@@ -1,21 +1,66 @@
 import SwiftUI
+import HornEngine
 
-/// Placeholder until M3 (spec §12), when this switches on `GameController.screen`.
+/// The shell every screen sits in: navy background, top bar with the sound toggle, a
+/// centred column at most 540 pt wide, and the scanlines over everything.
 struct RootView: View {
+    @Environment(GameController.self) private var c
+
     var body: some View {
         ZStack {
-            Color(red: 0x0A / 255, green: 0x0E / 255, blue: 0x14 / 255)
-                .ignoresSafeArea()
-            VStack(spacing: 12) {
-                Text(AppInfo.displayName.uppercased())
-                    .font(.system(.title2, design: .monospaced).bold())
-                    .foregroundStyle(Color(red: 0xF2 / 255, green: 0xB6 / 255, blue: 0x32 / 255))
-                Text("1849")
-                    .font(.system(.body, design: .monospaced))
-                    .foregroundStyle(Color(red: 0xEC / 255, green: 0xE4 / 255, blue: 0xCF / 255))
+            Theme.bg.ignoresSafeArea()
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    TopBar()
+                    screen
+                }
+                .foregroundStyle(Theme.ink)
+                .bodyFont()
+                .frame(maxWidth: Theme.maxWidth)
+                .padding(.horizontal, 14)
+                .padding(.top, 12)
+                .padding(.bottom, 48)
+                .frame(maxWidth: .infinity)
             }
-            .accessibilityElement(children: .combine)
-            .accessibilityIdentifier("title")
+            .scrollDismissesKeyboard(.interactively)
+            .id(c.screenID)
+            Scanlines().ignoresSafeArea()
         }
+    }
+
+    @ViewBuilder private var screen: some View {
+        switch c.screen {
+        case .title: TitleView()
+        case .learn(let i): LearnView(page: i)
+        case .role: RoleView()
+        case .roleDifferences: RoleDifferencesView()
+        case .names: NamesView()
+        case .month: MonthView()
+        case .outfit: OutfitIntroView()
+        case .message(let t, let label, let then): MessageView(text: t, label: label, then: then)
+        case .topTen(let hi, let back): TopTenView(table: c.persistence.topTen(), highlight: hi, back: back)
+        default: Para("Not built yet.", color: Theme.dim)
+        }
+    }
+}
+
+struct TopBar: View {
+    @Environment(GameController.self) private var c
+
+    var body: some View {
+        @Bindable var c = c
+        HStack {
+            Text("AROUND THE HORN · 1849").accessibilityHidden(true)
+            Spacer()
+            Button(c.muted ? "♪ off" : "♪ on") { c.muted.toggle() }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 2)
+                .overlay(Rectangle().strokeBorder(Theme.line, lineWidth: 1))
+                .accessibilityLabel(c.muted ? "Sound off" : "Sound on")
+                .accessibilityHint("Toggles sound")
+        }
+        .bodyFont(18)
+        .foregroundStyle(Theme.dim)
+        .padding(.bottom, 8)
     }
 }

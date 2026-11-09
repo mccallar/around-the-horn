@@ -37,7 +37,7 @@ extension GameEngine {
     public func departNewYork() -> String? {
         if state.food <= 0 { return nil }
         state.atPort = false
-        return "The [i]\(Markup.escape(state.ship))[/i] casts off from South Street on \(state.dateText). Behind you, New York shrinks to a smudge of chimney smoke. Ahead lie fourteen thousand miles of ocean."
+        return "The [i]\(TextMarkup.escape(state.ship))[/i] casts off from South Street on \(state.dateText). Behind you, New York shrinks to a smudge of chimney smoke. Ahead lie fourteen thousand miles of ocean."
     }
 
     public static let noProvisionsRefusal =

@@ -238,14 +238,14 @@ public final class GameEngine {
                 if a == .scurvy {
                     if (state.limes > 0 || mode == .port) && chance(mode == .port ? 0.6 : 0.35) {
                         p.ailment = nil
-                        q.append(.message("\(Markup.escape(p.name)) is recovering from scurvy."))
+                        q.append(.message("\(TextMarkup.escape(p.name)) is recovering from scurvy."))
                     }
                 } else {
                     p.ailDays -= mode == .port ? 2 : mode == .sea ? 1.5 : 1
                     if p.ailDays <= 0 {
                         p.ailment = nil
                         p.treated = false
-                        q.append(.message("\(Markup.escape(p.name)) is well again."))
+                        q.append(.message("\(TextMarkup.escape(p.name)) is well again."))
                     }
                 }
             } else {
@@ -291,7 +291,7 @@ public final class GameEngine {
         state.crew[idx].ailment = a
         state.crew[idx].ailDays = Double(ri(a.duration.lowerBound, a.duration.upperBound))
         state.crew[idx].treated = false
-        var t = "\(Markup.escape(state.crew[idx].name)) has \(a.name)."
+        var t = "\(TextMarkup.escape(state.crew[idx].name)) has \(a.name)."
         if a == .scurvy {
             t += " [dim]Bleeding gums, aching joints. Citrus or a run ashore will cure it.[/dim]"
         } else if state.meds > 0 {
@@ -309,7 +309,7 @@ public final class GameEngine {
             let cause = p.ailment?.deathName ?? (state.thirst ? "thirst" : state.starving ? "starvation" : "exhaustion")
             if p.isCaptain {
                 state.over = true
-                q.append(.gameOver(title: "You, Captain \(Markup.escape(p.name)), have died of \(cause).",
+                q.append(.gameOver(title: "You, Captain \(TextMarkup.escape(p.name)), have died of \(cause).",
                                    body: "The crew sails the ship into the nearest port and scatters. The voyage is over."))
                 return
             }
@@ -351,7 +351,7 @@ public final class GameEngine {
         if state.hull <= 0 && !state.over {
             state.hull = 0
             state.over = true
-            q.append(.gameOver(title: "The [i]\(Markup.escape(state.ship))[/i] has foundered.",
+            q.append(.gameOver(title: "The [i]\(TextMarkup.escape(state.ship))[/i] has foundered.",
                                body: "Her seams opened faster than the pumps could keep up. She went down by the head, taking everything with her."))
         }
     }

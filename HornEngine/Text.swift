@@ -4,7 +4,7 @@ import Foundation
 // [green], [amber], [dim], [i]. A literal "[" is written "[[" (docs/decisions.md D5),
 // which is how a player-entered name stays plain text however it is spelled.
 
-public enum Markup {
+public enum TextMarkup {
     /// The prototype's `esc`: a player-entered string, made safe to put in markup.
     public static func escape(_ s: String) -> String {
         s.replacingOccurrences(of: "[", with: "[[")

@@ -78,10 +78,11 @@ targets:
           - UIInterfaceOrientationPortraitUpsideDown
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
-        # Spec §3: VT323 + Press Start 2P, both SIL OFL. Added at M3; uncomment then.
-        # UIAppFonts:
-        #   - VT323-Regular.ttf
-        #   - PressStart2P-Regular.ttf
+        # Spec §3: VT323 + Press Start 2P, both SIL OFL; the licence ships beside them
+        # (Resources/Fonts/OFL.txt).
+        UIAppFonts:
+          - VT323-Regular.ttf
+          - PressStart2P-Regular.ttf
     settings:
       base:
         # iPhone primary, iPad supported (spec §1).

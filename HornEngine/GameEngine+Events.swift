@@ -9,7 +9,7 @@ extension GameEngine {
         let candidates = state.crew.indices.filter { state.crew[$0].alive && !state.crew[$0].isCaptain }
         if candidates.isEmpty { return }
         let idx = pick(candidates)!
-        let name = Markup.escape(state.crew[idx].name)
+        let name = TextMarkup.escape(state.crew[idx].name)
         if chance(0.65) {
             state.crew[idx].hp = max(1, state.crew[idx].hp - 25)
             q.append(.message("A sea sweeps the deck and carries \(name) over the side! The crew throws a line — and hauls \(name) back aboard, half-drowned."))
@@ -75,7 +75,7 @@ extension GameEngine {
                     state.crew[idx].ailment = .brokenArm
                     state.crew[idx].ailDays = Double(ri(14, 24))
                     state.crew[idx].hp -= 10
-                    t += "\n\n\(Markup.escape(state.crew[idx].name)) has a broken arm."
+                    t += "\n\n\(TextMarkup.escape(state.crew[idx].name)) has a broken arm."
                 }
                 out.append(.message(t))
                 checkSink(&out)
@@ -142,7 +142,7 @@ extension GameEngine {
             state.crew[idx].hp -= 20
             state.crew[idx].ailment = .brokenArm
             state.crew[idx].ailDays = Double(ri(14, 22))
-            t += "\n\n\(Markup.escape(state.crew[idx].name)) was hurt in the scuffle."
+            t += "\n\n\(TextMarkup.escape(state.crew[idx].name)) was hurt in the scuffle."
         }
         return [.message(t)]
     }
@@ -170,7 +170,7 @@ extension GameEngine {
             let leaving = state.crew.filter { $0.alive && $0.leaveAt == s.id }
             state.crew.removeAll { $0.alive && $0.leaveAt == s.id }
             var detail = GameData.port(s.portID!).arrive
-            for p in leaving { detail += "\n\n[dim]\(Markup.escape(p.name)) waves goodbye from the quay.[/dim]" }
+            for p in leaving { detail += "\n\n[dim]\(TextMarkup.escape(p.name)) waves goodbye from the quay.[/dim]" }
             return [.choice(ChoiceEvent(
                 kind: .portArrival(stopID: s.id),
                 prompt: "You have reached \(s.name).\n[dim]\(state.dateText) · day \(state.day)[/dim]",
@@ -338,7 +338,7 @@ extension GameEngine {
                 let idx = pick(c)!
                 state.crew[idx].ailment = .brokenArm
                 state.crew[idx].ailDays = Double(ri(14, 22))
-                q.append(.message("\(Markup.escape(state.crew[idx].name)) slipped on the lava and broke an arm."))
+                q.append(.message("\(TextMarkup.escape(state.crew[idx].name)) slipped on the lava and broke an arm."))
             }
             // Two days ashore, without the weather roll `passDays` would make.
             for _ in 0..<2 {
