@@ -102,3 +102,14 @@ extension ScreenshotUITests {
         }
     }
 }
+
+extension ScreenshotUITests {
+    func testSceneGallery() {
+        app.terminate()
+        app.launchArguments = ["-HornSceneGallery", "YES"]
+        app.launch()
+        shot("20-gallery")
+        sleep(1)
+        shot("21-gallery-later")
+    }
+}

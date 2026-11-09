@@ -7,6 +7,13 @@ struct RootView: View {
     @Environment(GameController.self) private var c
 
     var body: some View {
+        #if DEBUG
+        if SceneGallery.requested { return AnyView(SceneGallery()) }
+        #endif
+        return AnyView(shell)
+    }
+
+    private var shell: some View {
         ZStack {
             Theme.bg.ignoresSafeArea()
             ScrollView {
