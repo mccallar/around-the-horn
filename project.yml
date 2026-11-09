@@ -1,0 +1,157 @@
+name: AroundTheHorn
+options:
+  bundleIdPrefix: com.mccallatech
+  deploymentTarget:
+    iOS: "17.0"
+
+# THE VERSION LIVES HERE, ONCE, for every target (Slap Royale's lesson: three copies
+# drifted and one IPA carried three different build numbers).
+#
+# CURRENT_PROJECT_VERSION governs MANUAL archives from Xcode's Organizer only. Xcode
+# Cloud stamps its own per-product counter, set in App Store Connect under Xcode Cloud >
+# Settings > Build Number.
+settings:
+  base:
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+
+targets:
+  # The game itself: tables, GameState, the day simulation, events, trading, scoring.
+  # A SEPARATE FRAMEWORK, not a folder in the app (spec §2 says `Engine/`), so the
+  # spec's "pure Swift, no SwiftUI/UIKit imports" rule is enforced by the compiler
+  # rather than by a comment: APPLICATION_EXTENSION_API_ONLY plus no UI framework
+  # linked. All randomness goes through an injected RandomSource.
+  HornEngine:
+    type: framework
+    platform: iOS
+    sources: [HornEngine]
+    settings:
+      base:
+        SWIFT_VERSION: "5.0"
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: 3G6KKXTHFQ
+        APPLICATION_EXTENSION_API_ONLY: "YES"
+        GENERATE_INFOPLIST_FILE: "YES"
+
+  # Spec §12 M1 unit tests and M2's balance harness (the headless "sensible player"
+  # bot) live here, not in the app's test bundle: they need no simulator UI and no host.
+  HornEngineTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [HornEngineTests]
+    dependencies:
+      - target: HornEngine
+    settings:
+      base:
+        SWIFT_VERSION: "5.0"
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: 3G6KKXTHFQ
+        GENERATE_INFOPLIST_FILE: "YES"
+
+  AroundTheHorn:
+    type: application
+    platform: iOS
+    sources: [AroundTheHorn]
+    dependencies:
+      - target: HornEngine
+    info:
+      path: AroundTheHorn/Info.plist
+      properties:
+        # RENAME POINT 2 of 2. The other is `AppInfo.displayName` in
+        # AroundTheHorn/App/AppInfo.swift. XcodeGen regenerates the plist from these
+        # properties: edit here and re-run `xcodegen generate`, never the plist.
+        CFBundleDisplayName: Around the Horn
+        # MUST be build-setting references, not literals, or XcodeGen writes "1.0"/"1"
+        # into the plist and the uploaded binary carries the wrong build.
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        ITSAppUsesNonExemptEncryption: false
+        # The first frame is the game's navy-black, not white (spec §12 M9).
+        UILaunchScreen:
+          UIColorName: LaunchBackground
+        UIUserInterfaceStyle: Dark
+        # Spec §1: portrait on iPhone, any orientation on iPad.
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        # Spec §3: VT323 + Press Start 2P, both SIL OFL. Added at M3; uncomment then.
+        # UIAppFonts:
+        #   - VT323-Regular.ttf
+        #   - PressStart2P-Regular.ttf
+    settings:
+      base:
+        # iPhone primary, iPad supported (spec §1).
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SWIFT_VERSION: "5.0"
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: 3G6KKXTHFQ
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+
+  AroundTheHornTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [AroundTheHornTests]
+    dependencies:
+      - target: AroundTheHorn
+      - target: HornEngine
+    settings:
+      base:
+        SWIFT_VERSION: "5.0"
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: 3G6KKXTHFQ
+        GENERATE_INFOPLIST_FILE: "YES"
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/AroundTheHorn.app/AroundTheHorn
+        BUNDLE_LOADER: $(TEST_HOST)
+
+  AroundTheHornUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [AroundTheHornUITests]
+    dependencies:
+      - target: AroundTheHorn
+    settings:
+      base:
+        SWIFT_VERSION: "5.0"
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: 3G6KKXTHFQ
+        GENERATE_INFOPLIST_FILE: "YES"
+        TEST_TARGET_NAME: AroundTheHorn
+
+# ⚠️ Declaring ANY scheme turns off XcodeGen's per-target auto-generation: every scheme
+# still wanted must be spelled out here. No test action on the app scheme, deliberately —
+# a plain Run must never drag a test build along with it (Slap Royale's rule).
+schemes:
+  AroundTheHorn:
+    build:
+      targets:
+        AroundTheHorn: all
+    run:
+      config: Debug
+    archive:
+      config: Release
+  HornEngine:
+    build:
+      targets:
+        HornEngine: all
+        HornEngineTests: [test]
+    test:
+      targets: [HornEngineTests]
+  AroundTheHornTests:
+    build:
+      targets:
+        AroundTheHorn: all
+        AroundTheHornTests: [test]
+    test:
+      targets: [AroundTheHornTests]
+  AroundTheHornUITests:
+    build:
+      targets:
+        AroundTheHorn: all
+        AroundTheHornUITests: [test]
+    test:
+      targets: [AroundTheHornUITests]

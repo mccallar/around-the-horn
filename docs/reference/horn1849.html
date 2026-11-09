@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Around the Horn: 1849</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0e14;--panel:#101722;--ink:#ece4cf;--dim:#8f8a7a;--amber:#f2b632;--teal:#56d6c4;--red:#ff6b5b;--green:#8fe388;--line:#2a3547}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:'VT323',ui-monospace,Menlo,monospace;font-size:22px;line-height:1.15;-webkit-text-size-adjust:100%}
+body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.16) 0 1px,transparent 1px 3px);z-index:50}
+#app{max-width:540px;margin:0 auto;padding:12px 14px 48px;min-height:100vh}
+h1{font-family:'Press Start 2P',monospace;font-size:21px;line-height:1.5;color:var(--amber);margin:16px 0 4px;text-align:center;letter-spacing:1px}
+h2{font-family:'Press Start 2P',monospace;font-size:13px;color:var(--amber);margin:16px 0 10px;line-height:1.6}
+p{margin:9px 0}
+.dim{color:var(--dim)}.amber{color:var(--amber)}.teal{color:var(--teal)}.red{color:var(--red)}.green{color:var(--green)}
+.center{text-align:center}
+.small{font-size:18px}
+canvas.pix{width:100%;image-rendering:pixelated;image-rendering:crisp-edges;display:block;border:2px solid var(--line);background:#000}
+.choices{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+button.choice{font:inherit;font-size:22px;text-align:left;background:transparent;color:var(--ink);border:2px solid var(--line);padding:9px 12px;min-height:48px;cursor:pointer;border-radius:0;-webkit-tap-highlight-color:transparent}
+button.choice:hover,button.choice:focus-visible{border-color:var(--amber);outline:none}
+button.choice:active{background:var(--amber);color:#000}
+button.choice .num{color:var(--amber)}
+button.choice:active .num{color:#000}
+button.choice:disabled{opacity:.4;cursor:default}
+button.primary{border-color:var(--amber)}
+.status{border:2px solid var(--line);padding:8px 12px;margin-top:10px;background:var(--panel)}
+.row{display:flex;justify-content:space-between;gap:12px}
+.row>span:last-child{text-align:right}
+.box{border:2px solid var(--line);padding:10px 12px;margin:10px 0;background:var(--panel)}
+.msg{border:2px solid var(--amber);padding:14px;margin:12px 0;background:var(--panel);font-size:24px;line-height:1.2}
+.note{color:var(--teal);font-size:19px;margin-top:4px;min-height:22px}
+input.txt{font:inherit;font-size:22px;background:#000;color:var(--ink);border:2px solid var(--line);padding:8px 10px;width:100%;border-radius:0;margin-bottom:6px}
+input.txt:focus{border-color:var(--amber);outline:none}
+input.txt::placeholder{color:#5c5a52}
+label.fld{display:block;margin:10px 0 4px;color:var(--dim)}
+.bar{height:9px;background:#000;border:1px solid var(--line);margin:3px 0 2px}
+.bar>i{display:block;height:100%}
+.item{border-bottom:1px dashed var(--line);padding:9px 0;display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center}
+.qty{display:flex;align-items:center;gap:4px}
+.qty button{font:inherit;font-size:24px;width:44px;height:42px;background:transparent;color:var(--amber);border:2px solid var(--line);cursor:pointer;border-radius:0;-webkit-tap-highlight-color:transparent}
+.qty button:active{background:var(--amber);color:#000}
+.qty span{min-width:66px;text-align:center}
+.topbar{display:flex;justify-content:space-between;align-items:center;color:var(--dim);font-size:18px;margin-bottom:8px}
+.topbar button{font:inherit;font-size:18px;background:none;border:1px solid var(--line);color:var(--dim);cursor:pointer;padding:2px 8px}
+table.tt{width:100%;border-collapse:collapse}table.tt td{padding:3px 2px}table.tt td:last-child{text-align:right}
+table.tt tr.tot td{border-top:2px solid var(--line);color:var(--amber);padding-top:6px}
+.crew{padding:6px 0;border-bottom:1px dashed var(--line)}
+.legend{columns:2;font-size:18px;margin-top:8px}
+.grave{padding:6px 0;border-bottom:1px dashed var(--line)}
+.blink{animation:blink 1.1s steps(2) infinite}@keyframes blink{50%{opacity:0}}
+</style>
+</head>
+<body>
+<div id="app"><div id="screen"></div></div>
+<script>
+'use strict';
+/* ============ helpers ============ */
+const scr=document.getElementById('screen');
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const ri=(a,b)=>Math.floor(rnd(a,b+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const chance=p=>Math.random()<p;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const fmt=n=>Math.floor(n).toLocaleString('en-US');
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function wpick(w){let t=0;for(const k in w)t+=w[k];let r=Math.random()*t;for(const k in w){r-=w[k];if(r<=0)return k}return Object.keys(w)[0]}
+function mix(a,b,t){const A=parseInt(a.slice(1),16),B=parseInt(b.slice(1),16);const c=s=>Math.round(((A>>s)&255)*(1-t)+((B>>s)&255)*t);return `rgb(${c(16)},${c(8)},${c(0)})`}
+const store_={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+
+/* ============ sound ============ */
+let AC=null,muted=store_.get('horn_muted')==='1';
+function beep(f=600,d=.05,type='square',vol=.035,when=0){if(muted)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.value=f;o.connect(g);g.connect(AC.destination);const t=AC.currentTime+when;g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.start(t);o.stop(t+d+.03)}catch(e){}}
+function tune(seq,type='square'){let t=0;seq.forEach(([f,d])=>{if(f)beep(f,d*.95,type,.03,t);t+=d})}
+const T_TITLE=[[392,.15],[523,.15],[659,.15],[784,.3],[659,.15],[698,.15],[784,.15],[880,.45],[784,.15],[659,.15],[523,.4]];
+const T_ARRIVE=[[523,.1],[659,.1],[784,.1],[1047,.25]];
+const T_DEATH=[[392,.3],[349,.3],[311,.3],[262,.7]];
+const T_WIN=[[523,.12],[523,.12],[659,.12],[784,.24],[659,.12],[784,.12],[1047,.5]];
+
+/* ============ data ============ */
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const ROLES={
+ merchant:{label:'Be a merchant from Boston',title:'merchant',money:1500,mult:1},
+ shipwright:{label:'Be a shipwright from Mystic',title:'shipwright',money:850,mult:2},
+ whaler:{label:'Be a whaler from Nantucket',title:'whaler',money:500,mult:3},
+};
+const ITEMS=[
+ {k:'food',name:'Provisions',unit:'lbs',one:'lb',step:100,per:1,price:.10,max:3000,desc:'Salt beef, hardtack, beans. Each sailor eats 1–3 lbs a day.'},
+ {k:'water',name:'Fresh water',unit:'gal',one:'gal',step:100,per:1,price:.04,max:1000,desc:'A gallon per person per day — more in the tropics.'},
+ {k:'limes',name:'Citrus',unit:'crates',one:'crate',step:1,per:1,price:4,max:40,desc:'Limes & lemons against scurvy. A crate lasts 5 sailors ~10 days.'},
+ {k:'meds',name:'Medicine',unit:'kits',one:'kit',step:1,per:1,price:12,max:12,desc:'Quinine, laudanum, bandages. One kit per illness halves its harm.'},
+ {k:'clothes',name:'Oilskins & woolens',unit:'sets',one:'set',step:1,per:1,price:9,max:12,desc:'One set per soul aboard, or the far south will kill them.'},
+ {k:'sailcloth',name:'Spare sailcloth',unit:'bolts',one:'bolt',step:1,per:1,price:14,max:20,desc:'For mending torn sails at sea.'},
+ {k:'timber',name:'Spare timber',unit:'bundles',one:'bundle',step:1,per:1,price:11,max:20,desc:'Planks, oakum & pitch to patch the hull.'},
+ {k:'tackle',name:'Fishing tackle',unit:'boxes',one:'box',step:1,per:20,price:3,max:600,desc:'Harpoons, hooks & line. Each box is 20 throws.'},
+];
+const VAL={food:.14,water:.05,limes:4,meds:12,clothes:9,sailcloth:14,timber:11,tackle:.15,money:1};
+const PORTS={
+ ny:{name:'New York',shop:'Hollis & Sons, Ship Chandlers',mult:1,mod:{},talk:[
+  "A dockhand coiling rope: “Half the ships in this harbor are bound for California, and most of their captains have never seen the Horn. Buy woolens. Whatever you think you need — buy more.”",
+  "A retired captain on a bollard: “Leave in December or January. You want to reach the Horn in February or March, when it's summer down there. Get there in June and you'll be beating against the wind for a month.”",
+  "A ship's surgeon: “Lime juice, captain. A little every day and scurvy never comes aboard. The Navy learned that fifty years ago, and half the merchant fleet still ignores it.”"]},
+ cv:{name:'Porto Praia, Cape Verde',shop:'The market at Porto Praia',mult:1.3,mod:{limes:.55,water:.6,clothes:1.4,timber:1.4},
+  arrive:'Porto Praia sits under bare brown hills. Boys row out to meet you with baskets of oranges.',talk:[
+  "A harbor official: “South of here you run into the calms near the line. Some ships sit there two weeks with their sails hanging like laundry. Fill every cask you have.”",
+  "A fruit seller: “Oranges! Limes! Very cheap, very good for sailors' teeth!”",
+  "A whaleman's mate from New Bedford: “In the doldrums, rig a sail to catch the squalls. Rainwater is the sweetest water you'll drink all voyage.”"]},
+ rio:{name:'Rio de Janeiro',shop:'A chandler on the Rua Direita',mult:1.45,mod:{limes:.5},fever:true,
+  arrive:'You glide past the great granite Sugar Loaf into one of the finest harbors in the world. The bay is crowded with California-bound ships.',talk:[
+  "A British merchant: “Yellow fever comes and goes in this city. Don't linger longer than you must.”",
+  "A gold-seeker from Ohio: “Two months at sea and I'd trade my share of the gold for a dry bunk. They tell me the worst is still ahead.”",
+  "A harbor pilot: “South of the Plata, the weather turns. Bend on your heaviest canvas and break out the woolens.”"]},
+ falk:{name:'Port Stanley, Falklands',shop:'The Stanley company store',mult:2,mod:{clothes:.9,timber:1.2},
+  arrive:'A bleak, treeless settlement of stone cottages and peat smoke. Dismasted ships lie at anchor in the harbor.',talk:[
+  "A sheep farmer: “Ships limp in here every week with their masts gone. The shipyard does good business. So does the graveyard.”",
+  "A sealer: “Hug the Horn too close and the current will throw you on the rocks. Stand well south — fifty-seven degrees, if you can stand the ice.”",
+  "The storekeeper: “Everything costs double here. Everything has to come from England.”"]},
+ valp:{name:'Valparaíso',shop:'Almacén del Puerto',mult:1.6,mod:{},
+  arrive:'Valparaíso climbs steep hills above a crescent bay. After the far south, it looks like paradise.',talk:[
+  "A Chilean merchant: “Welcome to the Pacific! From here the current flows north with you. Cold, but kind.”",
+  "A homesick sailor: “Some crews jump ship here for the copper mines. Others hear the news from California and run there instead.”",
+  "The harbor master: “You came round the bottom? Then the worst is behind you. Mind your water — the coast north of here is desert.”"]},
+ callao:{name:'Callao, Peru',shop:'A ship chandler near the mole',mult:1.75,mod:{limes:.7},fever:true,
+  arrive:'The port of Lima. Pelicans wheel over the anchorage and the air smells of woodsmoke and salt.',talk:[
+  "A Peruvian trader: “Lima is close, and beautiful. But the fevers on the waterfront are no joke.”",
+  "A clipper captain: “Don't hug the coast from here. Stand out past the Galápagos, then swing north and east. The winds will thank you.”",
+  "A woman returning from San Francisco: “Gold everywhere, and a dozen eggs costs a week's wages. Bring anything you can sell.”"]},
+};
+const STOPS=[
+ {id:'ny',name:'New York',type:'port',mile:0},
+ {id:'gulf',name:'the Gulf Stream',short:'Gulf Stream',type:'mark',mile:300},
+ {id:'cv',name:'the Cape Verde Islands',short:'Cape Verde',type:'port',mile:2900},
+ {id:'line',name:'the Equator',short:'Equator',type:'line',mile:3850},
+ {id:'rio',name:'Rio de Janeiro',short:'Rio de Janeiro',type:'port',mile:5200},
+ {id:'falk',name:'Port Stanley in the Falkland Islands',short:'Falklands',type:'port',mile:7000},
+ {id:'tdf',name:'Tierra del Fuego',short:'Tierra del Fuego',type:'fork',mile:7350},
+ {id:'pacific',name:'the Pacific',short:'The Pacific',type:'mark',mile:7800},
+ {id:'valp',name:'Valparaíso',short:'Valparaíso',type:'port',mile:8900},
+ {id:'callao',name:'Callao',short:'Callao',type:'port',mile:10200},
+ {id:'gal',name:'the Galápagos Islands',short:'Galápagos',type:'island',mile:11300},
+ {id:'sf',name:'San Francisco',short:'San Francisco',type:'end',mile:14000},
+];
+const REGIONS=[
+ {to:2000,name:'North Atlantic',temp:'cool',w:{fair:30,fresh:22,rain:14,gale:14,fog:8,storm:5,light:7}},
+ {to:3450,name:'Northeast Trades',temp:'warm',w:{fair:35,fresh:40,rain:10,light:10,gale:5}},
+ {to:4300,name:'The Doldrums',temp:'hot',w:{calm:32,light:25,hot:18,rain:20,fair:5}},
+ {to:6000,name:'Southeast Trades',temp:'warm',w:{fair:35,fresh:35,rain:12,light:12,gale:6}},
+ {to:7350,name:'Roaring Forties',temp:'cold',south:true,w:{fresh:22,gale:30,storm:12,rain:14,fog:10,cold:12}},
+ {to:7800,name:'Cape Horn',temp:'freezing',south:true,horn:true,w:{gale:35,storm:28,cold:22,fog:8,fresh:7}},
+ {to:9600,name:'Humboldt Current',temp:'cold',south:true,w:{fair:30,fresh:25,fog:22,light:10,gale:13}},
+ {to:11800,name:'Tropical Pacific',temp:'hot',w:{fair:35,fresh:20,light:20,calm:10,rain:10,hot:5}},
+ {to:1e9,name:'North Pacific',temp:'cool',w:{fair:22,fresh:22,gale:18,fog:18,rain:15,storm:5}},
+];
+const MAGELLAN={to:7800,name:'Strait of Magellan',temp:'freezing',south:true,strait:true,w:{fresh:12,gale:25,storm:8,cold:25,fog:20,rain:10}};
+const WEATHER={
+ fair:{name:'Fair winds',speed:1,wear:.25},
+ fresh:{name:'Fresh breeze',speed:1.18,wear:.4},
+ light:{name:'Light airs',speed:.5,wear:.1},
+ calm:{name:'Becalmed',speed:.06,wear:.03},
+ hot:{name:'Hot & still',speed:.35,wear:.05},
+ rain:{name:'Rain squalls',speed:.9,wear:.3},
+ fog:{name:'Thick fog',speed:.6,wear:.15},
+ cold:{name:'Sleet & snow',speed:.8,wear:.6},
+ gale:{name:'Gale',speed:.75,wear:1.2,harsh:.6},
+ storm:{name:'STORM',speed:.35,wear:2.5,harsh:1.5},
+};
+const PACE={
+ easy:{name:'Easy sail',speed:100,hp:.5,wear:.6,desc:'Reefed sails. Gentle on ship and crew.'},
+ steady:{name:'Steady',speed:135,hp:0,wear:1,desc:'A sensible spread of canvas.'},
+ full:{name:'Full canvas',speed:170,hp:-1,wear:2,desc:'Every sail set. Fast, but hard on sails and sailors.'},
+};
+const RATIONS={
+ filling:{name:'Filling',lb:3,hp:1,desc:'3 lbs a day. Full meals.'},
+ meager:{name:'Meager',lb:2,hp:-.3,desc:'2 lbs a day. Small meals.'},
+ bare:{name:'Bare bones',lb:1,hp:-2.2,desc:'1 lb a day. Hardtack and little else.'},
+};
+const AIL={
+ 'scurvy':{dmg:2.2,d:[999,999]},'ship fever':{dmg:4.5,d:[6,11]},'dysentery':{dmg:4.5,d:[5,9]},
+ 'yellow fever':{dmg:6.5,d:[5,8]},'a fever':{dmg:3,d:[4,7]},'pneumonia':{dmg:4.5,d:[6,10]},
+ 'frostbite':{dmg:2.5,d:[5,9]},'a broken arm':{dmg:1.2,d:[14,24]},'exhaustion':{dmg:1.5,d:[3,5]},
+};
+const DEATH_NAME={'a broken arm':'an infected wound'};
+const FIRST=['Ezra','Hannah','Silas','Mercy','Tobias','Lydia','Amos','Prudence','Caleb','Martha','Jonas','Eliza','Gideon','Sarah','Ira','Abigail','Moses','Patience','Levi','Clara','Obed','Ruth','Josiah','Temperance','Asa','Phebe','Reuben','Charity'];
+const SHIPS=['Resolute','Mary Ellen','Golden Hope','Sea Lark','Persistence','Wanderer','Nantucket Belle','Prosperity','Endeavour','Good Intent','Morning Star','Jenny Lind'];
+const DEFAULT_TOP=[['Josiah Whitcombe',7650],['Abigail Thorne',6430],['Elias Mayhew',5920],['Ruth Starbridge',5110],['Obed Coffin',4380],['Lydia Penhallow',3800],['Amos Greenleaf',3150],['Hannah Brewster',2640],['Silas Weatherby',1990],['Tobias Fenn',1250]];
+
+/* ============ state ============ */
+let G=null;
+const SAVE_KEY='horn1849_save_v1';
+function save(){if(G&&!G.over){const t=G.traveling;G.traveling=false;store_.set(SAVE_KEY,JSON.stringify(G));G.traveling=t}}
+function loadSave(){try{const s=store_.get(SAVE_KEY);return s?JSON.parse(s):null}catch(e){return null}}
+function clearSave(){store_.del(SAVE_KEY)}
+function newGame(){G={role:null,crew:[],ship:'',y0:1849,m0:0,day:0,mile:0,money:0,food:0,water:0,limes:0,meds:0,clothes:0,sailcloth:0,timber:0,tackle:0,
+ hull:100,sails:100,pace:'steady',rations:'filling',weather:'fair',stopIdx:0,passage:null,pilot:false,noCitrus:0,badLuck:0,forceFair:0,
+ graves:[],flags:{},tradesLeft:3,talkIdx:0,atPort:true,traveling:false,over:false,note:'',albatross:false,stowaway:false,starving:false,thirst:false}}
+const living=()=>G.crew.filter(p=>p.alive);
+const avgHp=()=>{const l=living();return l.length?l.reduce((s,p)=>s+p.hp,0)/l.length:0};
+const healthLabel=()=>{const a=avgHp();return a>=75?'good':a>=50?'fair':a>=28?'poor':'very poor'};
+const hCls=l=>l==='good'?'green':l==='fair'?'amber':'red';
+function curDate(){const d=new Date(G.y0,G.m0,1);d.setDate(d.getDate()+G.day);return d}
+function fmtDate(){const d=curDate();return `${MONTHS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`}
+const curStop=()=>STOPS[G.stopIdx];
+const nextStop=()=>STOPS[G.stopIdx+1];
+const inStrait=()=>G.passage==='magellan'&&G.mile>=7350&&G.mile<7800;
+function regionAt(m){if(G.passage==='magellan'&&m>=7350&&m<7800)return MAGELLAN;return REGIONS.find(r=>m<r.to)}
+function tempAt(reg){let t=reg.temp;const mo=curDate().getMonth();if(reg===REGIONS[0]&&[10,11,0,1,2].includes(mo))t='cold';if(reg.south&&mo>=4&&mo<=8&&t==='cold')t='freezing';return t}
+function southWinter(){const mo=curDate().getMonth();return mo>=4&&mo<=8}
+function cap(k){const it=ITEMS.find(i=>i.k===k);return it?it.max*(it.per||1):Infinity}
+function add(k,v){G[k]=Math.max(0,Math.min(cap(k),G[k]+v))}
+function itemPrice(k,port){const P=PORTS[port];return ITEMS.find(i=>i.k===k).price*P.mult*(P.mod[k]||1)}
+function describe(k,a){const map={food:`${a} lbs of provisions`,water:`${a} gallons of water`,limes:`${a} crate${a>1?'s':''} of citrus`,meds:`${a} medicine kit${a>1?'s':''}`,clothes:`${a} set${a>1?'s':''} of woolens`,sailcloth:`${a} bolt${a>1?'s':''} of sailcloth`,timber:`${a} bundle${a>1?'s':''} of timber`,tackle:`${a/20} box${a>20?'es':''} of fishing tackle`,money:`$${a}`};return map[k]}
+
+/* ============ view ============ */
+function view(html,choices=[],opt={}){
+ scr.innerHTML=`<div class="topbar"><span>AROUND THE HORN · 1849</span><button id="snd">${muted?'♪ off':'♪ on'}</button></div>`+html+'<div class="choices"></div>';
+ const c=scr.querySelector('.choices');
+ choices.forEach((ch,i)=>{const b=document.createElement('button');b.className='choice'+(ch.cls?' '+ch.cls:'');b.innerHTML=`<span class="num">${i+1}.</span> ${ch.label}`;if(ch.disabled)b.disabled=true;b.onclick=()=>{beep(520,.03);ch.fn()};c.appendChild(b)});
+ document.getElementById('snd').onclick=()=>{muted=!muted;store_.set('horn_muted',muted?'1':'0');document.getElementById('snd').textContent=muted?'♪ off':'♪ on';if(!muted)beep(660,.05)};
+ if(!opt.keep)window.scrollTo(0,0);
+}
+const scene=()=>'<canvas id="scene" class="pix" width="160" height="80"></canvas>';
+function showMsg(html,done,label='Continue'){beep(240,.07);view(scene()+`<div class="msg">${html}</div>`,[{label,fn:done,cls:'primary'}])}
+const msg=html=>done=>showMsg(html,done);
+function runQueue(q,after){const step=()=>{if(!q.length)return after();const f=q.shift();f(step)};step()}
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;const all=[...scr.querySelectorAll('.choices button.choice')];if(/^[1-9]$/.test(e.key)){const b=all[+e.key-1];if(b&&!b.disabled)b.click()}else if((e.key==='Enter'||e.key===' ')&&all.length===1){e.preventDefault();all[0].click()}});
+
+/* ============ title & setup ============ */
+function title(){
+ if(G&&G.traveling)stopTravel();
+ G=null;const sv=loadSave();
+ const ch=[{label:'Sail for California',fn:()=>{tune(T_TITLE);newGame();roleScreen()}}];
+ if(sv)ch.push({label:`Continue the voyage of the <i>${esc(sv.ship)}</i>`,fn:()=>{G=sv;G.traveling=false;G.atPort?portMenu():seaMenu()}});
+ ch.push({label:'Learn about the passage',fn:()=>learn(0)},{label:'See the top ten',fn:()=>topTen(title)});
+ view(scene()+`<h1>AROUND<br>THE HORN</h1><p class="center amber">~ 1849 ~</p><p class="center dim">Fourteen thousand miles from New York to the gold fields of California, by sea.</p>`,ch);
+}
+const LEARN=[
+ `<h2>The voyage</h2><p>In 1849, news of gold in California emptied the seaports of the East. One road west went overland. The other went by sea — fourteen thousand miles south through the Atlantic, around the stormy tip of South America, and north up the Pacific.</p><p>You are captain of a small ship with a crew of five. You must buy supplies, keep your crew alive, keep your ship afloat, and reach San Francisco.</p>`,
+ `<h2>Supplies</h2><p><span class="amber">Provisions</span> and <span class="amber">water</span> run out fast. Restock at ports — at a price.</p><p><span class="amber">Citrus</span> prevents scurvy. After a month without it, your crew will start to sicken.</p><p><span class="amber">Woolens</span> keep sailors alive in the far south — one set per person.</p><p><span class="amber">Sailcloth</span> and <span class="amber">timber</span> repair your ship at sea. <span class="amber">Tackle</span> lets you fish for food.</p>`,
+ `<h2>The Horn</h2><p>Off Tierra del Fuego you must choose: round <span class="amber">Cape Horn</span> in open ocean, or thread the narrow, rocky <span class="amber">Strait of Magellan</span>.</p><p>Timing matters. From May to September it is winter down there, and the seas are the worst on earth. Leave New York too late and you will pay for it.</p><p>Pace and rations matter too: pushing hard gets you there faster, if anyone survives.</p>`,
+];
+function learn(i){view(LEARN[i],[i<LEARN.length-1?{label:'Next',fn:()=>learn(i+1)}:{label:'Back to the start',fn:title}])}
+function roleScreen(){
+ view(`<h2>Who are you?</h2><p>Many kinds of people made the voyage in 1849. You may:</p>`,[
+  ...Object.entries(ROLES).map(([k,r])=>({label:r.label,fn:()=>{G.role=k;G.money=r.money;namesScreen()}})),
+  {label:'Find out the differences',fn:()=>view(`<h2>The differences</h2><p>Passage to California was expensive, and not everyone who went was rich.</p><p><span class="amber">Merchant</span> — starts with $1,500.</p><p><span class="amber">Shipwright</span> — starts with $850. Gets far more out of every bolt of sailcloth and bundle of timber.</p><p><span class="amber">Whaler</span> — starts with $500. Deadly with a harpoon and can salt a bigger catch.</p><p>The poorer you start, the more your arrival is worth: the shipwright scores double, the whaler triple.</p>`,[{label:'Back',fn:roleScreen}])}]);
+}
+function namesScreen(){
+ const pool=[...FIRST].sort(()=>Math.random()-.5);const shipN=pick(SHIPS);
+ const ph=['',pool[0],pool[1],pool[2],pool[3],pool[4]];
+ view(`<h2>Ship & crew</h2><label class="fld">Name your ship:</label><input class="txt" id="n_ship" maxlength="22" placeholder="${shipN}">
+ <label class="fld">Your name, Captain:</label><input class="txt" id="n1" maxlength="16" placeholder="${ph[1]}">
+ <label class="fld">Your four crew members:</label>${[2,3,4,5].map(i=>`<input class="txt" id="n${i}" maxlength="16" placeholder="${ph[i]}">`).join('')}`,
+ [{label:'Use these names',fn:()=>{
+   const v=id=>{const e=document.getElementById(id);return(e.value.trim()||e.placeholder).slice(0,22)};
+   G.ship=v('n_ship');G.crew=[1,2,3,4,5].map(i=>({name:v('n'+i),hp:100,ail:null,ailDays:0,treated:false,alive:true,cap:i===1}));
+   monthScreen()}},
+  {label:'Pick new names for me',fn:namesScreen}]);
+}
+function monthScreen(){
+ const opts=[[1848,11],[1849,0],[1849,1],[1849,2],[1849,3]];
+ view(`<h2>When will you sail?</h2><p>The news from California reached New York in December 1848. Ships are leaving every day. When will you weigh anchor?</p>`,[
+  ...opts.map(([y,m])=>({label:`${MONTHS[m]} ${y}`,fn:()=>{G.y0=y;G.m0=m;outfitIntro()}})),
+  {label:'Ask for advice',fn:()=>showMsg('An old shipmaster scratches his beard: “Leave too early and the North Atlantic winter will batter you before you reach the trades. Leave too late and you will reach the Horn in the southern winter — and God help you then. December or January, if you can.”',monthScreen)}]);
+}
+function outfitIntro(){
+ view(`<h2>Outfitting</h2><p>You have <span class="amber">$${fmt(G.money)}</span> to fit out the <i>${esc(G.ship)}</i>. The chandler on South Street has what you need:</p>
+ <div class="box small"><p>• <b>Provisions</b> — five people eating well use 15 lbs a day. The voyage may take five months. Ports sell more, at a markup.</p><p>• <b>Water</b> — about a gallon per person per day. Rain can be caught in the sails.</p><p>• <b>Citrus</b> — without it, scurvy sets in after a month.</p><p>• <b>Oilskins & woolens</b> — one set per person, or the cold will kill them.</p><p>• <b>Sailcloth & timber</b> — the only way to make repairs at sea.</p><p>• <b>Medicine & fishing tackle</b>.</p></div>`,
+ [{label:'Enter the shop',fn:()=>shop('ny',departNY)}]);
+}
+function departNY(){
+ if(G.food<=0)return showMsg('You can\'t put to sea with no provisions! The chandler shakes his head and points you back inside.',()=>shop('ny',departNY));
+ G.atPort=false;
+ view(scene()+`<div class="msg">The <i>${esc(G.ship)}</i> casts off from South Street on ${fmtDate()}. Behind you, New York shrinks to a smudge of chimney smoke. Ahead lie fourteen thousand miles of ocean.</div>`,[{label:'Set sail',fn:startTravel,cls:'primary'}]);
+}
+
+/* ============ shop ============ */
+function shop(port,after){
+ const cart={};ITEMS.forEach(i=>cart[i.k]=0);
+ const P=PORTS[port];
+ const total=()=>ITEMS.reduce((s,i)=>s+cart[i.k]*itemPrice(i.k,port),0);
+ function draw(keep){
+  const t=total();
+  let h=`<h2>${P.shop}</h2>${port!=='ny'?`<p class="dim small">Prices here are ${Math.round((P.mult-1)*100)}% above New York, more or less.</p>`:''}<div class="box row"><span>Cash $${fmt(G.money)}</span><span>Bill <span class="${t>G.money?'red':'amber'}">$${t.toFixed(2)}</span></span></div>`;
+  ITEMS.forEach(i=>{const have=i.per>1?Math.floor(G[i.k]/i.per):Math.floor(G[i.k]*(i.k==='limes'?10:1))/(i.k==='limes'?10:1);
+   const pr=itemPrice(i.k,port);
+   h+=`<div class="item"><div><div>${i.name} <span class="dim small">$${pr<1?pr.toFixed(2):pr.toFixed(pr%1?2:0)}/${i.one}</span></div><div class="dim small">Have ${have} ${i.unit}. ${i.desc}</div></div>
+   <div class="qty"><button data-k="${i.k}" data-d="-1" aria-label="less">−</button><span>${cart[i.k]}${i.unit==='lbs'||i.unit==='gal'?'':''}</span><button data-k="${i.k}" data-d="1" aria-label="more">+</button></div></div>`});
+  view(h,[{label:t>G.money?'<span class="red">You can\'t afford all that</span>':t>0?`Pay $${t.toFixed(2)} and leave`:'Leave the shop',disabled:t>G.money,cls:'primary',fn:()=>{
+    G.money-=t;ITEMS.forEach(i=>add(i.k,cart[i.k]*i.per));save();after()}},...(t>0?[{label:'Leave without buying',fn:after}]:[])],{keep});
+  scr.querySelectorAll('.qty button').forEach(b=>b.onclick=()=>{
+   const i=ITEMS.find(x=>x.k===b.dataset.k);const d=+b.dataset.d*i.step;
+   const room=Math.max(0,Math.floor((cap(i.k)-G[i.k])/i.per));
+   cart[i.k]=clamp(cart[i.k]+d,0,room);beep(d>0?880:440,.025);draw(true)});
+ }
+ draw();
+}
+
+/* ============ travel loop ============ */
+let tickTimer=null;
+function startTravel(){G.atPort=false;G.traveling=true;travelView();clearTimeout(tickTimer);tickTimer=setTimeout(tick,700)}
+function stopTravel(){if(G)G.traveling=false;clearTimeout(tickTimer)}
+function tick(){
+ if(!G||!G.traveling)return;
+ const q=sailDay();
+ if(q.length){G.traveling=false;runQueue(q,()=>{if(!G.over)startTravel()})}
+ else{const s=document.getElementById('tstat');if(s)s.innerHTML=statusHTML();else travelView();tickTimer=setTimeout(tick,700)}
+}
+function travelView(){view(scene()+`<div id="tstat">${statusHTML()}</div>`,[{label:'Heave to & take stock',cls:'primary',fn:()=>{stopTravel();seaMenu()}}])}
+function bar(v,col){return `<div class="bar"><i style="width:${clamp(v,0,100)}%;background:${col||(v>60?'var(--green)':v>30?'var(--amber)':'var(--red)')}"></i></div>`}
+function statusHTML(){
+ const ns=nextStop(),reg=regionAt(G.mile),hl=healthLabel();
+ return `<div class="status"><div class="amber">${fmtDate()} <span class="dim small">· ${reg.name}</span></div>
+ <div class="row"><span>Weather</span><span${G.weather==='storm'?' class="red"':''}>${WEATHER[G.weather].name}</span></div>
+ <div class="row"><span>Health</span><span class="${hCls(hl)}">${hl}</span></div>
+ <div class="row"><span>Provisions</span><span>${fmt(G.food)} lbs</span></div>
+ <div class="row"><span>Water</span><span>${fmt(G.water)} gal</span></div>
+ <div class="row"><span>Next: ${ns?ns.short:'—'}</span><span>${ns?fmt(ns.mile-G.mile)+' nm':''}</span></div>
+ <div class="row"><span>Sailed</span><span>${fmt(G.mile)} of 14,000 nm</span></div>
+ <div class="row"><span>Hull · Sails</span><span>${Math.round(G.hull)}% · ${Math.round(G.sails)}%</span></div>
+ <div class="note">${G.note||''}</div></div>`;
+}
+function rollWeather(reg){
+ if(G.forceFair>0){G.forceFair--;return 'fair'}
+ const w={...reg.w};
+ if(reg.south&&southWinter()){w.gale=(w.gale||0)+20;w.storm=(w.storm||0)+(reg.horn?30:18);w.cold=(w.cold||0)+15;w.fair=(w.fair||0)*.5;w.fresh=(w.fresh||0)*.6}
+ if(reg===REGIONS[0]&&[11,0,1].includes(curDate().getMonth())){w.gale+=8;w.storm+=5}
+ if(G.badLuck>0){G.badLuck--;w.gale=(w.gale||0)+20;w.storm=(w.storm||0)+15;w.calm=(w.calm||0)+10}
+ return wpick(w);
+}
+
+function sailDay(){
+ const q=[];G.note='';
+ const ns=nextStop();
+ G.day++;
+ let reg=regionAt(G.mile);
+ G.weather=rollWeather(reg);
+ const W=WEATHER[G.weather];
+ const n=living().length;
+ let sp=PACE[G.pace].speed*W.speed;
+ sp*=.45+.55*(G.sails/100);
+ sp*=.75+.25*(G.hull/100);
+ sp*=n>=4?1:n===3?.85:n===2?.65:.45;
+ if(inStrait())sp*=.5;
+ if((reg.horn||reg.strait)&&southWinter())sp*=.6;
+ sp*=rnd(.85,1.15);
+ let d=Math.max(0,Math.round(sp)),arrived=false;
+ if(G.mile+d>=ns.mile){d=ns.mile-G.mile;arrived=true}
+ G.mile+=d;
+ if(G.weather==='calm')G.note='Not a breath of wind. The sails hang slack.';
+ consume(q,'sail');
+ health(q,'sail');
+ if(G.over)return q;
+ wear(q,reg);
+ if(G.over)return q;
+ if(!arrived){
+  if(inStrait()&&chance(G.pilot?.012:.055)){const h=ri(12,28);G.hull-=h;G.day++;q.push(msg(`You have run aground on an uncharted shoal! It takes a full day to kedge her off. <span class="red">(Hull −${h}%)</span>`));checkSink(q)}
+  else if(reg.horn&&chance(.012))overboard(q);
+  else if(chance(.11))seaEvent(q,reg);
+ }
+ if(G.over)return q;
+ if(arrived){G.stopIdx++;q.push(arrival(ns))}
+ save();
+ return q;
+}
+function consume(q,mode){
+ const n=living().length;if(!n)return;
+ const reg=regionAt(G.mile),temp=tempAt(reg);
+ const fneed=n*RATIONS[G.rations].lb;
+ if(G.food>=fneed){G.food-=fneed;G.starving=false}else{G.food=0;G.starving=true}
+ const wneed=n*(temp==='hot'?1.5:1);
+ if(G.water>=wneed){G.water-=wneed;G.thirst=false}else{G.water=0;G.thirst=true}
+ if(mode==='port')G.noCitrus=0;
+ else if(G.limes>0){G.limes=Math.max(0,G.limes-n*.02);G.noCitrus=0}
+ else G.noCitrus++;
+ if(mode!=='port'&&(G.weather==='rain'||G.weather==='storm')&&G.water<cap('water')){const r=ri(15,45);add('water',r);G.note=`Caught ${r} gallons of rainwater in the sails.`}
+ const F=G.flags;
+ if(G.starving&&!F.food){F.food=1;q.push(msg('<span class="red">You have run out of provisions!</span> The crew is starving.'))}
+ else if(!G.starving&&G.food<fneed*7&&!F.lowfood){F.lowfood=1;q.push(msg('The cook warns you: provisions will last about a week.'))}
+ if(G.food>fneed*10){F.food=0;F.lowfood=0}
+ if(G.thirst&&!F.water){F.water=1;q.push(msg('<span class="red">The water casks are dry!</span> Without water, the crew will die within days.'))}
+ else if(!G.thirst&&G.water<wneed*5&&!F.lowwater){F.lowwater=1;q.push(msg('The water casks are nearly empty — a few days left.'))}
+ if(G.water>wneed*10){F.water=0;F.lowwater=0}
+ if(mode!=='port'&&G.limes<=0&&!F.limes){F.limes=1;q.push(msg('The last of the citrus is gone. Scurvy will follow within a few weeks unless you find fresh food.'))}
+ if(G.limes>1)F.limes=0;
+}
+function health(q,mode){
+ const reg=regionAt(G.mile),temp=tempAt(reg),W=WEATHER[G.weather];
+ const port=mode==='port'?PORTS[curStop().id]:null;
+ living().forEach((p,i)=>{
+  let d=RATIONS[G.rations].hp;
+  if(mode==='sail'){d+=PACE[G.pace].hp;if(W.harsh)d-=W.harsh}
+  if(mode==='sea')d+=3;if(mode==='port')d+=6;
+  if(G.starving)d-=7;if(G.thirst)d-=12;
+  const warm=i<G.clothes;
+  if(mode!=='port'){if(temp==='freezing')d-=(warm?1.4:4.5)+(southWinter()?1:0);else if(temp==='cold')d-=warm?0:2.2;else if(temp==='hot')d-=.4}
+  if(p.ail){
+   const A=AIL[p.ail];d-=A.dmg*(p.treated?.5:1);
+   if(p.ail==='scurvy'){if((G.limes>0||mode==='port')&&chance(mode==='port'?.6:.35)){p.ail=null;q.push(msg(`${esc(p.name)} is recovering from scurvy.`))}}
+   else{p.ailDays-=mode==='port'?2:mode==='sea'?1.5:1;if(p.ailDays<=0){p.ail=null;p.treated=false;q.push(msg(`${esc(p.name)} is well again.`))}}
+  }else d+=1;
+  p.hp=clamp(p.hp+d,0,100);
+  if(!p.ail&&p.hp>0){
+   let pr=.0035+(100-p.hp)*.00035;
+   if(G.rations==='bare')pr+=.005;if(G.starving)pr+=.03;if(G.thirst)pr+=.04;
+   if(temp==='hot')pr+=.003;if((temp==='freezing'||temp==='cold')&&!warm&&mode!=='port')pr+=.01;
+   if(port&&port.fever)pr+=.012;if(mode==='port')pr*=.7;
+   if(chance(pr))sicken(p,q,temp,port);
+   else if(mode!=='port'&&G.noCitrus>35&&chance(Math.min(.12,(G.noCitrus-35)*.004)))sicken(p,q,temp,null,'scurvy');
+  }
+ });
+ deaths(q);
+}
+function sicken(p,q,temp,port,force){
+ let pool;
+ if(force)pool=[force];
+ else if(port&&port.fever)pool=['yellow fever','a fever','dysentery'];
+ else if(temp==='hot')pool=['a fever','dysentery','exhaustion','yellow fever','ship fever'];
+ else if(temp==='freezing'||temp==='cold')pool=['pneumonia','frostbite','a fever','ship fever','a broken arm'];
+ else pool=['ship fever','dysentery','a fever','a broken arm','exhaustion'];
+ const a=pick(pool),A=AIL[a];p.ail=a;p.ailDays=ri(A.d[0],A.d[1]);p.treated=false;
+ let t=`${esc(p.name)} has ${a}.`;
+ if(a==='scurvy')t+=' <span class="dim">Bleeding gums, aching joints. Citrus or a run ashore will cure it.</span>';
+ else if(G.meds>0){G.meds--;p.treated=true;t+=` <span class="dim">You open a medicine kit (${G.meds} left).</span>`}
+ q.push(msg(t));
+}
+function deaths(q){
+ for(const p of G.crew){
+  if(p.alive&&p.hp<=0){
+   p.alive=false;
+   const cause=DEATH_NAME[p.ail]||p.ail||(G.thirst?'thirst':G.starving?'starvation':'exhaustion');
+   if(p.cap){G.over=true;q.push(()=>gameOver(`You, Captain ${esc(p.name)}, have died of ${cause}.`,'The crew sails the ship into the nearest port and scatters. The voyage is over.'));return}
+   q.push(burial(p,cause));
+  }
+ }
+}
+function wear(q,reg){
+ const W=WEATHER[G.weather];
+ G.sails=Math.max(0,G.sails-PACE[G.pace].wear*W.wear*rnd(.6,1.4));
+ let hd=.03;
+ if(G.weather==='storm')hd+=rnd(1,2.6)*(G.pace==='full'?1.6:G.pace==='easy'?.7:1)*(reg.horn?1.5:1)*(reg.strait?.5:1);
+ if(G.weather==='gale')hd+=rnd(0,.8)*(G.pace==='full'?1.5:1);
+ G.hull=Math.max(0,G.hull-hd);
+ const F=G.flags;
+ if(G.hull<35&&G.food>50&&chance(.06)){const l=ri(20,60);G.food-=l;q.push(msg(`Seawater has been leaking into the hold. ${l} lbs of provisions are spoiled.`))}
+ if(G.hull<30&&!F.hull){F.hull=1;q.push(msg('<span class="red">The pumps are working day and night.</span> The hull needs patching — soon.'))}
+ if(G.hull>50)F.hull=0;
+ if(G.sails<25&&!F.sails){F.sails=1;q.push(msg('<span class="red">Your sails are in rags.</span> She barely answers the helm. Mend them if you can.'))}
+ if(G.sails>50)F.sails=0;
+ checkSink(q);
+}
+function checkSink(q){if(G.hull<=0&&!G.over){G.hull=0;G.over=true;q.push(()=>gameOver(`The <i>${esc(G.ship)}</i> has foundered.`,'Her seams opened faster than the pumps could keep up. She went down by the head, taking everything with her.'))}}
+
+/* ============ random events ============ */
+function overboard(q){
+ const c=living().filter(p=>!p.cap);if(!c.length)return;
+ const p=pick(c);
+ if(chance(.65)){p.hp=Math.max(1,p.hp-25);q.push(msg(`A sea sweeps the deck and carries ${esc(p.name)} over the side! The crew throws a line — and hauls ${esc(p.name)} back aboard, half-drowned.`))}
+ else{p.alive=false;p.hp=0;G.graves.push({name:p.name,cause:'drowned',date:fmtDate(),epitaph:'Lost overboard. No grave but the sea.'});q.push(done=>{tune(T_DEATH);showMsg(`A great sea sweeps the deck. <span class="red">${esc(p.name)} has been washed overboard and lost.</span> In that sea, there was no turning back.`,done)})}
+}
+function seaEvent(q,reg){
+ const W=G.weather,rough=W==='gale'||W==='storm';
+ const temp=tempAt(reg);
+ const L=[
+  {w:6,ok:G.food>150,f(){const l=Math.round(G.food*rnd(.05,.14));G.food-=l;q.push(msg(`Rats have gotten into the bread room. ${l} lbs of provisions are ruined.`))}},
+  {w:5,ok:G.water>120,f(){const l=ri(40,120);G.water=Math.max(0,G.water-l);q.push(msg(`A water cask has gone foul and green. You pump ${l} gallons over the side.`))}},
+  {w:4,ok:temp==='hot'||temp==='warm',f(){const g=ri(8,30);add('food',g);q.push(msg(`A school of flying fish lands on deck overnight. The cook gathers ${g} lbs of fresh fish.`))}},
+  {w:3,ok:true,f(){
+   if(chance(.5)){const t=ri(1,2);add('timber',t);q.push(msg(`You pass floating wreckage — spars, a hatch cover, a broken boat. Your crew salvages ${describe('timber',t)}.`))}
+   else if(chance(.6)){const f=ri(60,120);add('food',f);q.push(msg(`A barrel of salt pork bobs alongside, still sealed. +${f} lbs of provisions.`))}
+   else q.push(msg(`You pass a drifting nameboard: <i>${pick(SHIPS.filter(s=>s!==G.ship))}</i>. Nobody says much for the rest of the day.`))}},
+  {w:6,ok:rough||W==='fresh',f(){const d=ri(12,28);G.sails=Math.max(0,G.sails-d);q.push(msg(`The topsail splits from head to foot with a crack like a cannon. <span class="red">(Sails −${d}%)</span>`))}},
+  {w:4,ok:rough,f(){G.sails=Math.max(0,G.sails-15);G.hull=Math.max(0,G.hull-6);let t='The fore-topmast has carried away! Spars and rigging crash to the deck. <span class="red">(Sails −15%, Hull −6%)</span>';
+   const c=living().filter(p=>!p.ail);if(c.length&&chance(.5)){const p=pick(c);p.ail='a broken arm';p.ailDays=ri(14,24);p.hp-=10;t+=`<br><br>${esc(p.name)} has a broken arm.`}q.push(msg(t));checkSink(q)}},
+  {w:4,ok:true,f(){const h=ri(8,18);G.hull=Math.max(0,G.hull-h);q.push(msg(`You have sprung a leak! The carpenter finds a seam working loose below the waterline. <span class="red">(Hull −${h}%)</span>`));checkSink(q)}},
+  {w:3,ok:rough||W==='cold',f(){overboard(q)}},
+  {w:1.5,ok:G.food>100,f(){const l=Math.round(G.food*.08);G.food-=l;G.hull=Math.max(0,G.hull-4);q.push(msg(`Fire in the galley! The crew smothers it with wet canvas, but ${l} lbs of provisions are lost. <span class="red">(Hull −4%)</span>`))}},
+  {w:2,ok:W==='rain'||W==='storm',f(){G.sails=Math.max(0,G.sails-18);q.push(msg(`Lightning strikes the mainmast! Blue fire runs down the rigging and a sail goes up in flames. <span class="red">(Sails −18%)</span>`))}},
+  {w:2.5,ok:!reg.horn&&!reg.strait,f(){q.push(strangerEvent())}},
+  {w:2,ok:!!reg.south&&!G.albatross,f(){q.push(albatrossEvent())}},
+  {w:1.5,ok:!G.stowaway&&G.day<30,f(){q.push(stowawayEvent())}},
+  {w:5,ok:temp==='freezing'||(!!reg.south&&G.mile>6400&&G.mile<8300),f(){q.push(iceEvent())}},
+  {w:2,ok:true,f(){q.push(msg(`A pod of sperm whales surfaces off the bow, blowing and rolling in the swell. The crew lines the rail to watch.${G.role==='whaler'?' Your hands itch for a harpoon.':''}`))}},
+  {w:1.5,ok:rough,f(){G.forceFair=2;q.push(msg('Pale blue fire flickers at every masthead — St. Elmo\'s fire. The old hands say it means the worst of the blow is over.'))}},
+ ].filter(e=>e.ok);
+ if(!L.length)return;
+ const w={};L.forEach((e,i)=>w[i]=e.w);L[+wpick(w)].f();
+}
+function makeOffer(){
+ const keys=['food','water','limes','meds','clothes','sailcloth','timber','tackle'];
+ const wantable=keys.filter(k=>G[k]*VAL[k]>=25);if(G.money>=30)wantable.push('money');
+ if(!wantable.length)return null;
+ const want=pick(wantable);const give=pick(keys.filter(k=>k!==want&&G[k]<cap(k)*.8));
+ if(!give)return null;
+ const V=rnd(25,70);
+ const rt=(k,v)=>k==='food'||k==='water'?Math.max(10,Math.round(v/10)*10):k==='tackle'?Math.max(20,Math.round(v/20)*20):k==='money'?Math.max(5,Math.round(v/5)*5):Math.max(1,Math.round(v));
+ const wAmt=rt(want,Math.min(G[want]*.6,V*rnd(1,1.35)/VAL[want]));
+ const gAmt=rt(give,V*rnd(.8,1.1)/VAL[give]);
+ if(wAmt>G[want])return null;
+ return{give,gAmt,want,wAmt};
+}
+function offerScreen(o,intro,done){
+ view(scene()+`<div class="msg">${intro}<br><br>They will give you <span class="amber">${describe(o.give,o.gAmt)}</span> for <span class="amber">${describe(o.want,o.wAmt)}</span>.</div><p class="dim small">You have ${describe(o.want,Math.floor(G[o.want]))}.</p>`,[
+  {label:'Accept the trade',fn:()=>{G[o.want]-=o.wAmt;add(o.give,o.gAmt);save();showMsg('Done. Goods change hands.',done)}},
+  {label:'Decline',fn:done}]);
+}
+function strangerEvent(){return done=>{
+ beep(200,.15);
+ view(scene()+`<div class="msg">A strange sail on the horizon — and she is closing on you fast.</div>`,[
+  {label:'Hail her',fn:()=>{if(chance(.65)){const o=makeOffer();if(!o)return showMsg('She is a whaler out of New Bedford, three years from home. Her captain shouts the news across the water and sails on.',done);offerScreen(o,'She is a Yankee merchant brig, and her captain is in a trading mood.',done)}else pirates(done,false)}},
+  {label:'Crowd on sail and run',fn:()=>{G.sails=Math.max(0,G.sails-ri(5,12));if(chance(.75))showMsg('You crowd on every stitch of canvas and leave her hull-down astern. Your sails took a beating in the chase.',done);else pirates(done,true)}}]);
+}}
+function pirates(done,ran){
+ const cash=Math.min(Math.floor(G.money),ri(40,140)),f=Math.min(Math.floor(G.food),ri(60,200));
+ G.money-=cash;G.food-=f;
+ let t=`She runs up no flag — <span class="red">privateers!</span> ${ran?'She overhauls you despite every sail you carry. ':''}They swarm aboard and take $${cash} and ${f} lbs of provisions.`;
+ const c=living().filter(p=>!p.cap&&!p.ail);
+ if(c.length&&chance(.35)){const p=pick(c);p.hp-=20;p.ail='a broken arm';p.ailDays=ri(14,22);t+=`<br><br>${esc(p.name)} was hurt in the scuffle.`}
+ showMsg(t,done);
+}
+function albatrossEvent(){return done=>{
+ G.albatross=true;
+ view(scene()+`<div class="msg">A great albatross has followed the ship for three days, never once beating its wings. One of the crew wants to shoot it for the pot.</div>`,[
+  {label:'Let it be',fn:()=>showMsg('The bird wheels away over the swells. The old hands nod at you approvingly.',done)},
+  {label:'Shoot it',fn:()=>{add('food',12);G.badLuck=25;showMsg('One shot, and it falls into the sea. The crew hauls it aboard for 12 lbs of tough meat. The old hands go quiet. Nobody will look you in the eye.',done)}}]);
+}}
+function stowawayEvent(){return done=>{
+ G.stowaway=true;const nm=pick(FIRST.filter(f=>!G.crew.some(c=>c.name===f)));
+ view(scene()+`<div class="msg">A skinny youngster is found hiding in the hold among the flour barrels. The name is ${nm}, and ${nm} wants to see California more than anything in the world.</div>`,[
+  {label:'Sign them on as cabin hand',fn:()=>{G.crew.push({name:nm,hp:85,ail:null,ailDays:0,treated:false,alive:true,cap:false});showMsg(`${nm} grins and gets to work. One more hand — and one more mouth to feed.`,done)}},
+  {label:'Put them ashore at Cape Verde',fn:()=>{G.crew.push({name:nm,hp:85,ail:null,ailDays:0,treated:false,alive:true,cap:false,leave:'cv'});showMsg(`${nm} will work for passage as far as the Cape Verde Islands.`,done)}}]);
+}}
+function iceEvent(){return done=>{
+ const fog=G.weather==='fog';
+ view(scene()+`<div class="msg">Icebergs! Great white islands loom out of the ${fog?'fog':'murk'} — and between them, smaller growlers, half-sunk and nearly invisible.</div>`,[
+  {label:'Shorten sail and pick your way through',fn:()=>{const q=[];G.day++;consume(q,'sail');health(q,'sail');
+   if(chance(.1)){const h=ri(6,12);G.hull-=h;q.unshift(msg(`You lose a day creeping through, and still scrape a growler. <span class="red">(Hull −${h}%)</span>`))}else q.unshift(msg('You lose a day creeping through the ice, but come out the other side unscathed.'));checkSink(q);save();runQueue(q,done)}},
+  {label:'Hold your course',fn:()=>{const risk=(fog?.25:.12)+(G.pace==='full'?.15:0);if(chance(risk)){const h=ri(18,35);G.hull=Math.max(0,G.hull-h);const q=[msg(`A sickening crunch — you've struck a growler! <span class="red">(Hull −${h}%)</span>`)];checkSink(q);runQueue(q,done)}else showMsg('You stand on with your heart in your mouth. The ice slides past on either side.',done)}}]);
+}}
+function burial(p,cause){return done=>{
+ tune(T_DEATH);
+ view(scene()+`<div class="msg"><span class="red">${esc(p.name)} has died of ${cause}.</span></div><p>The crew sews ${esc(p.name)} into a sailcloth shroud, weighted with a cannonball. What words will you say?</p><input class="txt" id="epi" maxlength="70" placeholder="Fair winds, shipmate.">`,[
+  {label:'Commit to the deep',cls:'primary',fn:()=>{const e=document.getElementById('epi');G.graves.push({name:p.name,cause,date:fmtDate(),epitaph:(e.value.trim()||e.placeholder)});save();done()}}]);
+}}
+
+/* ============ landmarks ============ */
+function arrival(s){return done=>{
+ tune(T_ARRIVE);G.note='';
+ if(s.type==='mark'){
+  const t=s.id==='gulf'?'You are crossing the Gulf Stream. The water turns warm and indigo-blue, and squalls blow up out of nowhere. Your mate sets a course southeast for the Cape Verde Islands.'
+   :G.passage==='magellan'?'You have threaded the Strait of Magellan! The last rocky headland falls astern and the long Pacific swell lifts the bow. The crew cheers.'
+   :'You have rounded Cape Horn! The longitude creeps east to west at last, and the long Pacific swell lifts the bow. The crew cheers.';
+  return showMsg(t,done);
+ }
+ if(s.type==='port'){
+  G.tradesLeft=3;G.talkIdx=0;
+  const left=G.crew.filter(p=>p.alive&&p.leave===s.id);
+  G.crew=G.crew.filter(p=>!(p.alive&&p.leave===s.id));
+  const P=PORTS[s.id];
+  return view(scene()+`<div class="msg">You have reached ${s.name}.<br><span class="dim">${fmtDate()} · day ${G.day}</span></div><p>${P.arrive}</p>${left.map(p=>`<p class="dim">${esc(p.name)} waves goodbye from the quay.</p>`).join('')}`,[
+   {label:'Drop anchor and go ashore',fn:()=>{G.atPort=true;portMenu()}},{label:'Sail on without stopping',fn:done}]);
+ }
+ if(s.type==='line')return view(scene()+`<div class="msg">You are crossing the Equator!</div><p>By old custom, every sailor crossing the line for the first time must face King Neptune's court — an old hand in a rope-yarn beard who lathers the greenhands with tar and "shaves" them with a rusty barrel hoop.</p>`,[
+  {label:'Hold the ceremony (1 day)',fn:()=>{G.day++;add('food',-20);living().forEach(p=>p.hp=Math.min(100,p.hp+8));showMsg('There is shouting, tar, buckets of seawater and an extra ration of grog. Spirits are high. <span class="green">(Crew health improves.)</span>',done)}},
+  {label:'No time for foolishness',fn:()=>showMsg('The old hands grumble, but sail on.',done)}]);
+ if(s.type==='fork')return forkScreen(done);
+ if(s.type==='island')return view(scene()+`<div class="msg">You are passing the Galápagos Islands.</div><p>Black lava, cactus, and strange creatures that have never learned to fear people. There is fresh water in the highlands, if you're willing to climb for it.</p>`,[
+  {label:'Send a party ashore (2 days)',fn:()=>{const w=ri(150,250),f=ri(40,100);add('water',w);add('food',f);G.noCitrus=0;
+   living().forEach(p=>{if(p.ail==='scurvy'){p.ail=null}});
+   const q=[msg(`The shore party returns sunburned and scratched, with ${w} gallons of water and ${f} lbs of fish and wild fruit.`)];
+   const c=living().filter(p=>!p.ail&&!p.cap);if(c.length&&chance(.15)){const p=pick(c);p.ail='a broken arm';p.ailDays=ri(14,22);q.push(msg(`${esc(p.name)} slipped on the lava and broke an arm.`))}
+   G.day++;consume(q,'sea');health(q,'sea');G.day++;consume(q,'sea');health(q,'sea');save();runQueue(q,done)}},
+  {label:'Sail on',fn:done}]);
+ if(s.type==='end')return finale();
+}}
+function forkScreen(done){
+ view(scene()+`<div class="msg">You are off Tierra del Fuego, at the bottom of the world.${southWinter()?' <span class="red">It is the dead of the southern winter.</span>':''}</div><p>You may stand south and round <span class="amber">Cape Horn</span> in open ocean, or turn west into the narrow <span class="amber">Strait of Magellan</span>.</p>`,[
+  {label:'Round Cape Horn',fn:()=>{G.passage='horn';showMsg('You stand south for the Horn. The crew double-lashes everything on deck. Nobody speaks much.',done)}},
+  {label:'Take the Strait of Magellan',fn:()=>{G.passage='magellan';
+   const cost=75;
+   view(scene()+`<div class="msg">At the little Chilean settlement of Punta Arenas, a pilot offers to take you through the Strait for $${cost}.</div><p class="dim">You have $${fmt(G.money)}.</p>`,[
+    {label:`Hire the pilot ($${cost})`,disabled:G.money<cost,fn:()=>{G.money-=cost;G.pilot=true;showMsg('The pilot comes aboard with a sealskin coat and a bottle of pisco. “Slow,” he says. “Always slow.”',done)}},
+    {label:'Navigate it yourself',fn:()=>showMsg('You trust your charts and your lookouts. The Strait narrows ahead between dark, snow-dusted mountains.',done)}])}},
+  {label:"Ask the first mate's advice",fn:()=>showMsg('Your first mate spits over the rail: “The Horn is quicker if the wind is kind — and if it isn\'t, it\'ll tear the masts out of her. The Strait is sheltered, but it\'s slow, cold and full of rocks. Without a pilot, I wouldn\'t try it.”',()=>forkScreen(done))}]);
+}
+
+/* ============ menus ============ */
+function seaMenu(){
+ G.atPort=false;save();
+ view(scene()+statusHTML(),[
+  {label:'Continue on your voyage',cls:'primary',fn:startTravel},
+  {label:'Check supplies & crew',fn:()=>supplies(seaMenu)},
+  {label:'Look at the chart',fn:()=>chart(seaMenu)},
+  {label:`Change pace <span class="dim small">(${PACE[G.pace].name})</span>`,fn:()=>paceScreen(seaMenu)},
+  {label:`Change rations <span class="dim small">(${RATIONS[G.rations].name})</span>`,fn:()=>rationScreen(seaMenu)},
+  {label:'Heave to and rest',fn:()=>restScreen(seaMenu,false)},
+  {label:'Make repairs',fn:()=>repairScreen()},
+  {label:'Go fishing',fn:fishing},
+ ]);
+}
+function portMenu(){
+ G.atPort=true;save();
+ const id=curStop().id,P=PORTS[id];
+ view(scene()+statusHTML()+`<h2>${P.name}</h2>`,[
+  {label:'Weigh anchor and sail on',cls:'primary',fn:startTravel},
+  {label:'Check supplies & crew',fn:()=>supplies(portMenu)},
+  {label:'Look at the chart',fn:()=>chart(portMenu)},
+  {label:`Change pace <span class="dim small">(${PACE[G.pace].name})</span>`,fn:()=>paceScreen(portMenu)},
+  {label:`Change rations <span class="dim small">(${RATIONS[G.rations].name})</span>`,fn:()=>rationScreen(portMenu)},
+  {label:'Rest ashore',fn:()=>restScreen(portMenu,true)},
+  {label:'Attempt to trade',fn:()=>{if(G.tradesLeft<=0)return showMsg('Nobody else on the waterfront wants to trade with you today.',portMenu);G.tradesLeft--;const o=makeOffer();if(!o)return showMsg('You walk the quays, but nobody wants what you have.',portMenu);offerScreen(o,'A trader on the quay looks over your stores.',portMenu)}},
+  {label:'Talk to people',fn:()=>{const t=P.talk[G.talkIdx%P.talk.length];G.talkIdx++;showMsg(t,portMenu)}},
+  {label:'Buy supplies',fn:()=>shop(id,portMenu)},
+  {label:'Visit the shipyard',fn:shipyard},
+ ]);
+}
+function paceScreen(back){
+ view(`<h2>Pace</h2><p>The pace is currently <span class="amber">${PACE[G.pace].name}</span>.</p>`,Object.entries(PACE).map(([k,p])=>({label:`${p.name}<br><span class="dim small">${p.desc}</span>`,fn:()=>{G.pace=k;back()}})));
+}
+function rationScreen(back){
+ view(`<h2>Rations</h2><p>Rations are currently <span class="amber">${RATIONS[G.rations].name}</span>. With ${living().length} aboard, that's ${living().length*RATIONS[G.rations].lb} lbs a day.</p>`,Object.entries(RATIONS).map(([k,r])=>({label:`${r.name}<br><span class="dim small">${r.desc}</span>`,fn:()=>{G.rations=k;back()}})));
+}
+function passDays(n,mode,after){
+ const q=[];
+ for(let i=0;i<n&&!G.over;i++){
+  G.day++;if(mode!=='port')G.weather=rollWeather(regionAt(G.mile));else G.weather='fair';
+  consume(q,mode);health(q,mode);
+ }
+ save();runQueue(q,after);
+}
+function restScreen(back,port){
+ view(scene()+`<p>${port?'Your crew can sleep ashore, eat fresh food and recover.':'You heave to, and the crew rests below.'} How many days?</p>`,[
+  ...[1,2,3,5].map(d=>({label:`${d} day${d>1?'s':''}`,fn:()=>passDays(d,port?'port':'sea',()=>showMsg(`After ${d} day${d>1?'s':''} of rest, your crew's health is <span class="${hCls(healthLabel())}">${healthLabel()}</span>.`,back))})),
+  {label:'Never mind',fn:back}]);
+}
+function repairScreen(){
+ const sw=G.role==='shipwright',sa=sw?40:25,ha=sw?35:20;
+ view(scene()+`<h2>Repairs</h2><div class="box"><div class="row"><span>Hull</span><span>${Math.round(G.hull)}%</span></div>${bar(G.hull)}<div class="row"><span>Sails</span><span>${Math.round(G.sails)}%</span></div>${bar(G.sails)}</div><p class="dim small">Each repair takes a day.${sw?' As a shipwright, your repairs go much further.':''}</p>`,[
+  {label:`Mend sails — 1 bolt of sailcloth <span class="dim small">(have ${G.sailcloth})</span>`,disabled:G.sailcloth<1||G.sails>=100,fn:()=>{G.sailcloth--;G.sails=Math.min(100,G.sails+sa);passDays(1,'sea',()=>showMsg(`The sailmaker's palm and needle are busy all day. <span class="green">(Sails now ${Math.round(G.sails)}%)</span>`,repairScreen))}},
+  {label:`Patch the hull — 1 bundle of timber <span class="dim small">(have ${G.timber})</span>`,disabled:G.timber<1||G.hull>=100,fn:()=>{G.timber--;G.hull=Math.min(100,G.hull+ha);passDays(1,'sea',()=>showMsg(`The carpenter caulks and planks over the worst of it. <span class="green">(Hull now ${Math.round(G.hull)}%)</span>`,repairScreen))}},
+  {label:'Done',fn:seaMenu}]);
+}
+function shipyard(){
+ const P=PORTS[curStop().id];
+ const hc=Math.ceil((100-G.hull)*2.5*P.mult),sc=Math.ceil((100-G.sails)*1.8*P.mult);
+ view(scene()+`<h2>Shipyard</h2><div class="box"><div class="row"><span>Hull</span><span>${Math.round(G.hull)}%</span></div>${bar(G.hull)}<div class="row"><span>Sails</span><span>${Math.round(G.sails)}%</span></div>${bar(G.sails)}</div><p>You have <span class="amber">$${fmt(G.money)}</span>. Each job takes a day.</p>`,[
+  {label:`Haul out and repair the hull — $${hc}`,disabled:G.hull>=99.5||G.money<hc,fn:()=>{G.money-=hc;G.hull=100;passDays(1,'port',()=>showMsg('Shipwrights swarm over her. She is tight as a drum again.',shipyard))}},
+  {label:`Have new sails cut — $${sc}`,disabled:G.sails>=99.5||G.money<sc,fn:()=>{G.money-=sc;G.sails=100;passDays(1,'port',()=>showMsg('A sail loft fits you out with fresh canvas.',shipyard))}},
+  {label:'Leave the shipyard',fn:portMenu}]);
+}
+function supplies(back){
+ const rows=[['Cash','$'+fmt(G.money)],['Provisions',fmt(G.food)+' lbs'],['Fresh water',fmt(G.water)+' gal'],['Citrus',(Math.floor(G.limes*10)/10)+' crates'],['Medicine',G.meds+' kits'],['Woolens',G.clothes+' sets'],['Sailcloth',G.sailcloth+' bolts'],['Timber',G.timber+' bundles'],['Fishing tackle',G.tackle+' throws']];
+ const crew=G.crew.filter(p=>p.alive).map(p=>`<div class="crew"><div class="row"><span>${esc(p.name)}${p.cap?' <span class="dim small">(captain)</span>':''}</span><span class="small ${p.ail?'red':'dim'}">${p.ail?p.ail+(p.treated?' · treated':''):p.hp>70?'healthy':p.hp>40?'weary':'very weak'}</span></div>${bar(p.hp)}</div>`).join('');
+ view(`<h2>Supplies</h2><table class="tt">${rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('')}</table>
+ <h2>The ${esc(G.ship)}</h2><div class="row"><span>Hull</span><span>${Math.round(G.hull)}%</span></div>${bar(G.hull)}<div class="row"><span>Sails</span><span>${Math.round(G.sails)}%</span></div>${bar(G.sails)}
+ <p class="small dim">Pace: ${PACE[G.pace].name} · Rations: ${RATIONS[G.rations].name}${G.noCitrus>20?` · <span class="red">${G.noCitrus} days without citrus</span>`:''}</p>
+ <h2>Crew · health ${healthLabel()}</h2>${crew}
+ ${G.clothes<living().length?`<p class="small red">Only ${G.clothes} of ${living().length} have woolens.</p>`:''}
+ ${G.graves.length?`<h2>Lost</h2>${G.graves.map(g=>`<div class="small dim">${esc(g.name)} — ${g.cause}, ${g.date}</div>`).join('')}`:''}`,[{label:'Back',fn:back}]);
+}
+
+/* ============ chart ============ */
+const ROUTE=[[-74,40.7,0],[-70,37,300],[-55,30,1300],[-38,21,2200],[-23.5,15,2900],[-28,0,3850],[-35,-10,4500],[-43.2,-22.9,5200],[-48,-33,6000],[-57.9,-51.7,7000],[-64,-55,7350],[-67.3,-56.6,7550],[-75.5,-53,7800],[-74,-45,8200],[-71.6,-33,8900],[-77.1,-12,10200],[-89.6,-.9,11300],[-110,12,12300],[-126,28,13300],[-122.4,37.8,14000]];
+const ROUTE_M=[[-74,40.7,0],[-70,37,300],[-55,30,1300],[-38,21,2200],[-23.5,15,2900],[-28,0,3850],[-35,-10,4500],[-43.2,-22.9,5200],[-48,-33,6000],[-57.9,-51.7,7000],[-64,-54,7200],[-68.4,-52.4,7350],[-70.9,-53.3,7550],[-74.5,-52.7,7800],[-74,-45,8200],[-71.6,-33,8900],[-77.1,-12,10200],[-89.6,-.9,11300],[-110,12,12300],[-126,28,13300],[-122.4,37.8,14000]];
+const LAND=[
+ [[-124.5,46],[-124.5,45],[-124,42],[-122.5,37.8],[-120.5,34.5],[-117,32.5],[-114,30],[-110,23],[-105,20],[-97,16],[-92,14.5],[-87.5,13],[-85.7,10],[-83,8.2],[-80,7.5],[-77.5,8.5],[-79.5,9.6],[-83.5,11],[-83.5,15],[-88,15.8],[-87.5,21.5],[-90.5,21],[-91,18.5],[-94.5,18.3],[-97.5,22],[-97,27.8],[-94,29.7],[-89,30],[-84,30],[-82.5,27.5],[-81,25.2],[-80.1,26.8],[-81.2,31],[-76,35],[-75.5,38.5],[-74,40.5],[-70,41.5],[-70,43.5],[-67,45],[-66,46]],
+ [[-77.5,8.5],[-72,12],[-63,10.7],[-60,8.5],[-52,5],[-50,0],[-44,-2.5],[-35,-5.5],[-35,-9],[-39,-13],[-39.5,-18],[-41,-22],[-44,-23],[-48.5,-27],[-51,-31],[-53.5,-34],[-58,-34.5],[-57,-37],[-62,-39],[-65,-42],[-67.5,-46],[-69,-50],[-68.5,-52.5],[-67,-55],[-68.5,-55.6],[-72,-54],[-75,-50],[-74,-45],[-73.5,-41],[-73.5,-37],[-71.6,-33],[-71.5,-28],[-70.3,-18.5],[-71.5,-17],[-76,-14],[-77.1,-12],[-79,-8],[-81.3,-5],[-80.5,-1],[-80,1],[-78.8,2],[-77.5,7]],
+ [[-17.5,14.7],[-16.7,12.5],[-13,9],[-11,6.5],[-7.5,4.4],[0,5],[0,40],[-6,36],[-9.5,33],[-10,30],[-13,27.5],[-16,23.5],[-17,21],[-16,18]],
+ [[-85,22],[-80,23.2],[-75,20],[-77.5,19.8],[-82,21.5]],
+];
+function routeNow(){return G.passage==='magellan'?ROUTE_M:ROUTE}
+function posAt(m){const R=routeNow();for(let i=1;i<R.length;i++){if(m<=R[i][2]){const a=R[i-1],b=R[i],t=(m-a[2])/(b[2]-a[2]||1);return[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t]}}return R[R.length-1].slice(0,2)}
+function drawChart(c,t){
+ const x=c.getContext('2d'),W=c.width,H=c.height;const P=(lo,la)=>[(lo+130)*2,(45-la)*2];
+ x.fillStyle='#0d2a44';x.fillRect(0,0,W,H);
+ x.fillStyle='#173b5c';for(let lo=-120;lo<=-15;lo+=15)for(let y=0;y<H;y+=3)x.fillRect(P(lo,0)[0],y,1,1);
+ for(let la=30;la>=-60;la-=15)for(let xx=0;xx<W;xx+=3)x.fillRect(xx,P(0,la)[1],1,1);
+ x.fillStyle='#2f6a96';for(let xx=0;xx<W;xx+=2)x.fillRect(xx,P(0,0)[1],1,1);
+ x.fillStyle='#b9a26c';LAND.forEach(poly=>{x.beginPath();poly.forEach(([lo,la],i)=>{const[p,q]=P(lo,la);i?x.lineTo(p,q):x.moveTo(p,q)});x.closePath();x.fill()});
+ [[-23.5,15],[-24.5,16.5],[-59,-51.7],[-60.5,-51.5],[-90.5,-.6],[-91,-.2]].forEach(([lo,la])=>{const[p,q]=P(lo,la);x.fillRect(Math.round(p)-1,Math.round(q)-1,3,2)});
+ const R=routeNow();
+ x.fillStyle='#6d7f92';for(let m=0;m<=14000;m+=90){const[p,q]=P(...posAt(m));x.fillRect(Math.round(p),Math.round(q),1,1)}
+ x.fillStyle='#f2b632';for(let m=0;m<=G.mile;m+=25){const[p,q]=P(...posAt(m));x.fillRect(Math.round(p),Math.round(q),1,1)}
+ STOPS.forEach((s,i)=>{const[p,q]=P(...posAt(s.mile));x.fillStyle=i<=G.stopIdx?'#f2b632':'#ece4cf';x.fillRect(Math.round(p)-1,Math.round(q)-1,3,3)});
+ const[p,q]=P(...posAt(G.mile));
+ if(Math.floor(t*2)%2===0){x.fillStyle='#ff6b5b';x.fillRect(Math.round(p)-2,Math.round(q)-2,5,5)}
+}
+function chart(back){
+ view(`<h2>Chart of the voyage</h2><canvas id="chart" class="pix" width="230" height="210"></canvas>
+ <div class="legend">${STOPS.map((s,i)=>`<div class="${i<=G.stopIdx?'amber':i===G.stopIdx+1?'':'dim'}">${i<=G.stopIdx?'✓':i===G.stopIdx+1?'►':'·'} ${s.short||s.name}</div>`).join('')}</div>
+ <p class="small dim">${fmt(G.mile)} of 14,000 nautical miles sailed. ${fmt(14000-G.mile)} to go.</p>`,[{label:'Back',fn:back}]);
+}
+
+/* ============ fishing ============ */
+const FISH=[{n:'mackerel',lb:4,w:9,h:3,sp:[26,42],col:'#7fd6c9',wt:35},{n:'bonito',lb:12,w:12,h:4,sp:[30,48],col:'#6f9de0',wt:26},{n:'dorado',lb:25,w:15,h:5,sp:[36,56],col:'#e8c547',wt:18},{n:'tuna',lb:60,w:20,h:7,sp:[24,38],col:'#46689a',wt:13},{n:'shark',lb:120,w:28,h:7,sp:[38,58],col:'#8a949e',wt:8}];
+function fishing(){
+ if(G.tackle<=0)return showMsg('You have no fishing tackle left.',seaMenu);
+ if(G.weather==='gale'||G.weather==='storm')return showMsg('The seas are far too rough to fish.',seaMenu);
+ const capLb=G.role==='whaler'?300:200;
+ view(`<h2>Fishing</h2><div class="row small"><span id="fh_t">Throws: ${G.tackle}</span><span id="fh_c">Caught: 0 lbs</span><span id="fh_s">Time: 25</span></div><canvas id="fish" class="pix" width="160" height="200" style="touch-action:none;cursor:crosshair"></canvas><p class="small dim">Tap the water to throw a harpoon. Each throw uses tackle. You can salt and keep up to ${capLb} lbs.</p>`,[{label:'Back to the ship',fn:()=>end()}]);
+ const c=document.getElementById('fish'),x=c.getContext('2d');
+ let fish=[],harp=null,caught=0,time=25,last=performance.now(),spawnT=0,pops=[],ended=false,raf=0;
+ c.addEventListener('pointerdown',e=>{e.preventDefault();if(harp||G.tackle<=0||ended)return;const r=c.getBoundingClientRect();const tx=(e.clientX-r.left)/r.width*160,ty=(e.clientY-r.top)/r.height*200;if(ty<30)return;const dx=tx-80,dy=ty-28,L=Math.hypot(dx,dy)||1;harp={x:80,y:28,vx:dx/L*150,vy:dy/L*150};G.tackle--;beep(320,.06,'sawtooth')});
+ function spawn(){const ft=FISH[+wpick(Object.fromEntries(FISH.map((f,i)=>[i,f.wt])))];const dir=chance(.5)?1:-1;fish.push({...ft,x:dir>0?-ft.w:160+ft.w,y0:rnd(45,188),y:0,vx:dir*rnd(...ft.sp),t:rnd(0,6),wf:rnd(1.5,3),wa:rnd(1,4)})}
+ for(let i=0;i<4;i++){spawn();fish[i].x=rnd(20,140)}
+ function drawFish(f){const X=Math.round(f.x),Y=Math.round(f.y),dir=Math.sign(f.vx),hw=f.w/2|0,hh=f.h/2|0;x.fillStyle=f.col;x.fillRect(X-hw,Y-hh,f.w,f.h);x.fillRect(X-hw+2,Y-hh-1,f.w-4,1);x.fillRect(X-hw+2,Y+hh+(f.h%2),f.w-4,1);
+  const tx=dir>0?X-hw-3:X+hw;x.fillRect(tx,Y-hh-1,3,2);x.fillRect(tx,Y+hh,3,2);x.fillRect(dir>0?X-hw-1:X+hw,Y-1,1,2);
+  if(f.n==='shark'){x.fillRect(X-2,Y-hh-4,4,3);x.fillRect(X-1,Y-hh-5,2,1)}
+  x.fillStyle='#111';x.fillRect(dir>0?X+hw-3:X-hw+2,Y-1,1,1)}
+ function draw(now){
+  x.fillStyle='#9fd0ee';x.fillRect(0,0,160,28);
+  for(let i=0;i<10;i++){x.fillStyle=mix('#1f6b96','#061a2b',i/9);x.fillRect(0,28+i*18,160,18)}
+  x.fillStyle='rgba(255,255,255,.06)';for(let i=0;i<4;i++){const rx=((i*45+now/80)%200)-20;x.fillRect(rx,28,6,172)}
+  x.fillStyle='#d8ecf7';for(let i=0;i<160;i+=6)x.fillRect(i+Math.round(Math.sin(now/400+i)*1),28,3,1);
+  x.fillStyle='#4a2e1a';x.fillRect(70,24,20,4);x.fillRect(72,28,16,1);x.fillStyle='#d64545';x.fillRect(79,18,2,6);x.fillStyle='#efd6b0';x.fillRect(79,16,2,2);
+  fish.forEach(drawFish);
+  if(harp){x.strokeStyle='rgba(236,228,207,.5)';x.beginPath();x.moveTo(80.5,24.5);x.lineTo(harp.x,harp.y);x.stroke();x.fillStyle='#ece4cf';const a=Math.atan2(harp.vy,harp.vx);for(let k=0;k<6;k++)x.fillRect(Math.round(harp.x-Math.cos(a)*k),Math.round(harp.y-Math.sin(a)*k),1,1);x.fillStyle='#f2b632';x.fillRect(Math.round(harp.x),Math.round(harp.y),2,2)}
+  x.font='8px VT323, monospace';pops.forEach(p=>{x.fillStyle=`rgba(242,182,50,${p.t})`;x.fillText(p.s,p.x-6,p.y)});
+ }
+ function frame(now){
+  if(ended||!document.body.contains(c))return;
+  const dt=Math.min(.05,(now-last)/1000);last=now;time-=dt;spawnT-=dt;
+  if(spawnT<=0){spawnT=rnd(.5,1.1);spawn()}
+  fish.forEach(f=>{f.x+=f.vx*dt;f.t+=dt;f.y=f.y0+Math.sin(f.t*f.wf)*f.wa});
+  fish=fish.filter(f=>f.x>-40&&f.x<200);
+  pops.forEach(p=>{p.t-=dt*.8;p.y-=dt*12});pops=pops.filter(p=>p.t>0);
+  if(harp){harp.x+=harp.vx*dt;harp.y+=harp.vy*dt;const pad=G.role==='whaler'?4:1.5;
+   for(const f of fish){if(Math.abs(harp.x-f.x)<f.w/2+pad&&Math.abs(harp.y-f.y)<f.h/2+pad){caught+=f.lb;pops.push({x:f.x,y:f.y,t:1,s:`+${f.lb} lb ${f.n}`});fish.splice(fish.indexOf(f),1);harp=null;tune([[660,.06],[880,.1]]);break}}
+   if(harp&&(harp.x<-5||harp.x>165||harp.y>205))harp=null}
+  draw(now);
+  document.getElementById('fh_t').textContent=`Throws: ${G.tackle}`;document.getElementById('fh_c').textContent=`Caught: ${caught} lbs`;document.getElementById('fh_s').textContent=`Time: ${Math.max(0,Math.ceil(time))}`;
+  if(time<=0||(G.tackle<=0&&!harp))return end();
+  raf=requestAnimationFrame(frame);
+ }
+ raf=requestAnimationFrame(frame);
+ function end(){
+  if(ended)return;ended=true;cancelAnimationFrame(raf);
+  const kept=Math.min(caught,capLb),room=Math.floor(cap('food')-G.food),got=Math.min(kept,room);add('food',got);
+  let t=caught?`You caught <span class="amber">${caught} lbs</span> of fish.`:'You caught nothing.';
+  if(caught>capLb)t+=` The cook can only salt and stow ${capLb} lbs before the rest spoils.`;
+  if(got)t+=` <span class="green">+${got} lbs of provisions.</span>`;
+  t+=' <span class="dim">A day has passed.</span>';
+  showMsg(t,()=>passDays(1,'sea',seaMenu));
+ }
+}
+
+/* ============ endings ============ */
+function score(){
+ const al=living(),hl=healthLabel(),per={good:500,fair:400,poor:300,'very poor':200}[hl];
+ const L=[[`${al.length} aboard, health ${hl}`,al.length*per],['Hull & sails',Math.round(G.hull*2+G.sails)],['Provisions & water',Math.floor(G.food/25)+Math.floor(G.water/50)],['Stores & spares',Math.floor(G.limes)*2+G.meds*5+G.clothes*2+G.sailcloth*4+G.timber*4+Math.floor(G.tackle/20)],['Cash',Math.floor(G.money/5)]];
+ const sub=L.reduce((s,l)=>s+l[1],0),m=ROLES[G.role].mult;
+ return{L,sub,m,total:sub*m};
+}
+function getTop(){try{const s=JSON.parse(store_.get('horn1849_top')||'null');if(Array.isArray(s)&&s.length)return s}catch(e){}return DEFAULT_TOP.map(([n,s])=>({name:n,score:s}))}
+function rankOf(s){return s>=7000?'Master Mariner':s>=4000?'Able Seaman':s>=2000?'Ordinary Seaman':'Greenhand'}
+function topTen(back,hi){
+ const T=getTop();
+ view(`<h2>The top ten</h2><table class="tt">${T.map((r,i)=>`<tr class="${hi===i?'amber':''}"><td>${i+1}. ${esc(r.name)}</td><td class="dim small">${rankOf(r.score)}</td><td>${fmt(r.score)}</td></tr>`).join('')}</table>
+ <p class="small dim">Master Mariner 7,000+ · Able Seaman 4,000+ · Ordinary Seaman 2,000+ · Greenhand</p>`,[{label:'Back',fn:back}]);
+}
+function gravesHTML(){return G.graves.length?`<h2>Lost on the voyage</h2>${G.graves.map(g=>`<div class="grave"><div>${esc(g.name)} <span class="dim small">— ${g.cause}, ${g.date}</span></div><div class="small teal">“${esc(g.epitaph)}”</div></div>`).join('')}`:''}
+function finale(){
+ stopTravel();G.over=true;G.atPort=true;G.weather='fair';clearSave();tune(T_WIN);
+ const s=score();
+ const T=getTop();let hi=-1;
+ if(s.total>T[T.length-1].score){T.push({name:G.crew[0].name,score:s.total});T.sort((a,b)=>b.score-a.score);T.length=10;hi=T.findIndex(r=>r.name===G.crew[0].name&&r.score===s.total);store_.set('horn1849_top',JSON.stringify(T))}
+ view(scene()+`<div class="msg">Land ho! The <i>${esc(G.ship)}</i> passes through the Golden Gate on ${fmtDate()}, after ${G.day} days at sea.</div>
+ <p>San Francisco Bay is a forest of masts — hundreds of ships abandoned by crews who ran for the gold fields the moment the anchor dropped. ${living().length>1?'Your crew is already eyeing the hills.':'You stand alone on the deck, looking at the hills.'}</p>
+ <h2>Your score</h2><table class="tt">${s.L.map(l=>`<tr><td>${l[0]}</td><td>${fmt(l[1])}</td></tr>`).join('')}<tr><td>Subtotal</td><td>${fmt(s.sub)}</td></tr><tr><td>Bonus for being a ${ROLES[G.role].title}</td><td>×${s.m}</td></tr><tr class="tot"><td>Final score</td><td>${fmt(s.total)}</td></tr></table>
+ <p class="center amber">Rank: ${rankOf(s.total)}${hi>=0?` · #${hi+1} in the top ten!`:''}</p>${gravesHTML()}`,
+ [{label:'Sail again',fn:title,cls:'primary'},{label:'See the top ten',fn:()=>topTen(finale2,hi)}]);
+ function finale2(){view(scene()+`<p class="center">Thanks for sailing.</p>`,[{label:'Sail again',fn:title,cls:'primary'}])}
+}
+function gameOver(head,body){
+ stopTravel();G.over=true;clearSave();tune(T_DEATH);
+ view(scene()+`<div class="msg red">${head}</div><p>${body}</p><p class="dim">${fmtDate()} · ${fmt(G.mile)} nautical miles from New York.</p>${gravesHTML()}`,[{label:'Try again',fn:title,cls:'primary'}]);
+}
+
+/* ============ scene renderer ============ */
+const SHIP_SPR=[
+"           r              ",
+"           rrr            ",
+"    m      m       m      ",
+"   sss    sssss    ss     ",
+"  sssss  sssssss  ssss    ",
+"    m      m       m      ",
+"  sssss  sssssss  sssss   ",
+" ssssss sssssssss ssssss  ",
+" ssssss sssssssss ssssss  ",
+"    m      m       m      ",
+" ssssss sssssssss sssssss ",
+" ssssss sssssssss sssssss b",
+"    m      m       m    bb",
+"hh  m      m       m   hhh",
+"hhhhhhhhhhhhhhhhhhhhhhhhhh",
+" hyyyyyyyyyyyyyyyyyyyyyyh ",
+"  hhhhhhhhhhhhhhhhhhhhhh  ",
+"   hhhhhhhhhhhhhhhhhhhh   "];
+const SPR_COL={s:'#efe6cc',m:'#6b4a2b',h:'#4a2e1a',y:'#d9a441',r:'#d64545',b:'#6b4a2b'};
+const SKY={
+ fair:{top:'#2d5f9a',bot:'#9fd0ee',sea:'#1d4e7a',wave:'#7fb8de',sun:'#ffe27a',clouds:1},
+ fresh:{top:'#2a5c98',bot:'#a8d8f0',sea:'#1a4a78',wave:'#e9f4fb',sun:'#ffe27a',clouds:2},
+ light:{top:'#3a6aa2',bot:'#b6dcf0',sea:'#22557f',wave:'#8cc0e0',sun:'#ffe27a',clouds:1},
+ calm:{top:'#d9893f',bot:'#f6d78b',sea:'#3c6f88',wave:'#9fc6cf',sun:'#fff1b0',still:1},
+ hot:{top:'#e07a3a',bot:'#f8d27a',sea:'#3c6f88',wave:'#a7cbd0',sun:'#fff6c8',still:1},
+ rain:{top:'#3e4a5a',bot:'#7d8a98',sea:'#24394e',wave:'#8aa0b4',rain:1,clouds:3,cloud:'#6b7685'},
+ fog:{top:'#8d969e',bot:'#c5cbd0',sea:'#5f6f7c',wave:'#b5bec6',fog:1},
+ cold:{top:'#55606e',bot:'#a6b2bf',sea:'#2a3c4f',wave:'#dfe8f0',snow:1,clouds:3,cloud:'#8c97a3'},
+ gale:{top:'#33404f',bot:'#6e7d8d',sea:'#1f3346',wave:'#e8eef3',clouds:3,rough:2,cloud:'#55616f'},
+ storm:{top:'#15191f',bot:'#3a434f',sea:'#121d29',wave:'#c9d3dc',rain:1,clouds:3,rough:3,lightning:1,cloud:'#2c333d'},
+};
+function drawScene(t){
+ const c=document.getElementById('scene');if(!c)return;
+ const x=c.getContext('2d'),W=160,H=80,hz=46;
+ const wk=(G&&G.weather)||'fair',S=SKY[wk]||SKY.fair;
+ for(let i=0;i<8;i++){x.fillStyle=mix(S.top,S.bot,i/7);x.fillRect(0,Math.floor(i*hz/8),W,Math.ceil(hz/8)+1)}
+ if(S.sun){x.fillStyle=S.sun;x.fillRect(125,8,7,11);x.fillRect(123,10,11,7);x.fillRect(124,9,9,9)}
+ const moving=G&&G.traveling,spd=moving?14*(WEATHER[wk]?.speed||1)+2:1.5;
+ const nc=S.clouds||0;
+ if(nc){x.fillStyle=S.cloud||'#f4f7fa';for(let i=0;i<nc*2;i++){let px=((i*61+20)-t*(2+i)*(moving?1.6:.4))%(W+40);if(px<0)px+=W+40;px=Math.round(px-20);const py=5+(i*13)%24;x.fillRect(px,py,16,3);x.fillRect(px+3,py-2,9,2);x.fillRect(px+2,py+3,12,1)}}
+ if(G&&G.atPort){x.fillStyle='#2f4a35';for(let i=92;i<160;i++){const h=Math.round(11+7*Math.sin(i*.09)+4*Math.sin(i*.23));x.fillRect(i,hz-h,1,h)}
+  for(let i=0;i<7;i++){const bx=104+i*8,bh=3+(i*5)%4;x.fillStyle='#e9dfc8';x.fillRect(bx,hz-bh-1,5,bh+1);x.fillStyle='#9a3b2e';x.fillRect(bx,hz-bh-2,5,1)}}
+ x.fillStyle=S.sea;x.fillRect(0,hz,W,H-hz);
+ const rough=S.rough||1;x.fillStyle=S.wave;
+ for(let row=0;row<8;row++){const y=hz+2+row*4,rs=spd*(.4+row*.18)+(S.still?0:1);for(let i=0;i<7;i++){let px=((i*29+row*17)-t*rs)%W;if(px<0)px+=W;const len=S.still?1:2+((i+row)%3)+rough;x.fillRect(Math.floor(px),y+(rough>1?Math.round(Math.sin(t*3+i+row)):0),len,1)}}
+ const bob=Math.round(Math.sin(t*(1.4+rough*.7))*(.5+rough*.5));
+ const sl=G?G.sails:100;
+ for(let r=0;r<SHIP_SPR.length;r++){const row=SHIP_SPR[r];for(let col=0;col<row.length;col++){const ch=row[col];if(ch===' ')continue;if(ch==='s'&&sl<60&&((col*7+r*13)%37)<(60-sl)/2.2)continue;x.fillStyle=SPR_COL[ch];x.fillRect(44+col,hz-14+bob+r,1,1)}}
+ x.fillStyle=S.wave;if(moving&&!S.still)for(let i=0;i<4;i++)x.fillRect(66+((i*5+Math.floor(t*8))%10),hz+3+(i%2),2,1);
+ if(S.rain){x.fillStyle='rgba(200,215,230,.6)';for(let i=0;i<45;i++){const rx=((i*37+t*30)%W),ry=((i*53+t*150)%H);x.fillRect(Math.floor(rx),Math.floor(ry),1,3)}}
+ if(S.snow){x.fillStyle='#fff';for(let i=0;i<30;i++){const rx=(((i*41+t*10+Math.sin(t+i)*4)%W)+W)%W,ry=((i*29+t*16)%H);x.fillRect(Math.floor(rx),Math.floor(ry),1,1)}}
+ if(S.fog){x.fillStyle='rgba(210,215,220,.38)';x.fillRect(0,0,W,H)}
+ if(S.lightning&&Math.floor(t*10)%53===0){x.fillStyle='rgba(255,255,255,.55)';x.fillRect(0,0,W,H)}
+}
+function loop(now){const t=now/1000;drawScene(t);const ch=document.getElementById('chart');if(ch&&G)drawChart(ch,t);requestAnimationFrame(loop)}
+requestAnimationFrame(loop);
+title();
+</script>
+</body>
+</html>
