@@ -508,3 +508,30 @@ public enum Ailment: String, Codable, CaseIterable {
         self == .brokenArm ? "an infected wound" : rawValue
     }
 }
+
+// MARK: - Fishing (spec §9)
+
+public struct Fish {
+    public let name: String
+    public let lb: Int
+    public let width: Double
+    public let height: Double
+    /// Pixels per second, both ends included.
+    public let speed: ClosedRange<Double>
+    public let weight: Double
+    public let color: String
+}
+
+public extension GameData {
+    /// The prototype's `FISH`, in its order.
+    static let fish: [Fish] = [
+        Fish(name: "mackerel", lb: 4, width: 9, height: 3, speed: 26...42, weight: 35, color: "#7FD6C9"),
+        Fish(name: "bonito", lb: 12, width: 12, height: 4, speed: 30...48, weight: 26, color: "#6F9DE0"),
+        Fish(name: "dorado", lb: 25, width: 15, height: 5, speed: 36...56, weight: 18, color: "#E8C547"),
+        Fish(name: "tuna", lb: 60, width: 20, height: 7, speed: 24...38, weight: 13, color: "#46689A"),
+        Fish(name: "shark", lb: 120, width: 28, height: 7, speed: 38...58, weight: 8, color: "#8A949E"),
+    ]
+
+    /// Seconds in one fishing outing.
+    static let fishingSeconds = 25.0
+}

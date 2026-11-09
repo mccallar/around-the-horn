@@ -15,6 +15,7 @@
 		36888AEFA781ED374977A53D /* HornEngine.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 509B74C67184498F2681AA80 /* HornEngine.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		39EA71B06DD3A0F439B54130 /* PurityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19D6AAF10A90207D9CA7180E /* PurityTests.swift */; };
 		3AC6EAAB7BA864F5DEA4EEF3 /* Interrupt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C1E473EA548B3DBF4DFD8A4 /* Interrupt.swift */; };
+		570ED1A0299CA1D70CC7DA90 /* BalanceSimulationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 066E1756FBD97DB90F4CC624 /* BalanceSimulationTests.swift */; };
 		5BE5B2EEB1577D6BDBFC6DA1 /* HornEngine.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 509B74C67184498F2681AA80 /* HornEngine.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		699DE27EB99103642E593CE8 /* GameEngine+Actions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFB564D802B4628FB60D9483 /* GameEngine+Actions.swift */; };
 		6BA3FAE3F3280E81120CBC6A /* HornEngine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 509B74C67184498F2681AA80 /* HornEngine.framework */; };
@@ -114,6 +115,7 @@
 
 /* Begin PBXFileReference section */
 		030AD9AFB938A4FEEA45CA09 /* RNGTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RNGTests.swift; sourceTree = "<group>"; };
+		066E1756FBD97DB90F4CC624 /* BalanceSimulationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalanceSimulationTests.swift; sourceTree = "<group>"; };
 		08BCBF0670DB655B7CD9A450 /* AroundTheHornApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AroundTheHornApp.swift; sourceTree = "<group>"; };
 		0BF5668C018FEC94F3697835 /* EngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EngineTests.swift; sourceTree = "<group>"; };
 		0F41F0439CB6BDE9D136E712 /* LaunchUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchUITests.swift; sourceTree = "<group>"; };
@@ -243,6 +245,7 @@
 		C15417AFB765A3BB179D92FC /* HornEngineTests */ = {
 			isa = PBXGroup;
 			children = (
+				066E1756FBD97DB90F4CC624 /* BalanceSimulationTests.swift */,
 				0BF5668C018FEC94F3697835 /* EngineTests.swift */,
 				90EC46C79B8380AEC8181D5A /* PrototypeParityTests.swift */,
 				19D6AAF10A90207D9CA7180E /* PurityTests.swift */,
@@ -271,7 +274,7 @@
 			path = App;
 			sourceTree = "<group>";
 		};
-		"TEMP_E9DABFBF-49AE-4165-99BC-97D2C4FA214A" /* .claude */ = {
+		"TEMP_FFEA263D-DE59-4EF5-9A43-524CD2420894" /* .claude */ = {
 			isa = PBXGroup;
 			children = (
 			);
@@ -502,6 +505,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				570ED1A0299CA1D70CC7DA90 /* BalanceSimulationTests.swift in Sources */,
 				017186571EC97881CA9E44A3 /* EngineTests.swift in Sources */,
 				7C6456E65620A32E434723C4 /* PrototypeParityTests.swift in Sources */,
 				39EA71B06DD3A0F439B54130 /* PurityTests.swift in Sources */,

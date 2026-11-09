@@ -67,3 +67,36 @@ trades, burials, both passages, the pilot, starvation, sinkings).
 decisions and requires identical state, exactly, every day. To make that possible every
 engine function draws its random numbers in the prototype's order, including draws
 whose result is thrown away. Regenerate the fixture whenever the prototype changes.
+
+## D8 — The M2 bot is rebuilt from the spec's description (2026-11-09)
+
+The prototype's `test/bot.js` was not supplied. `SensibleBot`
+(HornEngineTests/BalanceSimulationTests.swift) follows spec §12 M2 to the letter, and
+where the spec is silent it takes the cautious choice:
+
+- departs December or January (alternating by seed), the game's own advice;
+- runs from strange sails, lets the albatross be, puts the stowaway ashore, shortens sail
+  in ice, hires the pilot when it can afford him, declines trades, goes ashore at every
+  port;
+- buys, in order while money lasts: food, water (1 gal/person/day, no tropical margin),
+  citrus, woolens to crew, then 2 medicine, 2 sailcloth, 2 timber, and 3 boxes of tackle
+  for non-merchants;
+- recuts sails at the shipyard below 70%, as well as the hull;
+- fishing is simulated as up to 15 throws, each hitting (35%, whaler 55%) a fish drawn by
+  the game's own weights.
+
+Results, three seed sets of 30 voyages per role:
+
+| | seeds 1849 | 50000 | 90000 | spec band (±15 pp) |
+|---|---|---|---|---|
+| merchant | 30/30 | 29/30 | 30/30 | ≥ 85% |
+| shipwright | 28/30 | 28/30 | 28/30 | 45–85% |
+| whaler | 13/30 | 17/30 | 16/30 | 15–50% |
+| median winning voyage | 165 d | 165 d | 165 d | 150–200 d |
+
+All pass with the tolerance. **The shipwright wins 93% every time, above the
+untolerated band.** Most likely this bot plays better than bot.js did, not that the
+balance moved: the engine matches the prototype exactly (D7). No balance number has been
+touched; whether to tighten the shipwright is Ryan's call (spec §0.5).
+
+Most whaler losses are thirst: the bot's water rule has no margin for the Doldrums.
