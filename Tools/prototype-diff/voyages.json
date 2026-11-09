@@ -1,0 +1,450 @@
+[
+ {
+  "name": "merchant-dec-horn",
+  "seed": 1849,
+  "role": "merchant",
+  "year": 1848,
+  "month": 11,
+  "policy": "first",
+  "fork": "Round Cape Horn",
+  "ship": "Resolute",
+  "names": [
+   "Ezra",
+   "Hannah",
+   "Silas",
+   "Mercy",
+   "Tobias"
+  ],
+  "supplies": {
+   "food": 2400,
+   "water": 900,
+   "limes": 20,
+   "meds": 6,
+   "clothes": 6,
+   "sailcloth": 6,
+   "timber": 6,
+   "tackle": 100,
+   "money": 800
+  }
+ },
+ {
+  "name": "merchant-jan-strait",
+  "seed": 7,
+  "role": "merchant",
+  "year": 1849,
+  "month": 0,
+  "policy": "first",
+  "fork": "Take the Strait of Magellan",
+  "ship": "Sea Lark",
+  "names": [
+   "Lydia",
+   "Amos",
+   "Prudence",
+   "Caleb",
+   "Martha"
+  ],
+  "supplies": {
+   "food": 2000,
+   "water": 700,
+   "limes": 15,
+   "meds": 4,
+   "clothes": 5,
+   "sailcloth": 4,
+   "timber": 4,
+   "tackle": 40,
+   "money": 900
+  }
+ },
+ {
+  "name": "shipwright-feb-horn",
+  "seed": 42,
+  "role": "shipwright",
+  "year": 1849,
+  "month": 1,
+  "policy": "first",
+  "fork": "Round Cape Horn",
+  "ship": "Good Intent",
+  "names": [
+   "Jonas",
+   "Eliza",
+   "Gideon",
+   "Sarah",
+   "Ira"
+  ],
+  "supplies": {
+   "food": 1500,
+   "water": 600,
+   "limes": 10,
+   "meds": 3,
+   "clothes": 5,
+   "sailcloth": 3,
+   "timber": 3,
+   "tackle": 20,
+   "money": 400
+  }
+ },
+ {
+  "name": "whaler-apr-strait",
+  "seed": 99,
+  "role": "whaler",
+  "year": 1849,
+  "month": 3,
+  "policy": "first",
+  "fork": "Take the Strait of Magellan",
+  "ship": "Wanderer",
+  "names": [
+   "Abigail",
+   "Moses",
+   "Patience",
+   "Levi",
+   "Clara"
+  ],
+  "supplies": {
+   "food": 1200,
+   "water": 500,
+   "limes": 6,
+   "meds": 2,
+   "clothes": 5,
+   "sailcloth": 2,
+   "timber": 2,
+   "tackle": 20,
+   "money": 120
+  }
+ },
+ {
+  "name": "merchant-mar-second",
+  "seed": 2024,
+  "role": "merchant",
+  "year": 1849,
+  "month": 2,
+  "policy": "second",
+  "fork": "Take the Strait of Magellan",
+  "ship": "Morning Star",
+  "names": [
+   "Obed",
+   "Ruth",
+   "Josiah",
+   "Temperance",
+   "Asa"
+  ],
+  "supplies": {
+   "food": 2600,
+   "water": 1000,
+   "limes": 25,
+   "meds": 8,
+   "clothes": 6,
+   "sailcloth": 5,
+   "timber": 5,
+   "tackle": 60,
+   "money": 700
+  }
+ },
+ {
+  "name": "whaler-dec-second",
+  "seed": 31337,
+  "role": "whaler",
+  "year": 1848,
+  "month": 11,
+  "policy": "second",
+  "fork": "Round Cape Horn",
+  "ship": "Jenny Lind",
+  "names": [
+   "Phebe",
+   "Reuben",
+   "Charity",
+   "Ezra",
+   "Hannah"
+  ],
+  "supplies": {
+   "food": 900,
+   "water": 400,
+   "limes": 0,
+   "meds": 0,
+   "clothes": 2,
+   "sailcloth": 1,
+   "timber": 1,
+   "tackle": 0,
+   "money": 200
+  }
+ },
+ {
+  "name": "shipwright-jan-advice",
+  "seed": 555,
+  "role": "shipwright",
+  "year": 1849,
+  "month": 0,
+  "policy": "first",
+  "fork": "Ask the first mate's advice",
+  "ship": "Persistence",
+  "names": [
+   "Silas",
+   "Mercy",
+   "Tobias",
+   "Lydia",
+   "Amos"
+  ],
+  "supplies": {
+   "food": 1800,
+   "water": 700,
+   "limes": 12,
+   "meds": 4,
+   "clothes": 5,
+   "sailcloth": 4,
+   "timber": 4,
+   "tackle": 40,
+   "money": 300
+  }
+ },
+ {
+  "name": "merchant-apr-starved",
+  "seed": 8080,
+  "role": "merchant",
+  "year": 1849,
+  "month": 3,
+  "policy": "first",
+  "fork": "Round Cape Horn",
+  "ship": "Prosperity",
+  "names": [
+   "Caleb",
+   "Martha",
+   "Jonas",
+   "Eliza",
+   "Gideon"
+  ],
+  "supplies": {
+   "food": 300,
+   "water": 150,
+   "limes": 2,
+   "meds": 1,
+   "clothes": 1,
+   "sailcloth": 0,
+   "timber": 0,
+   "tackle": 0,
+   "money": 0
+  }
+ },
+ {
+  "name": "rotate-0-merchant",
+  "seed": 100020,
+  "role": "merchant",
+  "year": 1848,
+  "month": 11,
+  "policy": "rotate",
+  "fork": "Round Cape Horn",
+  "ship": "Endeavour",
+  "names": [
+   "Ezra",
+   "Hannah",
+   "Silas",
+   "Mercy",
+   "Tobias"
+  ],
+  "supplies": {
+   "food": 2200,
+   "water": 850,
+   "limes": 18,
+   "meds": 6,
+   "clothes": 6,
+   "sailcloth": 5,
+   "timber": 5,
+   "tackle": 60,
+   "money": 600
+  }
+ },
+ {
+  "name": "rotate-1-shipwright",
+  "seed": 200023,
+  "role": "shipwright",
+  "year": 1849,
+  "month": 0,
+  "policy": "rotate",
+  "fork": "Take the Strait of Magellan",
+  "ship": "Golden Hope",
+  "names": [
+   "Mercy",
+   "Tobias",
+   "Lydia",
+   "Amos",
+   "Prudence"
+  ],
+  "supplies": {
+   "food": 1400,
+   "water": 550,
+   "limes": 8,
+   "meds": 2,
+   "clothes": 5,
+   "sailcloth": 2,
+   "timber": 2,
+   "tackle": 20,
+   "money": 150
+  }
+ },
+ {
+  "name": "rotate-2-whaler",
+  "seed": 300026,
+  "role": "whaler",
+  "year": 1849,
+  "month": 1,
+  "policy": "rotate",
+  "fork": "Round Cape Horn",
+  "ship": "Mary Ellen",
+  "names": [
+   "Amos",
+   "Prudence",
+   "Caleb",
+   "Martha",
+   "Jonas"
+  ],
+  "supplies": {
+   "food": 2200,
+   "water": 850,
+   "limes": 18,
+   "meds": 6,
+   "clothes": 6,
+   "sailcloth": 5,
+   "timber": 5,
+   "tackle": 60,
+   "money": 600
+  }
+ },
+ {
+  "name": "rotate-3-merchant",
+  "seed": 400029,
+  "role": "merchant",
+  "year": 1849,
+  "month": 2,
+  "policy": "rotate",
+  "fork": "Take the Strait of Magellan",
+  "ship": "Nantucket Belle",
+  "names": [
+   "Martha",
+   "Jonas",
+   "Eliza",
+   "Gideon",
+   "Sarah"
+  ],
+  "supplies": {
+   "food": 1400,
+   "water": 550,
+   "limes": 8,
+   "meds": 2,
+   "clothes": 5,
+   "sailcloth": 2,
+   "timber": 2,
+   "tackle": 20,
+   "money": 150
+  }
+ },
+ {
+  "name": "rotate-4-shipwright",
+  "seed": 500032,
+  "role": "shipwright",
+  "year": 1849,
+  "month": 3,
+  "policy": "rotate",
+  "fork": "Round Cape Horn",
+  "ship": "Resolute",
+  "names": [
+   "Gideon",
+   "Sarah",
+   "Ira",
+   "Abigail",
+   "Ezra"
+  ],
+  "supplies": {
+   "food": 2200,
+   "water": 850,
+   "limes": 18,
+   "meds": 6,
+   "clothes": 6,
+   "sailcloth": 5,
+   "timber": 5,
+   "tackle": 60,
+   "money": 600
+  }
+ },
+ {
+  "name": "rotate-5-whaler",
+  "seed": 600035,
+  "role": "whaler",
+  "year": 1848,
+  "month": 11,
+  "policy": "rotate",
+  "fork": "Take the Strait of Magellan",
+  "ship": "Wanderer",
+  "names": [
+   "Abigail",
+   "Ezra",
+   "Hannah",
+   "Silas",
+   "Mercy"
+  ],
+  "supplies": {
+   "food": 1400,
+   "water": 550,
+   "limes": 8,
+   "meds": 2,
+   "clothes": 5,
+   "sailcloth": 2,
+   "timber": 2,
+   "tackle": 20,
+   "money": 150
+  }
+ },
+ {
+  "name": "rotate-6-merchant",
+  "seed": 700038,
+  "role": "merchant",
+  "year": 1849,
+  "month": 0,
+  "policy": "rotate",
+  "fork": "Round Cape Horn",
+  "ship": "Sea Lark",
+  "names": [
+   "Silas",
+   "Mercy",
+   "Tobias",
+   "Lydia",
+   "Amos"
+  ],
+  "supplies": {
+   "food": 2200,
+   "water": 850,
+   "limes": 18,
+   "meds": 6,
+   "clothes": 6,
+   "sailcloth": 5,
+   "timber": 5,
+   "tackle": 60,
+   "money": 600
+  }
+ },
+ {
+  "name": "rotate-7-shipwright",
+  "seed": 800041,
+  "role": "shipwright",
+  "year": 1849,
+  "month": 1,
+  "policy": "rotate",
+  "fork": "Take the Strait of Magellan",
+  "ship": "Prosperity",
+  "names": [
+   "Lydia",
+   "Amos",
+   "Prudence",
+   "Caleb",
+   "Martha"
+  ],
+  "supplies": {
+   "food": 1400,
+   "water": 550,
+   "limes": 8,
+   "meds": 2,
+   "clothes": 5,
+   "sailcloth": 2,
+   "timber": 2,
+   "tackle": 20,
+   "money": 150
+  }
+ }
+]
