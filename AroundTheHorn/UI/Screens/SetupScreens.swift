@@ -19,6 +19,7 @@ struct TitleView: View {
                 .padding(.bottom, 4)
                 .accessibilityAddTraits(.isHeader)
                 .accessibilityLabel("Around the Horn")
+                .accessibilityIdentifier("title")
             Text("~ 1849 ~").foregroundStyle(Theme.amber).frame(maxWidth: .infinity).padding(.vertical, 4)
             Text(Copy.titleTagline).bodyFont().foregroundStyle(Theme.dim)
                 .multilineTextAlignment(.center).frame(maxWidth: .infinity)
