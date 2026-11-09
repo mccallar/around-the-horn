@@ -52,3 +52,53 @@ final class ScreenshotUITests: XCTestCase {
         shot("08-outfit")
     }
 }
+
+extension ScreenshotUITests {
+    func testVoyageScreens() {
+        app.terminate()
+        app.launchArguments = ["-HornTickSeconds", "6"]
+        app.launch()
+        tap("Sail for California")
+        tap("Be a whaler from Nantucket")
+        tap("Use these names")
+        tap("January 1849")
+        tap("Enter the shop")
+        for _ in 0..<12 { app.buttons["More Provisions"].tap() }
+        for _ in 0..<5 { app.buttons["More Fresh water"].tap() }
+        for _ in 0..<5 { app.buttons["More Oilskins & woolens"].tap() }
+        for _ in 0..<4 { app.buttons["More Citrus"].tap() }
+        shot("10-shop")
+        app.swipeUp()
+        app.swipeUp()
+        shot("11-shop-bottom")
+        let pay = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Pay $'")).firstMatch
+        XCTAssertTrue(pay.waitForExistence(timeout: 5))
+        pay.tap()
+        shot("12-depart")
+        tap("Set sail")
+        let heave = app.buttons["Heave to & take stock"]
+        XCTAssertTrue(heave.waitForExistence(timeout: 5))
+        shot("13-travel")
+        // Keep sailing through whatever the voyage raises until we can heave to.
+        for _ in 0..<20 where !heave.isHittable {
+            let next = app.buttons.matching(NSPredicate(format: "label == 'Continue' OR label BEGINSWITH 'Drop anchor'")).firstMatch
+            if next.exists { next.tap() }
+        }
+        if heave.waitForExistence(timeout: 5) {
+            heave.tap()
+            shot("14-sea-menu")
+            tap("Check supplies & crew")
+            shot("15-supplies")
+            app.swipeUp()
+            shot("16-supplies-bottom")
+            tap("Back")
+            app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Change pace'")).firstMatch.tap()
+            shot("17-pace")
+            tap("Easy sail. Reefed sails. Gentle on ship and crew.")
+            tap("Make repairs")
+            shot("18-repairs")
+        } else {
+            shot("14-interrupted")
+        }
+    }
+}
