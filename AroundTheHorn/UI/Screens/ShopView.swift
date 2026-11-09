@@ -76,9 +76,11 @@ private struct ItemRow: View {
     var body: some View {
         HStack(alignment: .center, spacing: 10) {
             VStack(alignment: .leading, spacing: 2) {
-                Text(item.name) + Text(" \(ShopView.priceText(price))/\(item.one)")
-                    .foregroundColor(Theme.dim).font(.custom(Theme.bodyFont, size: 18))
+                (Text(item.name) + Text(" \(ShopView.priceText(price))/\(item.one)")
+                    .foregroundColor(Theme.dim).font(.custom(Theme.bodyFont, size: 18)))
+                    .fixedSize(horizontal: false, vertical: true)
                 Text("Have \(have) \(item.unit). \(item.desc)").bodyFont(18).foregroundStyle(Theme.dim)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             HStack(spacing: 4) {

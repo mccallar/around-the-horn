@@ -111,6 +111,13 @@ final class GameController {
         show(.role)
     }
 
+    /// Starts from a given state on the sea menu (debug starts and tests).
+    func loadForDebug(_ s: GameState) {
+        engine = GameEngine(state: s)
+        game = s
+        backToMenu()
+    }
+
     func continueSavedVoyage() {
         guard let s = persistence.loadSave() else { return goToTitle() }
         engine = GameEngine(state: s)

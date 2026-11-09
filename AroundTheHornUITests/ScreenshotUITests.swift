@@ -113,3 +113,46 @@ extension ScreenshotUITests {
         shot("21-gallery-later")
     }
 }
+
+extension ScreenshotUITests {
+    func relaunch(_ args: [String]) {
+        app.terminate()
+        app.launchArguments = args
+        app.launch()
+    }
+
+    /// Taps Continue through messages until `label` appears.
+    func sail(until label: String) {
+        tap("Continue on your voyage")
+        let target = app.buttons[label]
+        for _ in 0..<30 where !target.exists {
+            let next = app.buttons["Continue"]
+            if next.waitForExistence(timeout: 2) { next.tap() }
+        }
+        XCTAssertTrue(target.waitForExistence(timeout: 10), "never reached \(label)")
+    }
+
+    func testPortScreens() {
+        relaunch(["-HornDebugStart", "rio", "-HornTickSeconds", "1"])
+        sail(until: "Drop anchor and go ashore")
+        shot("30-arrival")
+        tap("Drop anchor and go ashore")
+        shot("31-port-menu")
+        tap("Talk to people")
+        shot("32-talk")
+        tap("Continue")
+        tap("Visit the shipyard")
+        shot("33-shipyard")
+        tap("Leave the shipyard")
+        tap("Buy supplies")
+        shot("34-port-shop")
+    }
+
+    func testForkScreens() {
+        relaunch(["-HornDebugStart", "tdf", "-HornDebugMonth", "5", "-HornTickSeconds", "1"])
+        sail(until: "Round Cape Horn")
+        shot("35-fork")
+        tap("Take the Strait of Magellan")
+        shot("36-pilot")
+    }
+}
