@@ -8,6 +8,10 @@ struct AroundTheHornApp: App {
         // screen that redraws every 0.7 s.
         let s = UserDefaults.standard.double(forKey: "HornTickSeconds")
         if s > 0 { c.tickInterval = .milliseconds(Int(s * 1000)) }
+        Feedback.play = { [weak c] cue in
+            guard let c, !c.muted else { return }
+            Synth.shared.play(cue)
+        }
         #if DEBUG
         if let stop = UserDefaults.standard.string(forKey: "HornDebugStart") {
             c.debugStart(at: stop, month: UserDefaults.standard.integer(forKey: "HornDebugMonth"))

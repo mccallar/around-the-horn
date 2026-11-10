@@ -176,3 +176,27 @@ extension ScreenshotUITests {
         shot("42-catch")
     }
 }
+
+extension ScreenshotUITests {
+    func testFinale() {
+        relaunch(["-HornDebugStart", "sf", "-HornTickSeconds", "1"])
+        tap("Continue on your voyage")
+        let again = app.buttons["Sail again"]
+        for _ in 0..<20 where !again.exists {
+            let next = app.buttons["Continue"]
+            if next.waitForExistence(timeout: 2) { next.tap() }
+        }
+        XCTAssertTrue(again.waitForExistence(timeout: 10))
+        shot("50-finale")
+        app.swipeUp()
+        shot("51-finale-bottom")
+        tap("See the top ten")
+        shot("52-top-ten")
+        tap("Back")
+        shot("53-thanks")
+        tap("Sail again")
+        XCTAssertTrue(app.buttons["Sail for California"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Continue the voyage'")).firstMatch.exists,
+                       "no save survives the finale")
+    }
+}

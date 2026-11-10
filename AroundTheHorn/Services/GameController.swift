@@ -42,7 +42,10 @@ final class GameController {
     private(set) var game: GameState?
     private(set) var traveling = false
     var muted: Bool {
-        didSet { persistence.muted = muted }
+        didSet {
+            persistence.muted = muted
+            if !muted { Feedback.play(.unmute) }
+        }
     }
 
     /// Setup choices before the voyage exists.
