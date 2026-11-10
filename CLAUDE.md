@@ -23,6 +23,11 @@ make one.
 
 ## Building and testing
 
+- **Engine work: `swift test --disable-sandbox --scratch-path $TMPDIR/<unique>`** builds
+  and tests HornEngine on the Mac (Package.swift), no simulator, ~1 min. Results are
+  identical to the simulator's. Use a unique scratch path per checkout so several can
+  test at once.
+
 - `xcodegen generate` after adding or removing any file.
 - `sh Tools/run_tests.sh HornEngine` / `AroundTheHornTests` / `AroundTheHornUITests`
   (`xcodebuild test` can't allocate a pty in the sandbox). One run per simulator at a

@@ -91,7 +91,7 @@ Results, three seed sets of 30 voyages per role:
 |---|---|---|---|---|
 | merchant | 30/30 | 29/30 | 30/30 | ≥ 85% |
 | shipwright | 28/30 | 28/30 | 28/30 | 45–85% |
-| whaler | 13/30 | 17/30 | 16/30 | 15–50% |
+| whaler | 17/30 | 17/30 | 16/30 | 15–50% |
 | median winning voyage | 165 d | 165 d | 165 d | 150–200 d |
 
 All pass with the tolerance. **The shipwright wins 93% every time, above the
@@ -100,3 +100,8 @@ balance moved: the engine matches the prototype exactly (D7). No balance number 
 touched; whether to tighten the shipwright is Ryan's call (spec §0.5).
 
 Most whaler losses are thirst: the bot's water rule has no margin for the Doldrums.
+
+(Corrected 2026-11-09: the first row was first recorded as 13/30 for the whaler from a
+draft of the bot that spent one extra random draw before sailing. The committed bot
+gives 17/30, on the simulator and on the Mac alike — the engine is deterministic across
+both.)
