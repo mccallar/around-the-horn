@@ -200,3 +200,26 @@ extension ScreenshotUITests {
                        "no save survives the finale")
     }
 }
+
+extension ScreenshotUITests {
+    /// iPad: the column stays 540 pt and centred, in both orientations.
+    func testWideLayouts() {
+        relaunch(["-HornDebugStart", "valp", "-HornTickSeconds", "30"])
+        XCUIDevice.shared.orientation = .portrait
+        shot("60-portrait")
+        XCUIDevice.shared.orientation = .landscapeLeft
+        shot("61-landscape")
+        tap("Look at the chart")
+        shot("62-landscape-chart")
+        XCUIDevice.shared.orientation = .portrait
+    }
+
+    /// Accessibility text sizes: type grows to its cap and nothing is cut off.
+    func testLargeText() {
+        relaunch(["-HornDebugStart", "valp", "-HornTickSeconds", "30",
+                  "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"])
+        shot("70-large-sea-menu")
+        tap("Check supplies & crew")
+        shot("71-large-supplies")
+    }
+}

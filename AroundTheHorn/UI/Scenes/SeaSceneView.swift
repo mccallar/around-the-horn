@@ -7,13 +7,14 @@ struct SeaSceneView: View {
     let game: GameState?
     var moving = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var start = Date()
+    /// One clock for every scene, so the clouds don't jump back when the screen changes.
+    static let start = Date()
 
     var body: some View {
         TimelineView(.animation(paused: reduceMotion)) { tl in
             Canvas(rendersAsynchronously: true) { ctx, size in
                 var px = PixelCanvas(ctx: ctx, scale: size.width / CGFloat(SeaScene.w))
-                SeaScene.draw(&px, t: tl.date.timeIntervalSince(start), weather: game?.weather ?? .fair,
+                SeaScene.draw(&px, t: tl.date.timeIntervalSince(Self.start), weather: game?.weather ?? .fair,
                               moving: moving, atPort: game?.atPort ?? false, sails: game?.sails ?? 100)
             }
         }

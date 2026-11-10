@@ -45,7 +45,24 @@ spawns the bundle into a booted simulator instead.
 The `AroundTheHorn` scheme has no test action, deliberately: a plain Run never drags a
 test build along with it.
 
+## Debug launch arguments (debug builds)
+
+| Argument | Does |
+|---|---|
+| `-HornDebugStart <stopID>` | Starts a stocked merchant ten miles short of a stop (`cv`, `rio`, `tdf`, `gal`, `sf`…), on the sea menu. `-HornDebugMonth 5` sets the departure month. |
+| `-HornTickSeconds 4` | Slows the voyage clock (UI tests can't query a screen that redraws every 0.7 s). |
+| `-HornSceneGallery YES` | Every weather of the sea scene side by side. |
+
+## Screenshots
+
+`simctl io screenshot` comes back blank in the sandbox. `ScreenshotUITests` walks the
+game and saves what is drawn instead:
+
+```sh
+SIMCTL_CHILD_HORN_SHOTS=/path/to/dir sh Tools/run_tests.sh AroundTheHornUITests ScreenshotUITests
+```
+
 ## App icon
 
-`python3 Tools/make_icon.py` writes the placeholder icon (the prototype's pixel ship on
-navy). M9 replaces it.
+`python3 Tools/make_icon.py` writes the icon: the prototype's pixel ship on navy, opaque
+1024×1024 (spec M9).

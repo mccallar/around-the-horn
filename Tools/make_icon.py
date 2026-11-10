@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """Writes AppIcon.png: the prototype's pixel ship (SHIP_SPR) on navy over a pixel sea.
 
-A PLACEHOLDER until spec M9 — but a real, OPAQUE 1024x1024 PNG, because an empty
-appiconset fails Xcode's Distribute validation ("152x152 missing" + "CFBundleIconName
-missing"). Standard library only.
+Spec M9's icon: an OPAQUE 1024x1024 PNG (an alpha channel, or an empty appiconset,
+fails Xcode's Distribute validation). Standard library only.
 
     python3 Tools/make_icon.py
 """
