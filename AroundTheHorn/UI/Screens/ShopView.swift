@@ -15,7 +15,7 @@ struct ShopView: View {
         let over = bill > g.money
         VStack(alignment: .leading, spacing: 0) {
             Heading(port.shop)
-            if port.id != .ny {
+            if port.id != PortID.ny.rawValue {
                 Para("Prices here are \(Int(jsRounded((port.mult - 1) * 100)))% above New York, more or less.",
                      size: 18, color: Theme.dim)
             }

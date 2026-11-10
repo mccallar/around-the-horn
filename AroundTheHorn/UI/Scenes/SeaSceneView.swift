@@ -75,6 +75,7 @@ enum SeaScene {
         case .gale: return Sky(top: 0x33404F, bot: 0x6E7D8D, sea: 0x1F3346, wave: 0xE8EEF3, clouds: 3, cloud: 0x55616F, rough: 2)
         case .storm: return Sky(top: 0x15191F, bot: 0x3A434F, sea: 0x121D29, wave: 0xC9D3DC, clouds: 3,
                                 cloud: 0x2C333D, rough: 3, rain: true, lightning: true)
+        default: return sky(.fair)
         }
     }
 
