@@ -141,9 +141,10 @@ extension GameEngine {
     public func landCatch(_ caught: Int) -> [Interrupt] {
         let limit = journey.role(state.role).catchLimit
         let kept = min(caught, limit)
-        let room = Int((journey.item(.food).cap - state.food).rounded(.down))
+        let reward = journey.forageReward
+        let room = Int((journey.item(reward).cap - state[reward]).rounded(.down))
         let got = min(kept, room)
-        state.add(.food, Double(got))
+        state.add(reward, Double(got))
         return [.message(journey.text.catchReport(caught, limit, got))] + passDays(1, .sea)
     }
 

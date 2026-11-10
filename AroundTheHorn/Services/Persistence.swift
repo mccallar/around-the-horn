@@ -31,7 +31,7 @@ struct Persistence {
     func loadSave() -> GameState? {
         guard let data = try? Data(contentsOf: saveURL),
               let s = try? JSONDecoder().decode(GameState.self, from: data),
-              s.saveVersion == GameState.currentSaveVersion, !s.over
+              s.saveVersion == GameState.currentSaveVersion, Journeys.has(s.journey), !s.over
         else { return nil }
         return s
     }

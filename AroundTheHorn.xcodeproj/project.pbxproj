@@ -57,10 +57,12 @@
 		C0FBA31E19B06DC83CB3ED29 /* Score.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6EC279D772A856004EC53F9 /* Score.swift */; };
 		C6E407BF802C41EE6D4012DD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 93E794034F7F574E3F216E96 /* Assets.xcassets */; };
 		CA47939A0BDFDD649AB2BA4C /* SceneGallery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B27DC1AC875A1705C5B8A22 /* SceneGallery.swift */; };
+		CD1E34844A4047DB7069FBCF /* JourneyBot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F6163BE25F6E8B1308A6B29 /* JourneyBot.swift */; };
 		CF56E93632B32369776A9466 /* RNG.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C92945674434FC87B738A4A /* RNG.swift */; };
 		CF9A1B4D3EF915D7D41ECB4B /* TestSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9A32CC23A2A3A9A97B2F390 /* TestSupport.swift */; };
 		CFA59275DDFEF23A3004F4F7 /* LaunchUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F41F0439CB6BDE9D136E712 /* LaunchUITests.swift */; };
 		D6D7EE2688EAC47CCDFC0784 /* GameController+Menus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EB62542A8C2C0B67B4A1FB6 /* GameController+Menus.swift */; };
+		DB458688AD104888CB603F58 /* JourneyContractTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C405D019FE4471301AAEE96 /* JourneyContractTests.swift */; };
 		E40D20D3F9DFDE394A719317 /* Text.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DA561648AB9D0C1EB86799D /* Text.swift */; };
 		EB06357C27D073F3370D9C42 /* AroundTheHornApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08BCBF0670DB655B7CD9A450 /* AroundTheHornApp.swift */; };
 		ED34FC246224452FF9832A0D /* StatusPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4967E70CD0CB7116C76B901F /* StatusPanel.swift */; };
@@ -161,6 +163,7 @@
 		131A9C46BDD44C73CA391B2B /* golden-voyages.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "golden-voyages.txt"; sourceTree = "<group>"; };
 		19D6AAF10A90207D9CA7180E /* PurityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurityTests.swift; sourceTree = "<group>"; };
 		19E4471C6A4A4D51FC75BB5F /* AroundTheHornTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = AroundTheHornTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		1F6163BE25F6E8B1308A6B29 /* JourneyBot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JourneyBot.swift; sourceTree = "<group>"; };
 		26132E5082F8F671AED50D84 /* GoldenVoyageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoldenVoyageTests.swift; sourceTree = "<group>"; };
 		272E9C7692171434AE6EB489 /* SynthTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SynthTests.swift; sourceTree = "<group>"; };
 		2A5B3A3831A7A90C960BDFD0 /* ResumeUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResumeUITests.swift; sourceTree = "<group>"; };
@@ -170,6 +173,7 @@
 		338B3382DF5DB3F0A539995D /* ChoiceList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChoiceList.swift; sourceTree = "<group>"; };
 		3705B4E894BE9ADCD26E17A8 /* GameController+Debug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GameController+Debug.swift"; sourceTree = "<group>"; };
 		3B27DC1AC875A1705C5B8A22 /* SceneGallery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneGallery.swift; sourceTree = "<group>"; };
+		3C405D019FE4471301AAEE96 /* JourneyContractTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JourneyContractTests.swift; sourceTree = "<group>"; };
 		4108B95E6294D296CE33783C /* GameData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameData.swift; sourceTree = "<group>"; };
 		4967E70CD0CB7116C76B901F /* StatusPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusPanel.swift; sourceTree = "<group>"; };
 		49B4EF72CA6B988831F49607 /* AppInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppInfo.swift; sourceTree = "<group>"; };
@@ -410,6 +414,8 @@
 				066E1756FBD97DB90F4CC624 /* BalanceSimulationTests.swift */,
 				0BF5668C018FEC94F3697835 /* EngineTests.swift */,
 				26132E5082F8F671AED50D84 /* GoldenVoyageTests.swift */,
+				1F6163BE25F6E8B1308A6B29 /* JourneyBot.swift */,
+				3C405D019FE4471301AAEE96 /* JourneyContractTests.swift */,
 				90EC46C79B8380AEC8181D5A /* PrototypeParityTests.swift */,
 				19D6AAF10A90207D9CA7180E /* PurityTests.swift */,
 				030AD9AFB938A4FEEA45CA09 /* RNGTests.swift */,
@@ -448,7 +454,7 @@
 			path = App;
 			sourceTree = "<group>";
 		};
-		"TEMP_0F38DD13-B0C3-4BC0-BB83-CAEBCD54FA5F" /* .claude */ = {
+		"TEMP_CC26742E-1A33-4EFA-A2EC-C402D120E705" /* .claude */ = {
 			isa = PBXGroup;
 			children = (
 			);
@@ -715,6 +721,8 @@
 				570ED1A0299CA1D70CC7DA90 /* BalanceSimulationTests.swift in Sources */,
 				017186571EC97881CA9E44A3 /* EngineTests.swift in Sources */,
 				7DA5ECED083824A1458BACF6 /* GoldenVoyageTests.swift in Sources */,
+				CD1E34844A4047DB7069FBCF /* JourneyBot.swift in Sources */,
+				DB458688AD104888CB603F58 /* JourneyContractTests.swift in Sources */,
 				7C6456E65620A32E434723C4 /* PrototypeParityTests.swift in Sources */,
 				39EA71B06DD3A0F439B54130 /* PurityTests.swift in Sources */,
 				32F008A549271F1E85FAC2EB /* RNGTests.swift in Sources */,

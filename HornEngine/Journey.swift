@@ -54,6 +54,8 @@ public struct Rules {
     // Health per turn
     public var restAway = 3.0
     public var restInPort = 6.0
+    /// How many turns the rest menu offers.
+    public var restChoices = [1, 2, 3, 5]
     public var starve = 7.0
     public var parch = 12.0
     public var freezeWarm = 1.4
@@ -244,6 +246,8 @@ public class Journey {
     /// What the foraging game lets you catch.
     public internal(set) var quarry: [Fish] = []
     public internal(set) var forageSeconds = 25.0
+    /// What a catch is stowed as. A role's `catchLimit` and the item's room cap it.
+    public internal(set) var forageReward = ItemKey.food
     public internal(set) var rules = Rules()
 
     init(id: String, text: JourneyText) {
@@ -265,6 +269,8 @@ public class Journey {
     public func pace(_ p: Pace) -> PaceInfo { paces[p]! }
     public func rations(_ r: Rations) -> RationsInfo { rationings[r]! }
     public var totalMiles: Int { stops.last?.mile ?? 0 }
+    /// Whether any pace burns fuel: the status panel shows the tank only if so.
+    public var burnsFuel: Bool { Pace.allCases.contains { (paces[$0]?.fuel ?? 0) > 0 } }
 
     /// What a trader will take and give, in the order offers are drawn from.
     public var tradeKeys: [ItemKey] { items.map(\.key) }
@@ -416,5 +422,8 @@ public enum Journeys {
     private static let byID: [String: Journey] = Dictionary(uniqueKeysWithValues: all.map { ($0.id, $0) })
 
     /// An id no journey has (a save from a build with more journeys) falls back to 1849.
+    /// Check `has` before trusting a save: its stop index is only good for its own journey.
     public static func journey(_ id: String) -> Journey { byID[id] ?? all[0] }
+
+    public static func has(_ id: String) -> Bool { byID[id] != nil }
 }
