@@ -1,9 +1,16 @@
 // Scoring and the top ten (spec §7), the prototype's `score`, `rankOf` and `finale`.
+// `Score(_:)` and `Rank` are the 1849 voyage's; other journeys score through
+// `Journey.score` and `Journey.rank`.
 
 public struct Score: Equatable {
     public struct Line: Equatable {
         public let label: String
         public let points: Int
+
+        public init(label: String, points: Int) {
+            self.label = label
+            self.points = points
+        }
     }
 
     public let lines: [Line]
@@ -11,6 +18,13 @@ public struct Score: Equatable {
     public let multiplier: Int
     public var total: Int { subtotal * multiplier }
 
+    public init(lines: [Line], multiplier: Int) {
+        self.lines = lines
+        subtotal = lines.reduce(0) { $0 + $1.points }
+        self.multiplier = multiplier
+    }
+
+    /// The 1849 voyage's score, as the prototype counts it.
     public init(_ s: GameState) {
         let alive = s.living.count
         let health = s.healthLabel

@@ -3,24 +3,31 @@ import Foundation
 /// The game's rules (spec §5). Mutates `state` and returns `[Interrupt]`; never touches
 /// UI. Every random number comes from `rng`.
 ///
-/// FIDELITY RULE: each function here is a line-for-line port of the prototype function of
-/// the same name, and draws its random numbers in the same order — including draws whose
-/// result is thrown away (a pick from an empty list, a `ri` inside a `Math.min`). Change
-/// that order and a seeded voyage stops matching the prototype; `Tools/prototype-diff`
-/// checks it.
+/// These are the rules every journey shares. The numbers come from `journey.rules`, the
+/// sentences from `journey.text`, and what a journey does differently from its hooks
+/// (Journey.swift).
+///
+/// FIDELITY RULE: with 1849's journey, each function here is a line-for-line port of the
+/// prototype function of the same name, and draws its random numbers in the same order —
+/// including draws whose result is thrown away (a pick from an empty list, a `ri` inside
+/// a `Math.min`). Change that order, or regroup a floating-point expression, and a seeded
+/// voyage stops matching the prototype; `PrototypeParityTests` and `GoldenVoyageTests`
+/// check it.
 public final class GameEngine {
     public var state: GameState
     public var rng: RandomSource
+    public let journey: Journey
 
     public init(state: GameState, rng: RandomSource = SeededRNG(seed: UInt64.random(in: 0...UInt64.max))) {
         self.state = state
         self.rng = rng
+        journey = Journeys.journey(state.journey)
     }
 
     public enum DayMode {
         /// Under way.
         case sail
-        /// Hove to at sea: resting, repairing, fishing.
+        /// Stopped between ports: resting, repairing, foraging.
         case sea
         /// Ashore.
         case port
@@ -54,37 +61,16 @@ public final class GameEngine {
     func rollWeather(_ reg: Region) -> Weather {
         if state.forceFair > 0 {
             state.forceFair -= 1
-            return .fair
+            return journey.fairWeather
         }
         let w = weatherWeights(reg, cursed: state.badLuck > 0)
         if state.badLuck > 0 { state.badLuck -= 1 }
         return weightedPick(w)
     }
 
-    /// The day's weather odds in `reg`, in the prototype's key order: a key the
-    /// adjustments add that the region lacks goes on the end, as it does in `{...reg.w}`.
-    func weatherWeights(_ reg: Region, cursed: Bool) -> [(Weather, Double)] {
-        var w = reg.weights
-        func bump(_ k: Weather, _ f: (Double) -> Double) {
-            if let i = w.firstIndex(where: { $0.0 == k }) { w[i].1 = f(w[i].1) } else { w.append((k, f(0))) }
-        }
-        if reg.south && state.southernWinter {
-            bump(.gale) { $0 + 20 }
-            bump(.storm) { $0 + (reg.horn ? 30 : 18) }
-            bump(.cold) { $0 + 15 }
-            bump(.fair) { $0 * 0.5 }
-            bump(.fresh) { $0 * 0.6 }
-        }
-        if reg.id == .northAtlantic && [11, 0, 1].contains(state.month) {
-            bump(.gale) { $0 + 8 }
-            bump(.storm) { $0 + 5 }
-        }
-        if cursed {
-            bump(.gale) { $0 + 20 }
-            bump(.storm) { $0 + 15 }
-            bump(.calm) { $0 + 10 }
-        }
-        return w
+    /// The turn's weather odds in `reg`, after the journey's seasons and curses.
+    func weatherWeights(_ reg: Region, cursed: Bool) -> WeatherOdds {
+        journey.weatherWeights(self, reg, cursed: cursed)
     }
 
     // MARK: - One day under sail (spec §5.1)
@@ -97,14 +83,23 @@ public final class GameEngine {
         let reg = state.region
         state.weather = rollWeather(reg)
         let w = state.weather
+        let r = journey.rules
+        let pace = journey.pace(state.pace)
         let n = state.living.count
-        var sp = state.pace.speed * w.speed
-        sp *= 0.45 + 0.55 * (state.sails / 100)
-        sp *= 0.75 + 0.25 * (state.hull / 100)
-        sp *= n >= 4 ? 1 : n == 3 ? 0.85 : n == 2 ? 0.65 : 0.45
-        if state.inStrait { sp *= 0.5 }
-        if (reg.horn || reg.strait) && state.southernWinter { sp *= 0.6 }
-        sp *= rnd(0.85, 1.15)
+        var sp = pace.speed * w.speed
+        sp *= r.propFloor + r.propSpan * (state.sails / 100)
+        sp *= r.hullFloor + r.hullSpan * (state.hull / 100)
+        sp *= journey.crewFactor(n)
+        journey.adjustSpeed(self, reg, &sp)
+        if pace.fuel > 0 {
+            if state.fuel >= pace.fuel {
+                state.fuel -= pace.fuel
+            } else {
+                state.fuel = 0
+                sp *= r.noFuelSpeed
+            }
+        }
+        sp *= rnd(r.speedJitter.lowerBound, r.speedJitter.upperBound)
         var d = Int(max(0, jsRound(sp)))
         var arrived = false
         if state.mile + d >= ns.mile {
@@ -112,25 +107,16 @@ public final class GameEngine {
             arrived = true
         }
         state.mile += d
-        if w == .calm { state.note = "Not a breath of wind. The sails hang slack." }
+        if !w.note.isEmpty { state.note = w.note }
         consume(&q, .sail)
+        if pace.fuel > 0 { fuelWarnings(&q, pace) }
         health(&q, .sail)
         if state.over { return q }
         wear(&q, reg)
         if state.over { return q }
-        if !arrived {
-            if state.inStrait && chance(state.pilot ? 0.012 : 0.055) {
-                let h = ri(12, 28)
-                state.hull -= Double(h)
-                state.day += 1
-                q.append(.message("You have run aground on an uncharted shoal! It takes a full day to kedge her off. [red](Hull −\(h)%)[/red]"))
-                checkSink(&q)
-            } else if reg.horn && chance(0.012) {
-                overboard(&q)
-            } else if chance(0.11) {
-                seaEvent(&q, reg)
-            }
-        }
+        journey.tick(self, &q, .sail, reg)
+        if state.over { return q }
+        if !arrived { journey.dayEvents(self, &q, reg) }
         if state.over { return q }
         if arrived {
             state.stopIndex += 1
@@ -144,8 +130,10 @@ public final class GameEngine {
     func consume(_ q: inout [Interrupt], _ mode: DayMode) {
         let n = Double(state.living.count)
         if n == 0 { return }
+        let r = journey.rules
+        let text = journey.text
         let temp = state.temperature(in: state.region)
-        let fneed = n * state.rations.lb
+        let fneed = n * journey.rations(state.rations).amount
         if state.food >= fneed {
             state.food -= fneed
             state.starving = false
@@ -153,7 +141,7 @@ public final class GameEngine {
             state.food = 0
             state.starving = true
         }
-        let wneed = n * (temp == .hot ? 1.5 : 1)
+        let wneed = n * (temp == .hot ? r.hotWater : r.water)
         if state.water >= wneed {
             state.water -= wneed
             state.thirst = false
@@ -161,113 +149,136 @@ public final class GameEngine {
             state.water = 0
             state.thirst = true
         }
-        if mode == .port {
+        let hasDeficiency = journey.deficiency != nil
+        if !hasDeficiency || mode == .port {
             state.noCitrus = 0
         } else if state.limes > 0 {
-            state.limes = max(0, state.limes - n * 0.02)
+            state.limes = max(0, state.limes - n * r.preventiveUse)
             state.noCitrus = 0
         } else {
             state.noCitrus += 1
         }
-        if mode != .port && (state.weather == .rain || state.weather == .storm)
-            && state.water < GameData.item(.water).cap
-        {
-            let r = ri(15, 45)
-            state.add(.water, Double(r))
-            state.note = "Caught \(r) gallons of rainwater in the sails."
+        if mode != .port && state.weather.wet && state.water < journey.item(.water).cap {
+            let caught = ri(r.rainCatch.lowerBound, r.rainCatch.upperBound)
+            state.add(.water, Double(caught))
+            state.note = text.rainCaught(caught)
         }
         if state.starving && !state.flags.food {
             state.flags.food = true
-            q.append(.message("[red]You have run out of provisions![/red] The crew is starving."))
-        } else if !state.starving && state.food < fneed * 7 && !state.flags.lowFood {
+            q.append(.message(text.outOfFood))
+        } else if !state.starving && state.food < fneed * r.lowFoodTicks && !state.flags.lowFood {
             state.flags.lowFood = true
-            q.append(.message("The cook warns you: provisions will last about a week."))
+            q.append(.message(text.lowFood))
         }
-        if state.food > fneed * 10 {
+        if state.food > fneed * r.rearmTicks {
             state.flags.food = false
             state.flags.lowFood = false
         }
         if state.thirst && !state.flags.water {
             state.flags.water = true
-            q.append(.message("[red]The water casks are dry![/red] Without water, the crew will die within days."))
-        } else if !state.thirst && state.water < wneed * 5 && !state.flags.lowWater {
+            q.append(.message(text.outOfWater))
+        } else if !state.thirst && state.water < wneed * r.lowWaterTicks && !state.flags.lowWater {
             state.flags.lowWater = true
-            q.append(.message("The water casks are nearly empty — a few days left."))
+            q.append(.message(text.lowWater))
         }
-        if state.water > wneed * 10 {
+        if state.water > wneed * r.rearmTicks {
             state.flags.water = false
             state.flags.lowWater = false
         }
-        if mode != .port && state.limes <= 0 && !state.flags.limes {
-            state.flags.limes = true
-            q.append(.message("The last of the citrus is gone. Scurvy will follow within a few weeks unless you find fresh food."))
+        if hasDeficiency {
+            if mode != .port && state.limes <= 0 && !state.flags.limes {
+                state.flags.limes = true
+                q.append(.message(text.preventiveGone))
+            }
+            if state.limes > 1 { state.flags.limes = false }
         }
-        if state.limes > 1 { state.flags.limes = false }
+    }
+
+    /// For a journey with an engine: the tank is dry, or nearly.
+    func fuelWarnings(_ q: inout [Interrupt], _ pace: PaceInfo) {
+        let r = journey.rules
+        if state.fuel <= 0 && !state.flags.fuel {
+            state.flags.fuel = true
+            q.append(.message(journey.text.outOfFuel))
+        } else if state.fuel > 0 && state.fuel < pace.fuel * r.lowFuelTicks && !state.flags.lowFuel {
+            state.flags.lowFuel = true
+            q.append(.message(journey.text.lowFuel))
+        }
+        if state.fuel > pace.fuel * r.rearmTicks {
+            state.flags.fuel = false
+            state.flags.lowFuel = false
+        }
     }
 
     // MARK: - Health (spec §5.3)
 
     func health(_ q: inout [Interrupt], _ mode: DayMode) {
+        let r = journey.rules
+        let text = journey.text
         let temp = state.temperature(in: state.region)
         let w = state.weather
-        let port: Port? = mode == .port ? state.currentStop.portID.map(GameData.port) : nil
+        let pace = journey.pace(state.pace)
+        let rations = journey.rations(state.rations)
+        let harshSeason = journey.harshSeason(state)
+        let deficiency = journey.deficiency
+        let port: Port? = mode == .port ? journey.port(state.currentStop.id) : nil
         let livingNow = state.crew.indices.filter { state.crew[$0].alive }
         for (i, idx) in livingNow.enumerated() {
             var p = state.crew[idx]
-            var d = state.rations.hp
+            var d = rations.hp
             if mode == .sail {
-                d += state.pace.hp
+                d += pace.hp
                 if w.harsh != 0 { d -= w.harsh }
             }
-            if mode == .sea { d += 3 }
-            if mode == .port { d += 6 }
-            if state.starving { d -= 7 }
-            if state.thirst { d -= 12 }
+            if mode == .sea { d += r.restAway }
+            if mode == .port { d += r.restInPort }
+            if state.starving { d -= r.starve }
+            if state.thirst { d -= r.parch }
             let warm = i < state.clothes
             if mode != .port {
                 if temp == .freezing {
-                    d -= (warm ? 1.4 : 4.5) + (state.southernWinter ? 1 : 0)
+                    d -= (warm ? r.freezeWarm : r.freezeBare) + (harshSeason ? r.freezeSeason : 0)
                 } else if temp == .cold {
-                    d -= warm ? 0 : 2.2
+                    d -= warm ? 0 : r.coldBare
                 } else if temp == .hot {
-                    d -= 0.4
+                    d -= r.heat
                 }
             }
             if let a = p.ailment {
-                d -= a.damage * (p.treated ? 0.5 : 1)
-                if a == .scurvy {
-                    if (state.limes > 0 || mode == .port) && chance(mode == .port ? 0.6 : 0.35) {
+                d -= a.damage * (p.treated ? r.treated : 1)
+                if a == deficiency {
+                    if (state.limes > 0 || mode == .port) && chance(mode == .port ? r.cureInPort : r.cureAway) {
                         p.ailment = nil
-                        q.append(.message("\(TextMarkup.escape(p.name)) is recovering from scurvy."))
+                        q.append(.message(text.deficiencyCured(TextMarkup.escape(p.name))))
                     }
                 } else {
-                    p.ailDays -= mode == .port ? 2 : mode == .sea ? 1.5 : 1
+                    p.ailDays -= mode == .port ? r.mendInPort : mode == .sea ? r.mendAtRest : 1
                     if p.ailDays <= 0 {
                         p.ailment = nil
                         p.treated = false
-                        q.append(.message("\(TextMarkup.escape(p.name)) is well again."))
+                        q.append(.message(text.wellAgain(TextMarkup.escape(p.name))))
                     }
                 }
             } else {
-                d += 1
+                d += r.well
             }
             p.hp = min(100, max(0, p.hp + d))
             state.crew[idx] = p
             if p.ailment == nil && p.hp > 0 {
-                var pr = 0.0035 + (100 - p.hp) * 0.00035
-                if state.rations == .bare { pr += 0.005 }
-                if state.starving { pr += 0.03 }
-                if state.thirst { pr += 0.04 }
-                if temp == .hot { pr += 0.003 }
-                if (temp == .freezing || temp == .cold) && !warm && mode != .port { pr += 0.01 }
-                if port?.fever == true { pr += 0.012 }
-                if mode == .port { pr *= 0.7 }
+                var pr = r.sickBase + (100 - p.hp) * r.sickPerHP
+                if state.rations == .bare { pr += r.sickBare }
+                if state.starving { pr += r.sickStarving }
+                if state.thirst { pr += r.sickThirst }
+                if temp == .hot { pr += r.sickHeat }
+                if (temp == .freezing || temp == .cold) && !warm && mode != .port { pr += r.sickCold }
+                if port?.fever == true { pr += r.sickFeverPort }
+                if mode == .port { pr *= r.sickPortFactor }
                 if chance(pr) {
                     sicken(idx, &q, temp, port, nil)
-                } else if mode != .port && state.noCitrus > 35
-                    && chance(min(0.12, Double(state.noCitrus - 35) * 0.004))
+                } else if let deficiency = deficiency, mode != .port, state.noCitrus > r.deficiencyAfter,
+                          chance(min(r.deficiencyMax, Double(state.noCitrus - r.deficiencyAfter) * r.deficiencyRate))
                 {
-                    sicken(idx, &q, temp, nil, .scurvy)
+                    sicken(idx, &q, temp, nil, deficiency)
                 }
             }
         }
@@ -278,26 +289,21 @@ public final class GameEngine {
         let pool: [Ailment]
         if let force = force {
             pool = [force]
-        } else if port?.fever == true {
-            pool = [.yellowFever, .fever, .dysentery]
-        } else if temp == .hot {
-            pool = [.fever, .dysentery, .exhaustion, .yellowFever, .shipFever]
-        } else if temp == .freezing || temp == .cold {
-            pool = [.pneumonia, .frostbite, .fever, .shipFever, .brokenArm]
         } else {
-            pool = [.shipFever, .dysentery, .fever, .brokenArm, .exhaustion]
+            pool = journey.sickPool(self, temp, port)
         }
+        // The pick spends its draw even from a pool of one.
         let a = pick(pool)!
         state.crew[idx].ailment = a
         state.crew[idx].ailDays = Double(ri(a.duration.lowerBound, a.duration.upperBound))
         state.crew[idx].treated = false
-        var t = "\(TextMarkup.escape(state.crew[idx].name)) has \(a.name)."
-        if a == .scurvy {
-            t += " [dim]Bleeding gums, aching joints. Citrus or a run ashore will cure it.[/dim]"
+        var t = journey.text.hasAilment(TextMarkup.escape(state.crew[idx].name), a)
+        if a == journey.deficiency {
+            t += journey.text.deficiencyHint
         } else if state.meds > 0 {
             state.meds -= 1
             state.crew[idx].treated = true
-            t += " [dim]You open a medicine kit (\(state.meds) left).[/dim]"
+            t += journey.text.medsUsed(state.meds)
         }
         q.append(.message(t))
     }
@@ -306,11 +312,12 @@ public final class GameEngine {
         for idx in state.crew.indices where state.crew[idx].alive && state.crew[idx].hp <= 0 {
             state.crew[idx].alive = false
             let p = state.crew[idx]
-            let cause = p.ailment?.deathName ?? (state.thirst ? "thirst" : state.starving ? "starvation" : "exhaustion")
+            let text = journey.text
+            let cause = p.ailment?.deathName
+                ?? (state.thirst ? text.causeThirst : state.starving ? text.causeStarvation : text.causeExhaustion)
             if p.isCaptain {
                 state.over = true
-                q.append(.gameOver(title: "You, Captain \(TextMarkup.escape(p.name)), have died of \(cause).",
-                                   body: "The crew sails the ship into the nearest port and scatters. The voyage is over."))
+                q.append(.gameOver(title: text.leaderDied(TextMarkup.escape(p.name), cause), body: text.leaderDiedBody))
                 return
             }
             q.append(.burial(crewID: p.id, cause: cause))
@@ -320,30 +327,28 @@ public final class GameEngine {
     // MARK: - Ship wear (spec §5.4)
 
     func wear(_ q: inout [Interrupt], _ reg: Region) {
+        let r = journey.rules
+        let text = journey.text
         let w = state.weather
-        state.sails = max(0, state.sails - state.pace.wear * w.wear * rnd(0.6, 1.4))
-        var hd = 0.03
-        if w == .storm {
-            hd += rnd(1, 2.6) * (state.pace == .full ? 1.6 : state.pace == .easy ? 0.7 : 1)
-                * (reg.horn ? 1.5 : 1) * (reg.strait ? 0.5 : 1)
-        }
-        if w == .gale { hd += rnd(0, 0.8) * (state.pace == .full ? 1.5 : 1) }
+        state.sails = max(0, state.sails - journey.pace(state.pace).wear * w.wear
+            * rnd(r.wearJitter.lowerBound, r.wearJitter.upperBound))
+        let hd = journey.structureDamage(self, reg)
         state.hull = max(0, state.hull - hd)
-        if state.hull < 35 && state.food > 50 && chance(0.06) {
-            let l = ri(20, 60)
+        if state.hull < r.spoilBelow && state.food > r.spoilFoodOver && chance(r.spoilChance) {
+            let l = ri(r.spoil.lowerBound, r.spoil.upperBound)
             state.food -= Double(l)
-            q.append(.message("Seawater has been leaking into the hold. \(l) lbs of provisions are spoiled."))
+            q.append(.message(text.spoiled(l)))
         }
-        if state.hull < 30 && !state.flags.hull {
+        if state.hull < r.hullWarn && !state.flags.hull {
             state.flags.hull = true
-            q.append(.message("[red]The pumps are working day and night.[/red] The hull needs patching — soon."))
+            q.append(.message(text.hullWarning))
         }
-        if state.hull > 50 { state.flags.hull = false }
-        if state.sails < 25 && !state.flags.sails {
+        if state.hull > r.warnRearm { state.flags.hull = false }
+        if state.sails < r.sailsWarn && !state.flags.sails {
             state.flags.sails = true
-            q.append(.message("[red]Your sails are in rags.[/red] She barely answers the helm. Mend them if you can."))
+            q.append(.message(text.sailsWarning))
         }
-        if state.sails > 50 { state.flags.sails = false }
+        if state.sails > r.warnRearm { state.flags.sails = false }
         checkSink(&q)
     }
 
@@ -351,23 +356,24 @@ public final class GameEngine {
         if state.hull <= 0 && !state.over {
             state.hull = 0
             state.over = true
-            q.append(.gameOver(title: "The [i]\(TextMarkup.escape(state.ship))[/i] has foundered.",
-                               body: "Her seams opened faster than the pumps could keep up. She went down by the head, taking everything with her."))
+            q.append(.gameOver(title: journey.text.wrecked(TextMarkup.escape(state.ship)),
+                               body: journey.text.wreckedBody))
         }
     }
 
     // MARK: - Days without sailing (spec §5.5)
 
-    /// Rest, repairs, fishing: time passes, the crew eats and heals or sickens; the ship
+    /// Rest, repairs, foraging: time passes, the crew eats and heals or sickens; the vessel
     /// doesn't move or wear. In port the weather is fair.
     public func passDays(_ n: Int, _ mode: DayMode) -> [Interrupt] {
         var q: [Interrupt] = []
         var i = 0
         while i < n && !state.over {
             state.day += 1
-            state.weather = mode != .port ? rollWeather(state.region) : .fair
+            state.weather = mode != .port ? rollWeather(state.region) : journey.fairWeather
             consume(&q, mode)
             health(&q, mode)
+            if !state.over { journey.tick(self, &q, mode, state.region) }
             i += 1
         }
         return q

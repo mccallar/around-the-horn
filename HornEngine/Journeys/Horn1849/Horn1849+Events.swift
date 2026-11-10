@@ -1,6 +1,6 @@
 import Foundation
 
-// Random sea events (spec §5.6), landmarks (§5.7) and the choices both raise.
+// The 1849 voyage's sea events (spec §5.6), landmarks (§5.7) and the choices both raise.
 
 extension GameEngine {
     // MARK: - Man overboard
@@ -149,12 +149,9 @@ extension GameEngine {
 
     // MARK: - Arrivals (spec §5.7)
 
-    /// Called when the controller reaches an `.arrival` interrupt. Port side effects (a
-    /// stowaway going ashore, the trade count) happen here, as they do in the prototype's
-    /// `arrival` screen.
-    public func beginArrival(_ stopID: String) -> [Interrupt] {
-        guard let s = GameData.stop(stopID) else { return [] }
-        state.note = ""
+    /// Reaching `s`, the prototype's `arrival` screen. Port side effects (a stowaway going
+    /// ashore, the trade count) happen in the shared `portArrival`.
+    func horn1849Arrive(_ s: Stop) -> [Interrupt] {
         switch s.type {
         case .mark:
             if s.id == "gulf" {
@@ -165,17 +162,7 @@ extension GameEngine {
             }
             return [.message("You have rounded Cape Horn! The longitude creeps east to west at last, and the long Pacific swell lifts the bow. The crew cheers.")]
         case .port:
-            state.tradesLeft = 3
-            state.talkIndex = 0
-            let leaving = state.crew.filter { $0.alive && $0.leaveAt == s.id }
-            state.crew.removeAll { $0.alive && $0.leaveAt == s.id }
-            var detail = GameData.port(s.portID!).arrive
-            for p in leaving { detail += "\n\n[dim]\(TextMarkup.escape(p.name)) waves goodbye from the quay.[/dim]" }
-            return [.choice(ChoiceEvent(
-                kind: .portArrival(stopID: s.id),
-                prompt: "You have reached \(s.name).\n[dim]\(state.dateText) · day \(state.day)[/dim]",
-                detail: detail,
-                options: [.init("Drop anchor and go ashore"), .init("Sail on without stopping")]))]
+            return portArrival(s)
         case .line:
             return [.choice(choice(.equator))]
         case .fork:
@@ -185,14 +172,6 @@ extension GameEngine {
         case .end:
             return [.finale]
         }
-    }
-
-    /// Through the Golden Gate: the voyage is over and scored.
-    public func finish() -> Score {
-        state.over = true
-        state.atPort = true
-        state.weather = .fair
-        return Score(state)
     }
 
     // MARK: - Choices
@@ -237,24 +216,20 @@ extension GameEngine {
                                options: [.init("Hire the pilot ($\(cost))", enabled: state.money >= Double(cost)),
                                          .init("Navigate it yourself")])
         case .portArrival(let stopID):
-            // `beginArrival` builds the real one, with any stowaway's goodbye in the detail.
+            // `portArrival` builds the real one, with any stowaway's goodbye in the detail.
             let s = GameData.stop(stopID)!
-            return ChoiceEvent(kind: kind,
-                               prompt: "You have reached \(s.name).\n[dim]\(state.dateText) · day \(state.day)[/dim]",
-                               detail: GameData.port(s.portID!).arrive,
-                               options: [.init("Drop anchor and go ashore"), .init("Sail on without stopping")])
+            return portChoice(s, detail: GameData.port(s.portID!).arrive)
         case .tradeOffer(let o, let intro):
-            return ChoiceEvent(kind: kind,
-                               prompt: "\(intro)\n\nThey will give you [amber]\(describe(o.give, Double(o.giveAmount)))[/amber] for [amber]\(describe(o.want, Double(o.wantAmount)))[/amber].",
-                               detail: "[dim]You have \(describe(o.want, state[o.want].rounded(.down))).[/dim]",
-                               options: [.init("Accept the trade"), .init("Decline")])
+            return tradeChoice(o, intro: intro)
+        case .custom:
+            // Other journeys build their choices where they ask them (`GameEngine.ask`).
+            return ChoiceEvent(kind: kind, prompt: "", detail: nil, options: [])
         }
     }
 
-    /// The player picked option `option` (0-based). Returns what follows. A disabled or
-    /// out-of-range option changes nothing and returns the same choice.
-    public func resolve(_ event: ChoiceEvent, option: Int) -> [Interrupt] {
-        guard event.options.indices.contains(option), event.options[option].enabled else { return [.choice(event)] }
+    /// The player answered one of this voyage's choices. The shared `resolve` has already
+    /// turned away a disabled or out-of-range option, and answers port arrivals and trades.
+    func horn1849Resolve(_ event: ChoiceEvent, _ option: Int) -> [Interrupt] {
         switch event.kind {
         case .stranger:
             if option == 0 {
@@ -369,18 +344,7 @@ extension GameEngine {
             }
             return [.message("You trust your charts and your lookouts. The Strait narrows ahead between dark, snow-dusted mountains.")]
 
-        case .portArrival:
-            if option == 0 {
-                state.atPort = true
-                return [.enterPort]
-            }
-            return []
-
-        case .tradeOffer(let o, _):
-            if option == 0 {
-                applyTrade(o)
-                return [.message("Done. Goods change hands.")]
-            }
+        default:
             return []
         }
     }

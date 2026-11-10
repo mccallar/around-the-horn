@@ -197,6 +197,7 @@ final class SensibleBot {
         case .pilot: return c.options[0].enabled ? 0 : 1
         case .portArrival: return 0        // go ashore to buy
         case .tradeOffer: return 1         // decline
+        case .custom: return 0             // another journey's; the 1849 voyage raises none
         }
     }
 

@@ -17,7 +17,7 @@ public enum Interrupt: Codable, Equatable {
     /// Dropped anchor: show the port menu instead of resuming travel.
     case enterPort
     case gameOver(title: String, body: String)
-    /// Through the Golden Gate. The controller calls `GameEngine.finish`.
+    /// Reached the end. The controller calls `GameEngine.finish`.
     case finale
 }
 
@@ -25,6 +25,7 @@ public enum Interrupt: Codable, Equatable {
 /// `GameEngine.resolve(_:option:)` with the chosen index.
 public struct ChoiceEvent: Codable, Equatable {
     public enum Kind: Codable, Equatable {
+        // The 1849 voyage's.
         case stranger
         case albatross
         case stowaway(name: String)
@@ -33,8 +34,12 @@ public struct ChoiceEvent: Codable, Equatable {
         case galapagos
         case fork
         case pilot(cost: Int)
+        // Every journey's.
         case portArrival(stopID: String)
         case tradeOffer(Offer, intro: String)
+        /// A choice a journey raised with `GameEngine.ask`. The answer goes back to its
+        /// `Journey.resolve` with the same key and arguments.
+        case custom(key: String, args: [String])
     }
 
     public struct Option: Codable, Equatable {

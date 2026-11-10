@@ -1,4 +1,4 @@
-// Static tables, copied from the prototype's `ROLES`, `ITEMS`, `VAL`, `PORTS`, `STOPS`,
+// 1849's tables, copied from the prototype's `ROLES`, `ITEMS`, `VAL`, `PORTS`, `STOPS`,
 // `REGIONS`, `MAGELLAN`, `WEATHER`, `PACE`, `RATIONS`, `AIL`, `DEATH_NAME`, `FIRST`,
 // `SHIPS` and `DEFAULT_TOP` (docs/reference/horn1849.html). The prototype is the
 // reference: change a number here only with Ryan's say-so (spec §0.5).
@@ -6,13 +6,16 @@
 // ORDER IS DATA. Weather weights are ordered lists, not dictionaries, because the
 // prototype's `wpick` walks an object in key order and a different order lands the same
 // random number in a different bucket. Keep every list in the prototype's order.
+//
+// The shapes these tables fill (`Item`, `Port`, `Stop`, `Region`, `Weather`, `Ailment`) are in
+// Model.swift and shared by every journey. `GameData` is 1849 only: shared code asks the
+// `Journey` instead, and the properties here on `Role`, `Pace` and `Rations` are 1849's
+// numbers under their old names.
 
 // MARK: - Roles
 
-public enum Role: String, Codable, CaseIterable {
-    case merchant, shipwright, whaler
-
-    public var label: String {
+public extension Role {
+    var label: String {
         switch self {
         case .merchant: return "Be a merchant from Boston"
         case .shipwright: return "Be a shipwright from Mystic"
@@ -21,9 +24,9 @@ public enum Role: String, Codable, CaseIterable {
     }
 
     /// As in "Bonus for being a merchant".
-    public var title: String { rawValue }
+    var title: String { rawValue }
 
-    public var startingMoney: Double {
+    var startingMoney: Double {
         switch self {
         case .merchant: return 1500
         case .shipwright: return 850
@@ -31,48 +34,17 @@ public enum Role: String, Codable, CaseIterable {
         }
     }
 
-    public var scoreMultiplier: Int {
-        switch self {
-        case .merchant: return 1
-        case .shipwright: return 2
-        case .whaler: return 3
-        }
-    }
-
     /// Percentage points one bolt of sailcloth restores at sea.
-    public var sailMend: Double { self == .shipwright ? 40 : 25 }
+    var sailMend: Double { self == .shipwright ? 40 : 25 }
     /// Percentage points one bundle of timber restores at sea.
-    public var hullPatch: Double { self == .shipwright ? 35 : 20 }
+    var hullPatch: Double { self == .shipwright ? 35 : 20 }
     /// Pounds of fish the cook can salt from one outing.
-    public var catchLimit: Int { self == .whaler ? 300 : 200 }
+    var catchLimit: Int { self == .whaler ? 300 : 200 }
     /// Extra hit radius, in fishing-canvas pixels, around each fish.
-    public var harpoonPadding: Double { self == .whaler ? 4 : 1.5 }
+    var harpoonPadding: Double { self == .whaler ? 4 : 1.5 }
 }
 
 // MARK: - Items
-
-public enum ItemKey: String, Codable, CaseIterable {
-    case food, water, limes, meds, clothes, sailcloth, timber, tackle
-}
-
-public struct Item {
-    public let key: ItemKey
-    public let name: String
-    public let unit: String
-    public let one: String
-    /// Units added per tap of + in the shop.
-    public let step: Int
-    /// Stored units per bought unit: a box of tackle is 20 throws.
-    public let per: Int
-    /// New York price per bought unit.
-    public let price: Double
-    /// Most bought units the ship can hold.
-    public let max: Int
-    public let desc: String
-
-    /// Most STORED units the ship can hold (the prototype's `cap`).
-    public var cap: Double { Double(max * per) }
-}
 
 public enum GameData {
     public static let items: [Item] = [
@@ -112,6 +84,7 @@ public enum GameData {
             case .sailcloth: return 14
             case .timber: return 11
             case .tackle: return 0.15
+            case .fuel: return 0
             }
         }
     }
@@ -148,20 +121,11 @@ public enum PortID: String, Codable, CaseIterable {
     case ny, cv, rio, falk, valp, callao
 }
 
-public struct Port {
-    public let id: PortID
-    public let name: String
-    public let shop: String
-    public let mult: Double
-    public let mods: [ItemKey: Double]
-    public let fever: Bool
-    /// Arrival paragraph. New York has none: nobody arrives there.
-    public let arrive: String
-    public let talk: [String]
-
-    /// The prototype's `itemPrice`: `base × mult × mod`.
-    public func price(_ key: ItemKey) -> Double {
-        GameData.item(key).price * mult * (mods[key] ?? 1)
+public extension Port {
+    init(id: PortID, name: String, shop: String, mult: Double, mods: [ItemKey: Double], fever: Bool,
+         arrive: String, talk: [String]) {
+        self.init(id: id.rawValue, journey: Horn1849.id, name: name, shop: shop, mult: mult, mods: mods,
+                  fever: fever, arrive: arrive, talk: talk)
     }
 }
 
@@ -220,20 +184,8 @@ public extension GameData {
 
 // MARK: - Stops
 
-public enum StopType: String, Codable {
-    case port, mark, line, fork, island, end
-}
-
-public struct Stop: Equatable {
-    public let id: String
-    /// As in "You have reached ___."
-    public let name: String
-    /// For the status panel and the chart legend.
-    public let short: String
-    public let type: StopType
-    public let mile: Int
-
-    public var portID: PortID? { type == .port ? PortID(rawValue: id) : nil }
+public extension Stop {
+    var portID: PortID? { type == .port ? PortID(rawValue: id) : nil }
 }
 
 public extension GameData {
@@ -259,90 +211,54 @@ public extension GameData {
 
 // MARK: - Weather
 
-public enum Weather: String, Codable, CaseIterable {
-    case fair, fresh, light, calm, hot, rain, fog, cold, gale, storm
+public extension Weather {
+    static let fair = Weather("fair", name: "Fair winds", speed: 1, wear: 0.25, sky: .clear)
+    static let fresh = Weather("fresh", name: "Fresh breeze", speed: 1.18, wear: 0.4, sky: .breeze)
+    static let light = Weather("light", name: "Light airs", speed: 0.5, wear: 0.1, sky: .still)
+    static let calm = Weather("calm", name: "Becalmed", speed: 0.06, wear: 0.03, sky: .still,
+                              note: "Not a breath of wind. The sails hang slack.")
+    static let hot = Weather("hot", name: "Hot & still", speed: 0.35, wear: 0.05, sky: .heat)
+    static let rain = Weather("rain", name: "Rain squalls", speed: 0.9, wear: 0.3, wet: true, sky: .rain)
+    static let fog = Weather("fog", name: "Thick fog", speed: 0.6, wear: 0.15, sky: .fog)
+    static let cold = Weather("cold", name: "Sleet & snow", speed: 0.8, wear: 0.6, sky: .snow)
+    /// `harsh` is health lost per sailing day; zero for most weather.
+    static let gale = Weather("gale", name: "Gale", speed: 0.75, wear: 1.2, harsh: 0.6, rough: true, sky: .gale)
+    static let storm = Weather("storm", name: "STORM", speed: 0.35, wear: 2.5, harsh: 1.5, rough: true, wet: true,
+                               sky: .storm)
 
-    public var name: String {
-        switch self {
-        case .fair: return "Fair winds"
-        case .fresh: return "Fresh breeze"
-        case .light: return "Light airs"
-        case .calm: return "Becalmed"
-        case .hot: return "Hot & still"
-        case .rain: return "Rain squalls"
-        case .fog: return "Thick fog"
-        case .cold: return "Sleet & snow"
-        case .gale: return "Gale"
-        case .storm: return "STORM"
-        }
-    }
-
-    public var speed: Double {
-        switch self {
-        case .fair: return 1
-        case .fresh: return 1.18
-        case .light: return 0.5
-        case .calm: return 0.06
-        case .hot: return 0.35
-        case .rain: return 0.9
-        case .fog: return 0.6
-        case .cold: return 0.8
-        case .gale: return 0.75
-        case .storm: return 0.35
-        }
-    }
-
-    public var wear: Double {
-        switch self {
-        case .fair: return 0.25
-        case .fresh: return 0.4
-        case .light: return 0.1
-        case .calm: return 0.03
-        case .hot: return 0.05
-        case .rain: return 0.3
-        case .fog: return 0.15
-        case .cold: return 0.6
-        case .gale: return 1.2
-        case .storm: return 2.5
-        }
-    }
-
-    /// Health lost per sailing day. Zero for most weather.
-    public var harsh: Double {
-        switch self {
-        case .gale: return 0.6
-        case .storm: return 1.5
-        default: return 0
-        }
-    }
-
-    public var isRough: Bool { self == .gale || self == .storm }
+    /// 1849's ten, in the prototype's `WEATHER` order.
+    static let allCases: [Weather] = [.fair, .fresh, .light, .calm, .hot, .rain, .fog, .cold, .gale, .storm]
 }
 
 // MARK: - Regions
 
-public enum Temp: String, Codable {
-    case cool, warm, hot, cold, freezing
+public extension RegionID {
+    static let northAtlantic: RegionID = "northAtlantic"
+    static let northeastTrades: RegionID = "northeastTrades"
+    static let doldrums: RegionID = "doldrums"
+    static let southeastTrades: RegionID = "southeastTrades"
+    static let roaringForties: RegionID = "roaringForties"
+    static let capeHorn: RegionID = "capeHorn"
+    static let humboldt: RegionID = "humboldt"
+    static let tropicalPacific: RegionID = "tropicalPacific"
+    static let northPacific: RegionID = "northPacific"
+    static let magellan: RegionID = "magellan"
 }
 
-public enum RegionID: String, Codable {
-    case northAtlantic, northeastTrades, doldrums, southeastTrades, roaringForties, capeHorn,
-         humboldt, tropicalPacific, northPacific, magellan
-}
+public extension Region {
+    init(id: RegionID, to: Int, name: String, temp: Temp, south: Bool, horn: Bool, strait: Bool,
+         weights: [(Weather, Double)]) {
+        var tags: Set<String> = []
+        if south { tags.insert("south") }
+        if horn { tags.insert("horn") }
+        if strait { tags.insert("strait") }
+        self.init(id: id, to: to, name: name, temp: temp, tags: tags, weights: weights)
+    }
 
-public struct Region: Equatable {
-    public let id: RegionID
-    /// Exclusive upper mile.
-    public let to: Int
-    public let name: String
-    public let temp: Temp
-    public let south: Bool
-    public let horn: Bool
-    public let strait: Bool
-    /// In the prototype's key order.
-    public let weights: [(Weather, Double)]
-
-    public static func == (a: Region, b: Region) -> Bool { a.id == b.id }
+    /// Below the Forties: winter here runs May to September.
+    var south: Bool { has("south") }
+    var horn: Bool { has("horn") }
+    var strait: Bool { has("strait") }
 }
 
 public extension GameData {
@@ -375,10 +291,9 @@ public extension GameData {
 
 // MARK: - Pace & rations
 
-public enum Pace: String, Codable, CaseIterable {
-    case easy, steady, full
+public extension Pace {
 
-    public var name: String {
+    var name: String {
         switch self {
         case .easy: return "Easy sail"
         case .steady: return "Steady"
@@ -387,7 +302,7 @@ public enum Pace: String, Codable, CaseIterable {
     }
 
     /// Base nautical miles a day.
-    public var speed: Double {
+    var speed: Double {
         switch self {
         case .easy: return 100
         case .steady: return 135
@@ -395,7 +310,7 @@ public enum Pace: String, Codable, CaseIterable {
         }
     }
 
-    public var hp: Double {
+    var hp: Double {
         switch self {
         case .easy: return 0.5
         case .steady: return 0
@@ -403,7 +318,7 @@ public enum Pace: String, Codable, CaseIterable {
         }
     }
 
-    public var wear: Double {
+    var wear: Double {
         switch self {
         case .easy: return 0.6
         case .steady: return 1
@@ -411,7 +326,7 @@ public enum Pace: String, Codable, CaseIterable {
         }
     }
 
-    public var desc: String {
+    var desc: String {
         switch self {
         case .easy: return "Reefed sails. Gentle on ship and crew."
         case .steady: return "A sensible spread of canvas."
@@ -420,10 +335,9 @@ public enum Pace: String, Codable, CaseIterable {
     }
 }
 
-public enum Rations: String, Codable, CaseIterable {
-    case filling, meager, bare
+public extension Rations {
 
-    public var name: String {
+    var name: String {
         switch self {
         case .filling: return "Filling"
         case .meager: return "Meager"
@@ -432,7 +346,7 @@ public enum Rations: String, Codable, CaseIterable {
     }
 
     /// Pounds per person per day.
-    public var lb: Double {
+    var lb: Double {
         switch self {
         case .filling: return 3
         case .meager: return 2
@@ -440,7 +354,7 @@ public enum Rations: String, Codable, CaseIterable {
         }
     }
 
-    public var hp: Double {
+    var hp: Double {
         switch self {
         case .filling: return 1
         case .meager: return -0.3
@@ -448,7 +362,7 @@ public enum Rations: String, Codable, CaseIterable {
         }
     }
 
-    public var desc: String {
+    var desc: String {
         switch self {
         case .filling: return "3 lbs a day. Full meals."
         case .meager: return "2 lbs a day. Small meals."
@@ -459,68 +373,21 @@ public enum Rations: String, Codable, CaseIterable {
 
 // MARK: - Ailments
 
-public enum Ailment: String, Codable, CaseIterable {
-    case scurvy = "scurvy"
-    case shipFever = "ship fever"
-    case dysentery = "dysentery"
-    case yellowFever = "yellow fever"
-    case fever = "a fever"
-    case pneumonia = "pneumonia"
-    case frostbite = "frostbite"
-    case brokenArm = "a broken arm"
-    case exhaustion = "exhaustion"
-
-    /// As in "NAME has ___."
-    public var name: String { rawValue }
-
-    /// Health lost per day, halved when treated.
-    public var damage: Double {
-        switch self {
-        case .scurvy: return 2.2
-        case .shipFever: return 4.5
-        case .dysentery: return 4.5
-        case .yellowFever: return 6.5
-        case .fever: return 3
-        case .pneumonia: return 4.5
-        case .frostbite: return 2.5
-        case .brokenArm: return 1.2
-        case .exhaustion: return 1.5
-        }
-    }
-
-    /// Days it lasts, both ends included. Scurvy lasts until cured.
-    public var duration: ClosedRange<Int> {
-        switch self {
-        case .scurvy: return 999...999
-        case .shipFever: return 6...11
-        case .dysentery: return 5...9
-        case .yellowFever: return 5...8
-        case .fever: return 4...7
-        case .pneumonia: return 6...10
-        case .frostbite: return 5...9
-        case .brokenArm: return 14...24
-        case .exhaustion: return 3...5
-        }
-    }
-
-    /// As in "has died of ___". A broken arm doesn't kill; the wound does.
-    public var deathName: String {
-        self == .brokenArm ? "an infected wound" : rawValue
-    }
+public extension Ailment {
+    /// Scurvy lasts until cured.
+    static let scurvy = Ailment("scurvy", damage: 2.2, days: 999...999)
+    static let shipFever = Ailment("ship fever", damage: 4.5, days: 6...11)
+    static let dysentery = Ailment("dysentery", damage: 4.5, days: 5...9)
+    static let yellowFever = Ailment("yellow fever", damage: 6.5, days: 5...8)
+    static let fever = Ailment("a fever", damage: 3, days: 4...7)
+    static let pneumonia = Ailment("pneumonia", damage: 4.5, days: 6...10)
+    static let frostbite = Ailment("frostbite", damage: 2.5, days: 5...9)
+    /// A broken arm doesn't kill; the wound does.
+    static let brokenArm = Ailment("a broken arm", damage: 1.2, days: 14...24, death: "an infected wound")
+    static let exhaustion = Ailment("exhaustion", damage: 1.5, days: 3...5)
 }
 
 // MARK: - Fishing (spec §9)
-
-public struct Fish {
-    public let name: String
-    public let lb: Int
-    public let width: Double
-    public let height: Double
-    /// Pixels per second, both ends included.
-    public let speed: ClosedRange<Double>
-    public let weight: Double
-    public let color: String
-}
 
 public extension GameData {
     /// The prototype's `FISH`, in its order.

@@ -9,10 +9,12 @@ final class PurityTests: XCTestCase {
             .deletingLastPathComponent()
             .deletingLastPathComponent()
             .appendingPathComponent("HornEngine")
-        let files = try FileManager.default
-            .contentsOfDirectory(at: engineDir, includingPropertiesForKeys: nil)
-            .filter { $0.pathExtension == "swift" }
+        // Every folder: each journey keeps its sources under HornEngine/Journeys/<Id>.
+        let all = FileManager.default.enumerator(at: engineDir, includingPropertiesForKeys: nil)?
+            .compactMap { $0 as? URL } ?? []
+        let files = all.filter { $0.pathExtension == "swift" }
         XCTAssertFalse(files.isEmpty, "found no engine sources at \(engineDir.path)")
+        XCTAssertTrue(files.contains { $0.path.contains("/Journeys/") }, "the journeys' sources were not searched")
 
         let banned = ["SwiftUI", "UIKit", "AVFoundation", "CoreHaptics", "Combine"]
         for file in files {

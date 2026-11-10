@@ -41,24 +41,35 @@ public struct WarningFlags: Codable, Equatable {
     public var limes = false
     public var hull = false
     public var sails = false
+    public var fuel = false
+    public var lowFuel = false
 }
 
 public enum Passage: String, Codable {
     case horn, magellan
 }
 
-/// Everything needed to resume a voyage (spec §2). Encoded as JSON for the save.
+/// Everything needed to resume a journey (spec §2). Encoded as JSON for the save.
+///
+/// Some fields are named for the 1849 voyage and mean their role on every journey:
+/// `ship` is the vessel's name, `sails` what drives it and `hull` what holds it together,
+/// `limes` whatever wards off the journey's slow sickness (`noCitrus` counts turns
+/// without), `sailcloth` and `timber` what mends each. Model.swift lists the stock roles.
 public struct GameState: Codable, Equatable {
-    public static let currentSaveVersion = 1
+    /// 2: the save names its journey and stores weather and ailments whole.
+    public static let currentSaveVersion = 2
 
     public var saveVersion = GameState.currentSaveVersion
+    /// The id of the journey this is (`Journeys.journey`).
+    public var journey: String
     public var role: Role
     public var crew: [CrewMember]
     public var ship: String
     public var startYear: Int
     /// 0-based, matching the prototype.
     public var startMonth: Int
-    /// Days elapsed since the 1st of the start month.
+    /// Turns elapsed since the start. A turn is a day unless the journey's
+    /// `Rules.tickHours` says otherwise.
     public var day = 0
     public var mile = 0
 
@@ -73,13 +84,16 @@ public struct GameState: Codable, Equatable {
     public var timber = 0
     /// In THROWS, not boxes: one box is 20.
     public var tackle = 0
+    /// What an engine burns, on journeys that have one.
+    public var fuel: Double = 0
 
     public var hull: Double = 100
     public var sails: Double = 100
     public var pace: Pace = .steady
     public var rations: Rations = .filling
-    public var weather: Weather = .fair
+    public var weather: Weather
     public var stopIndex = 0
+    /// 1849: which way round the bottom of the world.
     public var passage: Passage?
     public var pilot = false
     public var noCitrus = 0
@@ -89,7 +103,7 @@ public struct GameState: Codable, Equatable {
     public var forceFair = 0
     public var graves: [Grave] = []
     public var flags = WarningFlags()
-    public var tradesLeft = 3
+    public var tradesLeft: Int
     public var talkIndex = 0
     public var atPort = true
     public var over = false
@@ -99,16 +113,23 @@ public struct GameState: Codable, Equatable {
     public var stowawaySeen = false
     public var starving = false
     public var thirst = false
+    /// A journey's own numbers and switches, by name. Looked up, never looped over.
+    public var vars: [String: Double] = [:]
 
-    /// A fresh voyage at New York, before the shop. `crew` is the four hands; the captain
-    /// is added as crew[0].
-    public init(role: Role, ship: String, captain: String, crew: [String], startYear: Int, startMonth: Int) {
+    /// A fresh journey at its first port, before the shop. `crew` is the four hands; the
+    /// captain is added as crew[0].
+    public init(journey: String = Horn1849.id, role: Role, ship: String, captain: String, crew: [String],
+                startYear: Int, startMonth: Int) {
+        let j = Journeys.journey(journey)
+        self.journey = j.id
         self.role = role
         self.ship = ship
         self.crew = [CrewMember(name: captain, isCaptain: true)] + crew.map { CrewMember(name: $0) }
         self.startYear = startYear
         self.startMonth = startMonth
-        money = role.startingMoney
+        money = j.role(role).money
+        weather = j.fairWeather
+        tradesLeft = j.rules.portTrades
     }
 
     // MARK: Derived
@@ -122,15 +143,16 @@ public struct GameState: Codable, Equatable {
 
     public var healthLabel: HealthLabel { HealthLabel(averageHP: averageHP) }
 
-    public var currentStop: Stop { GameData.stops[stopIndex] }
-    public var nextStop: Stop? { stopIndex + 1 < GameData.stops.count ? GameData.stops[stopIndex + 1] : nil }
+    public var currentStop: Stop { Journeys.journey(journey).stops[stopIndex] }
+    public var nextStop: Stop? {
+        let stops = Journeys.journey(journey).stops
+        return stopIndex + 1 < stops.count ? stops[stopIndex + 1] : nil
+    }
 
+    /// 1849: in the Strait of Magellan.
     public var inStrait: Bool { passage == .magellan && mile >= 7350 && mile < 7800 }
 
-    public func region(at m: Int) -> Region {
-        if passage == .magellan && m >= 7350 && m < 7800 { return GameData.magellan }
-        return GameData.regions.first { m < $0.to }!
-    }
+    public func region(at m: Int) -> Region { Journeys.journey(journey).region(self, at: m) }
 
     public var region: Region { region(at: mile) }
 
@@ -147,6 +169,7 @@ public struct GameState: Codable, Equatable {
             case .sailcloth: return Double(sailcloth)
             case .timber: return Double(timber)
             case .tackle: return Double(tackle)
+            case .fuel: return fuel
             }
         }
         set {
@@ -159,6 +182,7 @@ public struct GameState: Codable, Equatable {
             case .sailcloth: sailcloth = Int(newValue)
             case .timber: timber = Int(newValue)
             case .tackle: tackle = Int(newValue)
+            case .fuel: fuel = newValue
             }
         }
     }
@@ -180,7 +204,7 @@ public struct GameState: Codable, Equatable {
 
     /// The prototype's `add`: change a stock, clamped to 0…capacity.
     public mutating func add(_ item: ItemKey, _ amount: Double) {
-        self[item] = max(0, min(GameData.item(item).cap, self[item] + amount))
+        self[item] = max(0, min(Journeys.journey(journey).item(item).cap, self[item] + amount))
     }
 
     // MARK: Calendar
@@ -191,34 +215,45 @@ public struct GameState: Codable, Equatable {
         return c
     }()
 
-    public var date: (year: Int, month: Int, day: Int) {
+    /// Where the calendar stands now, to the hour.
+    private var moment: DateComponents {
         let c = Self.calendar
-        let start = c.date(from: DateComponents(year: startYear, month: startMonth + 1, day: 1))!
-        let d = c.date(byAdding: .day, value: day, to: start)!
-        let parts = c.dateComponents([.year, .month, .day], from: d)
+        let r = Journeys.journey(journey).rules
+        let start = c.date(from: DateComponents(year: startYear, month: startMonth + 1, day: r.startDay))!
+        let d: Date
+        if r.tickHours == 24 && r.startHour == 0 {
+            d = c.date(byAdding: .day, value: day, to: start)!
+        } else {
+            d = c.date(byAdding: .hour, value: r.startHour + day * r.tickHours, to: start)!
+        }
+        return c.dateComponents([.year, .month, .day, .hour], from: d)
+    }
+
+    public var date: (year: Int, month: Int, day: Int) {
+        let parts = moment
         return (parts.year!, parts.month! - 1, parts.day!)
     }
 
     /// 0-based month of the current date.
     public var month: Int { date.month }
 
-    /// "March 4, 1849"
+    /// Hour of the day, 0–23. Always 0 on a journey whose turns are whole days.
+    public var hour: Int { moment.hour! }
+
+    /// "March 4, 1849"; with the hour ("March 4, 1849, 6 p.m.") on a journey whose turns
+    /// are shorter than a day.
     public var dateText: String {
-        let d = date
-        return "\(GameData.months[d.month]) \(d.day), \(d.year)"
+        let parts = moment
+        let text = "\(monthNames[parts.month! - 1]) \(parts.day!), \(parts.year!)"
+        if Journeys.journey(journey).rules.tickHours >= 24 { return text }
+        let h = parts.hour!
+        return "\(text), \(h % 12 == 0 ? 12 : h % 12) \(h < 12 ? "a.m." : "p.m.")"
     }
 
-    /// May–September: winter at the bottom of the world.
+    /// 1849. May–September: winter at the bottom of the world.
     public var southernWinter: Bool { (4...8).contains(month) }
 
-    /// The prototype's `tempAt`.
-    public func temperature(in reg: Region) -> Temp {
-        var t = reg.temp
-        let mo = month
-        if reg.id == .northAtlantic && [10, 11, 0, 1, 2].contains(mo) { t = .cold }
-        if reg.south && (4...8).contains(mo) && t == .cold { t = .freezing }
-        return t
-    }
+    public func temperature(in reg: Region) -> Temp { Journeys.journey(journey).temperature(self, in: reg) }
 }
 
 public enum HealthLabel: String, Codable {
