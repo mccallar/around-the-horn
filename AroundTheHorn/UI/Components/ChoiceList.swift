@@ -1,7 +1,6 @@
 import SwiftUI
 
-struct Choice: Identifiable {
-    let id = UUID()
+struct Choice {
     /// Markup.
     let label: String
     /// A second, dim, smaller line (pace and rations screens).
@@ -20,7 +19,10 @@ struct ChoiceList: View {
 
     var body: some View {
         VStack(spacing: 8) {
-            ForEach(Array(choices.enumerated()), id: \.element.id) { i, c in
+            // Keyed by POSITION, not by `Choice.id`: a screen that redraws (travel every
+            // 0.7 s, fishing every frame) builds new Choices each time, and a new identity
+            // mid-press throws the press away, so the tap never lands.
+            ForEach(Array(choices.enumerated()), id: \.offset) { i, c in
                 Button {
                     Feedback.tap()
                     c.action()

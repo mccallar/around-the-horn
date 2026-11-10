@@ -156,3 +156,23 @@ extension ScreenshotUITests {
         shot("36-pilot")
     }
 }
+
+extension ScreenshotUITests {
+    func testChartAndFishing() {
+        relaunch(["-HornDebugStart", "callao", "-HornTickSeconds", "30"])
+        tap("Look at the chart")
+        shot("40-chart")
+        tap("Back")
+        tap("Go fishing")
+        let water = app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH 'The sea below'")).firstMatch
+        XCTAssertTrue(water.waitForExistence(timeout: 5))
+        for dy in [0.4, 0.6, 0.8] {
+            water.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: dy)).tap()
+            usleep(300_000)
+        }
+        shot("41-fishing")
+        tap("Back to the ship")
+        XCTAssertTrue(app.buttons["Continue"].waitForExistence(timeout: 5), "Back to the ship didn't land")
+        shot("42-catch")
+    }
+}

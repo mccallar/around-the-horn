@@ -350,16 +350,3 @@ struct FinaleView: View {
         }
     }
 }
-
-struct NotYetView: View {
-    @Environment(GameController.self) private var c
-    let what: String
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Heading(what)
-            Para("Coming in a later milestone.", color: Theme.dim)
-            ChoiceList(choices: [Choice(label: "Back") { c.backToMenu() }])
-        }
-    }
-}
