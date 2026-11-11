@@ -105,3 +105,21 @@ Most whaler losses are thirst: the bot's water rule has no margin for the Doldru
 draft of the bot that spent one extra random draw before sailing. The committed bot
 gives 17/30, on the simulator and on the Mac alike — the engine is deterministic across
 both.)
+
+## D9 — One engine, many journeys (2026-11-10)
+
+Ryan asked for variations on the game (rails, airships, balloons, another planet), planned
+and built without his input. The engine was split into shared rules and a `Journey` that
+supplies tables, numbers, text and hooks (docs/design/journeys-architecture.md); 1849
+became the first journey.
+
+- **1849 is unchanged, and three gates prove it**: the prototype parity fixture (D7), the
+  balance simulation (D8), and `GoldenVoyageTests`, 300 seeded voyages hashed day by day,
+  recorded BEFORE the split and never re-recorded.
+- The one change to `SensibleBot` is the name of the call that leaves port.
+- The save is version 2: it names its journey and stores weather and ailments whole. A
+  version-1 save (only ever on Ryan's own devices) is dropped, as any unreadable save is.
+- Saves and top tens are per journey; the files from before are read as 1849's.
+- New journeys' balance is set by their own bots and bands
+  (`HornEngineTests/<Name>Tests.swift`); none of it touches a 1849 number.
+- 1849's reference screenshots are in `docs/reference/shots-1849/`.
