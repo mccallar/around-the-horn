@@ -21,6 +21,16 @@ make one.
   and run `xcodegen generate`. Declaring a scheme in `project.yml` turns off
   auto-generation, so every scheme must be listed there.
 
+## Skins
+
+The app's shell is shared by every journey. Anything that belongs to one journey (a word,
+a number, a colour table, a drawing) lives in its skin under `AroundTheHorn/Journeys/`
+and is reached through `c.skin` (`Skins.skin(journey.id)`); anything the rules know comes
+from `c.journey`. Never put a ship, a captain, a sea, a day or a mile into a shared view:
+add a member to `JourneySkin` (no defaults, so every skin must answer) and let
+`SkinContractTests` hold it. Saves and top tens are per journey (`save-<id>.json`,
+`topten-<id>.json`). See `docs/design/journeys-architecture.md` §2 "As built".
+
 ## Building and testing
 
 - **Engine work: `swift test --disable-sandbox --scratch-path $TMPDIR/<unique>`** builds

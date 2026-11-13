@@ -142,6 +142,65 @@ Also shared and journey-aware:
 **1849 must look and read exactly as it did.** The reference is the 38 screenshots taken
 before this work (`docs/reference/shots-1849/`).
 
+### As built
+
+The skin is one value, `JourneySkin` (`AroundTheHorn/Journeys/JourneySkin.swift`), found
+by `Skins.skin(journey.id)`; the controller hands views `c.journey` and `c.skin`.
+
+```swift
+struct JourneySkin {
+    let id: String                    // Journey.id
+    let card: TitleCard               // banner, title, tagline, learn pages, setup copy
+    let words: (GameState) -> Words   // menus, status and supplies names, meters, endings
+    let scene: SceneSkin              // draw(PixelCanvas, SceneFrame), label(SceneFrame)
+    let chart: ChartSkin              // size, background, route(state), others, project, overlay
+    let forage: ForageSkin            // ForageField + copy + backdrop, quarry and thrown draws
+    let debug: DebugSkin              // start(stop, month), extra gallery cells
+}
+```
+
+- No member has a default, so a skin that leaves something out does not compile.
+  `Words` is worked out from the state in hand, so a name can change along the way.
+- `ForageField` says how the mini-game lies: canvas size, where a throw starts, `upward`
+  (thrower at the bottom), the line taps must be beyond, the lanes the quarry crosses and
+  its speed. `FishingModel` takes the field; nothing in it knows which way is up.
+- `ChartSkin.route` gives points in the skin's own map space with a mile at each;
+  `project` turns map space into canvas pixels. The shell draws the dots, the stops, the
+  marker and the legend.
+- Units the engine doesn't hold are in `Words`: `distanceUnit` and `distance`, `currency`,
+  `looseUnits` (a box of tackle is 20 throws) and `fractional` (items counted in tenths).
+  The rest menu is `rules.restChoices` through `words.restChoice`, so a turn need not be
+  a day.
+- 1849's skin is four files and a line: `Horn1849Skin` (copy and words), `Horn1849Scene`,
+  `Horn1849Chart`, `Horn1849Forage`, and its entry in `Skins.all`. They are the old view
+  code moved, not rewritten.
+
+**A new skin must supply** every member above for its `Journey.id`, add itself to
+`Skins.all`, and pass `SkinContractTests` unchanged: nothing a player reads is blank for a
+fresh voyage or at any stop, for any role; the scene leaves marks for every weather,
+moving and stopped, at every stop; the chart and the mini-game draw; `debug.start` gives a
+playable state short of every stop. Files are `save-<id>.json` and `topten-<id>.json`
+(`JourneyFilesTests`); only 1849 reads the two old unnamed files.
+
+**Screenshots.** `ScreenshotUITests` does nothing unless told where to write:
+
+```sh
+SIMCTL_CHILD_HORN_SHOTS="$TMPDIR/shots-<id>" sh Tools/run_tests.sh AroundTheHornUITests ScreenshotUITests
+```
+
+Its walk taps 1849's own buttons, so a new journey wants its own walk beside it (same
+helper, its own labels). The launch arguments that get it anywhere quickly are
+`-journey <id>` (straight to that title card), `-HornDebugStart <stop id>` with
+`-HornDebugMonth <n>` (the skin's `debug.start`), and `-HornSceneGallery YES` (every
+weather and the skin's extra cells on one screen). The walk is not seeded: crew names,
+weather and wear differ from run to run, so compare two runs by eye or by the regions
+that cannot move, not by whole-image equality.
+
+**What the shell still assumes** (the engine would have to say otherwise): a leader and
+four others; two meters, stored as `hull` and `sails`; money written as a sign before a
+number; the mini-game spends `tackle`; a journey has water exactly when its items include
+`.water`.
+
 ## 3. Adding a journey
 
 1. Spec in `docs/journeys/<id>.md` (the brief's 20-section template, or compact).
