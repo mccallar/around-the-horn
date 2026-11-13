@@ -1,8 +1,9 @@
 import SwiftUI
 import HornEngine
 
-/// The fishing mini-game's simulation (spec §9), stepped by the view with dt ≤ 0.05 s.
-/// Logical canvas 160×200; the boat is at the top centre and harpoons fly from (80, 28).
+/// The mini-game's simulation (spec §9), stepped by the view with dt ≤ 0.05 s. The field
+/// (its size, where a throw starts and which way it goes) is the skin's; the quarry and
+/// how long there is are the journey's. In 1849 that is fish under a boat.
 @MainActor @Observable
 final class FishingModel {
     struct Swimmer: Identifiable {
@@ -29,42 +30,53 @@ final class FishingModel {
     private(set) var harpoon: Harpoon?
     private(set) var pops: [Pop] = []
     private(set) var caught = 0
-    private(set) var time = GameData.fishingSeconds
+    private(set) var time: Double
     private(set) var ended = false
     private var spawnTimer = 0.0
 
+    let field: ForageField
+    let quarry: [Fish]
     let padding: Double
+    private let pop: (Fish) -> String
     private let random: () -> Double
     /// Spends one throw; false when there's no tackle left.
     private let useTackle: () -> Bool
     private let tackleLeft: () -> Int
     var onCatch: (Fish) -> Void = { _ in }
 
-    init(padding: Double, random: @escaping () -> Double = { Double.random(in: 0..<1) },
+    init(field: ForageField, quarry: [Fish], seconds: Double, padding: Double,
+         pop: @escaping (Fish) -> String = { "+\($0.lb)" },
+         random: @escaping () -> Double = { Double.random(in: 0..<1) },
          useTackle: @escaping () -> Bool, tackleLeft: @escaping () -> Int)
     {
+        self.field = field
+        self.quarry = quarry
+        time = seconds
         self.padding = padding
+        self.pop = pop
         self.random = random
         self.useTackle = useTackle
         self.tackleLeft = tackleLeft
+        guard !quarry.isEmpty else { return }
         for i in 0..<4 {
             spawn()
-            fish[i].x = rnd(20, 140)
+            fish[i].x = rnd(20, field.w - 20)
         }
     }
 
     private func rnd(_ a: Double, _ b: Double) -> Double { a + random() * (b - a) }
 
     private func spawn() {
-        let total = GameData.fish.reduce(0) { $0 + $1.weight }
+        guard var kind = quarry.first else { return }
+        let total = quarry.reduce(0) { $0 + $1.weight }
         var r = random() * total
-        var kind = GameData.fish[0]
-        for f in GameData.fish {
+        for f in quarry {
             r -= f.weight
             if r <= 0 { kind = f; break }
         }
         let dir: Double = random() < 0.5 ? 1 : -1
-        var s = Swimmer(kind: kind, x: dir > 0 ? -kind.width : 160 + kind.width, y0: rnd(45, 188), y: 0,
+        var s = Swimmer(kind: kind, x: dir > 0 ? -kind.width : field.w + kind.width,
+                        y0: rnd(field.lanes.lowerBound, field.lanes.upperBound), y: 0,
                         vx: dir * rnd(kind.speed.lowerBound, kind.speed.upperBound),
                         t: rnd(0, 6), wf: rnd(1.5, 3), wa: rnd(1, 4))
         // The prototype sets y on the first frame, before anything can be tapped.
@@ -72,12 +84,13 @@ final class FishingModel {
         fish.append(s)
     }
 
-    /// A tap on the water at logical (x, y). One harpoon in flight at a time.
+    /// A tap on the field at logical (x, y). One throw in flight at a time.
     func throwAt(x: Double, y: Double) {
-        guard harpoon == nil, !ended, y >= 30, tackleLeft() > 0, useTackle() else { return }
-        let dx = x - 80, dy = y - 28
+        guard harpoon == nil, !ended, field.inReach(y), tackleLeft() > 0, useTackle() else { return }
+        let o = field.origin
+        let dx = x - o.x, dy = y - o.y
         let l = max(hypot(dx, dy), 1)
-        harpoon = Harpoon(x: 80, y: 28, vx: dx / l * 150, vy: dy / l * 150)
+        harpoon = Harpoon(x: o.x, y: o.y, vx: dx / l * field.speed, vy: dy / l * field.speed)
     }
 
     func step(_ rawDt: Double) {
@@ -94,7 +107,7 @@ final class FishingModel {
             fish[i].t += dt
             fish[i].y = fish[i].y0 + sin(fish[i].t * fish[i].wf) * fish[i].wa
         }
-        fish.removeAll { $0.x <= -40 || $0.x >= 200 }
+        fish.removeAll { $0.x <= -40 || $0.x >= field.w + 40 }
         for i in pops.indices {
             pops[i].t -= dt * 0.8
             pops[i].y -= dt * 12
@@ -109,10 +122,10 @@ final class FishingModel {
             {
                 let f = fish.remove(at: i)
                 caught += f.kind.lb
-                pops.append(Pop(x: f.x, y: f.y, t: 1, text: "+\(f.kind.lb) lb \(f.kind.name)"))
+                pops.append(Pop(x: f.x, y: f.y, t: 1, text: pop(f.kind)))
                 harpoon = nil
                 onCatch(f.kind)
-            } else if h.x < -5 || h.x > 165 || h.y > 205 {
+            } else if h.x < -5 || h.x > field.w + 5 || h.y > field.h + 5 || h.y < -5 {
                 harpoon = nil
             }
         }
@@ -130,49 +143,55 @@ struct FishingView: View {
 
     var body: some View {
         let g = c.game!
+        let journey = c.journey, skin = c.skin.forage
+        let field = skin.field
         VStack(alignment: .leading, spacing: 0) {
-            Heading("Fishing")
+            Heading(skin.heading)
             if let m = model {
                 HStack {
-                    Text("Throws: \(g.tackle)")
+                    Text("\(skin.throwsLabel): \(g.tackle)")
                     Spacer()
-                    Text("Caught: \(m.caught) lbs")
+                    Text("\(skin.caughtLabel): \(m.caught) \(skin.unit)")
                     Spacer()
-                    Text("Time: \(Int(max(0, m.time).rounded(.up)))")
+                    Text("\(skin.timeLabel): \(Int(max(0, m.time).rounded(.up)))")
                 }
                 .bodyFont(18)
                 .accessibilityElement(children: .combine)
                 GeometryReader { geo in
                     Canvas { ctx, size in
-                        Self.draw(PixelCanvas(ctx: ctx, scale: size.width / 160), m, now: now, ctx: ctx, size: size)
+                        Self.draw(PixelCanvas(ctx, size: size, w: field.w, h: field.h), skin, m, now: now)
                     }
                     .contentShape(Rectangle())
                     .gesture(SpatialTapGesture().onEnded { e in
-                        m.throwAt(x: Double(e.location.x / geo.size.width * 160), y: Double(e.location.y / geo.size.height * 200))
+                        m.throwAt(x: Double(e.location.x / geo.size.width) * field.w,
+                                  y: Double(e.location.y / geo.size.height) * field.h)
                     })
                 }
-                .aspectRatio(160 / 200, contentMode: .fit)
+                .aspectRatio(field.w / field.h, contentMode: .fit)
                 .overlay(Rectangle().strokeBorder(Theme.line, lineWidth: 2))
                 .accessibilityElement()
-                .accessibilityLabel("The sea below the boat, with \(m.fish.count) fish swimming")
-                .accessibilityHint("Double-tap to throw a harpoon at the nearest fish")
+                .accessibilityLabel(skin.label(m.fish.count))
+                .accessibilityHint(skin.actionHint)
                 .accessibilityAction { aimAtNearest(m) }
             }
-            Para("Tap the water to throw a harpoon. Each throw uses tackle. You can salt and keep up to \(g.role.catchLimit) lbs.",
-                 size: 18, color: Theme.dim)
-            ChoiceList(choices: [Choice(label: "Back to the ship") { finish() }])
+            Para(skin.hint(journey.role(g.role).catchLimit), size: 18, color: Theme.dim)
+            ChoiceList(choices: [Choice(label: skin.leave) { finish() }])
         }
         .task { await run(g) }
     }
 
-    /// VoiceOver can't aim, so its throw goes at the nearest fish.
+    /// VoiceOver can't aim, so its throw goes at whatever is nearest the thrower.
     private func aimAtNearest(_ m: FishingModel) {
-        guard let f = m.fish.filter({ $0.x > 0 && $0.x < 160 }).min(by: { abs($0.x - 80) < abs($1.x - 80) }) else { return }
-        m.throwAt(x: f.x, y: f.y)
+        let f = m.field
+        guard let q = m.fish.filter({ $0.x > 0 && $0.x < f.w })
+            .min(by: { abs($0.x - f.origin.x) < abs($1.x - f.origin.x) }) else { return }
+        m.throwAt(x: q.x, y: q.y)
     }
 
     private func run(_ g: GameState) async {
-        let m = FishingModel(padding: g.role.harpoonPadding,
+        let journey = c.journey, skin = c.skin.forage
+        let m = FishingModel(field: skin.field, quarry: journey.quarry, seconds: journey.forageSeconds,
+                             padding: journey.role(g.role).aim, pop: skin.pop,
                              useTackle: { [c] in
                                  let ok = c.throwHarpoon()
                                  if ok { Feedback.play(.harpoon) }
@@ -202,59 +221,11 @@ struct FishingView: View {
         c.endFishing(caught: m.caught)
     }
 
-    static func draw(_ px: PixelCanvas, _ m: FishingModel, now: Double, ctx: GraphicsContext, size: CGSize) {
-        let ms = now * 1000
-        px.rect(0, 0, 160, 28, Color(hex: 0x9FD0EE))
-        for i in 0..<10 {
-            px.rect(0, 28 + Double(i * 18), 160, 18, SeaScene.mix(0x1F6B96, 0x061A2B, Double(i) / 9))
-        }
-        for i in 0..<4 {
-            px.rect(SeaScene.mod(Double(i * 45) + ms / 80, 200) - 20, 28, 6, 172, Color.white.opacity(0.06))
-        }
-        for i in stride(from: 0, to: 160, by: 6) {
-            px.rect(Double(i) + jsRounded(sin(ms / 400 + Double(i))), 28, 3, 1, Color(hex: 0xD8ECF7))
-        }
-        px.rect(70, 24, 20, 4, Color(hex: 0x4A2E1A))
-        px.rect(72, 28, 16, 1, Color(hex: 0x4A2E1A))
-        px.rect(79, 18, 2, 6, Color(hex: 0xD64545))
-        px.rect(79, 16, 2, 2, Color(hex: 0xEFD6B0))
-        for f in m.fish { drawFish(px, f) }
-        if let h = m.harpoon {
-            var line = Path()
-            line.move(to: CGPoint(x: 80.5 * px.scale, y: 24.5 * px.scale))
-            line.addLine(to: CGPoint(x: h.x * px.scale, y: h.y * px.scale))
-            ctx.stroke(line, with: .color(Color(red: 236 / 255, green: 228 / 255, blue: 207 / 255).opacity(0.5)),
-                       lineWidth: px.scale)
-            let a = atan2(h.vy, h.vx)
-            for k in 0..<6 {
-                px.rect(jsRounded(h.x - cos(a) * Double(k)), jsRounded(h.y - sin(a) * Double(k)), 1, 1, Theme.ink)
-            }
-            px.rect(jsRounded(h.x), jsRounded(h.y), 2, 2, Theme.amber)
-        }
-        for p in m.pops {
-            ctx.draw(Text(p.text).font(.custom(Theme.bodyFont, fixedSize: 8 * px.scale))
-                .foregroundColor(Theme.amber.opacity(p.t)),
-                     at: CGPoint(x: (p.x - 6) * px.scale, y: p.y * px.scale), anchor: .bottomLeading)
-        }
-    }
-
-    static func drawFish(_ px: PixelCanvas, _ f: FishingModel.Swimmer) {
-        let x = jsRounded(f.x), y = jsRounded(f.y)
-        let right = f.vx > 0
-        let w = f.kind.width, h = f.kind.height
-        let hw = (w / 2).rounded(.towardZero), hh = (h / 2).rounded(.towardZero)
-        let c = Color(hex: UInt32(f.kind.color.dropFirst(), radix: 16)!)
-        px.rect(x - hw, y - hh, w, h, c)
-        px.rect(x - hw + 2, y - hh - 1, w - 4, 1, c)
-        px.rect(x - hw + 2, y + hh + h.truncatingRemainder(dividingBy: 2), w - 4, 1, c)
-        let tx = right ? x - hw - 3 : x + hw
-        px.rect(tx, y - hh - 1, 3, 2, c)
-        px.rect(tx, y + hh, 3, 2, c)
-        px.rect(right ? x - hw - 1 : x + hw, y - 1, 1, 2, c)
-        if f.kind.name == "shark" {
-            px.rect(x - 2, y - hh - 4, 4, 3, c)
-            px.rect(x - 1, y - hh - 5, 2, 1, c)
-        }
-        px.rect(right ? x + hw - 3 : x - hw + 2, y - 1, 1, 1, Color(hex: 0x111111))
+    /// The skin's backdrop, quarry and throw; what floats up from a hit is the shell's.
+    static func draw(_ px: PixelCanvas, _ skin: ForageSkin, _ m: FishingModel, now: Double) {
+        skin.backdrop(px, now)
+        for f in m.fish { skin.quarry(px, f) }
+        if let h = m.harpoon { skin.thrown(px, h) }
+        for p in m.pops { px.text(p.text, x: p.x - 6, y: p.y, size: 8, Theme.amber.opacity(p.t)) }
     }
 }

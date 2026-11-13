@@ -37,6 +37,7 @@ struct RootView: View {
 
     @ViewBuilder private var screen: some View {
         switch c.screen {
+        case .picker: PickerView()
         case .title: TitleView()
         case .learn(let i): LearnView(page: i)
         case .role: RoleView()
@@ -45,7 +46,7 @@ struct RootView: View {
         case .month: MonthView()
         case .outfit: OutfitIntroView()
         case .message(let t, let label, let then): MessageView(text: t, label: label, then: then)
-        case .topTen(let hi, let back): TopTenView(table: c.persistence.topTen(), highlight: hi, back: back)
+        case .topTen(let hi, let back): TopTenView(table: c.persistence.topTen(c.journey), highlight: hi, back: back)
         case .shop(let done): ShopView(done: done)
         case .depart(let t): DepartView(text: t)
         case .travel: TravelView()
@@ -70,10 +71,16 @@ struct RootView: View {
 struct TopBar: View {
     @Environment(GameController.self) private var c
 
+    /// The journey's own banner, or the app's name while a journey is being picked.
+    private var banner: String {
+        if case .picker = c.screen { return AppInfo.displayName.uppercased() }
+        return c.skin.card.banner
+    }
+
     var body: some View {
         @Bindable var c = c
         HStack {
-            Text("AROUND THE HORN · 1849").accessibilityHidden(true)
+            Text(banner).accessibilityHidden(true)
             Spacer()
             Button(c.muted ? "♪ off" : "♪ on") { c.muted.toggle() }
                 .padding(.horizontal, 8)

@@ -1,14 +1,17 @@
 import SwiftUI
 import HornEngine
 
-/// Owns the voyage (spec §2): the engine, which screen is showing, the queue of
-/// interrupts being presented, and the travel loop that sails one day every 0.7 s.
+/// Owns the voyage (spec §2): which journey is on the table, the engine, which screen is
+/// showing, the queue of interrupts being presented, and the travel loop that takes one
+/// turn every 0.7 s.
 ///
 /// The engine is a plain class, so SwiftUI can't see it change. Every engine call goes
 /// through `run`, which copies `engine.state` into the observed `game` afterwards.
 @MainActor @Observable
 final class GameController {
     enum Screen {
+        /// Which journey: only ever shown when there is more than one.
+        case picker
         case title
         case learn(Int)
         case role, roleDifferences, names, month, outfit
@@ -27,7 +30,7 @@ final class GameController {
 
     struct Finale {
         let score: Score
-        let rank: Rank
+        let rank: String
         let place: Int?
     }
 
@@ -35,6 +38,16 @@ final class GameController {
     enum After {
         case travel, seaMenu, portMenu, repairs, shipyard
     }
+
+    /// Every journey on offer, in the order the picker lists them.
+    let journeys: [Journey]
+    /// The journey whose title card, voyage, save and top ten are in hand.
+    private(set) var journeyID: String
+    var journey: Journey { journeys.first { $0.id == journeyID } ?? journeys[0] }
+    /// How that journey looks and reads.
+    var skin: JourneySkin { Skins.skin(journey.id) ?? Skins.all[0] }
+    /// With one journey there is nothing to pick, and no way back from its title card.
+    var hasPicker: Bool { journeys.count > 1 }
 
     private(set) var screen: Screen = .title
     /// Changes on every navigation: views key their scroll position and text fields on it.
@@ -50,7 +63,7 @@ final class GameController {
 
     /// Setup choices before the voyage exists.
     var draftRole: Role = .merchant
-    private(set) var suggestions = NameSuggestions()
+    private(set) var suggestions: NameSuggestions
     private var draftNames: (ship: String, captain: String, crew: [String]) = ("", "", [])
 
     private var engine: GameEngine?
@@ -58,12 +71,20 @@ final class GameController {
     private var after: After = .travel
     private var travelTask: Task<Void, Never>?
     let persistence: Persistence
-    /// Seconds between sailing days.
+    /// Seconds between turns.
     var tickInterval: Duration = .milliseconds(700)
 
-    init(persistence: Persistence = .standard) {
+    /// Opens on the picker when there is more than one journey, unless `journey` (the
+    /// `-journey <id>` launch argument) names one: then, as with a single journey, on
+    /// that journey's title card.
+    init(persistence: Persistence = .standard, journeys: [Journey] = Journeys.all, journey: String? = nil) {
         self.persistence = persistence
+        self.journeys = journeys
+        let asked = journey.flatMap { id in journeys.first { $0.id == id } }
+        journeyID = (asked ?? journeys[0]).id
+        suggestions = NameSuggestions(asked ?? journeys[0])
         muted = persistence.muted
+        if asked == nil && journeys.count > 1 { screen = .picker }
     }
 
     // MARK: - Navigation
@@ -78,7 +99,7 @@ final class GameController {
         show(.message(text, label: label, then: then))
     }
 
-    /// The menu you came from: ashore or at sea. Saves, as every menu does.
+    /// The menu you came from: in port or under way. Saves, as every menu does.
     func backToMenu() {
         guard let g = game else { return show(.title) }
         save()
@@ -92,13 +113,17 @@ final class GameController {
         return r
     }
 
+    /// Asks the engine something without changing anything: what a job costs, whether a
+    /// repair is possible. Safe inside a view's body, where `run` is not.
+    func read<T>(_ f: (GameEngine) -> T) -> T { f(engine!) }
+
     func save() {
         if let g = game, !g.over { persistence.save(g) }
     }
 
     // MARK: - Title and setup
 
-    var savedVoyage: GameState? { persistence.loadSave() }
+    var savedVoyage: GameState? { persistence.loadSave(journeyID) }
 
     func goToTitle() {
         stopTravel()
@@ -108,21 +133,36 @@ final class GameController {
         show(.title)
     }
 
+    /// Back from a title card to the list of journeys.
+    func goToPicker() {
+        guard hasPicker else { return goToTitle() }
+        goToTitle()
+        show(.picker)
+    }
+
+    /// A row of the picker: that journey's title card.
+    func chooseJourney(_ id: String) {
+        guard journeys.contains(where: { $0.id == id }) else { return }
+        journeyID = id
+        goToTitle()
+    }
+
     func startNewGame() {
         Feedback.play(.title)
-        suggestions = NameSuggestions()
+        suggestions = NameSuggestions(journey)
         show(.role)
     }
 
-    /// Starts from a given state on the sea menu (debug starts and tests).
+    /// Starts from a given state on the menu under way (debug starts and tests).
     func loadForDebug(_ s: GameState) {
+        if journeys.contains(where: { $0.id == s.journey }) { journeyID = s.journey }
         engine = GameEngine(state: s)
         game = s
         backToMenu()
     }
 
     func continueSavedVoyage() {
-        guard let s = persistence.loadSave() else { return goToTitle() }
+        guard let s = persistence.loadSave(journeyID) else { return goToTitle() }
         engine = GameEngine(state: s)
         game = s
         backToMenu()
@@ -130,12 +170,12 @@ final class GameController {
 
     func chooseRole(_ r: Role) {
         draftRole = r
-        suggestions = NameSuggestions()
+        suggestions = NameSuggestions(journey)
         show(.names)
     }
 
     func pickNewNames() {
-        suggestions = NameSuggestions()
+        suggestions = NameSuggestions(journey)
         show(.names)
     }
 
@@ -151,25 +191,26 @@ final class GameController {
     }
 
     func chooseDeparture(year: Int, month: Int) {
-        let s = GameState(role: draftRole, ship: draftNames.ship, captain: draftNames.captain,
+        let s = GameState(journey: journeyID, role: draftRole, ship: draftNames.ship, captain: draftNames.captain,
                           crew: draftNames.crew, startYear: year, startMonth: month)
         engine = GameEngine(state: s)
         game = s
         show(.outfit)
     }
 
-    func enterNewYorkShop() {
-        show(.shop(done: { [weak self] in self?.departNewYork() }))
+    /// The shop at the first stop, which leads straight to the departure.
+    func enterFirstShop() {
+        show(.shop(done: { [weak self] in self?.depart() }))
     }
 
-    func departNewYork() {
-        guard let text = run({ $0.departNewYork() }) else {
-            return message(GameEngine.noProvisionsRefusal) { [weak self] in self?.enterNewYorkShop() }
+    func depart() {
+        guard let text = run({ $0.depart() }) else {
+            return message(journey.text.noProvisions) { [weak self] in self?.enterFirstShop() }
         }
         show(.depart(text))
     }
 
-    // MARK: - Travel (spec §2: one day every 0.7 s)
+    // MARK: - Travel (spec §2: one turn every 0.7 s)
 
     func startTravel() {
         run { $0.setSail() }
@@ -237,7 +278,7 @@ final class GameController {
         case .gameOver(let title, let body):
             queue = []
             stopTravel()
-            persistence.deleteSave()
+            persistence.deleteSave(journeyID)
             Feedback.play(.death)
             Feedback.warning()
             show(.gameOver(title: title, body: body))
@@ -273,12 +314,13 @@ final class GameController {
     private func finish() {
         stopTravel()
         let score = run { $0.finish() }
-        persistence.deleteSave()
-        let (table, place) = TopTen.inserting(name: game!.crew[0].name, score: score.total, into: persistence.topTen())
-        if place != nil { persistence.saveTopTen(table) }
+        persistence.deleteSave(journeyID)
+        let (table, place) = TopTen.inserting(name: game!.crew[0].name, score: score.total,
+                                              into: persistence.topTen(journey))
+        if place != nil { persistence.saveTopTen(table, for: journeyID) }
         Feedback.play(.win)
         Feedback.success()
-        show(.finale(Finale(score: score, rank: Rank(score: score.total), place: place)))
+        show(.finale(Finale(score: score, rank: journey.rank(score.total), place: place)))
     }
 
     // MARK: - Menu actions (each takes time, so each may raise interrupts)
@@ -303,13 +345,14 @@ final class GameController {
     }
 }
 
-/// Placeholder names for the names screen: a shuffled draw from the prototype's lists.
+/// Placeholder names for the names screen: a shuffled draw from the journey's lists.
 struct NameSuggestions {
     let ship: String
     let crew: [String]
 
-    init() {
-        ship = GameData.shipNames.randomElement()!
-        crew = Array(GameData.firstNames.shuffled().prefix(5))
+    init(_ journey: Journey) {
+        ship = journey.vesselNames.randomElement() ?? ""
+        let names = journey.firstNames.shuffled()
+        crew = (0..<5).map { names.isEmpty ? "" : names[$0 % names.count] }
     }
 }

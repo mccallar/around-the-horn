@@ -1,8 +1,8 @@
 import SwiftUI
 import HornEngine
 
-/// The chandler (spec §6 "Shop"): a cart per item, capped by what fits aboard, and a
-/// bill that turns red past your cash. Holding + or − repeats.
+/// A port's shop (spec §6 "Shop"): a cart per item the journey stocks, capped by what
+/// fits aboard, and a bill that turns red past your cash. Holding + or − repeats.
 struct ShopView: View {
     @Environment(GameController.self) private var c
     let done: () -> Void
@@ -10,31 +10,33 @@ struct ShopView: View {
 
     var body: some View {
         let g = c.game!
-        let port = GameData.port(g.currentStop.portID ?? .ny)
+        let journey = c.journey, words = c.skin.words(g)
+        let home = journey.stops.first.flatMap { journey.port($0.id) } ?? journey.ports[0]
+        let port = journey.port(g.currentStop.id) ?? home
         let bill = GameEngine.bill(cart, at: port)
         let over = bill > g.money
+        let sign = words.currency
         VStack(alignment: .leading, spacing: 0) {
             Heading(port.shop)
-            if port.id != PortID.ny.rawValue {
-                Para("Prices here are \(Int(jsRounded((port.mult - 1) * 100)))% above New York, more or less.",
-                     size: 18, color: Theme.dim)
+            if port.id != home.id {
+                Para(words.priceNote(Int(jsRounded((port.mult - 1) * 100))), size: 18, color: Theme.dim)
             }
             PanelBox {
                 HStack {
-                    Text("Cash $\(formatNumber(g.money))")
+                    Text("\(words.cash) \(sign)\(formatNumber(g.money))")
                     Spacer()
-                    Text("Bill ") + Text("$\(String(format: "%.2f", bill))").foregroundColor(over ? Theme.red : Theme.amber)
+                    Text("Bill ") + Text("\(sign)\(String(format: "%.2f", bill))").foregroundColor(over ? Theme.red : Theme.amber)
                 }
                 .accessibilityElement(children: .combine)
             }
             .padding(.vertical, 10)
-            ForEach(GameData.items, id: \.key) { it in
-                ItemRow(item: it, price: port.price(it.key), have: Self.have(it, g),
+            ForEach(journey.items, id: \.key) { it in
+                ItemRow(item: it, price: Self.priceText(port.price(it.key), sign), have: Stores.have(it, g, words),
                         qty: cart[it.key] ?? 0, room: roomFor(it, g)) { cart[it.key] = $0 }
             }
             ChoiceList(choices: [
                 Choice(label: over ? "[red]You can't afford all that[/red]"
-                           : bill > 0 ? "Pay $\(String(format: "%.2f", bill)) and leave" : "Leave the shop",
+                           : bill > 0 ? "Pay \(sign)\(String(format: "%.2f", bill)) and leave" : "Leave the shop",
                        enabled: !over, primary: true) {
                     if bill > 0 { c.run { $0.buy(cart) } }
                     c.save()
@@ -48,26 +50,15 @@ struct ShopView: View {
         max(0, Int(((it.cap - g[it.key]) / Double(it.per)).rounded(.down)))
     }
 
-    /// "Have N": boxes for tackle, tenths of a crate for citrus, whole units otherwise.
-    static func have(_ it: Item, _ g: GameState) -> String {
-        if it.per > 1 { return String(Int((g[it.key] / Double(it.per)).rounded(.down))) }
-        if it.key == .limes { return jsNumber((g.limes * 10).rounded(.down) / 10) }
-        return String(Int(g[it.key].rounded(.down)))
-    }
-
     /// The prototype's price label: "$0.13", "$4", "$5.20".
-    static func priceText(_ p: Double) -> String {
-        p < 1 || p.truncatingRemainder(dividingBy: 1) != 0 ? String(format: "$%.2f", p) : "$\(Int(p))"
+    static func priceText(_ p: Double, _ sign: String) -> String {
+        sign + (p < 1 || p.truncatingRemainder(dividingBy: 1) != 0 ? String(format: "%.2f", p) : "\(Int(p))")
     }
-}
-
-private func jsNumber(_ x: Double) -> String {
-    x == x.rounded() ? String(Int(x)) : String(x)
 }
 
 private struct ItemRow: View {
     let item: Item
-    let price: Double
+    let price: String
     let have: String
     let qty: Int
     let room: Int
@@ -76,7 +67,7 @@ private struct ItemRow: View {
     var body: some View {
         HStack(alignment: .center, spacing: 10) {
             VStack(alignment: .leading, spacing: 2) {
-                (Text(item.name) + Text(" \(ShopView.priceText(price))/\(item.one)")
+                (Text(item.name) + Text(" \(price)/\(item.one)")
                     .foregroundColor(Theme.dim).font(.custom(Theme.bodyFont, size: 18)))
                     .fixedSize(horizontal: false, vertical: true)
                 Text("Have \(have) \(item.unit). \(item.desc)").bodyFont(18).foregroundStyle(Theme.dim)

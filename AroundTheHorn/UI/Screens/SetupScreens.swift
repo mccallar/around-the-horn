@@ -1,14 +1,33 @@
 import SwiftUI
 import HornEngine
 
+/// Which journey. Only shown when there is more than one; a journey with a voyage in
+/// progress says so.
+struct PickerView: View {
+    @Environment(GameController.self) private var c
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Heading("Choose a journey")
+            ChoiceList(choices: c.journeys.map { j in
+                let saved = c.persistence.loadSave(j.id) != nil
+                return Choice(label: j.title + (saved ? " [amber]· in progress[/amber]" : ""), detail: j.subtitle) {
+                    c.chooseJourney(j.id)
+                }
+            })
+        }
+    }
+}
+
 struct TitleView: View {
     @Environment(GameController.self) private var c
 
     var body: some View {
         let saved = c.savedVoyage
+        let card = c.skin.card
         VStack(alignment: .leading, spacing: 0) {
-            SeaSceneView(game: nil)
-            Text("AROUND\nTHE HORN")
+            ScenePicture(game: nil)
+            Text(card.title)
                 .headingFont(21)
                 .lineSpacing(10)
                 .kerning(1)
@@ -18,19 +37,19 @@ struct TitleView: View {
                 .padding(.top, 16)
                 .padding(.bottom, 4)
                 .accessibilityAddTraits(.isHeader)
-                .accessibilityLabel("Around the Horn")
+                .accessibilityLabel(c.journey.title)
                 .accessibilityIdentifier("title")
-            Text("~ 1849 ~").foregroundStyle(Theme.amber).frame(maxWidth: .infinity).padding(.vertical, 4)
-            Text(Copy.titleTagline).bodyFont().foregroundStyle(Theme.dim)
+            Text(card.year).foregroundStyle(Theme.amber).frame(maxWidth: .infinity).padding(.vertical, 4)
+            Text(card.tagline).bodyFont().foregroundStyle(Theme.dim)
                 .multilineTextAlignment(.center).frame(maxWidth: .infinity)
             ChoiceList(choices: [
-                Choice(label: "Sail for California") { c.startNewGame() },
+                Choice(label: card.start) { c.startNewGame() },
             ] + (saved.map { s in
-                [Choice(label: "Continue the voyage of the [i]\(Markup.escape(s.ship))[/i]") { c.continueSavedVoyage() }]
+                [Choice(label: card.resume(Markup.escape(s.ship))) { c.continueSavedVoyage() }]
             } ?? []) + [
-                Choice(label: "Learn about the passage") { c.show(.learn(0)) },
+                Choice(label: card.learn) { c.show(.learn(0)) },
                 Choice(label: "See the top ten") { c.show(.topTen(highlight: nil, back: { c.goToTitle() })) },
-            ])
+            ] + (c.hasPicker ? [Choice(label: "Choose another journey") { c.goToPicker() }] : []))
         }
     }
 }
@@ -40,12 +59,13 @@ struct LearnView: View {
     let page: Int
 
     var body: some View {
-        let p = Copy.learn[page]
+        let pages = c.skin.card.learnPages
+        let p = pages[min(page, pages.count - 1)]
         VStack(alignment: .leading, spacing: 0) {
             Heading(p.heading)
             ForEach(p.paragraphs, id: \.self) { Para($0) }
             ChoiceList(choices: [
-                page < Copy.learn.count - 1
+                page < pages.count - 1
                     ? Choice(label: "Next") { c.show(.learn(page + 1)) }
                     : Choice(label: "Back to the start") { c.goToTitle() },
             ])
@@ -57,11 +77,12 @@ struct RoleView: View {
     @Environment(GameController.self) private var c
 
     var body: some View {
+        let card = c.skin.card
         VStack(alignment: .leading, spacing: 0) {
-            Heading("Who are you?")
-            Para(Copy.roleIntro)
-            ChoiceList(choices: Role.allCases.map { r in Choice(label: r.label) { c.chooseRole(r) } }
-                + [Choice(label: "Find out the differences") { c.show(.roleDifferences) }])
+            Heading(card.roleHeading)
+            Para(card.roleIntro)
+            ChoiceList(choices: Role.allCases.map { r in Choice(label: c.journey.role(r).label) { c.chooseRole(r) } }
+                + [Choice(label: card.differencesAction) { c.show(.roleDifferences) }])
         }
     }
 }
@@ -71,8 +92,8 @@ struct RoleDifferencesView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Heading("The differences")
-            ForEach(Copy.roleDifferences, id: \.self) { Para($0) }
+            Heading(c.skin.card.differencesHeading)
+            ForEach(c.skin.card.differences, id: \.self) { Para($0) }
             ChoiceList(choices: [Choice(label: "Back") { c.show(.role) }])
         }
     }
@@ -86,15 +107,16 @@ struct NamesView: View {
 
     var body: some View {
         let s = c.suggestions
+        let card = c.skin.card
         VStack(alignment: .leading, spacing: 0) {
-            Heading("Ship & crew")
-            FieldLabel("Name your ship:")
-            PixelField(text: $ship, placeholder: s.ship, maxLength: 22, label: "Ship's name")
-            FieldLabel("Your name, Captain:")
-            PixelField(text: $captain, placeholder: s.crew[0], maxLength: 16, label: "Captain's name")
-            FieldLabel("Your four crew members:")
+            Heading(card.namesHeading)
+            FieldLabel(card.vesselPrompt)
+            PixelField(text: $ship, placeholder: s.ship, maxLength: 22, label: card.vesselLabel)
+            FieldLabel(card.leaderPrompt)
+            PixelField(text: $captain, placeholder: s.crew[0], maxLength: 16, label: card.leaderLabel)
+            FieldLabel(card.crewPrompt)
             ForEach(0..<4, id: \.self) { i in
-                PixelField(text: $crew[i], placeholder: s.crew[i + 1], maxLength: 16, label: "Crew member \(i + 1)")
+                PixelField(text: $crew[i], placeholder: s.crew[i + 1], maxLength: 16, label: "\(card.crewLabel) \(i + 1)")
             }
             ChoiceList(choices: [
                 Choice(label: "Use these names") { c.setNames(ship: ship, captain: captain, crew: crew) },
@@ -118,12 +140,13 @@ struct MonthView: View {
     @Environment(GameController.self) private var c
 
     var body: some View {
+        let card = c.skin.card
         VStack(alignment: .leading, spacing: 0) {
-            Heading("When will you sail?")
-            Para(Copy.monthIntro)
-            ChoiceList(choices: GameData.departures.map { d in
-                Choice(label: "\(GameData.months[d.month]) \(d.year)") { c.chooseDeparture(year: d.year, month: d.month) }
-            } + [Choice(label: "Ask for advice") { c.message(Copy.monthAdvice) { c.show(.month) } }])
+            Heading(card.monthHeading)
+            Para(card.monthIntro)
+            ChoiceList(choices: c.journey.departures.map { d in
+                Choice(label: "\(monthNames[d.month]) \(d.year)") { c.chooseDeparture(year: d.year, month: d.month) }
+            } + [Choice(label: "Ask for advice") { c.message(card.monthAdvice) { c.show(.month) } }])
         }
     }
 }
@@ -133,14 +156,15 @@ struct OutfitIntroView: View {
 
     var body: some View {
         let g = c.game!
+        let card = c.skin.card
         VStack(alignment: .leading, spacing: 0) {
-            Heading("Outfitting")
-            Para(Copy.outfitIntro(money: g.money, ship: Markup.escape(g.ship)))
+            Heading(card.outfitHeading)
+            Para(card.outfitIntro(g))
             PanelBox {
-                ForEach(Copy.outfitBullets, id: \.self) { Para($0, size: 18) }
+                ForEach(card.outfitBullets, id: \.self) { Para($0, size: 18) }
             }
             .padding(.vertical, 10)
-            ChoiceList(choices: [Choice(label: "Enter the shop") { c.enterNewYorkShop() }])
+            ChoiceList(choices: [Choice(label: card.enterShop) { c.enterFirstShop() }])
         }
     }
 }
@@ -153,7 +177,7 @@ struct MessageView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            SeaSceneView(game: c.game)
+            ScenePicture(game: c.game)
             MessageBox(markup: text)
             ChoiceList(choices: [Choice(label: label, primary: true, action: then)])
         }
@@ -161,6 +185,7 @@ struct MessageView: View {
 }
 
 struct TopTenView: View {
+    @Environment(GameController.self) private var c
     let table: [TopTenEntry]
     let highlight: Int?
     let back: () -> Void
@@ -172,7 +197,7 @@ struct TopTenView: View {
                 HStack(alignment: .firstTextBaseline) {
                     Text("\(i + 1). \(r.name)")
                     Spacer(minLength: 8)
-                    Text(Rank(score: r.score).rawValue).bodyFont(18).foregroundStyle(Theme.dim)
+                    Text(c.journey.rank(r.score)).bodyFont(18).foregroundStyle(Theme.dim)
                     Text(formatNumber(Double(r.score))).frame(minWidth: 56, alignment: .trailing)
                 }
                 .foregroundStyle(highlight == i ? Theme.amber : Theme.ink)
@@ -180,7 +205,7 @@ struct TopTenView: View {
                 .padding(.vertical, 3)
                 .accessibilityElement(children: .combine)
             }
-            Para(Copy.rankLegend, size: 18, color: Theme.dim)
+            Para(c.skin.card.rankLegend, size: 18, color: Theme.dim)
             ChoiceList(choices: [Choice(label: "Back", action: back)])
         }
     }

@@ -1,6 +1,6 @@
 import HornEngine
 
-// The sea and port menus' actions (spec §6). Anything that takes time can raise
+// The actions of the menus under way and in port (spec §6). Anything that takes time can raise
 // interrupts, so it goes through `act`, which presents them and then returns where it
 // should.
 extension GameController {
@@ -38,7 +38,7 @@ extension GameController {
         show(.fishing)
     }
 
-    /// One throw from the fishing screen. False when the tackle is gone.
+    /// One throw in the mini-game. False when the tackle is gone.
     func throwHarpoon() -> Bool { run { $0.throwHarpoon() } }
 
     func endFishing(caught: Int) { act(run { $0.landCatch(caught) }, then: .seaMenu) }

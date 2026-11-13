@@ -1,15 +1,21 @@
 import SwiftUI
 import HornEngine
 
+// Every screen of a voyage under way. What a thing is called comes from the skin's
+// `Words`; what it costs, how long it lasts and whether it is allowed come from the
+// `Journey` and the engine.
+
 struct DepartView: View {
     @Environment(GameController.self) private var c
     let text: String
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            SeaSceneView(game: c.game)
+            ScenePicture(game: c.game)
             MessageBox(markup: text)
-            ChoiceList(choices: [Choice(label: "Set sail", primary: true) { c.startTravel() }])
+            ChoiceList(choices: [Choice(label: c.game.map(c.skin.words)?.setOut ?? "Continue", primary: true) {
+                c.startTravel()
+            }])
         }
     }
 }
@@ -19,9 +25,11 @@ struct TravelView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            SeaSceneView(game: c.game, moving: true)
+            ScenePicture(game: c.game, moving: true)
             if let g = c.game { StatusPanel(game: g) }
-            ChoiceList(choices: [Choice(label: "Heave to & take stock", primary: true) { c.heaveTo() }])
+            ChoiceList(choices: [Choice(label: c.game.map(c.skin.words)?.halt ?? "Continue", primary: true) {
+                c.heaveTo()
+            }])
         }
     }
 }
@@ -31,18 +39,19 @@ struct SeaMenuView: View {
 
     var body: some View {
         let g = c.game!
+        let journey = c.journey, words = c.skin.words(g)
         VStack(alignment: .leading, spacing: 0) {
-            SeaSceneView(game: g)
+            ScenePicture(game: g)
             StatusPanel(game: g)
             ChoiceList(choices: [
-                Choice(label: "Continue on your voyage", primary: true) { c.startTravel() },
-                Choice(label: "Check supplies & crew") { c.show(.supplies) },
-                Choice(label: "Look at the chart") { c.show(.chart) },
-                Choice(label: "Change pace [dim](\(g.pace.name))[/dim]") { c.show(.pace) },
-                Choice(label: "Change rations [dim](\(g.rations.name))[/dim]") { c.show(.rations) },
-                Choice(label: "Heave to and rest") { c.show(.rest) },
-                Choice(label: "Make repairs") { c.show(.repairs) },
-                Choice(label: "Go fishing") { c.goFishing() },
+                Choice(label: words.carryOn, primary: true) { c.startTravel() },
+                Choice(label: words.supplies) { c.show(.supplies) },
+                Choice(label: words.chart) { c.show(.chart) },
+                Choice(label: "\(words.changePace) [dim](\(journey.pace(g.pace).name))[/dim]") { c.show(.pace) },
+                Choice(label: "\(words.changeRations) [dim](\(journey.rations(g.rations).name))[/dim]") { c.show(.rations) },
+                Choice(label: words.rest) { c.show(.rest) },
+                Choice(label: words.repairs) { c.show(.repairs) },
+                Choice(label: words.forage) { c.goFishing() },
             ])
         }
     }
@@ -53,22 +62,22 @@ struct PortMenuView: View {
 
     var body: some View {
         let g = c.game!
-        let port = GameData.port(g.currentStop.portID ?? .ny)
+        let journey = c.journey, words = c.skin.words(g)
         VStack(alignment: .leading, spacing: 0) {
-            SeaSceneView(game: g)
+            ScenePicture(game: g)
             StatusPanel(game: g)
-            Heading(port.name)
+            Heading(journey.port(g.currentStop.id)?.name ?? g.currentStop.name)
             ChoiceList(choices: [
-                Choice(label: "Weigh anchor and sail on", primary: true) { c.startTravel() },
-                Choice(label: "Check supplies & crew") { c.show(.supplies) },
-                Choice(label: "Look at the chart") { c.show(.chart) },
-                Choice(label: "Change pace [dim](\(g.pace.name))[/dim]") { c.show(.pace) },
-                Choice(label: "Change rations [dim](\(g.rations.name))[/dim]") { c.show(.rations) },
-                Choice(label: "Rest ashore") { c.show(.rest) },
-                Choice(label: "Attempt to trade") { c.trade() },
-                Choice(label: "Talk to people") { c.talk() },
-                Choice(label: "Buy supplies") { c.buySupplies() },
-                Choice(label: "Visit the shipyard") { c.show(.shipyard) },
+                Choice(label: words.leavePort, primary: true) { c.startTravel() },
+                Choice(label: words.supplies) { c.show(.supplies) },
+                Choice(label: words.chart) { c.show(.chart) },
+                Choice(label: "\(words.changePace) [dim](\(journey.pace(g.pace).name))[/dim]") { c.show(.pace) },
+                Choice(label: "\(words.changeRations) [dim](\(journey.rations(g.rations).name))[/dim]") { c.show(.rations) },
+                Choice(label: words.restInPort) { c.show(.rest) },
+                Choice(label: words.trade) { c.trade() },
+                Choice(label: words.talk) { c.talk() },
+                Choice(label: words.buy) { c.buySupplies() },
+                Choice(label: words.yard) { c.show(.shipyard) },
             ])
         }
     }
@@ -80,7 +89,7 @@ struct ChoiceEventView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            SeaSceneView(game: c.game)
+            ScenePicture(game: c.game)
             MessageBox(markup: event.prompt)
             if let d = event.detail {
                 ForEach(d.components(separatedBy: "\n\n"), id: \.self) { Para($0) }
@@ -100,13 +109,14 @@ struct BurialView: View {
 
     var body: some View {
         let name = Markup.escape(c.game?.crew.first { $0.id == crewID }?.name ?? "")
+        let words = c.game.map(c.skin.words)
         VStack(alignment: .leading, spacing: 0) {
-            SeaSceneView(game: c.game)
+            ScenePicture(game: c.game)
             MessageBox(markup: "[red]\(name) has died of \(cause).[/red]")
-            Para("The crew sews \(name) into a sailcloth shroud, weighted with a cannonball. What words will you say?")
-            PixelField(text: $epitaph, placeholder: GameEngine.defaultEpitaph, maxLength: 70, label: "Epitaph")
+            if let words { Para(words.burial(name)) }
+            PixelField(text: $epitaph, placeholder: c.journey.text.defaultEpitaph, maxLength: 70, label: "Epitaph")
                 .textInputAutocapitalization(.sentences)
-            ChoiceList(choices: [Choice(label: "Commit to the deep", primary: true) {
+            ChoiceList(choices: [Choice(label: words?.commit ?? "Continue", primary: true) {
                 c.bury(crewID: crewID, cause: cause, epitaph: epitaph)
             }], keyboardShortcuts: false)
         }
@@ -118,23 +128,22 @@ struct SuppliesView: View {
 
     var body: some View {
         let g = c.game!
+        let words = c.skin.words(g)
         let living = g.living
         VStack(alignment: .leading, spacing: 0) {
             Heading("Supplies")
-            ForEach(Self.rows(g), id: \.0) { r in Row(label: r.0) { Text(r.1) }.padding(.vertical, 3) }
-            Heading("The \(g.ship)")
-            Row(label: "Hull") { Text("\(Int(jsRounded(g.hull)))%") }
+            ForEach(Self.rows(c.journey, g, words), id: \.0) { r in Row(label: r.0) { Text(r.1) }.padding(.vertical, 3) }
+            Heading(words.vesselHeading)
+            Row(label: words.meters.0) { Text("\(Int(jsRounded(g.hull)))%") }
             Bar(value: g.hull)
-            Row(label: "Sails") { Text("\(Int(jsRounded(g.sails)))%") }
+            Row(label: words.meters.1) { Text("\(Int(jsRounded(g.sails)))%") }
             Bar(value: g.sails)
-            Para("Pace: \(g.pace.name) · Rations: \(g.rations.name)"
-                 + (g.noCitrus > 20 ? " · [red]\(g.noCitrus) days without citrus[/red]" : ""),
-                 size: 18, color: Theme.dim)
-            Heading("Crew · health \(g.healthLabel.text)")
+            Para(words.suppliesNote, size: 18, color: Theme.dim)
+            Heading(words.crewHeading)
             ForEach(living) { p in
                 VStack(alignment: .leading, spacing: 0) {
                     HStack(alignment: .firstTextBaseline) {
-                        Text(p.name) + (p.isCaptain ? Text(" (captain)").foregroundColor(Theme.dim)
+                        Text(p.name) + (p.isCaptain ? Text(" (\(words.leaderTag))").foregroundColor(Theme.dim)
                             .font(.custom(Theme.bodyFont, size: 18)) : Text(""))
                         Spacer()
                         Text(Self.condition(p)).bodyFont(18).foregroundStyle(p.ailment == nil ? Theme.dim : Theme.red)
@@ -145,9 +154,7 @@ struct SuppliesView: View {
                 .overlay(alignment: .bottom) { DashedLine() }
                 .accessibilityElement(children: .combine)
             }
-            if g.clothes < living.count {
-                Para("[red]Only \(g.clothes) of \(living.count) have woolens.[/red]", size: 18)
-            }
+            if let warning = words.clothesWarning { Para(warning, size: 18) }
             if !g.graves.isEmpty {
                 Heading("Lost")
                 ForEach(Array(g.graves.enumerated()), id: \.offset) { _, gr in
@@ -158,12 +165,10 @@ struct SuppliesView: View {
         }
     }
 
-    static func rows(_ g: GameState) -> [(String, String)] {
-        [("Cash", "$\(formatNumber(g.money))"), ("Provisions", "\(formatNumber(g.food)) lbs"),
-         ("Fresh water", "\(formatNumber(g.water)) gal"),
-         ("Citrus", "\(ShopView.have(GameData.item(.limes), g)) crates"), ("Medicine", "\(g.meds) kits"),
-         ("Woolens", "\(g.clothes) sets"), ("Sailcloth", "\(g.sailcloth) bolts"), ("Timber", "\(g.timber) bundles"),
-         ("Fishing tackle", "\(g.tackle) throws")]
+    /// The money, then everything the journey stocks, in the shop's order.
+    static func rows(_ journey: Journey, _ g: GameState, _ words: Words) -> [(String, String)] {
+        [(words.cash, "\(words.currency)\(formatNumber(g.money))")]
+            + journey.items.map { (words.storeNames[$0.key] ?? $0.name, Stores.amount($0, g, words)) }
     }
 
     static func condition(_ p: CrewMember) -> String {
@@ -176,10 +181,13 @@ struct PaceView: View {
     @Environment(GameController.self) private var c
 
     var body: some View {
+        let journey = c.journey, words = c.skin.words(c.game!)
         VStack(alignment: .leading, spacing: 0) {
-            Heading("Pace")
-            Para("The pace is currently [amber]\(c.game!.pace.name)[/amber].")
-            ChoiceList(choices: Pace.allCases.map { p in Choice(label: p.name, detail: p.desc) { c.setPace(p) } })
+            Heading(words.paceHeading)
+            Para(words.paceNow)
+            ChoiceList(choices: Pace.allCases.map { p in
+                Choice(label: journey.pace(p).name, detail: journey.pace(p).desc) { c.setPace(p) }
+            })
         }
     }
 }
@@ -188,12 +196,13 @@ struct RationsView: View {
     @Environment(GameController.self) private var c
 
     var body: some View {
-        let g = c.game!
-        let n = g.living.count
+        let journey = c.journey, words = c.skin.words(c.game!)
         VStack(alignment: .leading, spacing: 0) {
-            Heading("Rations")
-            Para("Rations are currently [amber]\(g.rations.name)[/amber]. With \(n) aboard, that's \(n * Int(g.rations.lb)) lbs a day.")
-            ChoiceList(choices: Rations.allCases.map { r in Choice(label: r.name, detail: r.desc) { c.setRations(r) } })
+            Heading(words.rationsHeading)
+            Para(words.rationsNow)
+            ChoiceList(choices: Rations.allCases.map { r in
+                Choice(label: journey.rations(r).name, detail: journey.rations(r).desc) { c.setRations(r) }
+            })
         }
     }
 }
@@ -202,25 +211,27 @@ struct RestView: View {
     @Environment(GameController.self) private var c
 
     var body: some View {
-        let port = c.game!.atPort
+        let words = c.skin.words(c.game!)
         VStack(alignment: .leading, spacing: 0) {
-            SeaSceneView(game: c.game)
-            Para(port ? "Your crew can sleep ashore, eat fresh food and recover. How many days?"
-                      : "You heave to, and the crew rests below. How many days?")
-            ChoiceList(choices: [1, 2, 3, 5].map { d in Choice(label: "\(d) day\(d > 1 ? "s" : "")") { c.rest(days: d) } }
-                + [Choice(label: "Never mind") { c.backToMenu() }])
+            ScenePicture(game: c.game)
+            Para(words.restPrompt)
+            ChoiceList(choices: c.journey.rules.restChoices.map { n in
+                Choice(label: words.restChoice(n)) { c.rest(days: n) }
+            } + [Choice(label: "Never mind") { c.backToMenu() }])
         }
     }
 }
 
+/// The two meters, by the names the skin gives them.
 struct ConditionBox: View {
     let game: GameState
+    let meters: (String, String)
 
     var body: some View {
         PanelBox {
-            Row(label: "Hull") { Text("\(Int(jsRounded(game.hull)))%") }
+            Row(label: meters.0) { Text("\(Int(jsRounded(game.hull)))%") }
             Bar(value: game.hull)
-            Row(label: "Sails") { Text("\(Int(jsRounded(game.sails)))%") }
+            Row(label: meters.1) { Text("\(Int(jsRounded(game.sails)))%") }
             Bar(value: game.sails)
         }
         .padding(.vertical, 10)
@@ -232,18 +243,15 @@ struct RepairsView: View {
 
     var body: some View {
         let g = c.game!
-        let shipwright = g.role == .shipwright
+        let words = c.skin.words(g)
         VStack(alignment: .leading, spacing: 0) {
-            SeaSceneView(game: g)
-            Heading("Repairs")
-            ConditionBox(game: g)
-            Para("Each repair takes a day.\(shipwright ? " As a shipwright, your repairs go much further." : "")",
-                 size: 18, color: Theme.dim)
+            ScenePicture(game: g)
+            Heading(words.repairsHeading)
+            ConditionBox(game: g, meters: words.meters)
+            Para(words.repairsNote, size: 18, color: Theme.dim)
             ChoiceList(choices: [
-                Choice(label: "Mend sails — 1 bolt of sailcloth [dim](have \(g.sailcloth))[/dim]",
-                       enabled: g.sailcloth >= 1 && g.sails < 100) { c.mendSails() },
-                Choice(label: "Patch the hull — 1 bundle of timber [dim](have \(g.timber))[/dim]",
-                       enabled: g.timber >= 1 && g.hull < 100) { c.patchHull() },
+                Choice(label: words.mend, enabled: c.read { $0.canMendSails }) { c.mendSails() },
+                Choice(label: words.patch, enabled: c.read { $0.canPatchHull }) { c.patchHull() },
                 Choice(label: "Done") { c.backToMenu() },
             ])
         }
@@ -255,20 +263,18 @@ struct ShipyardView: View {
 
     var body: some View {
         let g = c.game!
-        let mult = GameData.port(g.currentStop.portID ?? .ny).mult
-        let hullCost = Int(((100 - g.hull) * 2.5 * mult).rounded(.up))
-        let sailCost = Int(((100 - g.sails) * 1.8 * mult).rounded(.up))
+        let words = c.skin.words(g)
         VStack(alignment: .leading, spacing: 0) {
-            SeaSceneView(game: g)
-            Heading("Shipyard")
-            ConditionBox(game: g)
-            Para("You have [amber]$\(formatNumber(g.money))[/amber]. Each job takes a day.")
+            ScenePicture(game: g)
+            Heading(words.yardHeading)
+            ConditionBox(game: g, meters: words.meters)
+            Para(words.yardIntro)
             ChoiceList(choices: [
-                Choice(label: "Haul out and repair the hull — $\(hullCost)",
-                       enabled: g.hull < 99.5 && g.money >= Double(hullCost)) { c.repairHullAtYard() },
-                Choice(label: "Have new sails cut — $\(sailCost)",
-                       enabled: g.sails < 99.5 && g.money >= Double(sailCost)) { c.recutSailsAtYard() },
-                Choice(label: "Leave the shipyard") { c.backToMenu() },
+                Choice(label: words.yardHull(c.read { $0.shipyardHullCost }),
+                       enabled: c.read { $0.canRepairHullAtYard }) { c.repairHullAtYard() },
+                Choice(label: words.yardSails(c.read { $0.shipyardSailsCost }),
+                       enabled: c.read { $0.canRecutSailsAtYard }) { c.recutSailsAtYard() },
+                Choice(label: words.leaveYard) { c.backToMenu() },
             ])
         }
     }
@@ -282,12 +288,13 @@ struct GameOverView: View {
     var body: some View {
         let g = c.game
         VStack(alignment: .leading, spacing: 0) {
-            SeaSceneView(game: g)
+            ScenePicture(game: g)
             MessageBox(markup: "[red]\(title)[/red]")
             Para(bodyText)
             if let g {
-                Para("\(g.dateText) · \(formatNumber(Double(g.mile))) nautical miles from New York.", color: Theme.dim)
-                GravesList(graves: g.graves)
+                let words = c.skin.words(g)
+                Para(words.gameOverLine, color: Theme.dim)
+                GravesList(graves: g.graves, heading: words.lostHeading)
             }
             ChoiceList(choices: [Choice(label: "Try again", primary: true) { c.goToTitle() }])
         }
@@ -296,10 +303,11 @@ struct GameOverView: View {
 
 struct GravesList: View {
     let graves: [Grave]
+    let heading: String
 
     var body: some View {
         if !graves.isEmpty {
-            Heading("Lost on the voyage")
+            Heading(heading)
             ForEach(Array(graves.enumerated()), id: \.offset) { _, g in
                 VStack(alignment: .leading, spacing: 2) {
                     Text(g.name) + Text(" — \(g.cause), \(g.date)").foregroundColor(Theme.dim)
@@ -321,29 +329,29 @@ struct FinaleView: View {
 
     var body: some View {
         let g = c.game!
+        let words = c.skin.words(g)
         let s = finale.score
         VStack(alignment: .leading, spacing: 0) {
-            SeaSceneView(game: g)
-            MessageBox(markup: "Land ho! The [i]\(Markup.escape(g.ship))[/i] passes through the Golden Gate on \(g.dateText), after \(g.day) days at sea.")
-            Para("San Francisco Bay is a forest of masts — hundreds of ships abandoned by crews who ran for the gold fields the moment the anchor dropped. "
-                 + (g.living.count > 1 ? "Your crew is already eyeing the hills." : "You stand alone on the deck, looking at the hills."))
+            ScenePicture(game: g)
+            MessageBox(markup: words.arrival)
+            Para(words.arrivalBody)
             Heading("Your score")
             ForEach(Array(s.lines.enumerated()), id: \.offset) { _, l in
                 Row(label: l.label) { Text(formatNumber(Double(l.points))) }.padding(.vertical, 3)
             }
             Row(label: "Subtotal") { Text(formatNumber(Double(s.subtotal))) }.padding(.vertical, 3)
-            Row(label: "Bonus for being a \(g.role.title)") { Text("×\(s.multiplier)") }.padding(.vertical, 3)
+            Row(label: words.bonus) { Text("×\(s.multiplier)") }.padding(.vertical, 3)
             Rectangle().fill(Theme.line).frame(height: 2).padding(.top, 3)
             Row(label: "Final score") { Text(formatNumber(Double(s.total))) }
                 .foregroundStyle(Theme.amber).padding(.top, 6)
-            Text("Rank: \(finale.rank.rawValue)\(finale.place.map { " · #\($0 + 1) in the top ten!" } ?? "")")
+            Text("Rank: \(finale.rank)\(finale.place.map { " · #\($0 + 1) in the top ten!" } ?? "")")
                 .foregroundStyle(Theme.amber).frame(maxWidth: .infinity).padding(.vertical, 9)
-            GravesList(graves: g.graves)
+            GravesList(graves: g.graves, heading: words.lostHeading)
             ChoiceList(choices: [
-                Choice(label: "Sail again", primary: true) { c.goToTitle() },
+                Choice(label: words.again, primary: true) { c.goToTitle() },
                 Choice(label: "See the top ten") {
                     c.show(.topTen(highlight: finale.place, back: {
-                        c.message("Thanks for sailing.", label: "Sail again") { c.goToTitle() }
+                        c.message(words.thanks, label: words.again) { c.goToTitle() }
                     }))
                 },
             ])

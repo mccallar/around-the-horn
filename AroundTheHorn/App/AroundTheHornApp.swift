@@ -3,7 +3,8 @@ import SwiftUI
 @main
 struct AroundTheHornApp: App {
     @State private var controller: GameController = {
-        let c = GameController()
+        // `-journey <id>` goes straight to that journey's title card.
+        let c = GameController(journey: UserDefaults.standard.string(forKey: "journey"))
         // `-HornTickSeconds 4` slows the voyage clock for UI tests, which can't query a
         // screen that redraws every 0.7 s.
         let s = UserDefaults.standard.double(forKey: "HornTickSeconds")
