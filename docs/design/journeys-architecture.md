@@ -239,6 +239,59 @@ four others, and the three backgrounds of `Role` (`Rules` has no party size and
 number; the mini-game spends `tackle`; a journey has water exactly when its items include
 `.water`.
 
+### Rail skin, as built
+
+The Iron Road (`rail`) is the second skin: `RailSkin` (copy, words, debug starts),
+`RailScene`, `RailChart`, `RailForage`, and its entry in `Skins.all`. The engine's rules,
+numbers and text are untouched, and so is everything 1849 shows.
+
+**What a second skin taught us.**
+
+- The shell needed three more members, each with an answer that leaves 1849 as it was:
+  `Words.clock` (a row under the meters for a count the date does not show, here the
+  contract; 1849 answers `nil`), `Words.lots` (items the shop prices by the lot,
+  "$2/100 gallons", where one alone costs pennies; 1849 answers `[]`) and
+  `ForageField.oneWay` (all the quarry crosses the same way, wood on a current; 1849
+  answers `false`). Nothing else in the shared views changed.
+- A turn need not be a day. Rail's is four hours, so the skin has one function, `span`,
+  that turns a count of turns into "8 hours" or "7 days and 4 hours", and uses it for the
+  rest menu, the contract row and the endings. The date with its hour is the engine's.
+- The engine's names are only names. `hull` and `sails` are the running gear and the
+  engine, `sailcloth` and `timber` are boiler fittings and car spares, the shipwright is
+  a boilermaker, and the player never sees the difference. All of it is in `Words` and
+  the engine's own item names; no view asks which journey it is.
+- A number in a sentence goes stale silently. Every figure the card states (twelve days,
+  sixteen, 1,776 miles, 16 cords, 80 gallons, 20 casts, the three purses, the rank
+  thresholds, the worst months) is held to the engine's tables by `RailSkinTests`.
+  "On time" is the engine's test (a turn in hand), not the skin's own arithmetic.
+- The contract test cannot tell one journey's vocabulary from another's.
+  `RailSkinTests` walks every string the skin can say and fails on a sailor's word; it
+  is shown to bite by running the same sieve over 1849's.
+- Two real journeys at once are a different test from one journey and a stand-in:
+  each keeps its own save and its own top ten, and an ending in one leaves the other
+  under way (the four two-voyage tests in `RailSkinTests`).
+- The map and the scene must agree on which way is forward. Rail runs east to west, so
+  east is on the right of the map and the train faces left in the scene.
+- The simulator keeps the app's files between runs. Uninstall the app before a
+  reference walk, or the top ten shows earlier runs and the picker marks journeys the
+  walk never started.
+- A walk across random country needs patience written down: `RailScreenshotUITests`
+  has a list of the answers that cost least and a `roll(until:)` that gives them until
+  the screen it wants turns up.
+
+**What the next skin's author should copy.** The four files' layout; `RailSkin.span` if
+a turn is not a day; a `<Name>SkinTests` beside `RailSkinTests` (numbers held to the
+tables, the vocabulary sieve, a whole run from the title card to an ending); a walk
+subclassing `ScreenshotWalk` with its own `journeyArgs`, numbered like
+`RailScreenshotUITests`; and a reference set like the 55 in `docs/reference/shots-rail/`:
+
+```sh
+SIMCTL_CHILD_HORN_SHOTS="$TMPDIR/shots-rail" sh Tools/run_tests.sh AroundTheHornUITests RailScreenshotUITests
+```
+
+Look at every one. A new shell member is the last resort: add it with no default, give
+every existing skin the answer that changes nothing, and say so here.
+
 ## 3. Adding a journey
 
 1. Spec in `docs/journeys/<id>.md` (the brief's 20-section template, or compact).
