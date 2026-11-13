@@ -4,12 +4,12 @@ import XCTest
 final class ResumeUITests: XCTestCase {
     func testForceQuitMidVoyageThenContinue() {
         let app = XCUIApplication(bundleIdentifier: LaunchUITests.appBundleID)
-        app.launchArguments = ["-HornDebugStart", "valp", "-HornTickSeconds", "30"]
+        app.launchArguments = LaunchUITests.horn + ["-HornDebugStart", "valp", "-HornTickSeconds", "30"]
         app.launch()
         XCTAssertTrue(app.buttons["Continue on your voyage"].waitForExistence(timeout: 10))
         app.terminate()  // what a force quit does: no chance to save on the way out
 
-        app.launchArguments = []
+        app.launchArguments = LaunchUITests.horn
         app.launch()
         let resume = app.buttons["Continue the voyage of the Resolute"]
         XCTAssertTrue(resume.waitForExistence(timeout: 10), "the title offers the saved voyage")

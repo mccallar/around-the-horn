@@ -15,8 +15,15 @@ final class ScreenshotUITests: XCTestCase {
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         continueAfterFailure = false
         app = XCUIApplication(bundleIdentifier: LaunchUITests.appBundleID)
-        app.launchArguments = ProcessInfo.processInfo.environment["HORN_ARGS"]?.split(separator: " ").map(String.init) ?? []
+        let extra = ProcessInfo.processInfo.environment["HORN_ARGS"]?.split(separator: " ").map(String.init) ?? []
+        app.launchArguments = Self.journey(extra)
         app.launch()
+    }
+
+    /// These are 1849's screens: every launch says so, unless the arguments already
+    /// name a journey.
+    static func journey(_ args: [String]) -> [String] {
+        args.contains("-journey") ? args : LaunchUITests.horn + args
     }
 
     func shot(_ name: String) {
@@ -56,7 +63,7 @@ final class ScreenshotUITests: XCTestCase {
 extension ScreenshotUITests {
     func testVoyageScreens() {
         app.terminate()
-        app.launchArguments = ["-HornTickSeconds", "6"]
+        app.launchArguments = Self.journey(["-HornTickSeconds", "6"])
         app.launch()
         tap("Sail for California")
         tap("Be a whaler from Nantucket")
@@ -106,7 +113,7 @@ extension ScreenshotUITests {
 extension ScreenshotUITests {
     func testSceneGallery() {
         app.terminate()
-        app.launchArguments = ["-HornSceneGallery", "YES"]
+        app.launchArguments = Self.journey(["-HornSceneGallery", "YES"])
         app.launch()
         shot("20-gallery")
         sleep(1)
@@ -117,7 +124,7 @@ extension ScreenshotUITests {
 extension ScreenshotUITests {
     func relaunch(_ args: [String]) {
         app.terminate()
-        app.launchArguments = args
+        app.launchArguments = Self.journey(args)
         app.launch()
     }
 

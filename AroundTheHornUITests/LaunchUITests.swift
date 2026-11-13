@@ -6,21 +6,52 @@ final class LaunchUITests: XCTestCase {
     /// `Tools/run_tests.sh` (which spawns the runner directly) does not.
     static let appBundleID = "com.mccallatech.AroundTheHorn"
 
-    func testLaunchShowsTitle() {
-        let app = XCUIApplication(bundleIdentifier: Self.appBundleID)
-        app.launch()
-        XCTAssertTrue(app.descendants(matching: .any)["title"].waitForExistence(timeout: 10))
+    /// Every UI test names its journey. Without it a launch lands wherever the app
+    /// happens to open: the picker once there is more than one journey, or whichever
+    /// journey was chosen last on this simulator.
+    static let horn = ["-journey", "horn1849"]
+
+    func title(_ app: XCUIApplication) -> XCUIElement { app.descendants(matching: .any)["title"] }
+
+    /// Where a launch that names no journey may land: a title card, or the list of
+    /// journeys when there are several and none was chosen last.
+    func opensOnATitleCardOrThePicker(_ app: XCUIApplication, _ what: String) {
+        let picker = app.staticTexts["Choose a journey"]
+        let deadline = Date().addingTimeInterval(10)
+        while Date() < deadline {
+            if title(app).exists || picker.exists { return }
+            usleep(200_000)
+        }
+        XCTFail("\(what): neither a title card nor the picker")
     }
 
-    /// `-journey <id>` goes straight to that journey's title card; an id nobody knows is
-    /// ignored, and the app opens as it would without it.
+    func testLaunchShowsTitle() {
+        let app = XCUIApplication(bundleIdentifier: Self.appBundleID)
+        app.launchArguments = Self.horn
+        app.launch()
+        XCTAssertTrue(title(app).waitForExistence(timeout: 10))
+    }
+
+    func testAPlainLaunchOpensOnATitleCardOrThePicker() {
+        let app = XCUIApplication(bundleIdentifier: Self.appBundleID)
+        app.launchArguments = []
+        app.launch()
+        opensOnATitleCardOrThePicker(app, "no arguments")
+    }
+
+    /// `-journey <id>` goes straight to that journey's title card. An id nobody knows is
+    /// ignored: the app opens as it would without the argument.
     func testTheJourneyArgumentOpensThatTitleCard() {
-        for id in ["horn1849", "no-such-journey"] {
-            let app = XCUIApplication(bundleIdentifier: Self.appBundleID)
-            app.launchArguments = ["-journey", id]
-            app.launch()
-            XCTAssertTrue(app.descendants(matching: .any)["title"].waitForExistence(timeout: 10), id)
-            app.terminate()
-        }
+        let app = XCUIApplication(bundleIdentifier: Self.appBundleID)
+        app.launchArguments = Self.horn
+        app.launch()
+        XCTAssertTrue(title(app).waitForExistence(timeout: 10), "horn1849")
+        app.terminate()
+
+        let stray = XCUIApplication(bundleIdentifier: Self.appBundleID)
+        stray.launchArguments = ["-journey", "no-such-journey"]
+        stray.launch()
+        opensOnATitleCardOrThePicker(stray, "an unknown journey")
+        stray.terminate()
     }
 }

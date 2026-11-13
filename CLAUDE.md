@@ -31,6 +31,18 @@ add a member to `JourneySkin` (no defaults, so every skin must answer) and let
 `SkinContractTests` hold it. Saves and top tens are per journey (`save-<id>.json`,
 `topten-<id>.json`). See `docs/design/journeys-architecture.md` §2 "As built".
 
+- **Amounts go through `Stores`.** The engine counts in stored units (`Item.per` to the
+  unit sold). Never print `g[key]`, a `catchLimit` or a quarry's `lb` beside a unit:
+  use `Stores.measure` / `count` / `have`, or `FishingView.reward` in the mini-game.
+- A screen may only offer a way out to the title or the picker when `c.hasPicker`
+  (`c.wayBack`, `c.wayOut`): with one journey 1849's screens have no extra rows.
+- The journey in hand changes only in `GameController.select`, with its skin.
+- `save.json` from the shipped build (save version 1) is read by `Horn1849LegacySave`.
+  Never delete a save file the build could not read.
+- UI tests always launch with `-journey <id>` (`LaunchUITests.horn`); a plain launch
+  opens on the picker, or on the journey last chosen, once there are several.
+- What one journey can't show is tested with `AroundTheHornTests/TestJourneys.swift`.
+
 ## Building and testing
 
 - **Engine work: `swift test --disable-sandbox --scratch-path $TMPDIR/<unique>`** builds

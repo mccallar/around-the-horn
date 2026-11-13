@@ -113,7 +113,8 @@ A skin supplies:
    the menu actions (set out, rest, mend, patch, yard, trade, talk, forage) are called.
 3. **Status panel rows**: labels and units for food and water (a journey with no water
    has no water row), a fuel row when `journey.burnsFuel`, the distance to the next stop
-   and "of N", the two meters. Weather turns red when `weather.sky == .storm`.
+   and "of N", the two meters. Weather turns red when it is the journey's hardest by
+   the rules' own figure (`Weather.harsh`), whatever its sky.
 4. **The scene**: a draw function over the 160×80 `PixelCanvas`, given time, weather,
    whether moving, whether in port, both meters, the region, the hour and the journey
    state. Shared helpers (sky bands, sun and moon, clouds, rain, snow, fog, lightning,
@@ -125,9 +126,9 @@ A skin supplies:
    legend are shared and come from `journey.stops`.
 6. **The mini-game**: `FishingModel` generalised: which way up the canvas is, where the
    throw starts, the backdrop draw, how the quarry and the thrown thing are drawn, the
-   heading, hint, tally and accessibility text, the unit of what's caught. Quarry and
-   duration come from `journey.quarry` and `journey.forageSeconds`; the reward is
-   `journey.forageReward`.
+   heading, hint, tally and accessibility text. Quarry and duration come from
+   `journey.quarry` and `journey.forageSeconds`; the reward is `journey.forageReward`,
+   and the shell writes every amount of it (see "Amounts" below).
 
 Also shared and journey-aware:
 
@@ -168,9 +169,20 @@ struct JourneySkin {
   `project` turns map space into canvas pixels. The shell draws the dots, the stops, the
   marker and the legend.
 - Units the engine doesn't hold are in `Words`: `distanceUnit` and `distance`, `currency`,
-  `looseUnits` (a box of tackle is 20 throws) and `fractional` (items counted in tenths).
+  `looseUnits` (a box of tackle is 20 throws), `fractional` (items counted in tenths
+  though stored whole) and `singular` (whether one of a thing takes `Item.one`).
   The rest menu is `rules.restChoices` through `words.restChoice`, so a turn need not be
   a day.
+- **Amounts.** The engine counts in stored units, `Item.per` of them to the unit the shop
+  sells. Only `Stores` (in `StatusPanel.swift`) turns a stored count into what a player
+  reads, and the shop, the supplies list, the status box and the mini-game all go
+  through it: `Stores.measure` ("1,500 lbs", "9.5 crates", "1.4 cords", "60 throws"),
+  `Stores.count` (the bare number) and `Stores.have` (the shop's units). An item stored in
+  parts of its unit is counted in tenths unless the skin counts it loose. The mini-game's
+  tally, its limit and what floats up from a hit come from `FishingView.reward`, so
+  `ForageSkin` has no unit of its own: `hint` is handed the limit written out and `pop`
+  the bare number a hit is worth. Never write `g[key]`, a `catchLimit` or a quarry's `lb`
+  beside a unit's name.
 - 1849's skin is four files and a line: `Horn1849Skin` (copy and words), `Horn1849Scene`,
   `Horn1849Chart`, `Horn1849Forage`, and its entry in `Skins.all`. They are the old view
   code moved, not rewritten.
@@ -181,6 +193,31 @@ fresh voyage or at any stop, for any role; the scene leaves marks for every weat
 moving and stopped, at every stop; the chart and the mini-game draw; `debug.start` gives a
 playable state short of every stop. Files are `save-<id>.json` and `topten-<id>.json`
 (`JourneyFilesTests`); only 1849 reads the two old unnamed files.
+
+What the contract test can tell about a drawing: with nothing to paint on, `PixelCanvas`
+notes each mark, so two drawings can be told apart (`tally.picture`) and the ground one
+covers measured (`tally.bounds`). The scene must fill its canvas, draw a different
+picture for each sky the journey has and for the worst weather, and a different one in
+port; the chart must be more than the shell's dots (a map under them, the marker moving
+with the voyage); a throw that lands in the mini-game must add the quarry's worth to the
+catch. Every store row must change with its own item and no other. What one journey
+cannot show (a second row in the picker, an item stored in tenths, a worst weather that
+is not a storm) is tested with the stand-ins in `AroundTheHornTests/TestJourneys.swift`.
+
+**The picker, as built.** Only journeys that have a skin are offered; the journey and its
+skin are set together in one place (`GameController.select`), and a state from a journey
+not on offer is refused. With several journeys the app opens on the picker, or on the
+title card of `-journey <id>`, or failing that of the journey last chosen
+(`Persistence.lastJourney`); an id that names nothing on offer is ignored. Every setup
+screen then ends with "Back to the title" and both menus with "Save and return to the
+title" (`wayBack`, `wayOut`); with one journey none of these rows exist and 1849 is as it
+was. The picker's "in progress" marks are read once when it is shown, not while drawing.
+
+**The save from before journeys.** The shipped build wrote save version 1 to `save.json`,
+with the weather and each ailment as a name alone. `Horn1849LegacySave` reads it into this
+version (`LegacySaveTests` holds a file that build wrote). It is offered on 1849's title
+card, moves to `save-horn1849.json` on the next save, and goes when that voyage ends. An
+old file this build cannot read is never deleted.
 
 **Screenshots.** `ScreenshotUITests` does nothing unless told where to write:
 
@@ -197,7 +234,8 @@ weather and wear differ from run to run, so compare two runs by eye or by the re
 that cannot move, not by whole-image equality.
 
 **What the shell still assumes** (the engine would have to say otherwise): a leader and
-four others; two meters, stored as `hull` and `sails`; money written as a sign before a
+four others, and the three backgrounds of `Role` (`Rules` has no party size and
+`Journey.role` answers only for those three); two meters, stored as `hull` and `sails`; money written as a sign before a
 number; the mini-game spends `tackle`; a journey has water exactly when its items include
 `.water`.
 
