@@ -17,6 +17,7 @@
 		198AABE7E8692852EA939919 /* Audio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F27D7F015ED625BDF69DBC4 /* Audio.swift */; };
 		1A379CE3F319A8631094FFDE /* GameState.swift in Sources */ = {isa = PBXBuildFile; fileRef = E66CCC765DAB15D402E1E5A0 /* GameState.swift */; };
 		1A37B15C6879FB6D85870F6A /* ScenePicture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 163849807C7C5D91D306EC75 /* ScenePicture.swift */; };
+		1CDC98768F49BC22BECDE3B5 /* RailSkinTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3297DDCDE0CCC564386B7462 /* RailSkinTests.swift */; };
 		1DE0008AE58F5320CCE67AB5 /* Rail+Events.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76DD21EFECB1A9AE7B8FAF27 /* Rail+Events.swift */; };
 		1E5F10CB543A419B52A9AC4E /* Markup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8658F512FD1FBFAEBFF786B6 /* Markup.swift */; };
 		21283D186304822B5942D1D1 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B5DB0322C897F9F163CD5FF /* Theme.swift */; };
@@ -200,6 +201,7 @@
 		2B348F0B87BB6038F9149B6B /* PortAndLandmarkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortAndLandmarkTests.swift; sourceTree = "<group>"; };
 		2EB62542A8C2C0B67B4A1FB6 /* GameController+Menus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GameController+Menus.swift"; sourceTree = "<group>"; };
 		30041FBF2E158954803C5ED6 /* SkinContractTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkinContractTests.swift; sourceTree = "<group>"; };
+		3297DDCDE0CCC564386B7462 /* RailSkinTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RailSkinTests.swift; sourceTree = "<group>"; };
 		338B3382DF5DB3F0A539995D /* ChoiceList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChoiceList.swift; sourceTree = "<group>"; };
 		3705B4E894BE9ADCD26E17A8 /* GameController+Debug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GameController+Debug.swift"; sourceTree = "<group>"; };
 		3B27DC1AC875A1705C5B8A22 /* SceneGallery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneGallery.swift; sourceTree = "<group>"; };
@@ -315,6 +317,7 @@
 				1EFE7D352E191E20D2322B5D /* LegacySaveTests.swift */,
 				B656EEA583D97D6A03EE42FD /* MarkupTests.swift */,
 				2B348F0B87BB6038F9149B6B /* PortAndLandmarkTests.swift */,
+				3297DDCDE0CCC564386B7462 /* RailSkinTests.swift */,
 				30041FBF2E158954803C5ED6 /* SkinContractTests.swift */,
 				D3D5EC138C0C4B40C49F14A1 /* StoresTests.swift */,
 				272E9C7692171434AE6EB489 /* SynthTests.swift */,
@@ -743,6 +746,7 @@
 				54F28ECDCAE78E4D847624EE /* LegacySaveTests.swift in Sources */,
 				87ED892C305EA05606F8FE9B /* MarkupTests.swift in Sources */,
 				22D22DDB2DD2BB7DDD0AED16 /* PortAndLandmarkTests.swift in Sources */,
+				1CDC98768F49BC22BECDE3B5 /* RailSkinTests.swift in Sources */,
 				457D26E80866FFA534E4D020 /* SkinContractTests.swift in Sources */,
 				F5F2A6A3B9B99EDB3509B063 /* StoresTests.swift in Sources */,
 				BB3B1340A172CD88BFC5EB27 /* SynthTests.swift in Sources */,

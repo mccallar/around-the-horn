@@ -4,10 +4,10 @@ import XCTest
 
 /// Choosing a journey, getting back to choose another, and what belongs to which.
 ///
-/// The engine has one journey, so the second on the list is a stand-in with its own id,
-/// title and top ten (`TestJourneys`): two rows that can be told apart, which the same
-/// journey listed twice could never be. A stand-in can't be sailed (the engine only
-/// sails its own), so the voyages here are all 1849's.
+/// The second on the list here is a stand-in with its own id, title and top ten
+/// (`TestJourneys`), so the picker's rules are held whatever journeys the engine has.
+/// A stand-in can't be sailed (the engine only sails its own), so the voyages here are
+/// all 1849's. Two real voyages under way at once are in `RailSkinTests`.
 @MainActor
 final class JourneyPickerTests: XCTestCase {
     var p: Persistence!

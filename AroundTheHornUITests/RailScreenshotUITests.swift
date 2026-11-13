@@ -126,8 +126,6 @@ final class RailScreenshotUITests: ScreenshotWalk {
         shot("29-gallery")
         app.swipeUp()
         shot("29-gallery-2")
-        app.swipeUp()
-        shot("29-gallery-3")
     }
 
     func testTheHelperAndAYard() {
@@ -173,8 +171,6 @@ final class RailScreenshotUITests: ScreenshotWalk {
         relaunch(["-HornDebugStart", "northplatte", "-HornTickSeconds", "30"])
         tap("Look at the map")
         shot("45-map")
-        app.swipeUp()
-        shot("45-map-bottom")
         tap("Back")
         tap("Haul driftwood")
         let river = app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH 'The river from the bank'")).firstMatch

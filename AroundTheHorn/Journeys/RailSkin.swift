@@ -150,8 +150,10 @@ enum RailSkin {
             commit: "Lay to rest",
             gameOverLine: "\(g.dateText) · \(formatNumber(Double(g.mile))) miles out of \(home).",
             arrival: "Sacramento! The [i]\(Markup.escape(g.ship))[/i] rolls into the yard by the river on \(g.dateText), \(span(g.day)) out of \(home).",
-            arrivalBody: (left >= 0
-                ? "The consignee is on the platform with a watch in his hand, and puts it away looking faintly let down. The freight is on time. "
+            // On time as the engine pays it: a turn in hand. At twelve days to the hour its
+            // own message has already called the freight late.
+            arrivalBody: (left > 0
+                ?"The consignee is on the platform with a watch in his hand, and puts it away looking faintly let down. The freight is on time. "
                 : "The consignee is on the platform with a watch in his hand and a good deal to say about the date. He signs for the freight anyway. ")
                 + (n > 1 ? "Your crew is asking where a person gets a bath and a beefsteak."
                          : "You climb down alone and stand a while on ground that does not move."),
