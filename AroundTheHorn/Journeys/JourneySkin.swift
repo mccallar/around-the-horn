@@ -22,7 +22,7 @@ struct JourneySkin {
 
 /// Every skin. Adding a journey's skin is this line and its file.
 enum Skins {
-    static let all: [JourneySkin] = [Horn1849Skin.skin]
+    static let all: [JourneySkin] = [Horn1849Skin.skin, RailSkin.skin]
 
     static func skin(_ id: String) -> JourneySkin? { all.first { $0.id == id } }
 }
@@ -109,6 +109,9 @@ struct Words {
     let distance: (Int) -> String
     /// The two meters, `GameState.hull` and `.sails`.
     let meters: (String, String)
+    /// A row of the journey's own under the meters, for a count the rules keep that the
+    /// date does not show: the days left on a contract. Nil when there is none.
+    let clock: (label: String, value: String)?
 
     // Supplies.
     /// What the money is called, and the sign written before an amount of it.
@@ -125,6 +128,9 @@ struct Words {
     /// Whether exactly one of a thing is written with the item's `one`: "1 cord". 1849
     /// writes "1 crates", as its prototype did.
     let singular: Bool
+    /// Items the shop prices by the lot they are sold in (`Item.step` of them at a time)
+    /// where one alone costs pennies: "$2/100 gallons".
+    let lots: Set<ItemKey>
     let vesselHeading: String
     /// The line under the meters: pace, rations and anything worth a warning.
     let suppliesNote: String
@@ -242,6 +248,8 @@ struct ForageField {
     let lanes: ClosedRange<Double>
     /// Pixels a second.
     let speed: Double
+    /// The quarry all crosses the same way, left to right: wood on a river's current.
+    let oneWay: Bool
 
     func inReach(_ y: Double) -> Bool { upward ? y <= line : y >= line }
 }

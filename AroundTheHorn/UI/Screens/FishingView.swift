@@ -74,7 +74,8 @@ final class FishingModel {
             r -= f.weight
             if r <= 0 { kind = f; break }
         }
-        let dir: Double = random() < 0.5 ? 1 : -1
+        let flip = random() < 0.5
+        let dir: Double = field.oneWay || flip ? 1 : -1
         var s = Swimmer(kind: kind, x: dir > 0 ? -kind.width : field.w + kind.width,
                         y0: rnd(field.lanes.lowerBound, field.lanes.upperBound), y: 0,
                         vx: dir * rnd(kind.speed.lowerBound, kind.speed.upperBound),

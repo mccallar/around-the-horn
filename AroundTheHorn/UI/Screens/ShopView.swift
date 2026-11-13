@@ -32,7 +32,7 @@ struct ShopView: View {
             .padding(.vertical, 10)
             ForEach(journey.items, id: \.key) { it in
                 let have = Stores.have(it, g, words), qty = cart[it.key] ?? 0
-                ItemRow(item: it, price: Self.priceText(port.price(it.key), sign), have: have,
+                ItemRow(item: it, price: Self.priceLabel(it, port.price(it.key), sign, lot: words.lots.contains(it.key)), have: have,
                         haveUnit: Stores.unit(it, count: have, words), qty: qty,
                         qtyUnit: Stores.unit(it, count: String(qty), words), room: roomFor(it, g)) { cart[it.key] = $0 }
             }
@@ -50,6 +50,14 @@ struct ShopView: View {
 
     private func roomFor(_ it: Item, _ g: GameState) -> Int {
         max(0, Int(((it.cap - g[it.key]) / Double(it.per)).rounded(.down)))
+    }
+
+    /// What an item costs, as its row writes it: "$4/cord", or by the lot it is sold in,
+    /// "$2/100 gallons".
+    static func priceLabel(_ it: Item, _ price: Double, _ sign: String, lot: Bool) -> String {
+        guard lot, it.step > 1 else { return "\(priceText(price, sign))/\(it.one)" }
+        // To the cent, as the bill adds it up.
+        return "\(priceText((price * Double(it.step) * 100).rounded() / 100, sign))/\(it.step) \(it.unit)"
     }
 
     /// The prototype's price label: "$0.13", "$4", "$5.20".
@@ -72,7 +80,7 @@ private struct ItemRow: View {
     var body: some View {
         HStack(alignment: .center, spacing: 10) {
             VStack(alignment: .leading, spacing: 2) {
-                (Text(item.name) + Text(" \(price)/\(item.one)")
+                (Text(item.name) + Text(" \(price)")
                     .foregroundColor(Theme.dim).font(.custom(Theme.bodyFont, size: 18)))
                     .fixedSize(horizontal: false, vertical: true)
                 Text("Have \(have) \(haveUnit). \(item.desc)").bodyFont(18).foregroundStyle(Theme.dim)

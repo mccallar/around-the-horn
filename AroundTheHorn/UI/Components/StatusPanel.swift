@@ -32,6 +32,9 @@ struct StatusPanel: View {
             Row(label: "\(words.meters.0) · \(words.meters.1)") {
                 Text("\(Int(jsRounded(game.hull)))% · \(Int(jsRounded(game.sails)))%")
             }
+            if let clock = words.clock {
+                Row(label: clock.label) { Text(clock.value) }
+            }
             Text(game.note)
                 .bodyFont(19)
                 .foregroundStyle(Theme.teal)

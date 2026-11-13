@@ -5,7 +5,7 @@ import HornEngine
 /// from (80, 28) at whatever swims below.
 enum Horn1849Forage {
     static let skin = ForageSkin(
-        field: ForageField(w: 160, h: 200, origin: (80, 28), upward: false, line: 30, lanes: 45...188, speed: 150),
+        field: ForageField(w: 160, h: 200, origin: (80, 28), upward: false, line: 30, lanes: 45...188, speed: 150, oneWay: false),
         heading: "Fishing",
         throwsLabel: "Throws", caughtLabel: "Caught", timeLabel: "Time",
         hint: { "Tap the water to throw a harpoon. Each throw uses tackle. You can salt and keep up to \($0)." },

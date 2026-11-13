@@ -66,6 +66,7 @@
 		A6A0CD5D814E1017E1BCADA0 /* ResumeUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A5B3A3831A7A90C960BDFD0 /* ResumeUITests.swift */; };
 		B18E94BFE40B9A36A7CD9AD2 /* Trade.swift in Sources */ = {isa = PBXBuildFile; fileRef = 101DC7E1126F062ED71F4B56 /* Trade.swift */; };
 		BB3B1340A172CD88BFC5EB27 /* SynthTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 272E9C7692171434AE6EB489 /* SynthTests.swift */; };
+		BE239210C0C9AEAB4405C196 /* RailForage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CE3341E0B7B3F8DB390A723 /* RailForage.swift */; };
 		C00041AA7005DFF5A81404CA /* JourneyPickerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CC0DE5BB8FFF8FCF5AAC89C /* JourneyPickerTests.swift */; };
 		C0FBA31E19B06DC83CB3ED29 /* Score.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6EC279D772A856004EC53F9 /* Score.swift */; };
 		C6E407BF802C41EE6D4012DD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 93E794034F7F574E3F216E96 /* Assets.xcassets */; };
@@ -75,6 +76,7 @@
 		CF56E93632B32369776A9466 /* RNG.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C92945674434FC87B738A4A /* RNG.swift */; };
 		CF9A1B4D3EF915D7D41ECB4B /* TestSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9A32CC23A2A3A9A97B2F390 /* TestSupport.swift */; };
 		CFA59275DDFEF23A3004F4F7 /* LaunchUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F41F0439CB6BDE9D136E712 /* LaunchUITests.swift */; };
+		D583BC12358D8FDB3AF7A706 /* RailSkin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7151B4A6CBFE97E7837A6DC2 /* RailSkin.swift */; };
 		D6D7EE2688EAC47CCDFC0784 /* GameController+Menus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EB62542A8C2C0B67B4A1FB6 /* GameController+Menus.swift */; };
 		DB458688AD104888CB603F58 /* JourneyContractTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C405D019FE4471301AAEE96 /* JourneyContractTests.swift */; };
 		DD46EDE0D596E9DF3CE87743 /* Horn1849LegacySave.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E8BDAD01ECB86B9276E0EB3 /* Horn1849LegacySave.swift */; };
@@ -87,8 +89,10 @@
 		F1D702D9F2213EB9973B2A82 /* AppInfoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F099379FFDDA51A0BAFA3352 /* AppInfoTests.swift */; };
 		F267B48B86BBAE4D49755FCB /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1E073E4A5604BCE3938DDFE /* RootView.swift */; };
 		F5F2A6A3B9B99EDB3509B063 /* StoresTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D5EC138C0C4B40C49F14A1 /* StoresTests.swift */; };
+		F640EF8B61FB386C908CC54D /* RailScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEA4BB4660B64DB83BFDAAA1 /* RailScene.swift */; };
 		F6AEB5DDB2548D95AB5EC0A1 /* SetupScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A22ACA5F76BDCA3C8B0CD82 /* SetupScreens.swift */; };
 		FAB32703ECE78E76C92E63B8 /* VT323-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = AEE19A288C55C105821ECC1D /* VT323-Regular.ttf */; };
+		FD2EC67CB412F9259AAC3F00 /* RailChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 618BD1BAD6D9CAA85D62C34A /* RailChart.swift */; };
 		FF4753F5568A6852B53C7097 /* GameEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA09DBF841EE4DB044177DA3 /* GameEngine.swift */; };
 /* End PBXBuildFile section */
 
@@ -175,6 +179,7 @@
 		0A22ACA5F76BDCA3C8B0CD82 /* SetupScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupScreens.swift; sourceTree = "<group>"; };
 		0BF5668C018FEC94F3697835 /* EngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EngineTests.swift; sourceTree = "<group>"; };
 		0CC0DE5BB8FFF8FCF5AAC89C /* JourneyPickerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JourneyPickerTests.swift; sourceTree = "<group>"; };
+		0CE3341E0B7B3F8DB390A723 /* RailForage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RailForage.swift; sourceTree = "<group>"; };
 		0E8BDAD01ECB86B9276E0EB3 /* Horn1849LegacySave.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Horn1849LegacySave.swift; sourceTree = "<group>"; };
 		0E8E7F89E9868BA9D521DCD7 /* ChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartView.swift; sourceTree = "<group>"; };
 		0F41F0439CB6BDE9D136E712 /* LaunchUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchUITests.swift; sourceTree = "<group>"; };
@@ -209,11 +214,13 @@
 		5C1E473EA548B3DBF4DFD8A4 /* Interrupt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Interrupt.swift; sourceTree = "<group>"; };
 		5DA561648AB9D0C1EB86799D /* Text.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Text.swift; sourceTree = "<group>"; };
 		5F2549B7433A37309EAE108D /* Horn1849.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Horn1849.swift; sourceTree = "<group>"; };
+		618BD1BAD6D9CAA85D62C34A /* RailChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RailChart.swift; sourceTree = "<group>"; };
 		6308324207F0B19AB2C51161 /* GameControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameControllerTests.swift; sourceTree = "<group>"; };
 		632D937A62370BF2FEC88811 /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
 		64F6077D1CB8841972D089E7 /* OFL.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = OFL.txt; sourceTree = "<group>"; };
 		6583B2CF434B20309FC1725C /* PixelCanvas.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PixelCanvas.swift; sourceTree = "<group>"; };
 		711BBE96B8E230C92444CFFA /* ChartAndFishingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartAndFishingTests.swift; sourceTree = "<group>"; };
+		7151B4A6CBFE97E7837A6DC2 /* RailSkin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RailSkin.swift; sourceTree = "<group>"; };
 		76DD21EFECB1A9AE7B8FAF27 /* Rail+Events.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Rail+Events.swift"; sourceTree = "<group>"; };
 		771DF7A9C743BD52E884EC30 /* Feedback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Feedback.swift; sourceTree = "<group>"; };
 		7B60571B9AA8419DCF959008 /* prototype-traces.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "prototype-traces.json"; sourceTree = "<group>"; };
@@ -233,6 +240,7 @@
 		93E794034F7F574E3F216E96 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		96D694A616F343447C631102 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		A1E073E4A5604BCE3938DDFE /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		AEA4BB4660B64DB83BFDAAA1 /* RailScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RailScene.swift; sourceTree = "<group>"; };
 		AEE19A288C55C105821ECC1D /* VT323-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "VT323-Regular.ttf"; sourceTree = "<group>"; };
 		B406A516BFB1D077B5FBCB58 /* Horn1849+Events.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Horn1849+Events.swift"; sourceTree = "<group>"; };
 		B656EEA583D97D6A03EE42FD /* MarkupTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkupTests.swift; sourceTree = "<group>"; };
@@ -470,6 +478,10 @@
 				E0E192B3F213935447BEC520 /* Horn1849Scene.swift */,
 				895669FFCD02D59A23D0444B /* Horn1849Skin.swift */,
 				47BB62B96C70BDD09D81D40B /* JourneySkin.swift */,
+				618BD1BAD6D9CAA85D62C34A /* RailChart.swift */,
+				0CE3341E0B7B3F8DB390A723 /* RailForage.swift */,
+				AEA4BB4660B64DB83BFDAAA1 /* RailScene.swift */,
+				7151B4A6CBFE97E7837A6DC2 /* RailSkin.swift */,
 			);
 			path = Journeys;
 			sourceTree = "<group>";
@@ -779,6 +791,10 @@
 				1E5F10CB543A419B52A9AC4E /* Markup.swift in Sources */,
 				2AAA4A67ACDAA3B8FC9AC69F /* Persistence.swift in Sources */,
 				08C865278BC4907C7264FE4C /* PixelCanvas.swift in Sources */,
+				FD2EC67CB412F9259AAC3F00 /* RailChart.swift in Sources */,
+				BE239210C0C9AEAB4405C196 /* RailForage.swift in Sources */,
+				F640EF8B61FB386C908CC54D /* RailScene.swift in Sources */,
+				D583BC12358D8FDB3AF7A706 /* RailSkin.swift in Sources */,
 				F267B48B86BBAE4D49755FCB /* RootView.swift in Sources */,
 				CA47939A0BDFDD649AB2BA4C /* SceneGallery.swift in Sources */,
 				1A37B15C6879FB6D85870F6A /* ScenePicture.swift in Sources */,
