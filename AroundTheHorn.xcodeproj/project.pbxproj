@@ -55,6 +55,7 @@
 		8507B9626335D0733F75E858 /* TestJourneys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B84815BD850CCD28520377E /* TestJourneys.swift */; };
 		86570A81184F274E60797E88 /* VoyageScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78D4D01109F06BE35F45A3F /* VoyageScreens.swift */; };
 		87ED892C305EA05606F8FE9B /* MarkupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B656EEA583D97D6A03EE42FD /* MarkupTests.swift */; };
+		87F0DA05537FCFF0B3BB75A4 /* RailScreenshotUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 746C70F5F36AC967DD5E9C22 /* RailScreenshotUITests.swift */; };
 		88A8FC565B507AACC911B4D1 /* RailData.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0F024DF259F1B20017EB5B4 /* RailData.swift */; };
 		8B58E7D9FC30938ED4C19381 /* Journey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0248E4120E4AA6712F708B41 /* Journey.swift */; };
 		8D0DA68E807E54449B68EA53 /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = 64F6077D1CB8841972D089E7 /* OFL.txt */; };
@@ -88,6 +89,7 @@
 		EF17D9B74446DF992698AD1C /* GameController+Debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3705B4E894BE9ADCD26E17A8 /* GameController+Debug.swift */; };
 		F1D702D9F2213EB9973B2A82 /* AppInfoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F099379FFDDA51A0BAFA3352 /* AppInfoTests.swift */; };
 		F267B48B86BBAE4D49755FCB /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1E073E4A5604BCE3938DDFE /* RootView.swift */; };
+		F585281D1F7FFCA5F34DDD15 /* ScreenshotWalk.swift in Sources */ = {isa = PBXBuildFile; fileRef = B38C2600574A28700FBAD44B /* ScreenshotWalk.swift */; };
 		F5F2A6A3B9B99EDB3509B063 /* StoresTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D5EC138C0C4B40C49F14A1 /* StoresTests.swift */; };
 		F640EF8B61FB386C908CC54D /* RailScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEA4BB4660B64DB83BFDAAA1 /* RailScene.swift */; };
 		F6AEB5DDB2548D95AB5EC0A1 /* SetupScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A22ACA5F76BDCA3C8B0CD82 /* SetupScreens.swift */; };
@@ -221,6 +223,7 @@
 		6583B2CF434B20309FC1725C /* PixelCanvas.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PixelCanvas.swift; sourceTree = "<group>"; };
 		711BBE96B8E230C92444CFFA /* ChartAndFishingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartAndFishingTests.swift; sourceTree = "<group>"; };
 		7151B4A6CBFE97E7837A6DC2 /* RailSkin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RailSkin.swift; sourceTree = "<group>"; };
+		746C70F5F36AC967DD5E9C22 /* RailScreenshotUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RailScreenshotUITests.swift; sourceTree = "<group>"; };
 		76DD21EFECB1A9AE7B8FAF27 /* Rail+Events.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Rail+Events.swift"; sourceTree = "<group>"; };
 		771DF7A9C743BD52E884EC30 /* Feedback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Feedback.swift; sourceTree = "<group>"; };
 		7B60571B9AA8419DCF959008 /* prototype-traces.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "prototype-traces.json"; sourceTree = "<group>"; };
@@ -242,6 +245,7 @@
 		A1E073E4A5604BCE3938DDFE /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		AEA4BB4660B64DB83BFDAAA1 /* RailScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RailScene.swift; sourceTree = "<group>"; };
 		AEE19A288C55C105821ECC1D /* VT323-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "VT323-Regular.ttf"; sourceTree = "<group>"; };
+		B38C2600574A28700FBAD44B /* ScreenshotWalk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotWalk.swift; sourceTree = "<group>"; };
 		B406A516BFB1D077B5FBCB58 /* Horn1849+Events.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Horn1849+Events.swift"; sourceTree = "<group>"; };
 		B656EEA583D97D6A03EE42FD /* MarkupTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkupTests.swift; sourceTree = "<group>"; };
 		BDBB3C16595D744809D8CF3B /* PressStart2P-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "PressStart2P-Regular.ttf"; sourceTree = "<group>"; };
@@ -443,8 +447,10 @@
 			isa = PBXGroup;
 			children = (
 				0F41F0439CB6BDE9D136E712 /* LaunchUITests.swift */,
+				746C70F5F36AC967DD5E9C22 /* RailScreenshotUITests.swift */,
 				2A5B3A3831A7A90C960BDFD0 /* ResumeUITests.swift */,
 				4B4F1F2713DA564D6DD82B2C /* ScreenshotUITests.swift */,
+				B38C2600574A28700FBAD44B /* ScreenshotWalk.swift */,
 			);
 			path = AroundTheHornUITests;
 			sourceTree = "<group>";
@@ -719,8 +725,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				CFA59275DDFEF23A3004F4F7 /* LaunchUITests.swift in Sources */,
+				87F0DA05537FCFF0B3BB75A4 /* RailScreenshotUITests.swift in Sources */,
 				A6A0CD5D814E1017E1BCADA0 /* ResumeUITests.swift in Sources */,
 				3DEF544B8261130989774BDD /* ScreenshotUITests.swift in Sources */,
+				F585281D1F7FFCA5F34DDD15 /* ScreenshotWalk.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

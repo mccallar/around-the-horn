@@ -27,7 +27,7 @@ enum RailChart {
         footer: {
             let total = RailSkin.journey.totalMiles
             return "\(formatNumber(Double($0.mile))) of \(formatNumber(Double(total))) miles covered. "
-                + "\(formatNumber(Double(max(0, total - $0.mile)))) to go."
+                + "\(formatNumber(Double(max(0, total - $0.mile)))) to go. The ringed stops have a yard."
         },
         background: { px, _, _ in background(px) },
         route: { _ in road.map { (x: $0.0, y: $0.1, mile: $0.2) } },
@@ -145,9 +145,18 @@ enum RailChart {
         peaks(sierra, 0x9AA0A6, snow: true)
     }
 
-    /// The two ends, and the sea, named.
+    /// The yards ringed, and the two ends named.
     static func names(_ px: PixelCanvas) {
         let ink = Color(hex: 0xD8D0B8)
+        for stop in RailSkin.journey.stops where stop.type == .port {
+            guard let at = road.first(where: { Int($0.2) == stop.mile }) else { continue }
+            let q = project((at.0, at.1))
+            let x = jsRounded(q.x) - 3, y = jsRounded(q.y) - 3
+            px.rect(x + 1, y, 5, 1, ink)
+            px.rect(x + 1, y + 6, 5, 1, ink)
+            px.rect(x, y + 1, 1, 5, ink)
+            px.rect(x + 6, y + 1, 1, 5, ink)
+        }
         let east = project((road[0].0, road[0].1)), west = project((road[road.count - 1].0, road[road.count - 1].1))
         px.text("OMAHA", x: east.x - 22, y: east.y - 4, size: 8, ink)
         px.text("SACRAMENTO", x: west.x - 4, y: west.y + 12, size: 8, ink)

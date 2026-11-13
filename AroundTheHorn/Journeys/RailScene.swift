@@ -50,74 +50,80 @@ enum RailScene {
     // MARK: The train
 
     static let engine = [
-        "     kkkkk                    ",
-        "    kkkkkkk           oooooooo",
-        "     kkkkk            cccccccc",
-        "      kkk    g   gg   cwwccwwc",
-        "   ll kkk   ggg gggg  cwwccwwc",
-        "   llkkkkkkkkkkkkkkkkkcccccccc",
-        "    kkkkgkkkkkgkkkkkgkcccccccc",
-        "    kkkkgkkkkkgkkkkkgkcccccccc",
-        "    kkkkkkkkkkkkkkkkkkcccccccc",
-        "  ppnnnnnnnnnnnnnnnnnnnnnnnnnn",
-        " ppp  dd   dd   RRR    RRR    ",
-        "pppp dddd dddd RRRRR  RRRRR   ",
-        "pppp dddd dddd RRhRR  RRhRR   ",
-        "pppp  dd   dd   RRR    RRR    ",
+        "      kkkkkkk                   ",
+        "      kkkkkkk                   ",
+        "       kkkkk          oooooooooo",
+        "        kkk     gg     ccccccccc",
+        "   loo  kkk g  gggg    cwwccwwcc",
+        "   loo  kkkggg gggg    cwwccwwcc",
+        "    kkkkkkkkkkkkkkkkkkkccccccccc",
+        "    kkkkkkkgkkkkkgkkkkkccccccccc",
+        "    kkkkkkkgkkkkkgkkkkkccccccccc",
+        "    kkkkkkkkkkkkkkkkkkkccccccccc",
+        "  nnnnnnnnnnnnnRRRRnnnnRRRRnnnnn",
+        "   ppkkkkk    RRRRRR  RRRRRR    ",
+        "  pppkgkgk    RRhhRR  RRhhRR    ",
+        " pppp ddd ddd RRhhRR  RRhhRR    ",
+        "ppppp ded ded RRRRRR  RRRRRR    ",
+        "ppppp ddd ddd  RRRR    RRRR     ",
     ].map(Array.init)
 
     static let tender = [
-        "ttttttttttttt",
-        "ttttttttttttt",
-        "tgggggggggggt",
-        "ttttttttttttt",
-        "ttttttttttttt",
-        "nnnnnnnnnnnnn",
-        " dd       dd ",
-        "dddd     dddd",
-        " dd       dd ",
+        "ttttttttttttttttt",
+        "ttttttttttttttttt",
+        "tgggggggggggggggt",
+        "ttttttttttttttttt",
+        "ttttttttttttttttt",
+        "ttttttttttttttttt",
+        "nnnnnnnnnnnnnnnnn",
+        "ddd ddd   ddd ddd",
+        "ded ded   ded ded",
+        "ddd ddd   ddd ddd",
     ].map(Array.init)
 
     static let tankCar = [
-        "  aaaaaaaaaaaa  ",
-        " aabaaabaaabaaa ",
-        " aabaaabaaabaaa ",
-        " aabaaabaaabaaa ",
-        " aabaaabaaabaaa ",
-        "  aaaaaaaaaaaa  ",
-        "ffffffffffffffff",
-        " dd          dd ",
-        "dddd        dddd",
-        " dd          dd ",
+        "       bbbb       ",
+        "  aaaaaaaaaaaaaa  ",
+        " aabaaaabaaaabaaa ",
+        " aabaaaabaaaabaaa ",
+        " aabaaaabaaaabaaa ",
+        " aabaaaabaaaabaaa ",
+        "  aaaaaaaaaaaaaa  ",
+        "ffffffffffffffffff",
+        "ddd ddd    ddd ddd",
+        "ded ded    ded ded",
+        "ddd ddd    ddd ddd",
     ].map(Array.init)
 
     static let boxcar = [
-        "    yyyyyyyyyy    ",
-        "oooooooooooooooooo",
-        "BBBBBBBBBBBBBBBBBB",
-        "BBBBBBDDDDDDBBBBBB",
-        "BBBBBBDDDDDDBBBBBB",
-        "BBBBBBDDDDDDBBBBBB",
-        "BBBBBBDDDDDDBBBBBB",
-        "BBBBBBBBBBBBBBBBBB",
-        " dd            dd ",
-        "dddd          dddd",
-        " dd            dd ",
+        "     yyyyyyyyyy     ",
+        "oooooooooooooooooooo",
+        "BBBBBBBBBBBBBBBBBBBB",
+        "BBBBBBBDDDDDDBBBBBBB",
+        "BBBBBBBDDDDDDBBBBBBB",
+        "BBBBBBBDDDDDDBBBBBBB",
+        "BBBBBBBDDDDDDBBBBBBB",
+        "BBBBBBBDDDDDDBBBBBBB",
+        "nnnnnnnnnnnnnnnnnnnn",
+        " ddd ddd    ddd ddd ",
+        " ded ded    ded ded ",
+        " ddd ddd    ddd ddd ",
     ].map(Array.init)
 
     static let caboose = [
-        "     ooooo     ",
-        "     CwCwC     ",
-        "ooooooooooooooo",
-        " CCCCCCCCCCCCC ",
-        " CCwwCCCCCwwCC ",
-        " CCwwCCCCCwwCC ",
-        " CCCCCCCCCCCCC ",
-        " CCCCCCCCCCCCC ",
-        "nnnnnnnnnnnnnnn",
-        "  dd       dd  ",
-        " dddd     dddd ",
-        "  dd       dd  ",
+        "      ooooo      ",
+        "      CwCwC      ",
+        "ooooooooooooooooo",
+        " CCCCCCCCCCCCCCC ",
+        " CCwwCCCCCCCwwCC ",
+        " CCwwCCCCCCCwwCC ",
+        " CCCCCCCCCCCCCCC ",
+        " CCCCCCCCCCCCCCC ",
+        " CCCCCCCCCCCCCCC ",
+        "nnnnnnnnnnnnnnnnn",
+        "  ddd       ddd  ",
+        "  ded       ded  ",
+        "  ddd       ddd  ",
     ].map(Array.init)
 
     static let colors: [Character: Color] = [
@@ -125,13 +131,13 @@ enum RailScene {
         "g": Color(hex: 0xD9A441), "l": Color(hex: 0xF2E3A6), "n": Color(hex: 0x3A3A40), "p": Color(hex: 0xB03A2E),
         "d": Color(hex: 0x4A4A52), "R": Color(hex: 0xA83A2C), "h": Color(hex: 0x26262B), "t": Color(hex: 0x2F4A3A),
         "a": Color(hex: 0x9A7A4E), "b": Color(hex: 0x4A4A52), "f": Color(hex: 0x5A3F2A), "y": Color(hex: 0x8A6A48),
-        "B": Color(hex: 0x8C4A32), "D": Color(hex: 0x74391F), "C": Color(hex: 0xB5382C),
+        "B": Color(hex: 0x8C4A32), "D": Color(hex: 0x74391F), "C": Color(hex: 0xB5382C), "e": Color(hex: 0x9A9AA2),
     ]
     /// The second boxcar is a different road's.
     static let ochre: [Character: Color] = colors.merging(["B": Color(hex: 0xB8893C), "D": Color(hex: 0x94692A)]) { $1 }
 
     /// Where each car's left edge stands.
-    static let engineX = 16.0, tenderX = 47.0, tankX = 61.0, box1X = 78.0, box2X = 97.0, cabooseX = 116.0
+    static let engineX = 9.0, tenderX = 43.0, tankX = 62.0, box1X = 82.0, box2X = 104.0, cabooseX = 126.0
 
     // MARK: Drawing
 
@@ -439,17 +445,15 @@ enum RailScene {
         px.rect(114, 40, 14, 1, dark)
         for i in 0..<4 { px.rect(100 + Double(i) * 12, 44, 6, 5, Color(hex: 0x4A6A86)) }
         px.rect(88, 60, 66, 2, wood)
-        // The tank: a tub on legs with a spout that swings down over the tender.
-        px.rect(1, 22, 14, 2, dark)
-        px.rect(0, 24, 16, 13, wood)
-        for i in 0..<3 { px.rect(0, 27 + Double(i) * 4, 16, 1, dark) }
-        px.rect(2, 37, 1, 25, dark)
-        px.rect(13, 37, 1, 25, dark)
-        px.rect(7, 37, 1, 25, dark)
-        px.line(from: (2, 40), to: (13, 58), dark)
-        px.line(from: (13, 40), to: (2, 58), dark)
-        px.line(from: (16, 34), to: (26, 41), dark)
-        px.rect(25, 41, 2, 3, dark)
+        // The tank: a tub on legs behind the engine, its spout swung down over the tender.
+        px.polygon([(23, 18), (30, 14), (31, 14), (38, 18)], dark)
+        px.rect(22, 18, 17, 14, wood)
+        for i in 0..<3 { px.rect(22, 21 + Double(i) * 4, 17, 1, dark) }
+        for x in [24.0, 30, 36] { px.rect(x, 32, 1, 30, dark) }
+        px.line(from: (24, 34), to: (36, 44), dark)
+        px.line(from: (36, 34), to: (24, 44), dark)
+        px.line(from: (39, 29), to: (48, 41), dark)
+        px.rect(47, 41, 2, 3, dark)
         // Cordwood, stacked for sale.
         for r in 0..<3 {
             px.rect(137 + Double(r), 73 - Double(r) * 2, 18 - Double(r) * 2, 2, r % 2 == 0 ? wood : dark)
@@ -505,10 +509,11 @@ enum RailScene {
 
     static func train(_ px: PixelCanvas, _ f: SceneFrame, night: Bool) {
         let t = f.t
-        // Planks go missing as the running gear wears; the dark of the car shows through.
-        let gaps = max(0, 60 - f.hull) / 2.2
+        // Boards go missing as the running gear wears, each broken off part way down,
+        // and the dark of the car shows through.
+        let gaps = max(0, 60 - f.hull) / 13
         let holed: (Int, Int, Character) -> Bool = { col, r, ch in
-            (ch == "B" || ch == "D" || ch == "C") && Double((col * 7 + r * 13) % 37) < gaps
+            (ch == "B" || ch == "D" || ch == "C") && Double((col * 7) % 13) < gaps && r >= 3 + (col * 5) % 4
         }
         let inside = Color(hex: 0x1E1612)
         func stand(_ rows: [[Character]], _ x: Double, sag: Double = 0, _ c: [Character: Color] = colors,
@@ -516,10 +521,11 @@ enum RailScene {
             px.sprite(rows, x: x, y: rail - Double(rows.count) + sag, c, skip: skip)
         }
         // Couplings.
-        for x in [tenderX, tankX, box1X, box2X, cabooseX] { px.rect(x - 2, rail - 5, 3, 1, Color(hex: 0x26262B)) }
+        for x in [tenderX, tankX, box1X, box2X, cabooseX] { px.rect(x - 3, rail - 4, 4, 1, Color(hex: 0x26262B)) }
 
-        px.rect(box1X + 1, rail - 9, 16, 6, inside)
-        px.rect(box2X + 1, rail - 9, 16, 6, inside)
+        px.rect(box1X, rail - 10, 20, 6, inside)
+        px.rect(box2X, rail - 10, 20, 6, inside)
+        px.rect(cabooseX + 1, rail - 10, 15, 6, inside)
         stand(caboose, cabooseX, sag: f.hull < 30 ? 1 : 0, skip: holed)
         stand(boxcar, box2X, ochre, skip: holed)
         stand(boxcar, box1X, skip: holed)
@@ -531,38 +537,38 @@ enum RailScene {
         let rows = stock > 0.6 ? 3 : stock > 0.3 ? 2 : stock > 0.03 ? 1 : 0
         for r in 0..<rows {
             let inset = Double(r)
-            px.rect(tenderX + 1 + inset, rail - 10 - Double(r), 11 - inset * 2, 1, Color(hex: r % 2 == 0 ? 0xB08A5A : 0x8C6B42))
+            px.rect(tenderX + 1 + inset, rail - 11 - Double(r), 15 - inset * 2, 1, Color(hex: r % 2 == 0 ? 0xB08A5A : 0x8C6B42))
         }
         stand(engine, engineX)
         // Rust on the boiler as the engine wears.
         let rust = max(0, 60 - f.sails) / 2.4
         if rust > 0 {
             px.sprite(engine, x: engineX, y: rail - Double(engine.count), ["k": Color(hex: 0x7A4A2A)]) { col, r, _ in
-                r < 4 || Double((col * 11 + r * 17) % 37) >= rust
+                r < 6 || Double((col * 11 + r * 17) % 37) >= rust
             }
         }
-        // The side rod, going round.
+        // The rods, going round.
         let turn = f.moving ? Int((t * 7).rounded(.down)) % 2 : 0
-        px.rect(engineX + 16, rail - 3 + Double(turn), 10, 1, Color(hex: 0xC8C8D0))
+        px.rect(engineX + 10, rail - 4 + Double(turn), 16, 1, Color(hex: 0xC8C8D0))
 
         if f.hull < 60 {
             // A hot box: a journal glowing under the first boxcar, and more as it worsens.
             let glow = Color(hex: Int((t * 5).rounded(.down)) % 2 == 0 ? 0xFF9A3A : 0xFFD27A)
-            px.rect(box1X + 15, rail - 2, 2, 1, glow)
-            wisp(px, x: box1X + 16, y: rail - 3, t: t, Color(hex: 0x6A6A70))
+            px.rect(box1X + 17, rail - 2, 1, 1, glow)
+            wisp(px, x: box1X + 17, y: rail - 4, t: t, Color(hex: 0x6A6A70))
             if f.hull < 30 {
-                px.rect(box2X + 2, rail - 2, 2, 1, glow)
-                wisp(px, x: box2X + 3, y: rail - 3, t: t + 1.7, Color(hex: 0x6A6A70))
+                px.rect(box2X + 2, rail - 2, 1, 1, glow)
+                wisp(px, x: box2X + 2, y: rail - 4, t: t + 1.7, Color(hex: 0x6A6A70))
             }
         }
         if f.sails < 60 {
             // Steam getting out where it should not.
             let white = Color(hex: 0xF4F7FA)
-            wisp(px, x: engineX + 9, y: rail - 8, t: t * 1.3, white)
-            px.rect(engineX + 3, rail - 3, 2, 1, white.opacity(0.8))
+            wisp(px, x: engineX + 17, y: rail - 14, t: t * 1.3, white)
+            px.rect(engineX + 3, rail - 4, 2, 1, white.opacity(0.8))
             if f.sails < 30 {
-                wisp(px, x: engineX + 17, y: rail - 9, t: t * 1.3 + 0.9, white)
-                wisp(px, x: engineX + 5, y: rail - 4, t: t * 1.1 + 2.1, white)
+                wisp(px, x: engineX + 12, y: rail - 12, t: t * 1.3 + 0.9, white)
+                wisp(px, x: engineX + 6, y: rail - 6, t: t * 1.1 + 2.1, white)
             }
         }
     }
@@ -580,7 +586,7 @@ enum RailScene {
     /// straight up at rest, thin and dark from an engine in a bad way.
     static func smoke(_ px: PixelCanvas, _ f: SceneFrame, night: Bool) {
         let t = f.t
-        let x0 = engineX + 7.0, y0 = rail - Double(engine.count) - 1
+        let x0 = engineX + 9.0, y0 = rail - Double(engine.count) - 1
         let sick = f.sails < 30
         let color: UInt32 = sick ? 0x4A4A50 : 0xE4E4E0
         let puffs = sick ? 5 : 8
@@ -608,12 +614,12 @@ enum RailScene {
         let top = rail - Double(engine.count)
         px.polygon([(engineX + 4, top + 4), (0, top - 4), (0, rail + 2), (engineX + 4, top + 6)], lamp.opacity(0.22))
         px.rect(engineX + 3, top + 4, 2, 2, lamp)
-        for x in [engineX + 23, engineX + 27] { px.rect(x, top + 3, 2, 2, lamp) }
-        px.rect(engineX + 21, rail - 5, 2, 1, Color(hex: 0xFF8A3A))
+        for x in [engineX + 24, engineX + 28] { px.rect(x, top + 4, 2, 2, lamp) }
+        px.rect(engineX + 20, rail - 5, 2, 1, Color(hex: 0xFF8A3A))
         let c = rail - Double(caboose.count) + (f.hull < 30 ? 1 : 0)
-        for x in [cabooseX + 3, cabooseX + 10] { px.rect(x, c + 4, 2, 2, lamp) }
-        px.rect(cabooseX + 6, c + 1, 1, 1, lamp)
-        px.rect(cabooseX + 8, c + 1, 1, 1, lamp)
+        for x in [cabooseX + 3, cabooseX + 12] { px.rect(x, c + 4, 2, 2, lamp) }
+        px.rect(cabooseX + 7, c + 1, 1, 1, lamp)
+        px.rect(cabooseX + 9, c + 1, 1, 1, lamp)
         if f.atPort {
             for i in 0..<4 { px.rect(100 + Double(i) * 12, 44, 6, 5, lamp.opacity(0.85)) }
         }
