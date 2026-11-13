@@ -7,12 +7,12 @@ enum Horn1849Forage {
     static let skin = ForageSkin(
         field: ForageField(w: 160, h: 200, origin: (80, 28), upward: false, line: 30, lanes: 45...188, speed: 150),
         heading: "Fishing",
-        throwsLabel: "Throws", caughtLabel: "Caught", unit: "lbs", timeLabel: "Time",
-        hint: { "Tap the water to throw a harpoon. Each throw uses tackle. You can salt and keep up to \($0) lbs." },
+        throwsLabel: "Throws", caughtLabel: "Caught", timeLabel: "Time",
+        hint: { "Tap the water to throw a harpoon. Each throw uses tackle. You can salt and keep up to \($0)." },
         label: { "The sea below the boat, with \($0) fish swimming" },
         actionHint: "Double-tap to throw a harpoon at the nearest fish",
         leave: "Back to the ship",
-        pop: { "+\($0.lb) lb \($0.name)" },
+        pop: { "+\($0) lb \($1.name)" },
         backdrop: backdrop, quarry: fish, thrown: harpoon)
 
     /// A strip of sky, the water darkening with depth, shafts of light, ripples, and the boat.

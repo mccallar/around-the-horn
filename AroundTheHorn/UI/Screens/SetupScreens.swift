@@ -10,12 +10,31 @@ struct PickerView: View {
         VStack(alignment: .leading, spacing: 0) {
             Heading("Choose a journey")
             ChoiceList(choices: c.journeys.map { j in
-                let saved = c.persistence.loadSave(j.id) != nil
-                return Choice(label: j.title + (saved ? " [amber]· in progress[/amber]" : ""), detail: j.subtitle) {
+                Choice(label: Self.label(j, inProgress: c.inProgress.contains(j.id)), detail: j.subtitle) {
                     c.chooseJourney(j.id)
                 }
             })
         }
+    }
+}
+
+extension PickerView {
+    static func label(_ j: Journey, inProgress: Bool) -> String {
+        j.title + (inProgress ? " [amber]· in progress[/amber]" : "")
+    }
+}
+
+extension GameController {
+    /// The way out of setting up a voyage, at the foot of each setup screen. Only where
+    /// there is a picker to go back to: a lone journey's screens are as they were before
+    /// there were others.
+    var wayBack: [Choice] {
+        hasPicker ? [Choice(label: "Back to the title") { [weak self] in self?.goToTitle() }] : []
+    }
+
+    /// The way out of a voyage, at the foot of both menus, on the same terms.
+    var wayOut: [Choice] {
+        hasPicker ? [Choice(label: "Save and return to the title") { [weak self] in self?.leaveVoyage() }] : []
     }
 }
 
@@ -82,7 +101,7 @@ struct RoleView: View {
             Heading(card.roleHeading)
             Para(card.roleIntro)
             ChoiceList(choices: Role.allCases.map { r in Choice(label: c.journey.role(r).label) { c.chooseRole(r) } }
-                + [Choice(label: card.differencesAction) { c.show(.roleDifferences) }])
+                + [Choice(label: card.differencesAction) { c.show(.roleDifferences) }] + c.wayBack)
         }
     }
 }
@@ -121,7 +140,7 @@ struct NamesView: View {
             ChoiceList(choices: [
                 Choice(label: "Use these names") { c.setNames(ship: ship, captain: captain, crew: crew) },
                 Choice(label: "Pick new names for me") { c.pickNewNames() },
-            ], keyboardShortcuts: false)
+            ] + c.wayBack, keyboardShortcuts: false)
         }
     }
 }
@@ -146,7 +165,7 @@ struct MonthView: View {
             Para(card.monthIntro)
             ChoiceList(choices: c.journey.departures.map { d in
                 Choice(label: "\(monthNames[d.month]) \(d.year)") { c.chooseDeparture(year: d.year, month: d.month) }
-            } + [Choice(label: "Ask for advice") { c.message(card.monthAdvice) { c.show(.month) } }])
+            } + [Choice(label: "Ask for advice") { c.message(card.monthAdvice) { c.show(.month) } }] + c.wayBack)
         }
     }
 }
@@ -164,7 +183,7 @@ struct OutfitIntroView: View {
                 ForEach(card.outfitBullets, id: \.self) { Para($0, size: 18) }
             }
             .padding(.vertical, 10)
-            ChoiceList(choices: [Choice(label: card.enterShop) { c.enterFirstShop() }])
+            ChoiceList(choices: [Choice(label: card.enterShop) { c.enterFirstShop() }] + c.wayBack)
         }
     }
 }

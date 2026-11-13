@@ -145,13 +145,14 @@ struct FishingView: View {
         let g = c.game!
         let journey = c.journey, skin = c.skin.forage
         let field = skin.field
+        let reward = Self.reward(journey, c.skin.words(g))
         VStack(alignment: .leading, spacing: 0) {
             Heading(skin.heading)
             if let m = model {
                 HStack {
                     Text("\(skin.throwsLabel): \(g.tackle)")
                     Spacer()
-                    Text("\(skin.caughtLabel): \(m.caught) \(skin.unit)")
+                    Text("\(skin.caughtLabel): \(reward.measure(m.caught))")
                     Spacer()
                     Text("\(skin.timeLabel): \(Int(max(0, m.time).rounded(.up)))")
                 }
@@ -174,7 +175,7 @@ struct FishingView: View {
                 .accessibilityHint(skin.actionHint)
                 .accessibilityAction { aimAtNearest(m) }
             }
-            Para(skin.hint(journey.role(g.role).catchLimit), size: 18, color: Theme.dim)
+            Para(skin.hint(reward.measure(journey.role(g.role).catchLimit)), size: 18, color: Theme.dim)
             ChoiceList(choices: [Choice(label: skin.leave) { finish() }])
         }
         .task { await run(g) }
@@ -190,8 +191,9 @@ struct FishingView: View {
 
     private func run(_ g: GameState) async {
         let journey = c.journey, skin = c.skin.forage
+        let reward = Self.reward(journey, c.skin.words(g))
         let m = FishingModel(field: skin.field, quarry: journey.quarry, seconds: journey.forageSeconds,
-                             padding: journey.role(g.role).aim, pop: skin.pop,
+                             padding: journey.role(g.role).aim, pop: Self.pop(skin, reward),
                              useTackle: { [c] in
                                  let ok = c.throwHarpoon()
                                  if ok { Feedback.play(.harpoon) }
@@ -219,6 +221,29 @@ struct FishingView: View {
         landed = true
         m.stop()
         c.endFishing(caught: m.caught)
+    }
+
+    /// What a catch is stowed as, and how the skin has that item counted. The model, a
+    /// role's `catchLimit` and a quarry's `lb` are all in the engine's stored units; this
+    /// is the one place they are turned into what the player reads.
+    struct Reward {
+        let item: Item
+        let how: Stores.Counting
+
+        /// With its unit: "12 lbs", "1.4 cords".
+        func measure(_ stored: Int) -> String { Stores.measure(Double(stored), item, how) }
+        /// The bare number: "12", "1.4".
+        func count(_ stored: Int) -> String { Stores.count(Double(stored), item, how) }
+    }
+
+    static func reward(_ journey: Journey, _ words: Words) -> Reward {
+        let item = journey.item(journey.forageReward)
+        return Reward(item: item, how: Stores.counting(item, words))
+    }
+
+    /// What floats up from a hit: the skin's words round the shell's number.
+    static func pop(_ skin: ForageSkin, _ reward: Reward) -> (Fish) -> String {
+        { skin.pop(reward.count($0.lb), $0) }
     }
 
     /// The skin's backdrop, quarry and throw; what floats up from a hit is the shell's.

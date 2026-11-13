@@ -52,7 +52,7 @@ struct SeaMenuView: View {
                 Choice(label: words.rest) { c.show(.rest) },
                 Choice(label: words.repairs) { c.show(.repairs) },
                 Choice(label: words.forage) { c.goFishing() },
-            ])
+            ] + c.wayOut)
         }
     }
 }
@@ -78,7 +78,7 @@ struct PortMenuView: View {
                 Choice(label: words.talk) { c.talk() },
                 Choice(label: words.buy) { c.buySupplies() },
                 Choice(label: words.yard) { c.show(.shipyard) },
-            ])
+            ] + c.wayOut)
         }
     }
 }

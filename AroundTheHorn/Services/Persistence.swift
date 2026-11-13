@@ -13,7 +13,10 @@ struct Persistence {
     }()
 
     /// Before there were journeys there was one, and its files had no id in their names.
-    /// They are still read as its own; nothing written before is lost.
+    /// They are still read as its own, the save in either the format of this version or
+    /// of the build that had only 1849 (`Horn1849LegacySave`). The old save goes once the
+    /// voyage in it has a file of its own or has ended; an old file this build can't read
+    /// is never removed.
     static let legacyJourney = Horn1849.id
     var legacySaveURL: URL { directory.appendingPathComponent("save.json") }
     var legacyTopTenURL: URL { directory.appendingPathComponent("topten.json") }
@@ -30,7 +33,7 @@ struct Persistence {
             try JSONEncoder().encode(s).write(to: saveURL(s.journey), options: .atomic)
             // The voyage has moved to its own file; the old one would only bring back a
             // voyage that has since ended.
-            if s.journey == Self.legacyJourney { try? FileManager.default.removeItem(at: legacySaveURL) }
+            if s.journey == Self.legacyJourney { retireLegacySave() }
         } catch {
             print("save failed: \(error)")
         }
@@ -39,21 +42,40 @@ struct Persistence {
     /// That journey's saved voyage, or nil if there is none or it can't be read by this
     /// version.
     func loadSave(_ journey: String) -> GameState? {
-        if let s = voyage(at: saveURL(journey), journey) { return s }
-        return journey == Self.legacyJourney ? voyage(at: legacySaveURL, journey) : nil
+        if let data = try? Data(contentsOf: saveURL(journey)), let s = voyage(data, journey) { return s }
+        return journey == Self.legacyJourney ? legacyVoyage() : nil
     }
 
-    private func voyage(at url: URL, _ journey: String) -> GameState? {
-        guard let data = try? Data(contentsOf: url),
-              let s = try? JSONDecoder().decode(GameState.self, from: data),
-              s.saveVersion == GameState.currentSaveVersion, s.journey == journey, Journeys.has(s.journey), !s.over
-        else { return nil }
-        return s
+    /// Whether a journey has a voyage to go back to.
+    func hasSave(_ journey: String) -> Bool { loadSave(journey) != nil }
+
+    private func voyage(_ data: Data, _ journey: String) -> GameState? {
+        guard let s = try? JSONDecoder().decode(GameState.self, from: data) else { return nil }
+        return usable(s, journey)
+    }
+
+    private func usable(_ s: GameState, _ journey: String) -> GameState? {
+        s.saveVersion == GameState.currentSaveVersion && s.journey == journey && Journeys.has(s.journey) && !s.over
+            ? s : nil
+    }
+
+    /// The voyage in the old file, whichever build wrote it.
+    private func legacyVoyage() -> GameState? {
+        guard let data = try? Data(contentsOf: legacySaveURL) else { return nil }
+        return voyage(data, Self.legacyJourney)
+            ?? Horn1849LegacySave.upgrade(data).flatMap { usable($0, Self.legacyJourney) }
+    }
+
+    /// Removes the old save, but only one this build could read: whatever else is in
+    /// that file is not ours to throw away.
+    private func retireLegacySave() {
+        guard FileManager.default.fileExists(atPath: legacySaveURL.path), legacyVoyage() != nil else { return }
+        try? FileManager.default.removeItem(at: legacySaveURL)
     }
 
     func deleteSave(_ journey: String) {
         try? FileManager.default.removeItem(at: saveURL(journey))
-        if journey == Self.legacyJourney { try? FileManager.default.removeItem(at: legacySaveURL) }
+        if journey == Self.legacyJourney { retireLegacySave() }
     }
 
     // MARK: Top ten
@@ -80,9 +102,17 @@ struct Persistence {
     // MARK: Settings
 
     static let mutedKey = "horn.muted"
+    static let lastJourneyKey = "horn.lastJourney"
 
     var muted: Bool {
         get { defaults.bool(forKey: Self.mutedKey) }
         nonmutating set { defaults.set(newValue, forKey: Self.mutedKey) }
+    }
+
+    /// The journey whose title card was last opened from the picker, so the next launch
+    /// goes straight back to it.
+    var lastJourney: String? {
+        get { defaults.string(forKey: Self.lastJourneyKey) }
+        nonmutating set { defaults.set(newValue, forKey: Self.lastJourneyKey) }
     }
 }

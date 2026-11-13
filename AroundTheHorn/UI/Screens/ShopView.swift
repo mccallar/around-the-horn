@@ -31,8 +31,10 @@ struct ShopView: View {
             }
             .padding(.vertical, 10)
             ForEach(journey.items, id: \.key) { it in
-                ItemRow(item: it, price: Self.priceText(port.price(it.key), sign), have: Stores.have(it, g, words),
-                        qty: cart[it.key] ?? 0, room: roomFor(it, g)) { cart[it.key] = $0 }
+                let have = Stores.have(it, g, words), qty = cart[it.key] ?? 0
+                ItemRow(item: it, price: Self.priceText(port.price(it.key), sign), have: have,
+                        haveUnit: Stores.unit(it, count: have, words), qty: qty,
+                        qtyUnit: Stores.unit(it, count: String(qty), words), room: roomFor(it, g)) { cart[it.key] = $0 }
             }
             ChoiceList(choices: [
                 Choice(label: over ? "[red]You can't afford all that[/red]"
@@ -60,7 +62,10 @@ private struct ItemRow: View {
     let item: Item
     let price: String
     let have: String
+    /// The item's unit as it reads after `have` and after `qty`.
+    let haveUnit: String
     let qty: Int
+    let qtyUnit: String
     let room: Int
     let set: (Int) -> Void
 
@@ -70,7 +75,7 @@ private struct ItemRow: View {
                 (Text(item.name) + Text(" \(price)/\(item.one)")
                     .foregroundColor(Theme.dim).font(.custom(Theme.bodyFont, size: 18)))
                     .fixedSize(horizontal: false, vertical: true)
-                Text("Have \(have) \(item.unit). \(item.desc)").bodyFont(18).foregroundStyle(Theme.dim)
+                Text("Have \(have) \(haveUnit). \(item.desc)").bodyFont(18).foregroundStyle(Theme.dim)
                     .fixedSize(horizontal: false, vertical: true)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -94,7 +99,7 @@ private struct ItemRow: View {
         .padding(.vertical, 9)
         .overlay(alignment: .bottom) { DashedLine() }
         .accessibilityElement(children: .contain)
-        .accessibilityValue("\(qty) \(item.unit) in the cart")
+        .accessibilityValue("\(qty) \(qtyUnit) in the cart")
     }
 }
 

@@ -118,9 +118,13 @@ struct Words {
     let storeNames: [ItemKey: String]
     /// What one of a boxed item is called once aboard: a box of tackle is 20 throws.
     let looseUnits: [ItemKey: String]
-    /// Items counted to a tenth of their unit, not in whole ones: crates of citrus,
-    /// cords of firewood.
+    /// Items counted to a tenth of their unit though they are stored whole: crates of
+    /// citrus. Anything stored in parts of its unit (`Item.per` above one) is counted
+    /// that way without being listed, unless it is in `looseUnits`.
     let fractional: Set<ItemKey>
+    /// Whether exactly one of a thing is written with the item's `one`: "1 cord". 1849
+    /// writes "1 crates", as its prototype did.
+    let singular: Bool
     let vesselHeading: String
     /// The line under the meters: pace, rations and anything worth a warning.
     let suppliesNote: String
@@ -245,17 +249,21 @@ struct ForageField {
 struct ForageSkin {
     let field: ForageField
     let heading: String
-    /// The tally reads "Throws: 60", "Caught: 12 lbs", "Time: 25".
+    /// The tally reads "Throws: 60", "Caught: 12 lbs", "Time: 25". The amount and its
+    /// unit are the shell's, from the item the journey stows a catch as (`forageReward`)
+    /// and counted the way `Words` counts that item everywhere else, so what the engine
+    /// holds in tenths of a cord is never shown as cords.
     let throwsLabel: String
     let caughtLabel: String
-    let unit: String
     let timeLabel: String
-    let hint: (_ limit: Int) -> String
+    /// `limit` is the most the role can keep, written out with its unit: "200 lbs".
+    let hint: (_ limit: String) -> String
     let label: (_ quarry: Int) -> String
     let actionHint: String
     let leave: String
-    /// What floats up from a hit.
-    let pop: (Fish) -> String
+    /// What floats up from a hit. `worth` is what it adds, as a bare number in the same
+    /// unit as the tally: "12", "1.4".
+    let pop: (_ worth: String, Fish) -> String
     let backdrop: (PixelCanvas, _ now: Double) -> Void
     let quarry: (PixelCanvas, FishingModel.Swimmer) -> Void
     let thrown: (PixelCanvas, FishingModel.Harpoon) -> Void

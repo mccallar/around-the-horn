@@ -39,15 +39,21 @@ final class GameController {
         case travel, seaMenu, portMenu, repairs, shipyard
     }
 
-    /// Every journey on offer, in the order the picker lists them.
+    /// Every journey on offer, in the order the picker lists them: each one the engine
+    /// has that a skin has been written for. A journey without a skin is not offered,
+    /// rather than shown wearing another journey's.
     let journeys: [Journey]
-    /// The journey whose title card, voyage, save and top ten are in hand.
-    private(set) var journeyID: String
-    var journey: Journey { journeys.first { $0.id == journeyID } ?? journeys[0] }
-    /// How that journey looks and reads.
-    var skin: JourneySkin { Skins.skin(journey.id) ?? Skins.all[0] }
+    private let skins: [String: JourneySkin]
+    /// The journey whose title card, voyage, save and top ten are in hand, and how it
+    /// looks and reads. Only `select` sets them, so they are always the same journey's.
+    private(set) var journey: Journey
+    private(set) var skin: JourneySkin
+    var journeyID: String { journey.id }
     /// With one journey there is nothing to pick, and no way back from its title card.
     var hasPicker: Bool { journeys.count > 1 }
+    /// The journeys with a voyage to go back to, as the picker last found them. Kept
+    /// here so the picker's rows don't each read and decode a file every time they draw.
+    private(set) var inProgress: Set<String> = []
 
     private(set) var screen: Screen = .title
     /// Changes on every navigation: views key their scroll position and text fields on it.
@@ -75,16 +81,39 @@ final class GameController {
     var tickInterval: Duration = .milliseconds(700)
 
     /// Opens on the picker when there is more than one journey, unless `journey` (the
-    /// `-journey <id>` launch argument) names one: then, as with a single journey, on
-    /// that journey's title card.
-    init(persistence: Persistence = .standard, journeys: [Journey] = Journeys.all, journey: String? = nil) {
+    /// `-journey <id>` launch argument) names one, or failing that the journey last
+    /// chosen is still on offer: then, as with a single journey, on that journey's title
+    /// card. An id that names no journey on offer is no choice at all.
+    init(persistence: Persistence = .standard, journeys: [Journey] = Journeys.all,
+         skins: [JourneySkin] = Skins.all, journey: String? = nil) {
+        let offered = journeys.filter { j in skins.contains { $0.id == j.id } }
+        precondition(!offered.isEmpty, "no journey has a skin")
         self.persistence = persistence
-        self.journeys = journeys
-        let asked = journey.flatMap { id in journeys.first { $0.id == id } }
-        journeyID = (asked ?? journeys[0]).id
-        suggestions = NameSuggestions(asked ?? journeys[0])
+        self.journeys = offered
+        self.skins = Dictionary(skins.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        func offer(_ id: String?) -> Journey? { id.flatMap { id in offered.first { $0.id == id } } }
+        let chosen = offer(journey) ?? (offered.count > 1 ? offer(persistence.lastJourney) : nil)
+        let first = chosen ?? offered[0]
+        self.journey = first
+        skin = self.skins[first.id]!
+        suggestions = NameSuggestions(first)
         muted = persistence.muted
-        if asked == nil && journeys.count > 1 { screen = .picker }
+        if chosen == nil && offered.count > 1 { showPicker() }
+    }
+
+    /// The one place the journey in hand changes. False, and nothing changes, for a
+    /// journey that is not on offer.
+    @discardableResult
+    private func select(_ id: String) -> Bool {
+        guard let j = journeys.first(where: { $0.id == id }), let s = skins[id] else { return false }
+        journey = j
+        skin = s
+        return true
+    }
+
+    private func showPicker() {
+        inProgress = Set(journeys.map(\.id).filter(persistence.hasSave))
+        show(.picker)
     }
 
     // MARK: - Navigation
@@ -135,15 +164,23 @@ final class GameController {
 
     /// Back from a title card to the list of journeys.
     func goToPicker() {
-        guard hasPicker else { return goToTitle() }
         goToTitle()
-        show(.picker)
+        if hasPicker { showPicker() }
     }
 
-    /// A row of the picker: that journey's title card.
+    /// A row of the picker: that journey's title card. It is remembered, and the app
+    /// opens there next time.
     func chooseJourney(_ id: String) {
-        guard journeys.contains(where: { $0.id == id }) else { return }
-        journeyID = id
+        guard select(id) else { return }
+        persistence.lastJourney = id
+        goToTitle()
+    }
+
+    /// Out of a voyage under way to its title card, where it waits to be continued and
+    /// another journey can be chosen.
+    func leaveVoyage() {
+        stopTravel()
+        save()
         goToTitle()
     }
 
@@ -153,9 +190,11 @@ final class GameController {
         show(.role)
     }
 
-    /// Starts from a given state on the menu under way (debug starts and tests).
+    /// Starts from a given state on the menu under way (debug starts and tests). A state
+    /// from a journey that is not on offer is refused: it would be played with another
+    /// journey's words and pictures.
     func loadForDebug(_ s: GameState) {
-        if journeys.contains(where: { $0.id == s.journey }) { journeyID = s.journey }
+        guard select(s.journey) else { return }
         engine = GameEngine(state: s)
         game = s
         backToMenu()

@@ -32,6 +32,7 @@
 		42A00B72C6A0E3290224E8B0 /* ChoiceList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 338B3382DF5DB3F0A539995D /* ChoiceList.swift */; };
 		457D26E80866FFA534E4D020 /* SkinContractTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30041FBF2E158954803C5ED6 /* SkinContractTests.swift */; };
 		47AD7D91637B665461598327 /* Horn1849Scene.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0E192B3F213935447BEC520 /* Horn1849Scene.swift */; };
+		54F28ECDCAE78E4D847624EE /* LegacySaveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EFE7D352E191E20D2322B5D /* LegacySaveTests.swift */; };
 		570ED1A0299CA1D70CC7DA90 /* BalanceSimulationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 066E1756FBD97DB90F4CC624 /* BalanceSimulationTests.swift */; };
 		5BE5B2EEB1577D6BDBFC6DA1 /* HornEngine.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 509B74C67184498F2681AA80 /* HornEngine.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		64108882F3E72EFB40A02171 /* Horn1849.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F2549B7433A37309EAE108D /* Horn1849.swift */; };
@@ -47,6 +48,7 @@
 		7DA5ECED083824A1458BACF6 /* GoldenVoyageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26132E5082F8F671AED50D84 /* GoldenVoyageTests.swift */; };
 		7E94EBF4A679D14B70BA855E /* ChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E8E7F89E9868BA9D521DCD7 /* ChartView.swift */; };
 		7ECE44A5CCDF318BEBFE8B0F /* Feedback.swift in Sources */ = {isa = PBXBuildFile; fileRef = 771DF7A9C743BD52E884EC30 /* Feedback.swift */; };
+		8507B9626335D0733F75E858 /* TestJourneys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B84815BD850CCD28520377E /* TestJourneys.swift */; };
 		86570A81184F274E60797E88 /* VoyageScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78D4D01109F06BE35F45A3F /* VoyageScreens.swift */; };
 		87ED892C305EA05606F8FE9B /* MarkupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B656EEA583D97D6A03EE42FD /* MarkupTests.swift */; };
 		8B58E7D9FC30938ED4C19381 /* Journey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0248E4120E4AA6712F708B41 /* Journey.swift */; };
@@ -59,6 +61,7 @@
 		A6A0CD5D814E1017E1BCADA0 /* ResumeUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A5B3A3831A7A90C960BDFD0 /* ResumeUITests.swift */; };
 		B18E94BFE40B9A36A7CD9AD2 /* Trade.swift in Sources */ = {isa = PBXBuildFile; fileRef = 101DC7E1126F062ED71F4B56 /* Trade.swift */; };
 		BB3B1340A172CD88BFC5EB27 /* SynthTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 272E9C7692171434AE6EB489 /* SynthTests.swift */; };
+		C00041AA7005DFF5A81404CA /* JourneyPickerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CC0DE5BB8FFF8FCF5AAC89C /* JourneyPickerTests.swift */; };
 		C0FBA31E19B06DC83CB3ED29 /* Score.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6EC279D772A856004EC53F9 /* Score.swift */; };
 		C6E407BF802C41EE6D4012DD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 93E794034F7F574E3F216E96 /* Assets.xcassets */; };
 		CA47939A0BDFDD649AB2BA4C /* SceneGallery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B27DC1AC875A1705C5B8A22 /* SceneGallery.swift */; };
@@ -69,6 +72,7 @@
 		CFA59275DDFEF23A3004F4F7 /* LaunchUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F41F0439CB6BDE9D136E712 /* LaunchUITests.swift */; };
 		D6D7EE2688EAC47CCDFC0784 /* GameController+Menus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EB62542A8C2C0B67B4A1FB6 /* GameController+Menus.swift */; };
 		DB458688AD104888CB603F58 /* JourneyContractTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C405D019FE4471301AAEE96 /* JourneyContractTests.swift */; };
+		DD46EDE0D596E9DF3CE87743 /* Horn1849LegacySave.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E8BDAD01ECB86B9276E0EB3 /* Horn1849LegacySave.swift */; };
 		E40D20D3F9DFDE394A719317 /* Text.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DA561648AB9D0C1EB86799D /* Text.swift */; };
 		E72382E2B63886F3E3198974 /* Horn1849Skin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 895669FFCD02D59A23D0444B /* Horn1849Skin.swift */; };
 		EB06357C27D073F3370D9C42 /* AroundTheHornApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08BCBF0670DB655B7CD9A450 /* AroundTheHornApp.swift */; };
@@ -76,6 +80,7 @@
 		EF17D9B74446DF992698AD1C /* GameController+Debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3705B4E894BE9ADCD26E17A8 /* GameController+Debug.swift */; };
 		F1D702D9F2213EB9973B2A82 /* AppInfoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F099379FFDDA51A0BAFA3352 /* AppInfoTests.swift */; };
 		F267B48B86BBAE4D49755FCB /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1E073E4A5604BCE3938DDFE /* RootView.swift */; };
+		F5F2A6A3B9B99EDB3509B063 /* StoresTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D5EC138C0C4B40C49F14A1 /* StoresTests.swift */; };
 		F6AEB5DDB2548D95AB5EC0A1 /* SetupScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A22ACA5F76BDCA3C8B0CD82 /* SetupScreens.swift */; };
 		FAB32703ECE78E76C92E63B8 /* VT323-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = AEE19A288C55C105821ECC1D /* VT323-Regular.ttf */; };
 		FF4753F5568A6852B53C7097 /* GameEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA09DBF841EE4DB044177DA3 /* GameEngine.swift */; };
@@ -163,6 +168,8 @@
 		08BCBF0670DB655B7CD9A450 /* AroundTheHornApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AroundTheHornApp.swift; sourceTree = "<group>"; };
 		0A22ACA5F76BDCA3C8B0CD82 /* SetupScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupScreens.swift; sourceTree = "<group>"; };
 		0BF5668C018FEC94F3697835 /* EngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EngineTests.swift; sourceTree = "<group>"; };
+		0CC0DE5BB8FFF8FCF5AAC89C /* JourneyPickerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JourneyPickerTests.swift; sourceTree = "<group>"; };
+		0E8BDAD01ECB86B9276E0EB3 /* Horn1849LegacySave.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Horn1849LegacySave.swift; sourceTree = "<group>"; };
 		0E8E7F89E9868BA9D521DCD7 /* ChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartView.swift; sourceTree = "<group>"; };
 		0F41F0439CB6BDE9D136E712 /* LaunchUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchUITests.swift; sourceTree = "<group>"; };
 		101DC7E1126F062ED71F4B56 /* Trade.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Trade.swift; sourceTree = "<group>"; };
@@ -170,6 +177,7 @@
 		163849807C7C5D91D306EC75 /* ScenePicture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScenePicture.swift; sourceTree = "<group>"; };
 		19D6AAF10A90207D9CA7180E /* PurityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurityTests.swift; sourceTree = "<group>"; };
 		19E4471C6A4A4D51FC75BB5F /* AroundTheHornTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = AroundTheHornTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		1EFE7D352E191E20D2322B5D /* LegacySaveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacySaveTests.swift; sourceTree = "<group>"; };
 		1F6163BE25F6E8B1308A6B29 /* JourneyBot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JourneyBot.swift; sourceTree = "<group>"; };
 		26132E5082F8F671AED50D84 /* GoldenVoyageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoldenVoyageTests.swift; sourceTree = "<group>"; };
 		272E9C7692171434AE6EB489 /* SynthTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SynthTests.swift; sourceTree = "<group>"; };
@@ -208,6 +216,7 @@
 		88B72F9134210D32E1C7AC26 /* AroundTheHornUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = AroundTheHornUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		895669FFCD02D59A23D0444B /* Horn1849Skin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Horn1849Skin.swift; sourceTree = "<group>"; };
 		8B5DB0322C897F9F163CD5FF /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		8B84815BD850CCD28520377E /* TestJourneys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestJourneys.swift; sourceTree = "<group>"; };
 		8F46A30D261341B02D3FFAC1 /* GameEngine+Choices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GameEngine+Choices.swift"; sourceTree = "<group>"; };
 		90EC46C79B8380AEC8181D5A /* PrototypeParityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrototypeParityTests.swift; sourceTree = "<group>"; };
 		92B379A31EE0B81538B8E6BE /* HornEngineTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = HornEngineTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -218,6 +227,7 @@
 		B406A516BFB1D077B5FBCB58 /* Horn1849+Events.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Horn1849+Events.swift"; sourceTree = "<group>"; };
 		B656EEA583D97D6A03EE42FD /* MarkupTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkupTests.swift; sourceTree = "<group>"; };
 		BDBB3C16595D744809D8CF3B /* PressStart2P-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "PressStart2P-Regular.ttf"; sourceTree = "<group>"; };
+		D3D5EC138C0C4B40C49F14A1 /* StoresTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoresTests.swift; sourceTree = "<group>"; };
 		D78D4D01109F06BE35F45A3F /* VoyageScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoyageScreens.swift; sourceTree = "<group>"; };
 		D9A32CC23A2A3A9A97B2F390 /* TestSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestSupport.swift; sourceTree = "<group>"; };
 		DFB564D802B4628FB60D9483 /* GameEngine+Actions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GameEngine+Actions.swift"; sourceTree = "<group>"; };
@@ -277,10 +287,14 @@
 				F099379FFDDA51A0BAFA3352 /* AppInfoTests.swift */,
 				711BBE96B8E230C92444CFFA /* ChartAndFishingTests.swift */,
 				6308324207F0B19AB2C51161 /* GameControllerTests.swift */,
+				0CC0DE5BB8FFF8FCF5AAC89C /* JourneyPickerTests.swift */,
+				1EFE7D352E191E20D2322B5D /* LegacySaveTests.swift */,
 				B656EEA583D97D6A03EE42FD /* MarkupTests.swift */,
 				2B348F0B87BB6038F9149B6B /* PortAndLandmarkTests.swift */,
 				30041FBF2E158954803C5ED6 /* SkinContractTests.swift */,
+				D3D5EC138C0C4B40C49F14A1 /* StoresTests.swift */,
 				272E9C7692171434AE6EB489 /* SynthTests.swift */,
+				8B84815BD850CCD28520377E /* TestJourneys.swift */,
 			);
 			path = AroundTheHornTests;
 			sourceTree = "<group>";
@@ -427,6 +441,7 @@
 			children = (
 				F657FF3127206CB698A0ADC6 /* Horn1849Chart.swift */,
 				7F4BCE9468DF346093B0A662 /* Horn1849Forage.swift */,
+				0E8BDAD01ECB86B9276E0EB3 /* Horn1849LegacySave.swift */,
 				E0E192B3F213935447BEC520 /* Horn1849Scene.swift */,
 				895669FFCD02D59A23D0444B /* Horn1849Skin.swift */,
 				47BB62B96C70BDD09D81D40B /* JourneySkin.swift */,
@@ -678,10 +693,14 @@
 				F1D702D9F2213EB9973B2A82 /* AppInfoTests.swift in Sources */,
 				71E118F1BA3180A2F7AF4028 /* ChartAndFishingTests.swift in Sources */,
 				27FAEDA776B23EEDF97FA2D0 /* GameControllerTests.swift in Sources */,
+				C00041AA7005DFF5A81404CA /* JourneyPickerTests.swift in Sources */,
+				54F28ECDCAE78E4D847624EE /* LegacySaveTests.swift in Sources */,
 				87ED892C305EA05606F8FE9B /* MarkupTests.swift in Sources */,
 				22D22DDB2DD2BB7DDD0AED16 /* PortAndLandmarkTests.swift in Sources */,
 				457D26E80866FFA534E4D020 /* SkinContractTests.swift in Sources */,
+				F5F2A6A3B9B99EDB3509B063 /* StoresTests.swift in Sources */,
 				BB3B1340A172CD88BFC5EB27 /* SynthTests.swift in Sources */,
+				8507B9626335D0733F75E858 /* TestJourneys.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -722,6 +741,7 @@
 				9CA9737D5D41C2573DA9DC47 /* GameController.swift in Sources */,
 				CCBA925034ED1870D6A14AAE /* Horn1849Chart.swift in Sources */,
 				1759644523B956369870862D /* Horn1849Forage.swift in Sources */,
+				DD46EDE0D596E9DF3CE87743 /* Horn1849LegacySave.swift in Sources */,
 				47AD7D91637B665461598327 /* Horn1849Scene.swift in Sources */,
 				E72382E2B63886F3E3198974 /* Horn1849Skin.swift in Sources */,
 				3B7CFED363F6AEA10E20470F /* JourneySkin.swift in Sources */,

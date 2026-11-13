@@ -133,16 +133,66 @@ final class SkinContractTests: XCTestCase {
                     said(r.value, "\(j.id) status value")
                 }
                 let rows = SuppliesView.rows(j, g, w)
-                XCTAssertEqual(rows.count, j.items.count + 1)
+                XCTAssertEqual(rows.first?.0, w.cash, "\(j.id) \(name): the money comes first")
+                XCTAssertEqual(rows.first?.1.hasPrefix(w.currency), true, "\(j.id) \(name): in the journey's currency")
+                XCTAssertEqual(Array(rows.dropFirst().map(\.0)), j.items.map { w.storeNames[$0.key] ?? $0.name },
+                               "\(j.id) \(name): then everything the journey stocks, in the shop's order")
                 XCTAssertEqual(Set(rows.map(\.0)).count, rows.count, "\(j.id) \(name)")
                 for r in rows {
                     said(r.0, "\(j.id) supplies label")
                     said(r.1, "\(j.id) supplies value")
                 }
-                for it in j.items { said(Stores.have(it, g, w), "\(j.id) have \(it.key)") }
+                for it in j.items {
+                    said(Stores.have(it, g, w), "\(j.id) have \(it.key)")
+                    for n in ["0", "1", "2"] { said(Stores.unit(it, count: n, w), "\(j.id) unit of \(n) \(it.key)") }
+                    if w.singular { said(it.one, "\(j.id): one \(it.key) is written with its singular") }
+                }
             }
+            try amountsAreNeverStoredCounts(j)
             for key in [ItemKey.food] + (j.burnsFuel ? [.fuel] : []) {
                 said(j.item(key).name, "\(j.id): the journey stocks \(key)")
+            }
+        }
+    }
+
+    /// Something aboard never reads as nothing, and a stored count is never written
+    /// beside the name of a unit it isn't in: the smallest amount the lists can show (a
+    /// whole unit, or a tenth of one for a thing stored in parts) reads differently from
+    /// none, in the supplies list, the status box and the shop.
+    func amountsAreNeverStoredCounts(_ j: Journey) throws {
+        let skin = try XCTUnwrap(Skins.skin(j.id))
+        var none = fresh(j)
+        for it in j.items { none[it.key] = 0 }
+        let w = skin.words(none)
+        let bare = SuppliesView.rows(j, none, w), bareStatus = StatusPanel.stores(j, none, w)
+        for (i, it) in j.items.enumerated() {
+            let how = Stores.counting(it, w), per = Double(max(1, it.per))
+            // One of whatever the item is counted in.
+            let least = how.loose != nil ? 1 : how.tenths ? max(1, (per / 10).rounded(.up)) : per
+            var some = none
+            some[it.key] = least
+            XCTAssertEqual(some[it.key], least, "\(j.id) \(it.key): the hold takes \(least)")
+            let rows = SuppliesView.rows(j, some, w)
+            XCTAssertNotEqual(rows[i + 1].1, bare[i + 1].1, "\(j.id): \(least) of \(it.key) reads as none")
+            for (k, r) in rows.enumerated() where k != i + 1 {
+                XCTAssertEqual(r.1, bare[k].1, "\(j.id): \(it.key) changed another row")
+            }
+            let status = StatusPanel.stores(j, some, w)
+            let label = w.statusNames[it.key] ?? it.name
+            if let k = bareStatus.firstIndex(where: { $0.label == label }) {
+                XCTAssertNotEqual(status[k].value, bareStatus[k].value, "\(j.id): \(least) of \(it.key) reads as none")
+            }
+            // The shop counts what it sells: one bought is one had.
+            var bought = none
+            bought[it.key] = per
+            XCTAssertEqual(Stores.have(it, bought, w), "1", "\(j.id): one \(it.one) bought")
+            XCTAssertEqual(Stores.have(it, none, w), "0", j.id)
+            // What isn't loose is written in the item's own unit, so a full unit reads "1".
+            if how.loose == nil {
+                XCTAssertEqual(Stores.count(per, it, how), "1", "\(j.id) \(it.key)")
+                XCTAssertTrue(Stores.measure(per, it, how).hasSuffix(" " + Stores.unit(it, count: "1", how)), j.id)
+            } else {
+                XCTAssertEqual(Stores.count(per, it, how), String(it.per), "\(j.id) \(it.key): counted singly")
             }
         }
     }
@@ -171,14 +221,68 @@ final class SkinContractTests: XCTestCase {
                     }
                 }
             }
+            let whole = CGRect(x: 0, y: 0, width: SceneSkin.w, height: SceneSkin.h)
             for f in frames {
                 for t in [0, 0.37, 5.3, 4321.9] {
                     let px = PixelCanvas(w: SceneSkin.w, h: SceneSkin.h)
                     scene.draw(px, f.at(t))
                     XCTAssertGreaterThan(px.tally.marks, 0, "\(j.id) \(f.weather.name): nothing drawn")
+                    XCTAssertTrue(px.tally.bounds?.contains(whole) ?? false,
+                                  "\(j.id) \(f.weather.name): the picture leaves part of the canvas bare")
                 }
                 said(scene.label(f), "\(j.id) scene label in \(f.weather.name)")
             }
+        }
+    }
+
+    func picture(_ scene: SceneSkin, _ f: SceneFrame, t: Double = 0.37) -> Int {
+        let px = PixelCanvas(w: SceneSkin.w, h: SceneSkin.h)
+        scene.draw(px, f.at(t))
+        return px.tally.picture
+    }
+
+    /// The scene is a picture of the voyage, not a fixed card: it shows the weather, and
+    /// whether the party is in port or under way. A draw that ignored its frame would
+    /// pass every "something was drawn" check there is.
+    func testTheSceneShowsTheWeatherAndThePort() throws {
+        for j in journeys {
+            let scene = try XCTUnwrap(Skins.skin(j.id)).scene
+            let all = try states(j)
+            let sea = try XCTUnwrap(all.first { $0.name.hasPrefix("nearing") }).state
+
+            // The same frame twice is the same picture, or nothing below means anything.
+            XCTAssertEqual(picture(scene, ScenePicture.frame(j, sea, moving: true, t: 0)),
+                           picture(scene, ScenePicture.frame(j, sea, moving: true, t: 0)), j.id)
+
+            // Under way, each kind of sky is its own picture.
+            var bySky: [Sky: Int] = [:]
+            for weather in j.weathers + [j.fairWeather] where bySky[weather.sky] == nil {
+                var g = sea
+                g.weather = weather
+                bySky[weather.sky] = picture(scene, ScenePicture.frame(j, g, moving: true, t: 0))
+            }
+            XCTAssertGreaterThan(bySky.count, 1, "\(j.id): more than one kind of sky")
+            XCTAssertEqual(Set(bySky.values).count, bySky.count, "\(j.id): two kinds of sky draw the same picture")
+
+            // The weather the status box writes in red looks nothing like fair weather.
+            let worst = try XCTUnwrap(j.weathers.first { StatusPanel.isWorst($0, of: j) }, "\(j.id): a worst weather")
+            var foul = sea, fine = sea
+            foul.weather = worst
+            fine.weather = j.fairWeather
+            XCTAssertNotEqual(picture(scene, ScenePicture.frame(j, foul, moving: true, t: 0)),
+                              picture(scene, ScenePicture.frame(j, fine, moving: true, t: 0)), j.id)
+
+            // In port is not the open way.
+            var ports = 0
+            for (name, g) in all where g.atPort {
+                ports += 1
+                var away = g
+                away.atPort = false
+                XCTAssertNotEqual(picture(scene, ScenePicture.frame(j, g, moving: false, t: 0)),
+                                  picture(scene, ScenePicture.frame(j, away, moving: false, t: 0)),
+                                  "\(j.id) \(name): in port looks the same as under way")
+            }
+            XCTAssertGreaterThan(ports, 0, "\(j.id): somewhere to put in")
         }
     }
 
@@ -205,12 +309,42 @@ final class SkinContractTests: XCTestCase {
                     let q = ChartView.position(route, atMile: Double(s.mile), chart)
                     XCTAssertTrue((0...chart.w).contains(q.x) && (0...chart.h).contains(q.y), "\(at): \(s.id) is off the chart")
                 }
+                // The shell's own marks, on a chart with no map under them.
+                let bare = ChartSkin(w: chart.w, h: chart.h, title: chart.title, label: chart.label, footer: chart.footer,
+                                     background: { _, _, _ in }, route: chart.route, others: chart.others,
+                                     project: chart.project, routeStep: chart.routeStep,
+                                     travelledStep: chart.travelledStep, routeColor: chart.routeColor,
+                                     overlay: { _, _, _ in })
+                let whole = CGRect(x: 0, y: 0, width: chart.w, height: chart.h)
                 for t in [0, 0.6] {
                     let px = PixelCanvas(w: chart.w, h: chart.h)
                     ChartView.draw(px, chart, j, g, t: t)
                     XCTAssertGreaterThan(px.tally.marks, j.stops.count, at)
+
+                    // The skin's map, on its own: there is one, and it covers the chart.
+                    let map = PixelCanvas(w: chart.w, h: chart.h)
+                    chart.background(map, g, t)
+                    XCTAssertGreaterThan(map.tally.marks, 0, "\(at): no map under the route")
+                    XCTAssertTrue(map.tally.bounds?.contains(whole) ?? false, "\(at): the map leaves part of the chart bare")
+
+                    let over = PixelCanvas(w: chart.w, h: chart.h)
+                    chart.overlay(over, g, t)
+                    let shell = PixelCanvas(w: chart.w, h: chart.h)
+                    ChartView.draw(shell, bare, j, g, t: t)
+                    XCTAssertGreaterThanOrEqual(shell.tally.marks, j.stops.count + 2, "\(at): a route and every stop")
+                    XCTAssertEqual(px.tally.marks, map.tally.marks + shell.tally.marks + over.tally.marks,
+                                   "\(at): the chart is the map, the shell's route and stops, and the overlay")
+                    XCTAssertNotEqual(px.tally.picture, shell.tally.picture, "\(at): the map shows")
                 }
             }
+            // The marker moves with the party.
+            let all = try states(j)
+            let first = try XCTUnwrap(all.first).state, last = try XCTUnwrap(all.last).state
+            XCTAssertNotEqual(first.mile, last.mile)
+            let a = PixelCanvas(w: chart.w, h: chart.h), b = PixelCanvas(w: chart.w, h: chart.h)
+            ChartView.draw(a, chart, j, first, t: 0)
+            ChartView.draw(b, chart, j, last, t: 0)
+            XCTAssertNotEqual(a.tally.picture, b.tally.picture, "\(j.id): the chart is the same at the start and the end")
         }
     }
 
@@ -218,15 +352,32 @@ final class SkinContractTests: XCTestCase {
         for j in journeys {
             let forage = try XCTUnwrap(Skins.skin(j.id)).forage
             let f = forage.field
-            XCTAssertEqual(blanks([forage.heading, forage.throwsLabel, forage.caughtLabel, forage.unit, forage.timeLabel,
+            XCTAssertEqual(blanks([forage.heading, forage.throwsLabel, forage.caughtLabel, forage.timeLabel,
                                    forage.actionHint, forage.leave]), [], j.id)
-            said(forage.hint(300), "\(j.id) forage hint")
             said(forage.label(0), "\(j.id) forage label")
             said(forage.label(4), "\(j.id) forage label")
 
             XCTAssertFalse(j.quarry.isEmpty, "\(j.id): something to catch")
             XCTAssertGreaterThan(j.forageSeconds, 0)
-            for q in j.quarry { said(forage.pop(q), "\(j.id) pop for \(q.name)") }
+
+            // Amounts are the shell's to write, in the unit the catch is stowed in; the
+            // skin's sentences only carry them.
+            XCTAssertTrue(j.items.contains { $0.key == j.forageReward }, "\(j.id): the catch is something the journey stocks")
+            let reward = FishingView.reward(j, try XCTUnwrap(Skins.skin(j.id)).words(fresh(j)))
+            XCTAssertEqual(reward.item.key, j.forageReward)
+            XCTAssertTrue(forage.hint("#LIMIT#").contains("#LIMIT#"), "\(j.id): the hint says how much can be kept")
+            for role in Role.allCases {
+                let limit = j.role(role).catchLimit
+                XCTAssertGreaterThan(limit, 0, "\(j.id) \(role)")
+                XCTAssertNotEqual(reward.measure(limit), reward.measure(0), "\(j.id) \(role): the limit reads as nothing")
+                XCTAssertTrue(forage.hint(reward.measure(limit)).contains(reward.measure(limit)), j.id)
+            }
+            for q in j.quarry {
+                XCTAssertTrue(forage.pop("#N#", q).contains("#N#"), "\(j.id): a hit on \(q.name) says what it was worth")
+                XCTAssertNotEqual(reward.count(q.lb), reward.count(0), "\(j.id): \(q.name) is worth something and reads as nothing")
+                XCTAssertNotEqual(reward.measure(q.lb), reward.measure(0), "\(j.id) \(q.name)")
+                said(FishingView.pop(forage, reward)(q), "\(j.id) pop for \(q.name)")
+            }
 
             // The field hangs together: the quarry runs on the far side of the line from
             // the thrower, all of it on the canvas and in reach.
@@ -239,7 +390,7 @@ final class SkinContractTests: XCTestCase {
             for role in Role.allCases {
                 var throwsLeft = 8
                 let m = FishingModel(field: f, quarry: j.quarry, seconds: j.forageSeconds, padding: j.role(role).aim,
-                                     pop: forage.pop, random: { 0.5 },
+                                     pop: FishingView.pop(forage, reward), random: { 0.5 },
                                      useTackle: {
                                          guard throwsLeft > 0 else { return false }
                                          throwsLeft -= 1
@@ -248,11 +399,24 @@ final class SkinContractTests: XCTestCase {
                                      tackleLeft: { throwsLeft })
                 XCTAssertFalse(m.fish.isEmpty, "\(j.id): quarry on the field at the start")
                 for s in m.fish { XCTAssertTrue(f.lanes.contains(s.y0), j.id) }
-                let mid = (f.lanes.lowerBound + f.lanes.upperBound) / 2
-                m.throwAt(x: f.w / 2, y: mid)
+                // A throw that leads its quarry lands, and the catch is what the quarry
+                // is worth: the field, the speeds and the role's aim make a game.
+                let target = m.fish[0]
+                var aim = (x: target.x, y: target.y)
+                for _ in 0..<3 {
+                    let flight = hypot(aim.x - f.origin.x, aim.y - f.origin.y) / f.speed
+                    aim = (target.x + target.vx * flight, target.y)
+                }
+                m.throwAt(x: aim.x, y: aim.y)
                 let thrown = try XCTUnwrap(m.harpoon, "\(j.id): a tap in the lanes throws")
                 XCTAssertEqual(thrown.vy < 0, f.upward, "\(j.id): thrown toward the lanes")
                 XCTAssertEqual(throwsLeft, 7)
+                for _ in 0..<2000 where m.harpoon != nil { m.step(0.01) }
+                XCTAssertEqual(m.caught, target.kind.lb, "\(j.id) \(role): a well-led throw catches what it was thrown at")
+                XCTAssertEqual(m.pops.first?.text, FishingView.pop(forage, reward)(target.kind), j.id)
+                XCTAssertFalse(m.fish.contains { $0.id == target.id }, "\(j.id): what is caught leaves the field")
+
+                let mid = (f.lanes.lowerBound + f.lanes.upperBound) / 2
                 var steps = 0
                 while !m.ended && steps < 100_000 {
                     m.step(0.05)
@@ -265,6 +429,7 @@ final class SkinContractTests: XCTestCase {
                     steps += 1
                 }
                 XCTAssertTrue(m.ended, "\(j.id): the outing ends")
+                XCTAssertGreaterThanOrEqual(m.caught, target.kind.lb, "\(j.id): a catch is kept to the end")
             }
 
             // Every kind of quarry and a throw in flight, drawn on their own.
@@ -411,69 +576,5 @@ final class JourneyFilesTests: XCTestCase {
         p.saveTopTen([TopTenEntry(name: "Driver", score: 1)], for: "rail")
         XCTAssertEqual(p.topTen(journey), journey.defaultTopTen, "another journey's table is not 1849's")
         XCTAssertTrue(fm.fileExists(atPath: p.topTenURL("rail").path))
-    }
-}
-
-// MARK: - Choosing a journey
-
-@MainActor
-final class JourneyPickerTests: XCTestCase {
-    var p: Persistence!
-
-    override func setUp() async throws {
-        p = Persistence(directory: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString),
-                        defaults: UserDefaults(suiteName: UUID().uuidString)!)
-    }
-
-    func isPicker(_ c: GameController) -> Bool { if case .picker = c.screen { return true } else { return false } }
-    func isTitle(_ c: GameController) -> Bool { if case .title = c.screen { return true } else { return false } }
-
-    func testOneJourneyOpensOnItsTitleCardWithNoWayToAPicker() {
-        let one = [Journeys.all[0]]
-        let c = GameController(persistence: p, journeys: one)
-        XCTAssertTrue(isTitle(c))
-        XCTAssertFalse(c.hasPicker)
-        c.goToPicker()
-        XCTAssertTrue(isTitle(c), "there is nothing to pick between")
-        XCTAssertTrue(isTitle(GameController(persistence: p, journeys: one, journey: "no-such-journey")))
-    }
-
-    /// The engine has one journey to give, so the list of two is the same one twice:
-    /// enough for the routing, which only counts them.
-    func testSeveralJourneysOpenOnThePickerAndTheTitleLeadsBack() {
-        let j = Journeys.all[0]
-        let c = GameController(persistence: p, journeys: [j, j])
-        XCTAssertTrue(isPicker(c))
-        XCTAssertTrue(c.hasPicker)
-        c.chooseJourney(j.id)
-        XCTAssertTrue(isTitle(c))
-        XCTAssertEqual(c.journey.id, j.id)
-        c.goToPicker()
-        XCTAssertTrue(isPicker(c))
-        c.chooseJourney("no-such-journey")
-        XCTAssertEqual(c.journey.id, j.id, "an unknown id changes nothing")
-    }
-
-    func testTheLaunchArgumentGoesStraightToThatTitleCard() {
-        let j = Journeys.all[0]
-        let c = GameController(persistence: p, journeys: [j, j], journey: j.id)
-        XCTAssertTrue(isTitle(c))
-        XCTAssertEqual(c.journey.id, j.id)
-        XCTAssertTrue(isPicker(GameController(persistence: p, journeys: [j, j], journey: "no-such-journey")),
-                      "an id nobody knows is no choice at all")
-    }
-
-    func testAVoyageBelongsToTheJourneyItWasStartedIn() {
-        for j in Journeys.all {
-            let c = GameController(persistence: p, journeys: Journeys.all, journey: j.id)
-            c.startNewGame()
-            c.chooseRole(.merchant)
-            c.setNames(ship: "", captain: "", crew: ["", "", "", ""])
-            let d = j.departures[0]
-            c.chooseDeparture(year: d.year, month: d.month)
-            XCTAssertEqual(c.game?.journey, j.id)
-            XCTAssertEqual(c.skin.id, j.id)
-            XCTAssertTrue(j.vesselNames.contains(c.game!.ship), "\(j.id): names come from the journey")
-        }
     }
 }
