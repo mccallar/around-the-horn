@@ -30,6 +30,7 @@
 		3DEF544B8261130989774BDD /* ScreenshotUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B4F1F2713DA564D6DD82B2C /* ScreenshotUITests.swift */; };
 		412A28E202A86BE6B8F7B9F9 /* GameData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4108B95E6294D296CE33783C /* GameData.swift */; };
 		42A00B72C6A0E3290224E8B0 /* ChoiceList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 338B3382DF5DB3F0A539995D /* ChoiceList.swift */; };
+		457D26E80866FFA534E4D020 /* SkinContractTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30041FBF2E158954803C5ED6 /* SkinContractTests.swift */; };
 		47AD7D91637B665461598327 /* Horn1849Scene.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0E192B3F213935447BEC520 /* Horn1849Scene.swift */; };
 		570ED1A0299CA1D70CC7DA90 /* BalanceSimulationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 066E1756FBD97DB90F4CC624 /* BalanceSimulationTests.swift */; };
 		5BE5B2EEB1577D6BDBFC6DA1 /* HornEngine.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 509B74C67184498F2681AA80 /* HornEngine.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -176,6 +177,7 @@
 		2A67AF0DC361810C5ED75471 /* GameController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameController.swift; sourceTree = "<group>"; };
 		2B348F0B87BB6038F9149B6B /* PortAndLandmarkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortAndLandmarkTests.swift; sourceTree = "<group>"; };
 		2EB62542A8C2C0B67B4A1FB6 /* GameController+Menus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GameController+Menus.swift"; sourceTree = "<group>"; };
+		30041FBF2E158954803C5ED6 /* SkinContractTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkinContractTests.swift; sourceTree = "<group>"; };
 		338B3382DF5DB3F0A539995D /* ChoiceList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChoiceList.swift; sourceTree = "<group>"; };
 		3705B4E894BE9ADCD26E17A8 /* GameController+Debug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GameController+Debug.swift"; sourceTree = "<group>"; };
 		3B27DC1AC875A1705C5B8A22 /* SceneGallery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneGallery.swift; sourceTree = "<group>"; };
@@ -277,6 +279,7 @@
 				6308324207F0B19AB2C51161 /* GameControllerTests.swift */,
 				B656EEA583D97D6A03EE42FD /* MarkupTests.swift */,
 				2B348F0B87BB6038F9149B6B /* PortAndLandmarkTests.swift */,
+				30041FBF2E158954803C5ED6 /* SkinContractTests.swift */,
 				272E9C7692171434AE6EB489 /* SynthTests.swift */,
 			);
 			path = AroundTheHornTests;
@@ -677,6 +680,7 @@
 				27FAEDA776B23EEDF97FA2D0 /* GameControllerTests.swift in Sources */,
 				87ED892C305EA05606F8FE9B /* MarkupTests.swift in Sources */,
 				22D22DDB2DD2BB7DDD0AED16 /* PortAndLandmarkTests.swift in Sources */,
+				457D26E80866FFA534E4D020 /* SkinContractTests.swift in Sources */,
 				BB3B1340A172CD88BFC5EB27 /* SynthTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -42,9 +42,9 @@ final class PersistenceTests: XCTestCase {
                           startYear: 1849, startMonth: 0)
         s.day = 40
         p.save(s)
-        XCTAssertEqual(p.loadSave(), s)
-        p.deleteSave()
-        XCTAssertNil(p.loadSave())
+        XCTAssertEqual(p.loadSave(Horn1849.id), s)
+        p.deleteSave(Horn1849.id)
+        XCTAssertNil(p.loadSave(Horn1849.id))
     }
 
     func testAFinishedVoyageIsNeverSaved() {
@@ -52,7 +52,7 @@ final class PersistenceTests: XCTestCase {
                           startYear: 1849, startMonth: 0)
         s.over = true
         p.save(s)
-        XCTAssertNil(p.loadSave())
+        XCTAssertNil(p.loadSave(Horn1849.id))
     }
 
     func testAnIncompatibleSaveIsDiscarded() throws {
@@ -60,17 +60,18 @@ final class PersistenceTests: XCTestCase {
                           startYear: 1849, startMonth: 0)
         s.saveVersion = 999
         try FileManager.default.createDirectory(at: p.directory, withIntermediateDirectories: true)
-        try JSONEncoder().encode(s).write(to: p.saveURL)
-        XCTAssertNil(p.loadSave())
-        try Data("not json".utf8).write(to: p.saveURL)
-        XCTAssertNil(p.loadSave())
+        try JSONEncoder().encode(s).write(to: p.saveURL(Horn1849.id))
+        XCTAssertNil(p.loadSave(Horn1849.id))
+        try Data("not json".utf8).write(to: p.saveURL(Horn1849.id))
+        XCTAssertNil(p.loadSave(Horn1849.id))
     }
 
     func testTopTenDefaultsThenPersists() {
-        XCTAssertEqual(p.topTen(), GameData.defaultTopTen)
-        let t = TopTen.inserting(name: "Ira", score: 9000, into: p.topTen()).table
-        p.saveTopTen(t)
-        XCTAssertEqual(p.topTen().first, TopTenEntry(name: "Ira", score: 9000))
+        let journey = Journeys.journey(Horn1849.id)
+        XCTAssertEqual(p.topTen(journey), GameData.defaultTopTen)
+        let t = TopTen.inserting(name: "Ira", score: 9000, into: p.topTen(journey)).table
+        p.saveTopTen(t, for: journey.id)
+        XCTAssertEqual(p.topTen(journey).first, TopTenEntry(name: "Ira", score: 9000))
     }
 
     func testMute() {

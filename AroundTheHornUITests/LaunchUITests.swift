@@ -11,4 +11,16 @@ final class LaunchUITests: XCTestCase {
         app.launch()
         XCTAssertTrue(app.descendants(matching: .any)["title"].waitForExistence(timeout: 10))
     }
+
+    /// `-journey <id>` goes straight to that journey's title card; an id nobody knows is
+    /// ignored, and the app opens as it would without it.
+    func testTheJourneyArgumentOpensThatTitleCard() {
+        for id in ["horn1849", "no-such-journey"] {
+            let app = XCUIApplication(bundleIdentifier: Self.appBundleID)
+            app.launchArguments = ["-journey", id]
+            app.launch()
+            XCTAssertTrue(app.descendants(matching: .any)["title"].waitForExistence(timeout: 10), id)
+            app.terminate()
+        }
+    }
 }

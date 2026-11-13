@@ -36,7 +36,8 @@ final class FishingModelTests: XCTestCase {
     var tackle = 0
 
     func model(padding: Double = 1.5, random: @escaping () -> Double = { 0.5 }) -> FishingModel {
-        FishingModel(padding: padding, random: random,
+        FishingModel(field: Horn1849Forage.skin.field, quarry: Journeys.journey(Horn1849.id).quarry, seconds: 25,
+                     padding: padding, random: random,
                      useTackle: { [unowned self] in
                          guard tackle > 0 else { return false }
                          tackle -= 1

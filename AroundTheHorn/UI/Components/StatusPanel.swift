@@ -72,9 +72,9 @@ enum Stores {
     }
 
     /// With its unit, for the supplies list and the status box: "1,500 lbs", "9.5 crates",
-    /// and what is loose aboard counted singly, "60 throws".
+    /// and what is loose aboard counted singly and written plain, "60 throws".
     static func amount(_ it: Item, _ g: GameState, _ words: Words) -> String {
-        if let loose = words.looseUnits[it.key] { return "\(formatNumber(g[it.key])) \(loose)" }
+        if let loose = words.looseUnits[it.key] { return "\(Int(g[it.key].rounded(.down))) \(loose)" }
         if words.fractional.contains(it.key) { return "\(tenths(units(it, g))) \(it.unit)" }
         return "\(formatNumber(units(it, g))) \(it.unit)"
     }

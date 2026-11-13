@@ -23,7 +23,7 @@ final class GameControllerTests: XCTestCase {
         c.setNames(ship: "", captain: "Ira", crew: ["", "", "", ""])
         c.chooseDeparture(year: 1849, month: 0)
         guard case .outfit = c.screen else { return XCTFail("\(c.screen)") }
-        c.enterNewYorkShop()
+        c.enterFirstShop()
         guard case .shop(let done) = c.screen else { return XCTFail("\(c.screen)") }
         c.run { $0.buy([.food: 2000, .water: 800, .limes: 20, .clothes: 5, .meds: 6, .sailcloth: 5, .timber: 5, .tackle: 2]) }
         done()
@@ -49,7 +49,7 @@ final class GameControllerTests: XCTestCase {
         c.chooseRole(.merchant)
         c.setNames(ship: "", captain: "", crew: ["", "", "", ""])
         c.chooseDeparture(year: 1849, month: 0)
-        c.enterNewYorkShop()
+        c.enterFirstShop()
         guard case .shop(let done) = c.screen else { return XCTFail() }
         done()
         guard case .message(let t, _, let then) = c.screen else { return XCTFail("\(c.screen)") }
@@ -69,7 +69,7 @@ final class GameControllerTests: XCTestCase {
             case .choice(let e): c.choose(e, option: e.options.firstIndex(where: \.enabled)!)
             case .burial(let id, let cause): c.bury(crewID: id, cause: cause, epitaph: "")
             case .portMenu, .seaMenu:
-                XCTAssertNotNil(p.loadSave(), "a menu always has a save behind it")
+                XCTAssertNotNil(p.loadSave(Horn1849.id), "a menu always has a save behind it")
                 c.startTravel()
             case .finale: return "finale"
             case .gameOver: return "gameover"
@@ -86,7 +86,7 @@ final class GameControllerTests: XCTestCase {
         for _ in 0..<6 {
             setUpVoyage()
             endings.append(playOut())
-            XCTAssertNil(p.loadSave(), "no save after the voyage ends")
+            XCTAssertNil(p.loadSave(Horn1849.id), "no save after the voyage ends")
             XCTAssertFalse(c.traveling)
             c.goToTitle()
         }
@@ -111,8 +111,8 @@ final class GameControllerTests: XCTestCase {
         }
         let f = try! XCTUnwrap(finale)
         XCTAssertNotNil(f.place, "a fresh merchant's arrival beats the tenth score")
-        XCTAssertEqual(p.topTen()[f.place!].name, "Ira")
-        XCTAssertNil(p.loadSave())
+        XCTAssertEqual(p.topTen(c.journey)[f.place!].name, "Ira")
+        XCTAssertNil(p.loadSave(Horn1849.id))
     }
 
     func testHeavingToAndBackgroundingStopTheClock() {
@@ -124,7 +124,7 @@ final class GameControllerTests: XCTestCase {
         c.scenePhaseChanged(.background)
         XCTAssertFalse(c.traveling)
         guard case .seaMenu = c.screen else { return XCTFail("a menu, not the loop, on return") }
-        XCTAssertNotNil(p.loadSave())
+        XCTAssertNotNil(p.loadSave(Horn1849.id))
     }
 
     func testContinuingASavedVoyage() {
