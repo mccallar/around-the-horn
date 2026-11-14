@@ -148,3 +148,18 @@ port row is "Seek a trade". Words only: no number, formula or random draw change
 prototype parity, balance and golden-voyage tests are untouched. The rail journey's
 matching lines were reworded the same day. The reference screenshots of the screens that
 show these lines are retaken with the next screenshot walk.
+
+## D12 — The web version runs the engine itself, compiled to WebAssembly (2026-11-14)
+
+Ryan ruled that the browser runs the exact Swift engine, not a second copy of the rules.
+`HornWeb/` is a JSON bridge over the engine's public calls (GameController's, one for
+one), built by `Tools/build_web.sh` into the committed `web/horn.wasm` (web/README.md).
+Under WASI the engine imports FoundationEssentials instead of Foundation: the full
+Foundation brings ICU's data and made the file 62 MB, Essentials 13 MB. Essentials lacks
+the two String methods the engine uses (`trimmingCharacters`, `replacingOccurrences`), so
+Text.swift has them behind `#if os(WASI)`, matching by Character as Apple's Foundation
+does. On Apple platforms nothing changes: the `#if` keeps `import Foundation`, and the
+three gates are untouched. `Tools/web-tests/golden.mjs` replays the 300 golden voyages
+through horn.wasm against the Mac's fixture, and `parity.mjs` compares every reply of
+seeded 1849 and rail voyages between horn.wasm and the bridge built for the Mac. An Int
+is 32 bits in WebAssembly; no amount in the game comes near 2^31.
