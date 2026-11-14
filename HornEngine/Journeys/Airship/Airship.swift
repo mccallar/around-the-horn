@@ -24,7 +24,7 @@ public final class Airship: Journey {
         super.init(id: Self.id, text: Self.strings)
         title = "Over the Pole"
         subtitle = "1926 · Rome to Nome by airship, over the top of the world"
-        blurb = "Nine thousand six hundred kilometres in a hydrogen airship: five mooring masts, then the North Pole and four thousand kilometres of ice nobody has seen. Every kilo has to be lifted, and petrol is life."
+        blurb = "Nine thousand six hundred kilometres in a hydrogen airship: five mooring masts, then 4,300 kilometres over the North Pole with no mast at all. Every kilo has to be lifted, and petrol is life."
         items = AirshipData.items
         stops = AirshipData.stops
         regions = AirshipData.regions

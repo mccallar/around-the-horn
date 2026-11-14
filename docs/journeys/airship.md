@@ -1006,3 +1006,141 @@ bit of 1849 when 1849's values are used.
 - Oslo carried that name from 1925. Millibars were in meteorological use from 1914; pilot
   balloons and theodolites were the standard way to measure winds aloft in the 1920s; the
   Bergen school of meteorology dates from 1917.
+
+---
+
+## As built
+
+Engine files: `HornEngine/Journeys/Airship/` (`Airship.swift` tables, sentences and hooks;
+`AirshipData.swift` the data namespace; `Airship+Masts.swift`; `Airship+Events.swift`;
+`Airship+Choices.swift`). Tests: `HornEngineTests/AirshipTests.swift`. The numbers below are
+the ones in the code, and the tests hold them. Everything not listed here was built as the
+spec says.
+
+### Stock roles
+
+| Engine key | Over the Pole | Unit, base price at Rome |
+|---|---|---|
+| `food` | Provisions | kg, $0.50, holds 300 |
+| `water` | Drinking water | litre, $0.05, holds 300 |
+| `limes` | Coffee & cocoa (wards off watch fatigue) | tin, $4, holds 20 |
+| `meds` | Medicine | kit, $15, holds 10 |
+| `clothes` | Fur flying suits | suit, $18, holds 8 |
+| `sailcloth` | Engine spares (mend `sails` = the engines) | box, $22, holds 10 |
+| `timber` | Water ballast (mends `hull` = lift; lift 0 forces her down) | bag, $8, holds 16 |
+| `tackle` | Pilot balloons, stored as balloons, 10 a box | box, $4, holds 30 boxes |
+| `fuel` | Petrol | kg, **$0.015**, holds 8,000 |
+
+### Numbers as shipped
+
+- **Purses:** financier **$1,200**, engineer **$575**, meteorologist **$490** (spec: $650 and
+  $425). Perks as the spec: the engineer's bag of ballast gives +35 lift and a box of spares
+  +40 engines (others +20 / +25); the meteorologist keeps up to 900 kg of winds a session
+  with 4 px of aim (others 450 kg, 1.5 px).
+- **Petrol:** $0.015 a kg at Rome (spec $0.02). At the masts: Pulham $0.0162, Oslo $0.0195,
+  Vadsø $0.0239, Kings Bay $0.0281.
+- A turn is a four-hour watch from 08:00 on the 1st (`tickHours 4`, `startHour 8`). Rest
+  menu 1, 3, 6, 12 watches.
+- Paces 190 / 250 / 310 km a watch, burning 150 / 250 / 420 kg; rations 0.3 / 0.2 / 0.1 kg.
+  Water 0.6 litre a head a watch; rain and thunderstorms catch 6–18 litres.
+- Health: starving −4, thirst −6; freezing −1.4 with a suit, −4.5 without; cold −2.2
+  without a suit. Illness `0.006 + (100 − hp) × 0.0005` a head a watch, plus the 1849
+  extras. Watch fatigue after 12 watches without coffee at `(n − 12) × 0.01` (max 0.12),
+  cured at 0.35 a watch with coffee and 0.6 at a mast.
+- Lift: 0.15 a flying watch, plus snow `rnd(0, 0.5)`, icing `rnd(1, 3) × pace × iceMult`,
+  gale `rnd(0, 0.8) × (1.5 at full speed)`, thunderstorm `rnd(1, 2.6) × pace`, and 0.6
+  above the fog. Pace factor: full 1.6, cruising 1, economical 0.7. Under the fog `iceMult`
+  is 1.5.
+- Events on 15% of flying watches; under the fog a ridge strike first at 4% (1% with the
+  $60 forecasts). Heavy ship: below 35% lift with more than 300 kg of petrol, 6% a watch
+  to dump 100–250 kg.
+- Gas plant $3 a point of lift, overhaul $2 a point of engines, times the mast's
+  multiplier.
+- Score as §17; ranks Commander 7,000, Navigator 4,000, Rigger 2,000, Ballast.
+
+### Balance
+
+`JourneyBot`, 30 seeded flights a role, seed 500, the policy in `AirshipTests.policy()`:
+cruising throughout; the financier on full rations, the others on short; at every mast buy
+food, water and petrol for the run to the next mast at 70% of cruising speed plus four
+watches, coffee to match, a fur suit each, two medicine kits, two boxes of spares and three
+bags of ballast; balloons to 60 (engineer) or 100 (meteorologist) and send them up when the
+tanks hold under 6 or 15 watches; spares and ballast below 60%; gas plant and overhaul at a
+mast below 55%; fly on past steamers, put the stowaway off, decline the newspaper, help the
+castaways, celebrate the Circle, climb out of the murk, come down at Barrow; at the Pole go
+above the fog on an even watch and under it on an odd one, buying the forecasts.
+
+| Departure | Financier | Engineer | Meteorologist | Median winning flight |
+|---|---|---|---|---|
+| April | 29/30 | 18/30 | 15/30 | 81 watches |
+| **May (recommended)** | **29/30** | **25/30** | **18/30** | **78 watches** |
+| June | 30/30 | 14/30 | 19/30 | 83 watches |
+| July | 28/30 | 12/30 | 11/30 | 85 watches |
+| May, economical | 28/30 | 24/30 | 21/30 | 95 watches |
+| May, full speed | 26/30 | 0/30 | 4/30 | 70 watches |
+
+May is inside the bands (85–100 / 60–90 / 35–70%) and a winning flight takes about thirteen
+days. On a second seed set (7000) May gives 29 / 20 / 16. Median winning scores in May:
+financier ~2,840 (Rigger), engineer ~4,570 (Navigator), meteorologist ~8,250 (Commander).
+Losses are spread across thirst and hunger after the money runs out, watch fatigue (it
+kills as "exhaustion"), infected wounds, pneumonia, influenza, frostbite and exposure.
+
+The tests assert the May bands and a median of 70–100 watches, that July is at least 15
+points harder for the two poorer roles, that full speed halves their chances, and that
+losing flights end at least three ways.
+
+### Departures from the spec, and why
+
+1. **The bands.** This build was asked for 85–100 / 60–90 / 35–70%, not the spec's
+   ≥85 / 45–85 / 15–50%. With the spec's prices and purses the bot won 29 / 4 / 0 of 30 in
+   May: what decides a flight is whether the money lasts to the Kings Bay leap, and the
+   spec's engineer and meteorologist cannot pay for it. Petrol came down a quarter and the
+   two poorer purses were reset to $575 and $490. The win rate is steep in the purse: the
+   meteorologist wins 4 of 30 at $425, 18 at $490 and 29 at $575.
+2. **The bot.** `JourneyBot` flies one pace for every role and shops for the next stop with
+   a mast, so it cannot do the spec's "economical when short" or "fill the tanks at Vadsø".
+   Its policy is listed above; the departure table is what it gives.
+3. **Drifting** is built from the shared rules: `noFuelSpeed` is 1, so a watch that starts
+   with some petrol is still powered and empties the tanks; a watch that starts with none
+   drifts at `60 × weather × (0.75 + 0.25 × lift)` from `adjustSpeed`, and `propulsionWear`
+   returns 0 (its jitter is still drawn).
+4. **Two shared hooks**, both with defaults that leave 1849 and rail byte-identical (the three
+   gates and the rail bands are green): `Journey.propulsionWear` (the drive's wear a turn)
+   and `Journey.wreckedBody` (the paragraph under the wreck title, so being forced down
+   reads "onto the ice" in a `north` region and "into a field" elsewhere).
+5. **Heavy ship** is rolled in `tick`, after `wear` has said its warnings, not inside `wear`.
+   The odds and amounts are the spec's.
+6. **The date line** is the shared one for short turns ("May 3, 1926, 4 p.m."), as rail's
+   is, not "May 3, 1926 · 1600". Changing it would change rail's.
+7. **Leaving Rome** needs provisions only: the engine's `depart` has no fuel check, and with
+   empty tanks she simply drifts. If the app wants the spec's second refusal ("You can't
+   cast off with empty tanks!") it can check `fuel` itself.
+8. **The stowaway** is only found before Pulham (as well as before watch 9): put off
+   anywhere later, they could never leave.
+9. **Point Barrow** also adds 2 tins of coffee: the message hands up "a sack of coffee", so
+   it is real.
+10. **The old hulls** seen from the air are named from this journey's own list
+    (`AirshipData.wrecks`), not 1849's ship names.
+11. **Weather skies**: the following wind and the headwind are both `.breeze`, icing fog is
+    `.fog` and the gale `.gale`. The status panel turns red on `.storm` only, so icing fog
+    is not red unless the skin draws it so.
+12. **A fall from the ladder** records the grave directly with its fixed epitaph and shows no
+    burial screen, as 1849's man overboard does. The broken arms from flying ice and the
+    handling lines open no medicine kit, as 1849's Galápagos does not.
+13. **The castaways' fair weather** is `forceFair = 2`, and the watch spent helping uses one
+    of the two.
+14. **The finale's lines** are `Airship.finale(_:)` in the engine, for the skin to show,
+    because they carry the watch and day counts.
+15. The blurb, the stops' "You have reached ___" names and the arrival line
+    ("[dim]DATE · watch N[/dim]") are as the spec.
+
+### Things worth knowing
+
+- Forced down is a rare ending for the bot because it always carries three bags of ballast
+  and tops up the gas below 55%. A player who skips ballast and flies under the fog will meet
+  it.
+- Full speed cannot cross the ice on one tank, as the spec says; even the financier loses a
+  few flights to it.
+- The meteorologist's balloons are worth a great deal: a session of 15 at 55% finds ~800 kg
+  of petrol for $6 of balloons. Its high median score is the ×3 on a flight that usually
+  arrives with petrol in hand.
