@@ -45,6 +45,11 @@ Three gates prove 1849 is unchanged and are never re-recorded: `PrototypeParityT
 | `crewFactor(_:)` | 1 / 0.85 / 0.65 / 0.45 for 4+ / 3 / 2 / 1 hands | the vehicle needs fewer or more |
 | `adjustSpeed(_:_:_:)` | nothing | grades, currents, head winds, a hired helper |
 | `structureDamage(_:_:)` | creep + rough weather × pace | the structure wears differently |
+| `propulsionWear(_:)` | pace × weather × jitter | the drive rests while moving (an airship adrift) |
+| `wreckedTitle(_:)`, `wreckedBody(_:)`, `leaderDiedBody(_:)` | `text.wrecked`, `text.wreckedBody`, `text.leaderDiedBody` | where it happens, or who is left, changes the ending |
+| `mayDepart(_:)` | true | leaving the first port needs more than food (`text.noProvisions` says why) |
+| `leaving(_:)` | nothing | leaving the ground costs something (a balloon's climb) |
+| `foraged(_:)` | nothing | a foraging outing does more than stow its catch |
 | `tick(_:_:_:_:)` | nothing | a per-turn rule of its own, in every mode |
 | `dayEvents(_:_:_:)` | `eventChance` → one of `events` | several event tables |
 | `events(_:_:)` | none | always: this is the journey's event list |
