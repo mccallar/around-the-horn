@@ -390,6 +390,11 @@ public class Journey {
         }
     }
 
+    /// A drawn offer, last of all and after every draw: as it stands, cut to fit, or nil for
+    /// no offer. The default leaves it as drawn, even when it gives more than there is room
+    /// for (the excess is lost when it is stowed, as in the prototype).
+    func fitOffer(_ e: GameEngine, _ o: Offer) -> Offer? { o }
+
     /// Bulk goods to 10s, boxed goods to whole boxes, money to 5s, the rest to whole units.
     public func roundTrade(_ good: TradeGood, _ v: Double) -> Int {
         switch good {
