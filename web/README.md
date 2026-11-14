@@ -31,6 +31,9 @@ With Node 20 or later, from the repository's root:
     node Tools/web-tests/imports.mjs   # the WASI shim answers exactly what horn.wasm imports
     node Tools/web-tests/golden.mjs    # the 300 golden 1849 voyages hash as the Mac recorded them (~1 min)
     node Tools/web-tests/parity.mjs    # horn.wasm and the Mac build give identical replies (~1 min)
+    node Tools/web-tests/play.mjs      # the game's flow, played through its screens: wins, losses, saves
+    node Tools/web-tests/skin.mjs      # 1849's skin is the app's, and every scene, chart and catch draws
+    node Tools/web-tests/ui.mjs        # the page on a small DOM of its own: keys, taps, whole voyages clicked
 
 `parity.mjs` builds the bridge for the Mac with `swift build` (Xcode's Swift); set
 `HORN_NATIVE` to an already built `HornWeb` to skip that, and `VOYAGES` to play more than
@@ -61,6 +64,30 @@ With Node 20 or later, from the repository's root:
   generator's position). Calls that take time also reply with `interrupts`, in the order
   the app shows them; `readInterrupt` reads one into `{type, …}`. Hand the interrupt
   itself back to the engine (`resolve`, `save`), never the reading of it.
+- The game is plain ES modules in `js/`, after the app's Swift, file for file:
+
+  | Module | The app's |
+  |---|---|
+  | `flow.js` | `GameController` (and `+Menus`, `Persistence`): the screen in hand, the interrupt queue, the travel loop (one turn every 0.7 s), saving with what is still waiting (D10), the top ten |
+  | `screens.js` | the SwiftUI screens, as descriptions with no DOM: blocks of words, and the numbered choices with what each does |
+  | `ui.js` | `RootView`: draws the descriptions in the page, and turns taps and keys into the choices |
+  | `journeys/` | the skins: `horn1849-skin.js`, `-scene.js`, `-chart.js`, `-forage.js` are `Horn1849Skin.swift` and the three beside it; `skins.js` is `Skins.all` |
+  | `pixels.js`, `drawing.js`, `fishing.js` | `PixelCanvas`, `ScenePicture` and `ChartView`, `FishingView` and its model |
+  | `stores.js`, `markup.js`, `sound.js` | `Stores`, `Markup`, the square-wave `Synth` |
+
+  Nothing in the flow or the screens touches the page, so the tests play them in Node.
+  The pixel canvas draws on a browser canvas (`ContextCanvas`, each logical pixel a whole
+  number of device pixels, scaled up with `image-rendering: pixelated`) or on a plain RGBA
+  buffer (`BufferCanvas`, for the tests).
+- Saves and top tens are in `localStorage`, one each per journey: `horn.save-<id>` (the
+  app's save file, `pending` and all) and `horn.topten-<id>`, with `horn.muted`. A save
+  the engine won't take is never offered and never deleted.
+- `?journey=<id>` opens on that journey's title card, as the app's `-journey <id>` does.
+  With one journey skinned there is no picker; adding a skin to `journeys/skins.js` brings
+  it, as in the app.
+- Keys: 1–9 press a numbered choice, Return a lone one; on the fishing screen Space throws
+  at the nearest fish (the app's VoiceOver throw). Leaving the page under way stops the
+  voyage on its menu and saves it.
 - Randomness: `newSeed()` draws 64 bits with `crypto.getRandomValues` for each voyage, and
   the engine plays it with its own `SeededRNG`, so a seed replays a voyage exactly.
   Loading a save takes a seed too (`view.rng` continues where the voyage left off).
