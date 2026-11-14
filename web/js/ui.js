@@ -52,7 +52,8 @@ function blockHTML(b) {
       return `<div class="grave"><div>${html(b.name)}<span class="dim small">${html(b.rest)}</span></div>`
         + `<div class="small teal">${html(b.epitaph)}</div></div>`;
     case 'legend':
-      return `<div class="legend">${b.items.map((x) => `<span${x.color ? ` class="${x.color}"` : ''}>${html(x.text)}</span>`).join('')}</div>`;
+      return `<div class="legend">${b.items.map((x) => `<span${x.color ? ` class="${x.color}"` : ''} aria-label="${html(x.label)}">`
+        + `${html(x.text)}</span>`).join('')}</div>`;
     case 'tally': return `<div class="row small tally">${b.items.map((x) => `<span>${html(x)}</span>`).join('')}</div>`;
     case 'rule': return '<div class="rule"></div>';
     default: throw new Error(`no way to draw a ${b.type}`);
@@ -128,6 +129,7 @@ export class UI {
     this.banner.textContent = d.banner;
     this.soundButton.textContent = f.muted ? '♪ off' : '♪ on';
     this.soundButton.setAttribute('aria-label', f.muted ? 'Sound off' : 'Sound on');
+    this.soundButton.title = 'Toggles sound';
     if (f.screenID !== this.renderedID) this.build(d);
     else this.update(d);
   }
@@ -298,7 +300,7 @@ export class UI {
   }
 
   key(e) {
-    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
     const d = this.d;
     if (!d) return;
     const typing = e.target?.tagName === 'INPUT';

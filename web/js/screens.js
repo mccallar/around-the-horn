@@ -330,7 +330,8 @@ export function describe(c) {
         { type: 'chart', label: chart.label(v) },
         { type: 'legend', items: J.stops.map((st, i) => {
           const passed = i <= g.stopIndex, next = i === g.stopIndex + 1;
-          return { text: `${passed ? '✓' : next ? '►' : '·'} ${st.short}`, color: passed ? 'amber' : next ? null : 'dim' };
+          return { text: `${passed ? '✓' : next ? '►' : '·'} ${st.short}`, color: passed ? 'amber' : next ? null : 'dim',
+            label: `${st.short}, ${passed ? 'passed' : next ? 'next' : 'ahead'}` };
         }) },
         para(chart.footer(v), 18, 'dim'),
       ];
