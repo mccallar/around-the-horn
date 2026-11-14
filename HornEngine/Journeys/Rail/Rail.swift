@@ -44,9 +44,9 @@ public final class Rail: Journey {
         paces[.full] = PaceInfo(name: "Wide open", speed: 54, hp: -1, wear: 4.4, fuel: 15,
                                 desc: "About 54 miles in four hours. Half again the wood, most of twice the wear, and nobody sleeps.")
 
-        rationings[.filling] = RationsInfo(name: "Filling", amount: 0.5, hp: 1, desc: "Three square meals a day.")
-        rationings[.meager] = RationsInfo(name: "Meager", amount: 0.35, hp: -0.3, desc: "Two meals and a lot of coffee.")
-        rationings[.bare] = RationsInfo(name: "Bare bones", amount: 0.2, hp: -2.2, desc: "Hard bread and the memory of bacon.")
+        rationings[.filling] = RationsInfo(name: "Hearty", amount: 0.5, hp: 1, desc: "Three square meals a day.")
+        rationings[.meager] = RationsInfo(name: "Lean", amount: 0.35, hp: -0.3, desc: "Two meals and a lot of coffee.")
+        rationings[.bare] = RationsInfo(name: "Scraps", amount: 0.2, hp: -2.2, desc: "Hard bread and the memory of bacon.")
 
         departures = RailData.departures
         firstNames = RailData.firstNames

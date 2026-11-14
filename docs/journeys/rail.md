@@ -60,7 +60,7 @@ No preventive item (`limes`) is stocked: there is no scurvy on a twelve-day run.
 | Timetable | 42 | 1 cord | 2.6 | 0 |
 | Wide open | 54 | 1.5 cords | 4.4 | −1 |
 
-Rations: Filling 0.5 lb a head a turn (+1), Meager 0.35 (−0.3), Bare bones 0.2 (−2.2).
+Rations: Hearty 0.5 lb a head a turn (+1), Lean 0.35 (−0.3), Scraps 0.2 (−2.2).
 
 ## The road
 
