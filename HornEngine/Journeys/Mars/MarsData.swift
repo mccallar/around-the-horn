@@ -17,7 +17,7 @@ enum MarsData {
     static let dockBurn = 60.0
     /// Turnover: running on four more days.
     static let turnoverBurn = 80.0
-    static let turnoverGain = 1200
+    static let turnoverGain = 1400
     /// Tenths of a tonne for a full propulsive capture.
     static let captureBurn = 100.0
     /// Where the capture's rough days end: the Phobos yard.

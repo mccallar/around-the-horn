@@ -286,12 +286,12 @@ final class MarsTests: XCTestCase {
         let hurt = engine(ship(mile: 24_000), [0, 0.5])
         _ = hurt.resolve(c, option: 1)
         XCTAssertEqual(hurt.state.fuel, 420)
-        XCTAssertEqual(hurt.state.mile, 25_200)
+        XCTAssertEqual(hurt.state.mile, 25_400)
         XCTAssertEqual(hurt.state.sails, 85)
 
         let fine = engine(ship(mile: 24_000))
         _ = fine.resolve(c, option: 1)
-        XCTAssertEqual(fine.state.mile, 25_200)
+        XCTAssertEqual(fine.state.mile, 25_400)
         XCTAssertEqual(fine.state.sails, 100)
 
         // A tired drive: 30% becomes 50%.
