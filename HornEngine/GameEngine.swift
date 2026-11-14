@@ -354,8 +354,7 @@ public final class GameEngine {
         if state.hull <= 0 && !state.over {
             state.hull = 0
             state.over = true
-            q.append(.gameOver(title: journey.text.wrecked(TextMarkup.escape(state.ship)),
-                               body: journey.wreckedBody(state)))
+            q.append(.gameOver(title: journey.wreckedTitle(state), body: journey.wreckedBody(state)))
         }
     }
 

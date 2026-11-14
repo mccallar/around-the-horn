@@ -38,9 +38,9 @@ public final class Balloon: Journey {
         roles[.merchant] = RoleInfo(label: "Be a chocolate maker from Zurich", title: "chocolate maker",
                                     money: 15000, mend: 25, patch: 20, catchLimit: 40, aim: 1.5)
         roles[.shipwright] = RoleInfo(label: "Be a balloon builder from Bristol", title: "balloon builder",
-                                      money: 6250, mend: 35, patch: 30, catchLimit: 40, aim: 1.5)
+                                      money: 7250, mend: 35, patch: 30, catchLimit: 40, aim: 1.5)
         roles[.whaler] = RoleInfo(label: "Be a bush pilot from Alaska", title: "bush pilot",
-                                  money: 5000, mend: 25, patch: 20, catchLimit: 60, aim: 4)
+                                  money: 6500, mend: 25, patch: 20, catchLimit: 60, aim: 4)
 
         paces[.easy] = PaceInfo(name: "Low & slow", speed: 110, hp: 0.5, wear: 0.6, fuel: 12,
                                 desc: "Around 10,000 feet. Slow winds, gentle on burners and crew.")
@@ -267,6 +267,12 @@ public final class Balloon: Journey {
             d += e.rnd(1, 2.6) * (pace == .full ? 1.6 : pace == .easy ? 0.7 : 1) * (reg.has("ice") ? 1.5 : 1)
         }
         return d
+    }
+
+    public override func wreckedTitle(_ s: GameState) -> String {
+        let title = super.wreckedTitle(s)
+        guard s.region.has("sea") else { return title }
+        return "The [i]\(TextMarkup.escape(s.ship))[/i] has come down in the sea."
     }
 
     public override func wreckedBody(_ s: GameState) -> String {

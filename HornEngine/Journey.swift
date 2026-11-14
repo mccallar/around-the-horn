@@ -316,6 +316,9 @@ public class Journey {
             * e.rnd(rules.wearJitter.lowerBound, rules.wearJitter.upperBound)
     }
 
+    /// The wreck's title, from `text.wrecked`. Override when where it happens changes it.
+    public func wreckedTitle(_ s: GameState) -> String { text.wrecked(TextMarkup.escape(s.ship)) }
+
     /// The paragraph under `text.wrecked`. Override when where it happens changes it.
     public func wreckedBody(_ s: GameState) -> String { text.wreckedBody }
 

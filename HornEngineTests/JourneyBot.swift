@@ -9,11 +9,16 @@ final class JourneyBot {
     struct Policy {
         var departure = 0
         var pace = Pace.steady
+        /// Chooses the pace before each turn under way (nil: keep `pace`).
+        var choosePace: ((GameEngine) -> Pace)?
         var rations: [Role: Rations] = [:]
         /// Stock up for the run to the next port at this share of the pace's speed, plus
         /// `marginTurns` in hand.
         var speedShare = 0.85
         var marginTurns = 10.0
+        /// Multiplies the run's food, water, fuel or preventive by item (1 if absent): heat
+        /// drinks more than the tables' daily ration, cold burns more.
+        var stockFactor: [ItemKey: Double] = [:]
         /// What to hold after shopping, in stored units, bought in this order after the
         /// consumables and the warm clothes.
         var spares: [(ItemKey, Double)] = [(.meds, 2), (.sailcloth, 2), (.timber, 2)]
@@ -23,6 +28,8 @@ final class JourneyBot {
         var yardBelow = 70.0
         var restBelowHP = 70.0
         var restTurns = 3
+        /// Shop before using the yard, so the money goes on supplies first.
+        var yardAfterShop = false
         /// Forage when this few turns of the reward are left (0: never).
         var forageBelowTurns: [Role: Double] = [:]
         var throwsPerOuting = 15
@@ -86,6 +93,7 @@ final class JourneyBot {
         if below > 0, rewardTurns < below, e.fishingRefusal == nil {
             if case .ended(let r) = process(e.landCatch(simulatedCatch())) { return r }
         }
+        if let choose = policy.choosePace { e.state.pace = choose(e) }
         e.setSail()
         return nil
     }
@@ -117,9 +125,10 @@ final class JourneyBot {
 
     func portVisit() -> Result? {
         if e.state.averageHP < policy.restBelowHP, case .ended(let r) = process(e.rest(days: policy.restTurns)) { return r }
+        if policy.yardAfterShop { shop() }
         if e.state.hull < policy.yardBelow && e.canRepairHullAtYard, case .ended(let r) = process(e.repairHullAtYard()) { return r }
         if e.state.sails < policy.yardBelow && e.canRecutSailsAtYard, case .ended(let r) = process(e.recutSailsAtYard()) { return r }
-        shop()
+        if !policy.yardAfterShop { shop() }
         e.setSail()
         return nil
     }
@@ -131,11 +140,12 @@ final class JourneyBot {
         let pace = j.pace(e.state.pace)
         let turns = Double(next.mile - e.state.mile) / (pace.speed * policy.speedShare) + policy.marginTurns
         let n = crew
+        func f(_ k: ItemKey) -> Double { policy.stockFactor[k] ?? 1 }
         var wants: [(ItemKey, Double)] = [
-            (.food, n * j.rations(e.state.rations).amount * turns),
-            (.water, n * j.rules.water * turns),
-            (.fuel, pace.fuel * turns),
-            (.limes, j.deficiency == nil ? 0 : n * j.rules.preventiveUse * turns),
+            (.food, n * j.rations(e.state.rations).amount * turns * f(.food)),
+            (.water, n * j.rules.water * turns * f(.water)),
+            (.fuel, pace.fuel * turns * f(.fuel)),
+            (.limes, j.deficiency == nil ? 0 : n * j.rules.preventiveUse * turns * f(.limes)),
             (.clothes, n),
         ]
         wants += policy.spares
