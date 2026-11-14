@@ -499,6 +499,27 @@ final class KlondikeTests: XCTestCase {
         XCTAssertEqual(chilkoot.num("slideSpring"), 0.02)
         XCTAssertEqual(white.num("slideSpring"), 0.005)
         XCTAssertGreaterThan(chilkoot.num("slide"), white.num("slide"))
+
+        // A day on the trail draws 0.015 for the slide: under the Chilkoot's spring odds,
+        // over its winter odds and the White Pass's spring odds.
+        func day(month: Int, pass: Double, mile: Int = 11400, _ values: [Double]) -> GameEngine {
+            let e = engine(party(mile: mile, month: month, pass: pass), values)
+            var q: [Interrupt] = []
+            klondike.trailDay(e, &q, e.state.region)
+            return e
+        }
+        func draws(_ e: GameEngine) -> Int { (e.rng as! ScriptedRNG).draws }
+        let april = day(month: 3, pass: KlondikeData.chilkoot, [0.015, 0, 0, 0])
+        XCTAssertEqual(april.state.hull, 90)
+        XCTAssertEqual(april.state.food, 5900)
+        // No slide; the next draw (0.999) is the day's event roll, and it fails too.
+        for e in [day(month: 2, pass: KlondikeData.chilkoot, [0.015]), day(month: 3, pass: KlondikeData.whitePass, [0.015])] {
+            XCTAssertEqual(e.state.hull, 100)
+            XCTAssertEqual(e.state.food, 6000)
+            XCTAssertEqual(draws(e), 2)
+        }
+        // Below the slopes there is no slide to draw for: the only draw is the event roll.
+        XCTAssertEqual(draws(day(month: 3, pass: KlondikeData.chilkoot, mile: 11250, [0.5])), 1)
     }
 
     func testTheSeasonsMoveTheColdAndTheIce() {
@@ -533,10 +554,17 @@ final class KlondikeTests: XCTestCase {
         XCTAssertEqual(engine(s).fishingRefusal, klondike.text.tooRough)
         s.tackle = 0
         XCTAssertEqual(engine(s).fishingRefusal, klondike.text.noTackle)
+        // 200 lbs caught, 150 kept (the catch limit), then a day's eating.
         let e = engine(party(mile: 13500))
         e.state.food = 100
         _ = e.landCatch(200)
-        XCTAssertGreaterThanOrEqual(e.state.food, 200)
+        XCTAssertEqual(klondike.role(.merchant).catchLimit, 150)
+        XCTAssertEqual(e.state.food, 100 + 150 - 5 * klondike.rations(e.state.rations).amount)
+        // And no more than there is room for.
+        let full = engine(party(mile: 13500))
+        full.state.food = klondike.item(.food).cap - 40
+        _ = full.landCatch(200)
+        XCTAssertEqual(full.state.food, klondike.item(.food).cap - 5 * klondike.rations(full.state.rations).amount)
     }
 
     func testWhatAilsYouDependsOnTheCold() {
@@ -670,6 +698,15 @@ final class KlondikeTests: XCTestCase {
     }
 
     // MARK: - What the words say matches the tables
+
+    func testDistancesShowInMilesWithOneDecimal() {
+        XCTAssertEqual(Klondike.unitsPerMile, 10)
+        XCTAssertEqual(klondike.totalMiles, 17000)
+        XCTAssertEqual(Klondike.miles(klondike.totalMiles), "1,700.0 miles")
+        XCTAssertEqual(Klondike.mileNumber(KlondikeData.summitMile), "1,136.5")
+        XCTAssertEqual(Klondike.miles(5), "0.5 miles")
+        XCTAssertEqual(Klondike.progress(party(mile: 11365)), "1,136.5 of 1,700.0 miles traveled. 563.5 to go.")
+    }
 
     func testJuneauFursAreCheaperThanSeattlesAsTheStorekeeperSays() {
         let s = party(mile: 10200)
@@ -887,7 +924,18 @@ final class KlondikeTests: XCTestCase {
         XCTAssertLessThanOrEqual(r.rates[.shipwright] ?? 1, 0.9 + 1e-9, r.report)
         XCTAssertGreaterThanOrEqual(r.rates[.whaler] ?? 0, 0.35, r.report)
         XCTAssertLessThanOrEqual(r.rates[.whaler] ?? 1, 0.7, r.report)
-        XCTAssertTrue((110...140).contains(r.medianTurns), r.report)
+        XCTAssertTrue((115...140).contains(r.medianTurns), r.report)
+    }
+
+    /// The set-piece risks are rare: a bot that always takes the risky answer (runs Five
+    /// Fingers, pushes on under a talking slope, crosses thin ice) wins about as often.
+    func testTheRiskyAnswersAreNotWhatDecidesARun() {
+        let careful = JourneyBot.survey(klondike, count: 30, seed: 1898, policy: Self.policy())
+        let reckless = JourneyBot.survey(klondike, count: 30, seed: 1898, policy: Self.policy(reckless: true))
+        print(reckless.report)
+        for role in [Role.merchant, .shipwright, .whaler] {
+            XCTAssertEqual(reckless.rates[role] ?? 0, careful.rates[role] ?? 0, accuracy: 0.2 + 1e-9, reckless.report)
+        }
     }
 
     /// January crosses the pass in deep winter: the poorer parties freeze and wear out.

@@ -146,6 +146,22 @@ public final class Klondike: Journey {
 
     // MARK: - For the skin: the words that change with the pass and the leg
 
+    /// Distances (`state.mile`, `stop.mile`, `totalMiles`) are in tenths of a mile: divide
+    /// by this to show miles.
+    public static let unitsPerMile = KlondikeData.unitsPerMile
+
+    /// A distance in tenths, as the status line and the legend show it: "1,136.5".
+    public static func mileNumber(_ units: Int) -> String { KlondikeData.mileNumber(units) }
+
+    /// A distance in tenths, in words: "1,136.5 miles".
+    public static func miles(_ units: Int) -> String { KlondikeData.miles(units) }
+
+    /// The chart's line under the legend: "1,136.5 of 1,700.0 miles traveled. 563.5 to go."
+    public static func progress(_ s: GameState) -> String {
+        let total = KlondikeData.stops[KlondikeData.stops.count - 1].mile
+        return "\(mileNumber(s.mile)) of \(mileNumber(total)) miles traveled. \(mileNumber(total - s.mile)) to go."
+    }
+
     static func route(_ s: GameState) -> Double? { s.vars[KlondikeData.routeKey] }
     static func onWhitePass(_ s: GameState) -> Bool { route(s) == KlondikeData.whitePass }
 

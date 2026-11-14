@@ -3,8 +3,8 @@ import Foundation
 // To the Klondike's tables: the outfit, the stops, the three legs of country, the weather by
 // season, and the names. Everything is in this namespace; nothing extends a shared type.
 //
-// Distances are in TENTHS of a mile: the trail moves under a mile a day. `miles(_:)` turns
-// them back into words.
+// Distances are in TENTHS of a mile: the trail moves under a mile a day. `Klondike.miles(_:)`
+// turns them back into words for the skin.
 
 enum KlondikeData {
     // MARK: - Numbers of its own
@@ -110,10 +110,17 @@ enum KlondikeData {
     static let breakupUsual = dayOfYear(month: 4, day: 28)
     static let august1 = dayOfYear(month: 7, day: 1)
 
-    /// "1,136.5 miles", from tenths.
-    static func miles(_ tenths: Int) -> String {
-        "\(formatNumber(Double(tenths / 10))).\(tenths % 10) miles"
+    /// Stored distance units in a mile.
+    static let unitsPerMile = 10
+
+    /// "1,136.5", from tenths.
+    static func mileNumber(_ tenths: Int) -> String {
+        let t = max(0, tenths)
+        return "\(formatNumber(Double(t / unitsPerMile))).\(t % unitsPerMile)"
     }
+
+    /// "1,136.5 miles", from tenths.
+    static func miles(_ tenths: Int) -> String { "\(mileNumber(tenths)) miles" }
 
     // MARK: - Stock
 
