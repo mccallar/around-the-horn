@@ -79,6 +79,10 @@ public final class GameEngine {
         var q: [Interrupt] = []
         state.note = ""
         guard let ns = state.nextStop, !state.over else { return q }
+        // Still ashore where the journey holds you (`setSail` was skipped or its hold
+        // ignored): no day passes, and the hold is asked again. No journey but the
+        // Klondike holds anyone, and asking draws nothing.
+        if state.atPort, let hold = journey.holdInPort(self) { return hold }
         state.day += 1
         let reg = state.region
         state.weather = rollWeather(reg)
@@ -141,7 +145,7 @@ public final class GameEngine {
             state.food = 0
             state.starving = true
         }
-        let wneed = n * (temp == .hot ? r.hotWater : r.water)
+        let wneed = n * journey.waterNeed(state, temp)
         if state.water >= wneed {
             state.water -= wneed
             state.thirst = false
@@ -217,17 +221,17 @@ public final class GameEngine {
         let text = journey.text
         let temp = state.temperature(in: state.region)
         let w = state.weather
-        let pace = journey.pace(state.pace)
+        let paceHP = journey.paceHP(state)
         let rations = journey.rations(state.rations)
         let harshSeason = journey.harshSeason(state)
         let deficiency = journey.deficiency
-        let port: Port? = mode == .port ? journey.port(state.currentStop.id) : nil
+        let port: Port? = mode == .port ? journey.port(state, at: state.currentStop.id) : nil
         let livingNow = state.crew.indices.filter { state.crew[$0].alive }
         for (i, idx) in livingNow.enumerated() {
             var p = state.crew[idx]
             var d = rations.hp
             if mode == .sail {
-                d += pace.hp
+                d += paceHP
                 if w.harsh != 0 { d -= w.harsh }
             }
             if mode == .sea { d += r.restAway }
@@ -317,7 +321,7 @@ public final class GameEngine {
                 ?? (state.thirst ? text.causeThirst : state.starving ? text.causeStarvation : text.causeExhaustion)
             if p.isCaptain {
                 state.over = true
-                q.append(.gameOver(title: text.leaderDied(TextMarkup.escape(p.name), cause), body: text.leaderDiedBody))
+                q.append(.gameOver(title: text.leaderDied(TextMarkup.escape(p.name), cause), body: journey.leaderDiedBody(state)))
                 return
             }
             q.append(.burial(crewID: p.id, cause: cause))
@@ -329,9 +333,7 @@ public final class GameEngine {
     func wear(_ q: inout [Interrupt], _ reg: Region) {
         let r = journey.rules
         let text = journey.text
-        let w = state.weather
-        state.sails = max(0, state.sails - journey.pace(state.pace).wear * w.wear
-            * rnd(r.wearJitter.lowerBound, r.wearJitter.upperBound))
+        state.sails = max(0, state.sails - journey.propulsionWear(self))
         let hd = journey.structureDamage(self, reg)
         state.hull = max(0, state.hull - hd)
         if state.hull < r.spoilBelow && state.food > r.spoilFoodOver && chance(r.spoilChance) {
@@ -356,8 +358,7 @@ public final class GameEngine {
         if state.hull <= 0 && !state.over {
             state.hull = 0
             state.over = true
-            q.append(.gameOver(title: journey.text.wrecked(TextMarkup.escape(state.ship)),
-                               body: journey.text.wreckedBody))
+            q.append(.gameOver(title: journey.wreckedTitle(state), body: journey.wreckedBody(state)))
         }
     }
 

@@ -6,7 +6,7 @@ extension GameEngine {
     // MARK: - Shop
 
     /// The port whose prices apply right now.
-    public var currentPort: Port? { journey.port(state.currentStop.id) }
+    public var currentPort: Port? { journey.port(state, at: state.currentStop.id) }
 
     /// Most bought units of `key` that still fit aboard (the shop's + cap).
     public func room(for key: ItemKey) -> Int {
@@ -35,14 +35,22 @@ extension GameEngine {
     /// Leaving the first port. Nil, and nobody leaves, if there's no food (the journey's
     /// `text.noProvisions` says why); otherwise the setting-off message.
     public func depart() -> String? {
-        if state.food <= 0 { return nil }
+        if state.food <= 0 || !journey.mayDepart(state) { return nil }
         state.atPort = false
+        journey.leaving(self)
         return journey.text.depart(state)
     }
 
-    /// Leave a port along the way.
-    public func setSail() {
+    /// Leave a port along the way. Also called to resume travel between ports, where it
+    /// changes nothing. A journey can hold you ashore (`Journey.holdInPort`): then you are
+    /// still in port, and what it returns is what happens instead. Empty when you leave.
+    @discardableResult
+    public func setSail() -> [Interrupt] {
+        let ashore = state.atPort
+        if ashore, let hold = journey.holdInPort(self) { return hold }
         state.atPort = false
+        if ashore { journey.leaving(self) }
+        return []
     }
 
     // MARK: - Rest
@@ -63,7 +71,7 @@ extension GameEngine {
         state.sailcloth -= 1
         state.sails = min(100, state.sails + journey.role(state.role).mend)
         var q = passDays(1, .sea)
-        if !state.over { q.append(.message(journey.text.mended(Int(jsRound(state.sails))))) }
+        if !state.over { q.append(.message(journey.repaired(state, .mend))) }
         return q
     }
 
@@ -72,7 +80,7 @@ extension GameEngine {
         state.timber -= 1
         state.hull = min(100, state.hull + journey.role(state.role).patch)
         var q = passDays(1, .sea)
-        if !state.over { q.append(.message(journey.text.patched(Int(jsRound(state.hull))))) }
+        if !state.over { q.append(.message(journey.repaired(state, .patch))) }
         return q
     }
 
@@ -94,7 +102,7 @@ extension GameEngine {
         state.money -= Double(shipyardHullCost)
         state.hull = 100
         var q = passDays(1, .port)
-        if !state.over { q.append(.message(journey.text.yardHull)) }
+        if !state.over { q.append(.message(journey.repaired(state, .yardHull))) }
         return q
     }
 
@@ -103,7 +111,7 @@ extension GameEngine {
         state.money -= Double(shipyardSailsCost)
         state.sails = 100
         var q = passDays(1, .port)
-        if !state.over { q.append(.message(journey.text.yardSails)) }
+        if !state.over { q.append(.message(journey.repaired(state, .yardSails))) }
         return q
     }
 
@@ -145,6 +153,7 @@ extension GameEngine {
         let room = Int((journey.item(reward).cap - state[reward]).rounded(.down))
         let got = min(kept, room)
         state.add(reward, Double(got))
+        journey.foraged(self)
         return [.message(journey.text.catchReport(caught, limit, got))] + passDays(1, .sea)
     }
 

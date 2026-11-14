@@ -44,7 +44,17 @@ Three gates prove 1849 is unchanged and are never re-recorded: `PrototypeParityT
 | `weatherWeights(_:_:cursed:)` | the region's | seasons or the journey's state shift the odds (use `bump`) |
 | `crewFactor(_:)` | 1 / 0.85 / 0.65 / 0.45 for 4+ / 3 / 2 / 1 hands | the vehicle needs fewer or more |
 | `adjustSpeed(_:_:_:)` | nothing | grades, currents, head winds, a hired helper |
+| `paceHP(_:)` | the pace's `hp` | the pace costs more in some places (hauling on foot against rowing) |
+| `waterNeed(_:_:)` | `rules.water`, `hotWater` when hot | the need scales with the cold, or stops on some legs (the Klondike's firewood) |
 | `structureDamage(_:_:)` | creep + rough weather × pace | the structure wears differently |
+| `propulsionWear(_:)` | pace × weather × jitter | the drive rests while moving (an airship adrift) |
+| `wreckedTitle(_:)`, `wreckedBody(_:)`, `leaderDiedBody(_:)` | `text.wrecked`, `text.wreckedBody`, `text.leaderDiedBody` | where it happens, or who is left, changes the ending |
+| `mayDepart(_:)` | true | leaving the first port needs more than food (`text.noProvisions` says why) |
+| `leaving(_:)` | nothing | leaving the ground costs something (a balloon's climb) |
+| `holdInPort(_:)` | nil: you leave | leaving a port along the way needs something first (Bennett's boat and ice). `setSail()` then returns what happens instead and you stay ashore until `state.atPort` is cleared; `sailDay()` called while still ashore returns the same hold and passes no day |
+| `port(_:at:)` | the table's port at that stop | a fork changes who keeps the store (Dyea or Skagway) |
+| `repaired(_:_:)` | `text.mended`, `patched`, `yardHull`, `yardSails` | what is mended changes on the way (an outfit, then a boat) |
+| `foraged(_:)` | nothing | a foraging outing does more than stow its catch |
 | `tick(_:_:_:_:)` | nothing | a per-turn rule of its own, in every mode |
 | `dayEvents(_:_:_:)` | `eventChance` → one of `events` | several event tables |
 | `events(_:_:)` | none | always: this is the journey's event list |
@@ -54,6 +64,8 @@ Three gates prove 1849 is unchanged and are never re-recorded: `PrototypeParityT
 | `resolve(_:_:_:_:)` | nothing | always: answers to `GameEngine.ask(key, args, …)` |
 | `forageRefusal(_:)` | no gear; rough weather | foraging needs a place or a state |
 | `tradeValue`, `roundTrade`, `describe` | from the item table | odd units |
+| `tradeKeys` | every stocked item | a good nobody trades (the balloon's water) |
+| `fitOffer(_:_:)` | the offer as drawn | an offer must fit the room left (the balloon cuts it, and its price) |
 | `score(_:)`, `rank(_:)` | five generic lines; `Rules.rankCuts` | a bonus of its own |
 
 ### Rules of authorship

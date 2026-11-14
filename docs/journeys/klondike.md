@@ -1596,3 +1596,175 @@ results identical: `PrototypeParityTests` and `BalanceSimulationTests` must stay
   only three events, and they are mild.
 - **The canyon pilot rule** is applied from the start of the river season. Historically
   it came in during the first days of June 1898, after the worst wrecks.
+
+---
+
+## As built
+
+Engine files: `HornEngine/Journeys/Klondike/` (`Klondike.swift` tables, text and hooks;
+`KlondikeData.swift` the data enum; `Klondike+Towns.swift` the ports, Bennett's boat and
+ice; `Klondike+Events.swift` hazards and events; `Klondike+Choices.swift` set pieces and
+answers). Tests: `HornEngineTests/KlondikeTests.swift` (42 rule tests, 5 balance tests).
+`Journeys.all` lists it between the balloon and Mars.
+
+### The numbers as shipped
+
+Everything in §2–§17 is as written, except the departures listed below. In short:
+
+- Distances in tenths of a mile: Seattle 0, Juneau 10,200, Lynn Canal 11,100, Dyea ·
+  Skagway 11,200, Sheep Camp · White Pass City 11,330, the summit 11,365, Lindeman · Log
+  Cabin 11,460, Bennett 11,530, Tagish 12,030, Miles Canyon 12,530, Five Fingers 14,670,
+  Fort Selkirk 15,250, Dawson 17,000.
+- Speed a day: steamer 2,200 × weather × jitter (nothing else counts); foot 9 and boat 300,
+  × pace factor (0.75 / 1 / 1.3) × weather × the shared meter and crew terms × region speed
+  (White Pass 0.9) × the miner's 1.15 on foot × packers' 1.4 below the summit × jitter.
+- Pace health a day: steamer 0; boat +0.5 / 0 / −1; **foot −0.5 / −1.7 / −3.4** (×0.75 on
+  the White Pass).
+- Firewood (the water role): 4 lbs a head × 2 freezing / 1.5 cold / 1 cool / 0.5 warm or
+  hot; none on the steamer. Out of firewood is the shared thirst: −12 health a day, +0.04
+  illness, death by "exposure". Deadwood 20–50 lbs a day out of town in timber regions,
+  not in a blizzard.
+- Juneau sells furs at 0.75 of its markup: $11.25 a set against Seattle's $12 (§6's
+  table has $13.50; see departure 16).
+- Purses: storekeeper $1,700, **boatbuilder $1,000**, miner $720. Repairs 25/20, the
+  boatbuilder 40/35. Catch limit 150 lbs and aim 1.5 for everyone.
+- Police: 1,095 lbs a head at the summit; the traders' price 30¢ a lb short; the trip down
+  costs the short amount plus six days' eating at the mid-trail store's food price.
+- Bennett: the ice goes out on May 24 + 0–8 days, rolled on arrival. Builds: properly 21
+  days (14 for the boatbuilder) for 3 canvas & pitch and 2 rope, 100/100; scow 9 (6) days
+  for 2 and 1, 60–75/80 (85–95/95); bought $220, 2 town days, 90–100/100; raft 5 (4) days,
+  35–45/50 (45–55/50).
+- Score: 1849's five lines in this journey's words, plus "Ahead of the crowd", 20 points a
+  day before August 1, 1898. Ranks Sourdough 7,000 / Old Hand 4,000 / Stampeder 2,000 /
+  Cheechako.
+
+### The bot
+
+`KlondikeTests.policy()`: the spec's §18 policy as `JourneyBot` runs it. It shops by the
+spec's targets (a year of grub plus the run to the summit, firewood for the bare summit,
+lime juice for the run plus the wait at the lakes, spares kept only while $60 stays in hand
+before the summit); storekeeper Filling, the others Meager; pace Steady; fork at random;
+packers with $240 in hand; waits out slides, goes round thin ice, lines Five Fingers, pays
+a pilot when it can; at the police the cheaper remedy; at Bennett builds properly when
+there is time before May 28, else the storekeeper buys, else a scow, else buys, else a
+raft; waits for the ice. It rests three days in town under 70 health, then shops, then
+uses the yard under 70 (never on the outfit at Bennett).
+
+30 runs a role, seed 1898 (seeds `1898 + 1000 × multiplier + i`):
+
+| Departure | Storekeeper | Boatbuilder | Miner | Median winning run |
+|---|---|---|---|---|
+| January | 27/30 | 0/30 | 0/30 | 175 days |
+| February | 30/30 | 6/30 | 1/30 | 145 days |
+| **March** | **30/30** | **24/30** | **15/30** | **119 days** |
+| April | 30/30 | 27/30 | 16/30 | 111 days |
+| May | 30/30 | 29/30 | 10/30 | 106 days |
+
+March over 100 runs a role (seed 20000): 98 / 80 / 43%, median 119 days. March winners
+reach Dawson around June 24 (storekeeper), June 28 (boatbuilder) and July 16 (miner);
+median scores 3,843 / 7,181 / 7,863.
+
+By choice, March: the Chilkoot 29 / 21 / 10 and the White Pass 30 / 26 / 12 (balanced
+within noise; the Chilkoot's losses include more snowslides). Hard driving all the way:
+28 / 5 / 3, nearly all of the difference exhaustion on the trail.
+
+Losses in March are spread: the miner is turned back by the police (his main loss, about
+a third of his runs over 100), wrecks his raft or scow, or dies of wounds, pneumonia,
+frostbite, a fall on the ice or a fever; the boatbuilder loses to exhaustion, pneumonia,
+infected wounds and snowslides.
+
+The tests assert March's bands (85–100 / 60–90 / 35–70%) and a median of 115–140 days
+(the spec's lower bound); that a bot taking every risky answer is within 20 points of the
+careful one for each role;
+that January is at least 30 points worse for the boatbuilder and miner and 30 days
+longer; that hard driving is at least 30 points worse for both; and that the miner's
+losses end at least three ways, the police among them.
+
+### Departures from the spec, and why
+
+1. **Bands.** The task this was built for set 85–100 / 60–90 / 35–70%, not the spec's
+   §18 45–85 / 15–50. The journey was tuned to those.
+2. **Foot exertion ×1.2** (−0.5 / −1.7 / −3.4 against −0.4 / −1.4 / −2.8). With the
+   spec's numbers the March boatbuilder won 89% over 100 runs and the miner 52%: too
+   easy for the middle band. At ×1.2 they are 80% and 46%.
+3. **The boatbuilder starts with $1,000, not $1,050.** With $1,050 he leaves Seattle with
+   $253 and the bot's "$240 in hand" rule hires the packers, which put him at 86–89%.
+   Fifty dollars less keeps him at the poorer roles' pace. The skin's differences page
+   must say $1,000.
+4. **The valley regions end at 1,133.1 mi**, not 1,133.0 (§20's suggestion): Sheep Camp
+   and White Pass City are the last places with trees, so a stay there counts as the
+   cold valley, not the freezing summit.
+5. **Two port records per landing.** `ports` holds the Chilkoot's towns; the White Pass's
+   Skagway and White Pass City are `Klondike.whitePassTowns`, chosen by the new
+   `port(_:at:)` hook once the pass is chosen. Stop names stay "Dyea · Skagway" in the
+   table; `Klondike.name` and `shortName` give the pass's own once it is chosen ("the
+   landing at Lynn Canal" in a sentence before the fork).
+6. **Bennett.** Pushing off without a boat says the spec's line and offers "See about a
+   boat" at once (the skin can also offer `Klondike.boatChoice` from the yard slot).
+   Building passes its days and leaves the party in camp, so it can shop again; pushing
+   off with a boat before the ice goes out asks the ice question, and waiting passes camp
+   days to the breakup and lets the party go. The engine's way of holding a party ashore
+   is the new `holdInPort` hook: `setSail()` now returns interrupts, and the app must show
+   them and stay on the town menu while `state.atPort` is still true. `sailDay()` enforces
+   it too: called while the party is still ashore where it is held, it passes no day and
+   returns the same hold, so no app can float a party out of Bennett without a boat.
+7. **Sundogs force clear skies** through a counter in `vars` that `weatherWeights` reads
+   and `tick` counts down; the shared `forceFair` would have forced "Fair".
+8. **Deadwood is gathered in `tick`**, after the day's burn, not before it in `consume`;
+   the numbers are the spec's. The shared rain catch is off (no weather is wet).
+9. **Spoilage and the two wear warnings run in `tick`** (the shared ones are switched off
+   with −1 thresholds) so they speak of the outfit or the boat. The repair and yard lines
+   come from the new `repaired` hook for the same reason.
+10. **Going round thin ice** costs a day of eating and travel-mode health with no miles and
+    no weather roll; a snag adds a day to the count and nothing else, as written.
+11. **Weather's sky slots**, for the skin's palettes: clear `.clear`, fair `.breeze`, rain
+    `.rain`, fog `.fog`, snow `.snow`, thaw `.dust`, wind `.gale`, blizzard `.storm` (red),
+    ice `.still`, hot `.heat`. The blizzard's trail line is cleared off the trail.
+12. **A swindle on an empty purse** says so instead of "$0 of yours has changed hands".
+13. **The police rule applies from January** (§20's open question): the game's rule, not
+    the calendar's. The canyon pilot rule applies all river season, as written.
+14. **For the skin**, public helpers on `Klondike`: `hasBoat`, `meterNames`, `legName`,
+    `name`/`shortName`, `requirement` and `shortOfGrubWarning` (the Seattle warning),
+    `finale` (the finale's two paragraphs), `burialText` (by leg), `boatChoice`, and for
+    distances, which are stored in tenths: `unitsPerMile` (10), `mileNumber` ("1,136.5"),
+    `miles` ("1,136.5 miles") and `progress` (the line under the legend).
+15. `PaceInfo.speed` is the pace's factor (0.75 / 1 / 1.3), not a distance; the leg sets
+    the distance. Scurvy's duration in the table is nominal (it lasts until cured).
+16. **Juneau's furs are cheaper than Seattle's** (mod 0.75, $11.25), so the storekeeper's
+    line (“Furs are cheaper here than in Seattle”) is true; §6's 0.9 made them $13.50.
+17. **The coast is split at Dixon Entrance** (mile 650): `bcCoast`, "The British Columbia
+    coast", 360–650, then `alaskaCoast` 650–1,120, with the same temperatures and weather
+    lists, so no draw changes.
+18. **Hauling off the route is work, not rest.** The trip back down for grub (6 days), the
+    canyon portage (4) and the stampede (3) pass their days as the trail does: the foot
+    leg's exertion at the party's pace and the weather's harshness, no rest bonus, ailments
+    mending a day a day; no miles and no wear. Waiting out a slide, building a boat and
+    lining Five Fingers are still camp days.
+19. **Bennett before the boat is the foot leg** for `legName` and `burialText` (the town
+    stands where the boat leg's country begins), and no "Ice running" weather is drawn there
+    while the lake is frozen. Deadwood is still gathered: the arrival paragraph says the
+    good trees are gone but the offcuts and slash keep the stoves going.
+20. **Words changed to match the tables:** the White Pass is "easier going but slower" (both
+    passes are 33 miles in the table; the 0.9 is a speed), not "ten miles longer"; the
+    White Pass City smith says the next smith is at Bennett; the stowaway is no longer
+    "two days out" (the event can come any steamer day); a break-through on a frozen lake
+    has lines and an epitaph of its own instead of E8's creek; a ruined outfit past the
+    summit no longer mentions the police; waiting out a slide says "you go on" after the
+    two days, and not at all if the party did not live.
+
+### Worth knowing
+
+- **New shared hooks**, each with a default that leaves every other journey unchanged
+  (the three 1849 gates and the other journeys' tests are green): `port(_:at:)`,
+  `paceHP(_:)`, `waterNeed(_:_:)`, `holdInPort(_:)` with `setSail()` returning
+  `[Interrupt]`, and `repaired(_:_:)`. `JourneyBot` gained `shopHere`, `useYard` and a
+  loop that answers a hold until the party leaves.
+- The set-piece risks (slides, thin ice, Five Fingers) are rare enough that a bot that
+  always takes the risky answer wins about as often as a careful one (March: 29 / 24 / 16
+  against 30 / 24 / 15). What decides a
+  run is money at Seattle, the police margin, the pace and rations on the trail, and the
+  date.
+- April is a little safer than March for the boatbuilder and no worse for the miner, but
+  arrives later; the score's crowd line is what makes March the advice.
+- February is harder than the spec's sim found (6/30 and 1/30 for the poorer roles):
+  February parties spend their trail in deep cold on Meager rations.
