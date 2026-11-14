@@ -54,6 +54,7 @@
 		7E94EBF4A679D14B70BA855E /* ChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E8E7F89E9868BA9D521DCD7 /* ChartView.swift */; };
 		7ECE44A5CCDF318BEBFE8B0F /* Feedback.swift in Sources */ = {isa = PBXBuildFile; fileRef = 771DF7A9C743BD52E884EC30 /* Feedback.swift */; };
 		8507B9626335D0733F75E858 /* TestJourneys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B84815BD850CCD28520377E /* TestJourneys.swift */; };
+		85A1CC3CDBEDA5BC33586B0B /* ResumeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6AFAF1AEC528687A069F091 /* ResumeTests.swift */; };
 		86570A81184F274E60797E88 /* VoyageScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78D4D01109F06BE35F45A3F /* VoyageScreens.swift */; };
 		87ED892C305EA05606F8FE9B /* MarkupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B656EEA583D97D6A03EE42FD /* MarkupTests.swift */; };
 		87F0DA05537FCFF0B3BB75A4 /* RailScreenshotUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 746C70F5F36AC967DD5E9C22 /* RailScreenshotUITests.swift */; };
@@ -250,6 +251,7 @@
 		B38C2600574A28700FBAD44B /* ScreenshotWalk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotWalk.swift; sourceTree = "<group>"; };
 		B406A516BFB1D077B5FBCB58 /* Horn1849+Events.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Horn1849+Events.swift"; sourceTree = "<group>"; };
 		B656EEA583D97D6A03EE42FD /* MarkupTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkupTests.swift; sourceTree = "<group>"; };
+		B6AFAF1AEC528687A069F091 /* ResumeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResumeTests.swift; sourceTree = "<group>"; };
 		BDBB3C16595D744809D8CF3B /* PressStart2P-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "PressStart2P-Regular.ttf"; sourceTree = "<group>"; };
 		C11589EC5172DE1C71B5748F /* Rail+Depots.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Rail+Depots.swift"; sourceTree = "<group>"; };
 		D3D5EC138C0C4B40C49F14A1 /* StoresTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoresTests.swift; sourceTree = "<group>"; };
@@ -318,6 +320,7 @@
 				B656EEA583D97D6A03EE42FD /* MarkupTests.swift */,
 				2B348F0B87BB6038F9149B6B /* PortAndLandmarkTests.swift */,
 				3297DDCDE0CCC564386B7462 /* RailSkinTests.swift */,
+				B6AFAF1AEC528687A069F091 /* ResumeTests.swift */,
 				30041FBF2E158954803C5ED6 /* SkinContractTests.swift */,
 				D3D5EC138C0C4B40C49F14A1 /* StoresTests.swift */,
 				272E9C7692171434AE6EB489 /* SynthTests.swift */,
@@ -747,6 +750,7 @@
 				87ED892C305EA05606F8FE9B /* MarkupTests.swift in Sources */,
 				22D22DDB2DD2BB7DDD0AED16 /* PortAndLandmarkTests.swift in Sources */,
 				1CDC98768F49BC22BECDE3B5 /* RailSkinTests.swift in Sources */,
+				85A1CC3CDBEDA5BC33586B0B /* ResumeTests.swift in Sources */,
 				457D26E80866FFA534E4D020 /* SkinContractTests.swift in Sources */,
 				F5F2A6A3B9B99EDB3509B063 /* StoresTests.swift in Sources */,
 				BB3B1340A172CD88BFC5EB27 /* SynthTests.swift in Sources */,

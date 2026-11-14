@@ -130,9 +130,12 @@ final class GameController {
         show(.message(text, label: label, then: then))
     }
 
-    /// The menu you came from: in port or under way. Saves, as every menu does.
+    /// The menu you came from: in port or under way. Saves, as every menu does, with
+    /// nothing waiting: whatever was, the menu has put aside.
     func backToMenu() {
         guard let g = game else { return show(.title) }
+        queue = []
+        showing = nil
         save()
         show(g.atPort ? .portMenu : .seaMenu)
     }
