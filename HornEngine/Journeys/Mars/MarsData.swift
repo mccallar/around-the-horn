@@ -34,6 +34,7 @@ enum MarsData {
     static let captureKey = "mars.capture"   // 1 aerobrake, 2 full burn, 3 partial burn
     static let owedKey = "mars.owed"         // money wired by a grateful ship, paid at the next port
     static let lateKey = "mars.late"
+    static let dockedKey = "mars.docked"     // the index of the last stop you went aboard at
 
     /// "312.45 million km", from units of 10,000 km.
     static func km(_ units: Int) -> String {
@@ -82,7 +83,7 @@ enum MarsData {
         Stop(id: "cycler", name: "the cycler Perpetua", short: "Perpetua", type: .port, mile: 15_500),
         Stop(id: "turnover", name: "Turnover", short: "Turnover", type: .line, mile: 24_000),
         Stop(id: "midway", name: "Midway Depot", short: "Midway", type: .port, mile: 30_000),
-        Stop(id: "shadow", name: "the conjunction shadow", short: "Shadow", type: .mark, mile: 38_000,
+        Stop(id: "shadow", name: "the conjunction shadow", short: "Shadow", type: .mark, mile: 37_000,
              note: "The Sun now stands between you and Earth and talks over every message. [amber]No forecasts until 410 million km: if a storm comes, nobody will have warned you.[/amber]"),
         Stop(id: "approach", name: "Mars approach", short: "Approach", type: .fork, mile: 46_000),
         Stop(id: "phobos", name: "Phobos Yard", short: "Phobos", type: .port, mile: 47_300),
@@ -130,8 +131,9 @@ enum MarsData {
                                             (proton, 6), (ejection, 2)]
 
     /// Tags: "traffic" (debris likelier), "ice" (the grapple works; pebble hits likelier),
-    /// "far" (furthest from help; power wears 1.3× faster), "quiet" (the Sun is between you
-    /// and Earth: no flare warnings), "dust" (Mars's neighbourhood).
+    /// "far" (past 240 million km, where the Sun is thin; power wears 1.3× faster), "quiet"
+    /// (the Sun is between you and Earth: no flare warnings, fixes or mail), "dust" (Mars's
+    /// neighbourhood).
     static let regions: [Region] = [
         Region(id: "cislunar", to: 150, name: "Cislunar space", temp: .cool, tags: ["traffic"], weights: near),
         Region(id: "departure", to: 8_000, name: "The departure leg", temp: .cool, weights: open),
@@ -142,8 +144,8 @@ enum MarsData {
                weights: farStream),
         Region(id: "shadow", to: 41_000, name: "The conjunction shadow", temp: .cool, tags: ["far", "quiet"],
                weights: hidden),
-        Region(id: "approach", to: 46_000, name: "The approach", temp: .cool, weights: open),
-        Region(id: "capture", to: 48_001, name: "Mars capture", temp: .cool, tags: ["dust"], weights: mars),
+        Region(id: "approach", to: 46_000, name: "The approach", temp: .cool, tags: ["far"], weights: open),
+        Region(id: "capture", to: 48_001, name: "Mars capture", temp: .cool, tags: ["dust", "far"], weights: mars),
     ]
 
     // MARK: - Ailments

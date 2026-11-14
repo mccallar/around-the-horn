@@ -185,6 +185,11 @@ public final class Mars: Journey {
         }
     }
 
+    /// Docking somewhere is leaving it aboard: a shuttle from there can still catch you.
+    override func leaving(_ e: GameEngine) {
+        e.state.vars[MarsData.dockedKey] = Double(e.state.stopIndex)
+    }
+
     /// Far from the Sun the wings work harder for the same power.
     override func propulsionWear(_ e: GameEngine) -> Double {
         let w = super.propulsionWear(e)

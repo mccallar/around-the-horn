@@ -25,7 +25,7 @@ extension Mars {
              ]),
         Port(id: "midway", journey: Mars.id, name: "Midway Depot", shop: "Midway Depot stores", mult: 1.4,
              mods: [.fuel: 0.4],
-             arrive: "Three tanks, a habitat can and a light in one window. Midway's two keepers have not seen a third face in a year, and they talk over each other to tell you so. The propellant is cheap. Everything else came a long way to get here.",
+             arrive: "Three tanks, a habitat can and a light in one window. Midway's two keepers see a ship a month if they are lucky, and they talk over each other to tell you so. The propellant is cheap. Everything else came a long way to get here.",
              talk: [
                  "The older keeper taps a tank gauge. \"Fill up. Phobos charges the earth for propellant, and if your hull isn't fit to aerobrake you'll want ten tonnes at Mars for a capture burn.\"",
                  "The younger keeper: \"Past 370 million the Sun gets between you and home. No forecasts. If the counters start chattering, get in the core. Don't wait for a warning. There won't be one.\"",

@@ -10,9 +10,13 @@ extension Mars {
         let full = s.pace == .full
         let forecasts = !reg.has("quiet")
         // A shuttle can still catch you a few days out from a station you docked at.
-        let lastPort = stops[...s.stopIndex].last { $0.type == .port && $0.id != "cycler" }
-        let leavingPort = lastPort.map { s.mile - $0.mile < 1500 } ?? false
+        let lastPortAt = stops[...s.stopIndex].lastIndex { $0.type == .port && $0.id != "cycler" }
+        let lastPort = lastPortAt.map { stops[$0] }
+        let docked = lastPortAt.map { Double($0) == s.vars[MarsData.dockedKey] } ?? false
+        let leavingPort = docked && (lastPort.map { s.mile - $0.mile < 1500 } ?? false)
         let nextPort = stops[(s.stopIndex + 1)...].first { $0.type == .port && $0.id != "cycler" }
+        // A promise of money at the next station means something only while one lies ahead.
+        let stationAhead = stops[(s.stopIndex + 1)...].contains { $0.type == .port }
 
         return [
             // The ship
@@ -61,7 +65,7 @@ extension Mars {
                 e.state.food = max(0, e.state.food - Double(kg))
                 q.append(.message("The galley freezer has failed in the night. The crew eat well for a day and throw out the rest: \(kg) kg of rations."))
             },
-            JourneyEvent(2.5) { e, q in
+            JourneyEvent(2.5, when: forecasts) { e, q in
                 q.append(.message("A navigation update from Earth refuses to install, then installs twice, then insists the ship is in Belgium. A day goes by setting it right."))
                 q += e.passDays(1, .sea)
             },
@@ -82,7 +86,7 @@ extension Mars {
                                detail: "Matching its course would cost about \(MarsData.tonnes(30)) of propellant.",
                                options: [.init("Match and take it aboard", enabled: e.state.fuel >= 30), .init("Leave it")]))
             },
-            JourneyEvent(3) { e, q in
+            JourneyEvent(3, when: stationAhead) { e, q in
                 let wantsWater = e.chance(0.5)
                 let litres = e.ri(6, 12) * 10
                 let want = wantsWater ? "\(litres) litres of water" : "a hull patch"
@@ -146,7 +150,7 @@ extension Mars {
                     ? "A chunk of ice has wedged itself in the truss overnight. It goes into the melt tank. [green]+\(got) litres of water.[/green]"
                     : "A chunk of ice has wedged itself in the truss overnight. The tanks are full, so it goes overboard again with a ceremony."))
             },
-            JourneyEvent(3) { e, q in
+            JourneyEvent(3, when: forecasts) { e, q in
                 for i in e.state.crew.indices where e.state.crew[i].alive {
                     e.state.crew[i].hp = min(100, e.state.crew[i].hp + 5)
                 }
@@ -154,7 +158,7 @@ extension Mars {
             },
 
             // Sights
-            Self.sight(1.5, when: s.mile < 8_000, "Earth is a bright star now, with a dimmer one beside it. Somebody has taped a note under the window: YOU ARE HERE, with an arrow pointing the wrong way."),
+            Self.sight(1.5, when: s.mile >= 3_000 && s.mile < 24_000, "Earth is a bright star now, with a dimmer one beside it. Somebody has taped a note under the window: YOU ARE HERE, with an arrow pointing the wrong way."),
             Self.sight(1.5, when: s.mile >= 30_000, "In the navigation telescope Mars has stopped being a star. This morning it is a disc, small and orange and patient, and everybody finds a reason to borrow the telescope."),
             Self.sight(1, "A comet crosses the far side of the sky, its tail laid out like a scarf. The crew name it after the cook, who is delighted, then suspicious."),
             Self.sight(1.5, "The cabin lights go off for a power check, and the Milky Way is suddenly everywhere. Nobody turns them back on for an hour."),

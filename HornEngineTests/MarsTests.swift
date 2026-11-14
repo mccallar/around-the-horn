@@ -90,6 +90,9 @@ final class MarsTests: XCTestCase {
         XCTAssertEqual(mars.propulsionWear(engine(ship(mile: 1000), [0.5])), 0.6, accuracy: 0.001)
         XCTAssertEqual(mars.propulsionWear(engine(ship(mile: 25_000), [0.5])), 0.78, accuracy: 0.001)
         XCTAssertEqual(mars.propulsionWear(engine(ship(mile: 39_000), [0.5])), 0.78, accuracy: 0.001)
+        // The Sun only gets thinner from there to Mars.
+        XCTAssertEqual(mars.propulsionWear(engine(ship(mile: 43_000), [0.5])), 0.78, accuracy: 0.001)
+        XCTAssertEqual(mars.propulsionWear(engine(ship(mile: 47_500), [0.5])), 0.78, accuracy: 0.001)
     }
 
     func testPebblesAndTheSunsWeatherHitTheHull() {
@@ -245,9 +248,14 @@ final class MarsTests: XCTestCase {
     }
 
     func testTheHitchhikerIsBoundForADepotNeverTheCycler() {
+        func docked(_ mile: Int) -> GameState {
+            var s = ship(mile: mile)
+            s.vars[MarsData.dockedKey] = Double(mars.stops.firstIndex { $0.id == (mile < 30_000 ? "gateway" : "midway") }!)
+            return s
+        }
         for mile in [600, 30_900] {
             var found: [String] = []
-            let s = ship(mile: mile)
+            let s = docked(mile)
             for ev in mars.events(engine(s), s.region) where ev.ok {
                 let e = engine(s, [], fallback: 0)
                 var q: [Interrupt] = []
@@ -256,14 +264,25 @@ final class MarsTests: XCTestCase {
             }
             XCTAssertEqual(found.last, mile < 30_000 ? "midway" : "phobos", "at \(mile)")
         }
-        // Past the cycler, which nobody is ever bound for, there is no shuttle to catch you.
-        let past = ship(mile: 16_000)
-        for ev in mars.events(engine(past), past.region) where ev.ok {
-            let e = engine(past, [], fallback: 0)
-            var q: [Interrupt] = []
-            ev.run(e, &q)
-            XCTAssertNotEqual(key(choice(q)), "hitch")
+        // Past the cycler, which nobody is ever bound for, there is no shuttle to catch you;
+        // nor from a depot you kept going past, though you docked at the yard before it.
+        var passed = docked(600)
+        passed.mile = 30_900
+        passed.stopIndex = mars.stops.firstIndex { $0.id == "midway" }!
+        for past in [docked(16_000), passed] {
+            for ev in mars.events(engine(past), past.region) where ev.ok {
+                let e = engine(past, [], fallback: 0)
+                var q: [Interrupt] = []
+                ev.run(e, &q)
+                XCTAssertNotEqual(key(choice(q)), "hitch", "at \(past.mile)")
+            }
         }
+
+        // Going aboard is what counts: leaving Midway's dock marks it.
+        let leave = engine(ship(mile: 30_000))
+        leave.state.atPort = true
+        leave.setSail()
+        XCTAssertEqual(leave.state.vars[MarsData.dockedKey], Double(mars.stops.firstIndex { $0.id == "midway" }!))
 
         let e = engine(ship())
         _ = e.resolve(ask(e, "hitch", ["Noor", "midway"]), option: 0)
@@ -475,6 +494,60 @@ final class MarsTests: XCTestCase {
         XCTAssertTrue(keys(5000).contains("fix"))
         XCTAssertFalse(keys(39_000).contains("flare"))
         XCTAssertFalse(keys(39_000).contains("fix"))
+
+        // Nor anything else from Earth: no navigation update, no mail.
+        func said(_ mile: Int) -> [String] {
+            let s = ship(mile: mile)
+            var out: [String] = []
+            for ev in mars.events(engine(s), s.region) where ev.ok {
+                let e = engine(s, [], fallback: 0)
+                var q: [Interrupt] = []
+                ev.run(e, &q)
+                out += messages(q)
+            }
+            return out
+        }
+        for line in ["navigation update from Earth", "Messages from home"] {
+            XCTAssertTrue(said(5000).contains { $0.contains(line) }, line)
+            XCTAssertFalse(said(39_000).contains { $0.contains(line) }, line)
+        }
+        // The landmark that says so comes where the shadow begins.
+        XCTAssertEqual(mars.stop("shadow")?.mile, mars.regions.first { $0.id == "stream2" }?.to)
+    }
+
+    /// Earth and the Moon make a double star only once they are far enough off to be stars.
+    func testEarthIsADoubleStarOnlyFromAfar() {
+        func seen(_ mile: Int) -> Bool {
+            let s = ship(mile: mile)
+            return mars.events(engine(s), s.region).contains { ev in
+                guard ev.ok else { return false }
+                let e = engine(s, [], fallback: 0)
+                var q: [Interrupt] = []
+                ev.run(e, &q)
+                return messages(q).contains { $0.contains("Earth is a bright star") }
+            }
+        }
+        XCTAssertFalse(seen(450))
+        XCTAssertTrue(seen(5000))
+        XCTAssertFalse(seen(30_000))
+    }
+
+    /// A ship you helped promises money at the next station, so she only calls while there
+    /// is one ahead.
+    func testNobodyAsksForHelpPastTheLastStation() {
+        func asked(_ mile: Int) -> Bool {
+            let s = ship(mile: mile)
+            return mars.events(engine(s), s.region).contains { ev in
+                guard ev.ok else { return false }
+                let e = engine(s, [], fallback: 0)
+                var q: [Interrupt] = []
+                ev.run(e, &q)
+                return key(choice(q)) == "distress"
+            }
+        }
+        XCTAssertTrue(asked(5000))
+        XCTAssertTrue(asked(47_000))
+        XCTAssertFalse(asked(47_500))
     }
 
     // MARK: - The contract and the score

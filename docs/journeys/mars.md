@@ -282,7 +282,7 @@ None the engine cannot express: every rule above maps onto a hook rail already u
 Engine files: `HornEngine/Journeys/Mars/` (`Mars.swift` rules, sentences and hooks,
 `MarsData.swift` tables, `Mars+Ports.swift` the four stations and the cycler's offer,
 `Mars+Events.swift` the 23 events, `Mars+Choices.swift` turnover, capture and every
-answer), one entry in `Journeys.all`. Tests: `HornEngineTests/MarsTests.swift` (28 rule
+answer), one entry in `Journeys.all`. Tests: `HornEngineTests/MarsTests.swift` (30 rule
 tests, 4 balance tests); `JourneyContractTests` runs over it with no special case. The
 title card, setup and outfit copy, learn pages, burial wording, status labels, scene,
 chart and the grapple's drawing (§1's card, §15's canvas, §16, §19) belong to the skin,
@@ -332,9 +332,12 @@ hp, hull 4. A hull hit is × 1.5 at a hard burn and × 0.7 at economy. Proton st
 mass ejections are × (0.6 + months since 1 August 2087 ÷ 9), held between 0.6 and 1.6.
 Skies: clear, still, breeze, dust, fog, storm, gale.
 
-**The arc.** Regions and stops as §7–§8. Power wears 1.3× in `far` regions (deep space,
-the second ice stream, the shadow). The shadow has no Good tracking weather, no flare
-warning and no tracking-fix event.
+**The arc.** Regions and stops as §7–§8, with the shadow landmark at 37,000 and the
+approach and capture tagged `far` (departures 12 and 13). Power wears 1.3× in `far`
+regions, everything past 240 million km: deep space, the second ice stream, the shadow,
+the approach and the capture. The shadow has no Good tracking weather and nothing from
+Earth: no flare warning, tracking fix, navigation update or mail from home. Earth and the
+Moon show as a double star only between 30 and 240 million km.
 
 **Set pieces.** The cycler: dock for 6 t (disabled under 6 t) and you are aboard with her shop
 open, with no second offer to dock; wave
@@ -371,31 +374,31 @@ Thirty runs a role from seed 500 (what the tests assert), then 90 a role over se
 
 | Launch | Charter captain | Yard rigger | Ice hauler | Median winning run |
 |---|---|---|---|---|
-| 7 August 2087 | 29/30 · 88/90 | 7/30 · 19/90 | 5/30 · 10/90 | 180 days |
-| 7 September | 30/30 · 90/90 | 17/30 · 48/90 | 9/30 · 35/90 | 164 |
-| **7 October (tested)** | **30/30 · 90/90** | **23/30 · 70/90** | **18/30 · 47/90** | **155–157** |
-| 7 November | 30/30 · 90/90 | 12/30 · 39/90 | 9/30 · 24/90 | 165 |
-| 7 December | 30/30 · 89/90 | 4/30 · 11/90 | 2/30 · 4/90 | 181 |
+| 7 August 2087 | 30/30 · 88/90 | 1/30 · 16/90 | 2/30 · 7/90 | 180 days |
+| 7 September | 28/30 · 88/90 | 14/30 · 47/90 | 11/30 · 29/90 | 164 |
+| **7 October (tested)** | **30/30 · 89/90** | **24/30 · 67/90** | **19/30 · 58/90** | **154–155** |
+| 7 November | 30/30 · 90/90 | 12/30 · 43/90 | 10/30 · 27/90 | 165–166 |
+| 7 December | 29/30 · 88/90 | 1/30 · 7/90 | 1/30 · 2/90 | 181–182 |
 
-October median scores: charter captain 3,312 (Orbit Hand), yard rigger 6,218 (Deep-space
-Hand), ice hauler 8,058 (Master of Transfer). How October's 90 a role are lost: thirst
-22, bone loss 14, hypothermia 8, a fracture 6, hunger 4, a long decline 3, and
-exhaustion, decompression, radiation, infection and bad air.
+October median scores: charter captain 3,353 (Orbit Hand), yard rigger 6,242 (Deep-space
+Hand), ice hauler 7,911 (Deep-space Hand). How October's 90 a role are lost: thirst 25,
+bone loss 7, a fracture 6, hypothermia 5, hunger 4, bad air 3, infection 3, and
+exhaustion, an infected burn and decompression.
 
 Choices and play, October, 60 runs a role (seeds 500 and 1999; captain / rigger /
 hauler, median):
 
 | Played as | Wins | Median |
 |---|---|---|
-| the bot | 60 / 49 / 33 | 155 |
-| always aerobrake | 60 / 50 / 35 (4 hulls lost) | 154 |
-| always burn into orbit | 60 / 47 / 33 | 157 |
-| never run on at turnover | 60 / 41 / 36 | 160 |
-| work through every flare | 59 / 54 / 35 | 153 |
-| hard burn all the way | 60 / 49 / 11 | 139 |
-| economy burn all the way | 59 / 25 / 24 | 181 |
-| full rations for the ice hauler | 60 / 49 / 18 | 155 |
-| no grapple | 60 / 50 / 0 | 153 |
+| the bot | 60 / 44 / 39 | 155 |
+| always aerobrake | 60 / 46 / 43 (2 hulls lost) | 155 |
+| always burn into orbit | 60 / 44 / 37 | 157 |
+| never run on at turnover | 60 / 40 / 37 | 160 |
+| work through every flare | 60 / 47 / 40 | 153 |
+| hard burn all the way | 59 / 42 / 12 | 139 |
+| economy burn all the way | 59 / 27 / 20 | 181 |
+| full rations for the ice hauler | 60 / 44 / 16 | 154 |
+| no grapple | 60 / 47 / 0 | 153 |
 | wave the cycler by | 0 / 0 / 0 | — |
 
 The tests assert the October bands (85–100 / 60–90 / 35–70%) and a median winning run of
@@ -435,26 +438,33 @@ the two poorer roles' losses end at least three ways.
 8. **Aerobraking and capture** as above: §14 gave the shape but no numbers. The capture
    region's `dust` tag is kept for the skin but no rule reads it.
 9. **The hitch-hiker** is offered only within 1,500 units (15 million km) after Gateway
-   or Midway, and is always bound for Midway or Phobos, never the cycler, which the
-   player may wave by. A grateful ship's transfer ($15–30) is paid when you reach the
-   next station, whether you dock or keep going.
+   or Midway, and only if you went aboard there, and is always bound for Midway or
+   Phobos, never the cycler, which the player may wave by. A survey ship in trouble
+   calls only while a station lies ahead, and her grateful transfer ($15–30) is paid when
+   you reach that station, whether you dock or keep going.
 10. **Money** reads "$" in engine text, as the shop shows it; §2's thousand-dollar unit is
     the learn page's business.
 11. **The spec's sample lines** are used where they fit (the recycler, the window note, the
     lentil), with the recycler's crew member left unnamed.
+12. **The shadow landmark is at 37,000**, not §7's 38,000: that is where §8's shadow
+    region, and the silence from Earth, begin, and where Midway's keeper says it starts.
+13. **The approach and the capture are `far` too.** §8 tags only deep space and the
+    shadow, but the transfer arc only gets further from the Sun until Mars, and the
+    cycler's engineer says the wings wear faster past 240 million km. The bot's October
+    results stayed in their bands.
 
 ### Things worth knowing
 
 - Waving the cycler by is a trap unless planned for: the next station is 145 million km
   on, past what the water tanks (80 days) and the propellant tanks (100 t) hold without
   the first ice stream. The bot, which shops one leg at a time, never survives it.
-- August and December are close to a wall for the two poorer roles (a rigger wins about
-  one launch in five, a hauler one in ten or fewer) while the charter captain barely
+- August and December are close to a wall for the two poorer roles (a rigger wins one
+  launch in six or fewer, a hauler one in twelve or fewer) while the charter captain barely
   notices. That is §10's "early is slow, late is slow and stormy", and the advice says
   so, but it is steep.
 - Thirst is the commonest death: a slow leg, a station short of money, and water at 0.23
   a litre. A player who watches the tanks and grapples in the streams avoids most of it.
 - Sheltering from a flare and working through it come out about even for the bot: a
   day's rations and water against a 75% chance of radiation sickness for one or two.
-- Losing the ship is rare for the bot: about one run in a hundred, mostly from late
-  launches, and four in 180 when it aerobrakes whatever the hull.
+- Losing the ship is rare for the bot: five runs in 1,350, all November launches, and
+  two in 180 when it aerobrakes whatever the hull.
