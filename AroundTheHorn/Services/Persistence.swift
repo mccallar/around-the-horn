@@ -4,6 +4,29 @@ import HornEngine
 /// The saves, the top tens and the mute setting (spec §11). JSON files in Application
 /// Support, one save and one top ten per journey; the mute flag in UserDefaults.
 struct Persistence {
+    /// A save on disk: the voyage's own keys, exactly as `GameState` writes them, and
+    /// beside them `pending` when something is waiting. A save with nothing waiting is
+    /// the voyage and no more, as it always was.
+    private struct SaveFile: Encodable {
+        struct Waiting: Decodable {
+            let pending: [Interrupt]?
+        }
+
+        enum Keys: String, CodingKey {
+            case pending
+        }
+
+        let state: GameState
+        let pending: [Interrupt]
+
+        func encode(to encoder: Encoder) throws {
+            try state.encode(to: encoder)
+            guard !pending.isEmpty else { return }
+            var c = encoder.container(keyedBy: Keys.self)
+            try c.encode(pending, forKey: .pending)
+        }
+    }
+
     let directory: URL
     let defaults: UserDefaults
 
@@ -26,11 +49,16 @@ struct Persistence {
 
     // MARK: Save
 
-    func save(_ s: GameState) {
+    /// `pending` is what the turn raised and the player has not yet answered: the message
+    /// or question on screen and whatever was queued behind it. The engine has already
+    /// moved the voyage on by the time they are shown (a stop is behind you before its
+    /// arrival is offered), so a save without them would resume past them. They go in the
+    /// same file as the voyage, written in one piece, under a key the voyage doesn't use.
+    func save(_ s: GameState, pending: [Interrupt] = []) {
         guard !s.over else { return }  // never after game over or the finale
         do {
             try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-            try JSONEncoder().encode(s).write(to: saveURL(s.journey), options: .atomic)
+            try JSONEncoder().encode(SaveFile(state: s, pending: pending)).write(to: saveURL(s.journey), options: .atomic)
             // The voyage has moved to its own file; the old one would only bring back a
             // voyage that has since ended.
             if s.journey == Self.legacyJourney { retireLegacySave() }
@@ -41,9 +69,16 @@ struct Persistence {
 
     /// That journey's saved voyage, or nil if there is none or it can't be read by this
     /// version.
-    func loadSave(_ journey: String) -> GameState? {
-        if let data = try? Data(contentsOf: saveURL(journey)), let s = voyage(data, journey) { return s }
-        return journey == Self.legacyJourney ? legacyVoyage() : nil
+    func loadSave(_ journey: String) -> GameState? { loadVoyage(journey)?.state }
+
+    /// The saved voyage and what was waiting to be shown when it was saved. A save from a
+    /// build that kept no queue, or a queue this build can't read, has nothing waiting.
+    func loadVoyage(_ journey: String) -> (state: GameState, pending: [Interrupt])? {
+        if let data = try? Data(contentsOf: saveURL(journey)), let s = voyage(data, journey) {
+            return (s, (try? JSONDecoder().decode(SaveFile.Waiting.self, from: data))?.pending ?? [])
+        }
+        guard journey == Self.legacyJourney, let s = legacyVoyage() else { return nil }
+        return (s, [])
     }
 
     /// Whether a journey has a voyage to go back to.

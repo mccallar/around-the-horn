@@ -74,6 +74,8 @@ final class GameController {
 
     private var engine: GameEngine?
     private var queue: [Interrupt] = []
+    /// The interrupt on screen: taken off the queue, not yet answered.
+    private var showing: Interrupt?
     private var after: After = .travel
     private var travelTask: Task<Void, Never>?
     let persistence: Persistence
@@ -146,9 +148,15 @@ final class GameController {
     /// repair is possible. Safe inside a view's body, where `run` is not.
     func read<T>(_ f: (GameEngine) -> T) -> T { f(engine!) }
 
+    /// The voyage, and with it whatever is still waiting to be shown (`pending`): the
+    /// engine has already moved on from what raised it, so the two only make sense
+    /// together.
     func save() {
-        if let g = game, !g.over { persistence.save(g) }
+        if let g = game, !g.over { persistence.save(g, pending: pending) }
     }
+
+    /// What the last turn raised and the player has not yet dealt with, in order.
+    private var pending: [Interrupt] { (showing.map { [$0] } ?? []) + queue }
 
     // MARK: - Title and setup
 
@@ -159,6 +167,7 @@ final class GameController {
         engine = nil
         game = nil
         queue = []
+        showing = nil
         show(.title)
     }
 
@@ -200,11 +209,27 @@ final class GameController {
         backToMenu()
     }
 
+    /// Back to where the voyage was left: on a menu, or, if it was left with something
+    /// on screen (an arrival's question, a warning, a burial), on that, with whatever was
+    /// queued behind it still to come. After those, a menu, not the loop.
     func continueSavedVoyage() {
-        guard let s = persistence.loadSave(journeyID) else { return goToTitle() }
+        guard let v = persistence.loadVoyage(journeyID) else { return goToTitle() }
+        let s = v.state
         engine = GameEngine(state: s)
         game = s
-        backToMenu()
+        var waiting = v.pending
+        // A voyage standing on its last stop has arrived and not yet been told so: no turn
+        // can be taken from there, so it would never end. (A save from before the queue
+        // was kept can be in this state.)
+        let ends = waiting.contains { i in
+            switch i {
+            case .arrival, .finale: return true
+            default: return false
+            }
+        }
+        if s.nextStop == nil && !ends { waiting.append(.arrival(stopID: s.currentStop.id)) }
+        if waiting.isEmpty { return backToMenu() }
+        present(waiting, then: s.atPort ? .portMenu : .seaMenu)
     }
 
     func chooseRole(_ r: Role) {
@@ -274,11 +299,9 @@ final class GameController {
 
     func tick() {
         let q = run { $0.sailDay() }
-        save()
-        if !q.isEmpty {
-            stopTravel()
-            present(q, then: .travel)
-        }
+        if q.isEmpty { return save() }
+        stopTravel()
+        present(q, then: .travel)
     }
 
     func heaveTo() {
@@ -288,6 +311,9 @@ final class GameController {
 
     // MARK: - Interrupts
 
+    /// Shows `q` in order, then goes where `then` says. The save follows the queue: it is
+    /// written each time an interrupt goes up and once more when the last is dealt with,
+    /// so a voyage left at any point comes back to that point.
     func present(_ q: [Interrupt], then: After) {
         queue = q
         after = then
@@ -295,14 +321,22 @@ final class GameController {
     }
 
     func advance() {
-        guard !queue.isEmpty else { return finishQueue() }
-        switch queue.removeFirst() {
+        showing = nil
+        guard !queue.isEmpty else {
+            save()
+            return finishQueue()
+        }
+        let next = queue.removeFirst()
+        switch next {
         case .message(let t):
+            hold(next)
             message(t) { [weak self] in self?.advance() }
         case .choice(let c):
+            hold(next)
             if case .stranger = c.kind { Feedback.play(.stranger) } else { Feedback.play(.message) }
             show(.choice(c))
         case .burial(let id, let cause):
+            hold(next)
             Feedback.play(.death)
             Feedback.warning()
             show(.burial(crewID: id, cause: cause))
@@ -327,16 +361,21 @@ final class GameController {
         }
     }
 
+    /// `i` is on screen until it is answered. Saved with it there, so that leaving now
+    /// comes back to it.
+    private func hold(_ i: Interrupt) {
+        showing = i
+        save()
+    }
+
     func choose(_ c: ChoiceEvent, option: Int) {
         let r = run { $0.resolve(c, option: option) }
-        save()
         queue = r + queue
         advance()
     }
 
     func bury(crewID: UUID, cause: String, epitaph: String) {
         run { $0.commitBurial(crewID: crewID, cause: cause, epitaph: epitaph) }
-        save()
         advance()
     }
 
@@ -365,7 +404,6 @@ final class GameController {
     // MARK: - Menu actions (each takes time, so each may raise interrupts)
 
     func act(_ q: [Interrupt], then: After) {
-        save()
         present(q, then: then)
     }
 
