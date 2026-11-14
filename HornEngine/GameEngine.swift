@@ -317,7 +317,7 @@ public final class GameEngine {
                 ?? (state.thirst ? text.causeThirst : state.starving ? text.causeStarvation : text.causeExhaustion)
             if p.isCaptain {
                 state.over = true
-                q.append(.gameOver(title: text.leaderDied(TextMarkup.escape(p.name), cause), body: text.leaderDiedBody))
+                q.append(.gameOver(title: text.leaderDied(TextMarkup.escape(p.name), cause), body: journey.leaderDiedBody(state)))
                 return
             }
             q.append(.burial(crewID: p.id, cause: cause))

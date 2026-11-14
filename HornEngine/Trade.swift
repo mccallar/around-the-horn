@@ -18,10 +18,11 @@ public struct Offer: Codable, Equatable {
 extension GameEngine {
     /// A trader's offer, or nil when you have nothing they want or they have nothing
     /// you lack. Every random draw is taken in the prototype's order, including the one a
-    /// pick from an empty list still spends.
-    func makeOffer() -> Offer? {
+    /// pick from an empty list still spends. Goods in `excluding` are neither wanted nor
+    /// given; they are left out before any draw, so an empty list changes nothing.
+    func makeOffer(excluding: [ItemKey] = []) -> Offer? {
         let r = journey.rules
-        let keys = journey.tradeKeys
+        let keys = excluding.isEmpty ? journey.tradeKeys : journey.tradeKeys.filter { !excluding.contains($0) }
         var wantable: [TradeGood] = keys.filter { state[$0] * journey.tradeValue(.item($0)) >= r.tradeWorth }
             .map { .item($0) }
         if state.money >= r.tradeCash { wantable.append(.money) }

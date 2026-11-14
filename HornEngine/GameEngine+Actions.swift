@@ -35,14 +35,18 @@ extension GameEngine {
     /// Leaving the first port. Nil, and nobody leaves, if there's no food (the journey's
     /// `text.noProvisions` says why); otherwise the setting-off message.
     public func depart() -> String? {
-        if state.food <= 0 { return nil }
+        if state.food <= 0 || !journey.mayDepart(state) { return nil }
         state.atPort = false
+        journey.leaving(self)
         return journey.text.depart(state)
     }
 
-    /// Leave a port along the way.
+    /// Leave a port along the way. Also called to resume travel between ports, where it
+    /// changes nothing.
     public func setSail() {
+        let ashore = state.atPort
         state.atPort = false
+        if ashore { journey.leaving(self) }
     }
 
     // MARK: - Rest
@@ -145,6 +149,7 @@ extension GameEngine {
         let room = Int((journey.item(reward).cap - state[reward]).rounded(.down))
         let got = min(kept, room)
         state.add(reward, Double(got))
+        journey.foraged(self)
         return [.message(journey.text.catchReport(caught, limit, got))] + passDays(1, .sea)
     }
 

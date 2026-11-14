@@ -319,6 +319,10 @@ public class Journey {
     /// The paragraph under `text.wrecked`. Override when where it happens changes it.
     public func wreckedBody(_ s: GameState) -> String { text.wreckedBody }
 
+    /// The paragraph under `text.leaderDied`. Override when where it happens, or who is
+    /// left, changes it.
+    public func leaderDiedBody(_ s: GameState) -> String { text.leaderDiedBody }
+
     /// Bookkeeping of the journey's own, once a turn after health and wear, in every mode.
     func tick(_ e: GameEngine, _ q: inout [Interrupt], _ mode: GameEngine.DayMode, _ reg: Region) {}
 
@@ -352,6 +356,17 @@ public class Journey {
 
     /// The player answered one of the named choice kinds, which are 1849's.
     func resolveNamed(_ e: GameEngine, _ event: ChoiceEvent, _ option: Int) -> [Interrupt] { [] }
+
+    /// Whether the first port lets you go, beyond having food (`depart`). A refusal reads
+    /// `text.noProvisions`, so a journey that refuses for more says so there.
+    public func mayDepart(_ s: GameState) -> Bool { true }
+
+    /// Leaving the ground: the first departure, or setting off from a port you went ashore
+    /// at. Not called when travel resumes between ports.
+    func leaving(_ e: GameEngine) {}
+
+    /// A foraging outing is over and its catch stowed; the turn it takes has not passed yet.
+    func foraged(_ e: GameEngine) {}
 
     /// Why foraging is off right now, or nil.
     func forageRefusal(_ e: GameEngine) -> String? {
@@ -427,7 +442,7 @@ public class Journey {
 public enum Journeys {
     /// Every journey, in the order the picker shows them. Adding one is this line and
     /// its folder.
-    public static let all: [Journey] = [Horn1849(), Rail(), Airship()]
+    public static let all: [Journey] = [Horn1849(), Rail(), Airship(), Balloon()]
 
     private static let byID: [String: Journey] = Dictionary(uniqueKeysWithValues: all.map { ($0.id, $0) })
 
