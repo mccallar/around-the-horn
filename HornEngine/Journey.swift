@@ -265,6 +265,11 @@ public class Journey {
 
     public func stop(_ id: String) -> Stop? { stops.first { $0.id == id } }
     public func port(_ stopID: String) -> Port? { ports.first { $0.id == stopID } }
+
+    /// The port at `stopID` in this game: who keeps the store, what it charges, what is said
+    /// there. Override when a fork changes it (the Klondike's two passes each have their own
+    /// landing). The engine asks this one; `port(_:)` is the table's.
+    public func port(_ s: GameState, at stopID: String) -> Port? { port(stopID) }
     public func role(_ r: Role) -> RoleInfo { roles[r]! }
     public func pace(_ p: Pace) -> PaceInfo { paces[p]! }
     public func rations(_ r: Rations) -> RationsInfo { rationings[r]! }
@@ -297,6 +302,14 @@ public class Journey {
     /// The journey's own speed factors, applied after sails, hull and crew and before the
     /// jitter.
     func adjustSpeed(_ e: GameEngine, _ reg: Region, _ sp: inout Double) {}
+
+    /// Health each person gains or loses from the pace on a turn under way. Override when
+    /// it depends on where you are (hauling on foot is harder work than rowing).
+    public func paceHP(_ s: GameState) -> Double { pace(s.pace).hp }
+
+    /// Water each person needs a turn at `temp`. Override when it scales with the cold
+    /// (the Klondike's firewood) or stops on some legs.
+    public func waterNeed(_ s: GameState, _ temp: Temp) -> Double { temp == .hot ? rules.hotWater : rules.water }
 
     /// What the structure loses this turn. Rough weather costs up to its `harsh` in
     /// points, more at full pace and less at an easy one.
@@ -367,6 +380,21 @@ public class Journey {
     /// Leaving the ground: the first departure, or setting off from a port you went ashore
     /// at. Not called when travel resumes between ports.
     func leaving(_ e: GameEngine) {}
+
+    /// Setting off from a port along the way: nil lets you go; otherwise you stay ashore and
+    /// this is what happens instead (a choice whose answer may let you go by clearing
+    /// `state.atPort`). The Klondike holds you at Lake Bennett for a boat and the ice.
+    func holdInPort(_ e: GameEngine) -> [Interrupt]? { nil }
+
+    /// The line after a repair, from `text` unless what is being mended changes on the way.
+    public func repaired(_ s: GameState, _ job: RepairJob) -> String {
+        switch job {
+        case .mend: return text.mended(Int(jsRound(s.sails)))
+        case .patch: return text.patched(Int(jsRound(s.hull)))
+        case .yardHull: return text.yardHull
+        case .yardSails: return text.yardSails
+        }
+    }
 
     /// A foraging outing is over and its catch stowed; the turn it takes has not passed yet.
     func foraged(_ e: GameEngine) {}
@@ -445,12 +473,16 @@ public class Journey {
     }
 }
 
+/// The four repairs the menus offer: a spare on the drive or the structure, or the yard on
+/// either.
+public enum RepairJob { case mend, patch, yardHull, yardSails }
+
 // MARK: - The list
 
 public enum Journeys {
     /// Every journey, in the order the picker shows them. Adding one is this line and
     /// its folder.
-    public static let all: [Journey] = [Horn1849(), Rail(), Airship(), Balloon(), Mars()]
+    public static let all: [Journey] = [Horn1849(), Rail(), Airship(), Balloon(), Klondike(), Mars()]
 
     private static let byID: [String: Journey] = Dictionary(uniqueKeysWithValues: all.map { ($0.id, $0) })
 

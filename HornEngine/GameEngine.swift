@@ -141,7 +141,7 @@ public final class GameEngine {
             state.food = 0
             state.starving = true
         }
-        let wneed = n * (temp == .hot ? r.hotWater : r.water)
+        let wneed = n * journey.waterNeed(state, temp)
         if state.water >= wneed {
             state.water -= wneed
             state.thirst = false
@@ -217,17 +217,17 @@ public final class GameEngine {
         let text = journey.text
         let temp = state.temperature(in: state.region)
         let w = state.weather
-        let pace = journey.pace(state.pace)
+        let paceHP = journey.paceHP(state)
         let rations = journey.rations(state.rations)
         let harshSeason = journey.harshSeason(state)
         let deficiency = journey.deficiency
-        let port: Port? = mode == .port ? journey.port(state.currentStop.id) : nil
+        let port: Port? = mode == .port ? journey.port(state, at: state.currentStop.id) : nil
         let livingNow = state.crew.indices.filter { state.crew[$0].alive }
         for (i, idx) in livingNow.enumerated() {
             var p = state.crew[idx]
             var d = rations.hp
             if mode == .sail {
-                d += pace.hp
+                d += paceHP
                 if w.harsh != 0 { d -= w.harsh }
             }
             if mode == .sea { d += r.restAway }

@@ -38,6 +38,11 @@ final class JourneyBot {
         var throwsPerOuting = 15
         var hitChance: [Role: Double] = [:]
         var maxTurns = 2000
+        /// Shops in place of the default when set: a journey whose needs the run's length
+        /// can't describe (the Klondike's police and lakes) buys for itself.
+        var shopHere: ((GameEngine) -> Void)?
+        /// Whether to use the yard at this port (nil: always).
+        var useYard: ((GameEngine) -> Bool)?
         /// Answers a choice: the option index. Nil takes the first enabled option.
         var decide: (GameEngine, ChoiceEvent) -> Int? = { _, _ in nil }
     }
@@ -129,14 +134,26 @@ final class JourneyBot {
     func portVisit() -> Result? {
         if e.state.averageHP < policy.restBelowHP, case .ended(let r) = process(e.rest(days: policy.restTurns)) { return r }
         if policy.yardAfterShop { shop() }
-        if e.state.hull < policy.yardBelow && e.canRepairHullAtYard, case .ended(let r) = process(e.repairHullAtYard()) { return r }
-        if e.state.sails < policy.yardBelow && e.canRecutSailsAtYard, case .ended(let r) = process(e.recutSailsAtYard()) { return r }
+        let yard = policy.useYard?(e) ?? true
+        if yard && e.state.hull < policy.yardBelow && e.canRepairHullAtYard, case .ended(let r) = process(e.repairHullAtYard()) { return r }
+        if yard && e.state.sails < policy.yardBelow && e.canRecutSailsAtYard, case .ended(let r) = process(e.recutSailsAtYard()) { return r }
         if !policy.yardAfterShop { shop() }
-        e.setSail()
-        return nil
+        return leavePort()
+    }
+
+    /// Sets off; a journey that holds you ashore gets its choices answered and the shop
+    /// visited again until it lets you go.
+    func leavePort() -> Result? {
+        for _ in 0..<50 {
+            if case .ended(let r) = process(e.setSail()) { return r }
+            if !e.state.atPort { return nil }
+            shop()
+        }
+        return Result(won: false, turns: e.state.day, ending: "held in port", score: 0)
     }
 
     func shop() {
+        if let own = policy.shopHere { return own(e) }
         guard let port = e.currentPort else { return }
         let ahead = j.stops[(e.state.stopIndex + 1)...]
         guard let next = ahead.first(where: { $0.type == .port || $0.type == .end }) else { return }
