@@ -171,10 +171,11 @@ public final class Balloon: Journey {
     public static func finale(_ s: GameState) -> String {
         let days = s.day / 6
         let hours = (s.day % 6) * 4
+        let took = "\(days) \(days == 1 ? "day" : "days")" + (hours == 0 ? "" : " and \(hours) hours")
         let out = s.living.count > 1
             ? " Your crew climbs out, stiff and blinking, and stands on the ground as if it might move."
             : " You climb out alone and stand on the ground as if it might move."
-        return "Finish line! The [i]\(TextMarkup.escape(s.ship))[/i] crosses eight degrees west, the meridian of Marrakech, at \(BalloonData.clock(s)) GMT on \(BalloonData.dateOnly(s)) — \(days) \(days == 1 ? "day" : "days") and \(hours) hours after you lifted off.\n\nAt the next sunrise you come down on a stony plain outside the city, bounce twice, and stop. Children run out from a village to see what has fallen out of the sky." + out
+        return "Finish line! The [i]\(TextMarkup.escape(s.ship))[/i] crosses eight degrees west, the meridian of Marrakech, at \(BalloonData.clock(s)) GMT on \(BalloonData.dateOnly(s)) — \(took) after you lifted off.\n\nAt the next sunrise you come down on a stony plain outside the city, bounce twice, and stop. Children run out from a village to see what has fallen out of the sky." + out
     }
 
     /// The game-over footer: how far you got, and how far there was still to go.
@@ -279,8 +280,11 @@ public final class Balloon: Journey {
         s.region.has("sea") ? Self.downAtSea : Self.downOnLand
     }
 
+    /// The shared rule stops at the pilot's death, so anyone it would have taken in the
+    /// same watch is still marked alive: only someone with health left can land her.
     public override func leaderDiedBody(_ s: GameState) -> String {
-        s.atPort ? Self.onTheGround : s.living.isEmpty ? Self.aloftAlone : Self.aloftWithCrew
+        if s.atPort { return Self.onTheGround }
+        return s.living.contains { $0.hp > 0 } ? Self.aloftWithCrew : Self.aloftAlone
     }
 
     /// Dry tanks cost lift every watch aloft; loitering burns its own, smaller share; the
@@ -296,8 +300,8 @@ public final class Balloon: Journey {
                 e.state.vars[BalloonData.relaunchKey] = nil
                 let relaunched = "Relaunched. The climb back to cruising height burned \(Int(BalloonData.launchBurn)) gallons."
                 if r == 2 {
-                    let n = Int(e.state.vars[BalloonData.toppedUpKey] ?? 0)
-                    q.append(.message("The ground-team chief looks at your gauges, then at your wallet, and waves the fuel truck over. “On the sponsor's account,” he says. “Just enough to get you off the ground. After that you're drifting.” [dim](+\(n) gallons.)[/dim]"))
+                    let n = BalloonData.gallons(e.state.vars[BalloonData.toppedUpKey] ?? 0)
+                    q.append(.message("The ground-team chief looks at your gauges, then at your wallet, and waves the fuel truck over. “On the sponsor's account,” he says. “Just enough to get you off the ground. After that you're drifting.” [dim](+\(n).)[/dim]"))
                     q.append(.message(relaunched))
                     q.append(.message(text.outOfFuel))
                 } else if e.state.note.isEmpty || e.state.note == e.state.weather.note {
@@ -335,10 +339,11 @@ public final class Balloon: Journey {
 
     public override func mayDepart(_ s: GameState) -> Bool { s.fuel >= BalloonData.launchBurn }
 
-    /// What the app should say instead of relaunching, or nil: you are short of the climb's
-    /// propane and could buy a step of it here. With no money for it, the ground team pays.
+    /// What the app should say instead of relaunching, or nil: you are on the ground, short
+    /// of the climb's propane, and could buy a step of it here. With no money for it, the
+    /// ground team pays. Aloft (resuming between fields) it is always nil.
     public static func relaunchRefusal(_ e: GameEngine) -> String? {
-        guard let port = e.currentPort, e.state.fuel < BalloonData.launchBurn else { return nil }
+        guard e.state.atPort, let port = e.currentPort, e.state.fuel < BalloonData.launchBurn else { return nil }
         let step = Double(BalloonData.items.first { $0.key == .fuel }!.step)
         guard e.state.money >= step * port.price(.fuel) else { return nil }
         return "You need at least 25 gallons of propane to relaunch. The ground crew points at the fuel truck."
@@ -391,6 +396,14 @@ public final class Balloon: Journey {
     }
 
     // MARK: - Trade and score
+
+    /// Water is never traded: the jugs hold $150 of it, under any trader's interest, and
+    /// the smallest trade is more water than they hold.
+    public override var tradeKeys: [ItemKey] { items.map(\.key).filter { $0 != .water } }
+
+    /// Nobody hands over more than you can stow: an offer too big for the room left is cut
+    /// to what fits, and what they want for it by the same share (`fitTrade`).
+    override func fitOffer(_ e: GameEngine, _ o: Offer) -> Offer? { fitTrade(e, o) }
 
     public override func tradeValue(_ good: TradeGood) -> Double {
         switch good {

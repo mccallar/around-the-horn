@@ -56,6 +56,13 @@ enum BalloonData {
         return "\(monthNames[d.month]) \(d.day), \(d.year)"
     }
 
+    /// "0.7 gallons", "14.5 gallons", "1 gallon": propane to a tenth, never shown as none.
+    static func gallons(_ g: Double) -> String {
+        let tenths = max(1, jsRound(g * 10))
+        let n = tenths.truncatingRemainder(dividingBy: 10) == 0 ? String(Int(tenths / 10)) : String(format: "%.1f", tenths / 10)
+        return "\(n) \(tenths == 10 ? "gallon" : "gallons")"
+    }
+
     /// "1600", the watch's GMT time.
     static func clock(_ s: GameState) -> String {
         String(format: "%02d00", s.hour)
@@ -84,9 +91,9 @@ enum BalloonData {
              desc: "Burns 12–16 gallons a watch, more in the cold. Run out and you sink."),
     ]
 
-    /// What a trader thinks one stored unit is worth.
+    /// What a trader thinks one stored unit is worth. Water is not traded (`tradeKeys`).
     static let values: [ItemKey: Double] = [
-        .food: 4.2, .water: 0.6, .limes: 25, .meds: 100, .clothes: 80, .timber: 60, .sailcloth: 140, .tackle: 1.5,
+        .food: 4.2, .limes: 25, .meds: 100, .clothes: 80, .timber: 60, .sailcloth: 140, .tackle: 1.5,
         .fuel: 0.55,
     ]
 
@@ -165,8 +172,11 @@ enum BalloonData {
                weights: [(jet, 26), (steady, 24), (shear, 16), (cloud, 12), (snow, 10), (storm, 6), (light, 6)]),
         Region(id: "atlantic", to: 17350, name: "The North Atlantic", temp: .cool, tags: ["sea", "atlantic"],
                weights: [(steady, 26), (jet, 22), (cloud, 16), (shear, 16), (storm, 8), (snow, 6), (light, 6)]),
-        Region(id: "azores", to: 18301, name: "The Azores & home", temp: .warm, tags: ["sea"],
+        Region(id: "azores", to: 18225, name: "Past the Azores", temp: .warm, tags: ["sea"],
                weights: [(steady, 34), (light, 18), (jet, 14), (cloud, 14), (sun, 8), (stalled, 8), (shear, 4)]),
+        // The coast of Morocco between Safi and Essaouira; the finish line is inland.
+        Region(id: "morocco", to: 18301, name: "Morocco & home", temp: .warm,
+               weights: [(steady, 34), (light, 18), (jet, 14), (sun, 12), (dust, 8), (stalled, 8), (shear, 6)]),
     ]
 
     /// The southern Pacific track, in place of the North Pacific and the Northeast Pacific.

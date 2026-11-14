@@ -152,7 +152,8 @@ extension Balloon {
                                options: [.init("Climb above the cloud to melt it (40 gal)", enabled: e.state.fuel >= BalloonData.iceBurn),
                                          .init("Ride it out")]))
             },
-            JourneyEvent(2, when: !sea && !rough) { e, q in
+            // A small camera plane can't climb to the jet.
+            JourneyEvent(2, when: !sea && !rough && s.pace != .full) { e, q in
                 q.append(e.ask("camera",
                                prompt: "A small plane full of television cameras climbs up to circle you. Its pilot comes on the radio: closer, they want closer.",
                                options: [.init("Wave them in close"), .init("Wave them off")]))

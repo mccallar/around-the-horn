@@ -9,9 +9,12 @@ extension Balloon {
     func setPiece(_ e: GameEngine, _ stop: Stop) -> [Interrupt] {
         switch stop.id {
         case "him":
+            // Already in the jet, you hold your height over the summits; lower, you climb.
+            let high = e.state.pace == .full
             return [e.ask("him", prompt: "You are passing the Himalaya.",
-                          detail: "The whole range stands up out of the haze to the north, a white wall two hundred miles long. Mission Control says the jet is running hard just over the top — if you can stand the cold.",
-                          options: [.init("Climb over the range into the jet (35 gal)", enabled: e.state.fuel >= BalloonData.himalayaBurn),
+                          detail: "The whole range stands up out of the haze to the north, a white wall two hundred miles long. Mission Control says the jet is running hard right over the summits — if you can stand the cold.",
+                          options: [.init(high ? "Hold the jet over the range (35 gal)" : "Climb over the range into the jet (35 gal)",
+                                          enabled: e.state.fuel >= BalloonData.himalayaBurn),
                                     .init("Stay south of the range")])]
         case "pacific":
             return [forkChoice(e)]
@@ -20,9 +23,12 @@ extension Balloon {
                           detail: "Half a world from Greenwich, the calendar below you jumps back a day. Mission Control keeps Greenwich time, so nothing changes aboard — but somebody has kept a cake in the freezer since Marrakech for exactly this moment.",
                           options: [.init("Hold a party (1 watch)"), .init("Keep to the watch schedule")])]
         case "azores":
-            return [e.ask("azores", prompt: "You are passing over the Azores.",
-                          detail: "Green volcanic islands in the middle of the Atlantic. A fishing boat out of Ponta Delgada has heard you on the radio, and offers to meet you off the coast with fresh water and bread if you'll come down to the wave tops.",
-                          options: [.init("Drop down to meet her (2 watches)"), .init("Fly on")])]
+            // Coming down to the wave tops needs air as calm as fishing does.
+            let rough = e.state.weather.isRough
+            var detail = "Green volcanic islands in the middle of the Atlantic. A fishing boat out of Ponta Delgada has heard you on the radio, and offers to meet you off the coast with fresh water and bread if you'll come down to the wave tops."
+            if rough { detail += " [red]But the air is far too rough to come down that low today.[/red]" }
+            return [e.ask("azores", prompt: "You are passing over the Azores.", detail: detail,
+                          options: [.init("Drop down to meet her (2 watches)", enabled: !rough), .init("Fly on")])]
         default:
             return []
         }
@@ -47,6 +53,21 @@ extension Balloon {
                                .init("Trust your own eyes")])
     }
 
+    // MARK: - Trades
+
+    /// An offer cut to the room left for what it gives, in whole trading units (10 lbs or
+    /// gallons, a spool, a kit), with what is wanted cut by the same share; nil when not one
+    /// unit fits.
+    func fitTrade(_ e: GameEngine, _ o: Offer) -> Offer? {
+        guard case .item(let k) = o.give else { return o }
+        let unit = Double(roundTrade(o.give, 0))
+        let room = ((item(k).cap - e.state[k]) / unit).rounded(.down) * unit
+        if Double(o.giveAmount) <= room { return o }
+        guard room > 0 else { return nil }
+        let want = roundTrade(o.want, Double(o.wantAmount) * room / Double(o.giveAmount))
+        return Offer(give: o.give, giveAmount: Int(room), want: o.want, wantAmount: min(want, o.wantAmount))
+    }
+
     // MARK: - Answers
 
     func answer(_ e: GameEngine, _ key: String, _ args: [String], _ option: Int) -> [Interrupt] {
@@ -63,10 +84,13 @@ extension Balloon {
             for (i, idx) in living.enumerated() {
                 e.state.crew[idx].hp -= 3 + (i < e.state.clothes ? 0 : 10)
             }
-            var t = "You climb to thirty thousand feet and the jet takes you like a leaf in a gutter. For an hour Everest stands just below the porthole, close enough to see the snow streaming off the summit. You've gained two hundred miles. The cold has gained on all of you. [red](Crew health falls.)[/red]"
+            let over = e.state.pace == .full
+                ? "You burn hard to hold your height over the summits, and the jet takes you like a leaf in a gutter."
+                : "You burn hard and climb up over the summits into the jet, and it takes you like a leaf in a gutter."
+            var t = over + " For an hour Everest stands just below the porthole, close enough to see the snow streaming off the summit. You've gained two hundred miles. The cold has gained on all of you. [red](Crew health falls.)[/red]"
             if e.chance(0.25) {
                 e.state.sails = max(0, e.state.sails - 10)
-                t += " Ice forms in a burner valve on the way down. [red](Burners −10%)[/red]"
+                t += " Ice forms in a burner valve over the range. [red](Burners −10%)[/red]"
             }
             var q: [Interrupt] = [.message(t)]
             for idx in living where e.state.crew[idx].hp < 0 { e.state.crew[idx].hp = 0 }
@@ -77,7 +101,7 @@ extension Balloon {
             switch option {
             case 0:
                 e.state.vars[BalloonData.southKey] = nil
-                return [.message("You climb into the jet, and the Pacific starts to slide by at a hundred knots. Everyone puts on a second pair of socks.")]
+                return [.message("You climb into the jet, and the Pacific starts to slide by faster than any ship could cross it. Everyone puts on a second pair of socks.")]
             case 1:
                 e.state.vars[BalloonData.southKey] = 1
                 return [forecastChoice(e)]
@@ -127,7 +151,7 @@ extension Balloon {
                     q.append(.message("\(TextMarkup.escape(e.state.crew[idx].name)) caught a hand in the line hauling the net up, and has a broken arm."))
                 }
             }
-            // Two watches at the wave tops, in whatever weather there is.
+            // Two watches at the wave tops, in the calm air that let you come down.
             for _ in 0..<2 where !e.state.over {
                 e.state.day += 1
                 e.consume(&q, .sea)
@@ -143,7 +167,8 @@ extension Balloon {
             var q = e.passDays(1, .sea)
             if e.state.over { return q }
             if e.chance(0.75) {
-                // Propane and sand weigh too much to pass up a trail line.
+                // Propane and sand weigh too much to pass up a trail line (and nobody trades
+                // water: `tradeKeys`).
                 if let o = e.makeOffer(excluding: [.fuel, .timber]) {
                     q.append(.choice(e.tradeChoice(o, intro: "Her bosun ties a sack to your trail line and shouts up what's in it.")))
                 } else {

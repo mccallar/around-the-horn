@@ -33,7 +33,7 @@ extension Balloon {
              mods: [.sailcloth: 0.8, .food: 1.2, .limes: 0.9], fever: true,
              arrive: "You come down on the wide gravel bed of the Kase River, where the city holds its balloon fiesta every autumn. A crowd is already lining the bank, waving paper flags.",
              talk: [
-                "A fiesta organiser: \"From here the jet runs straight out over the ocean at a hundred knots and more. The next land is America. There is nothing in between.\"",
+                "A fiesta organiser: \"From here the jet runs straight out over the ocean, faster than any ship. The next land is America. There is nothing in between.\"",
                 "A balloon maker: \"Last winter a team left here with half-full tanks. A fishing boat found them near Midway, sitting on their capsule. Fill your tanks.\"",
                 "A doctor at the field: \"The winter flu is everywhere this month. Wash your hands, and don't linger.\"",
              ]),

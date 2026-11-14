@@ -164,6 +164,27 @@ final class BalloonTests: XCTestCase {
 
         s.fuel = 30
         XCTAssertNil(Balloon.relaunchRefusal(engine(s)))
+
+        // Aloft past a field there is nothing to refuse: resuming the flight costs nothing.
+        var aloft = flying(mile: 2600)
+        aloft.fuel = 10
+        aloft.money = 1000
+        let a = engine(aloft)
+        XCTAssertEqual(a.currentPort?.id, "lux")
+        XCTAssertNil(Balloon.relaunchRefusal(a))
+    }
+
+    func testTheGroundTeamsTopUpIsCountedToATenth() {
+        for (fuel, said) in [(24.3, "(+0.7 gallons.)"), (10.5, "(+14.5 gallons.)"), (24.0, "(+1 gallon.)")] {
+            var s = landed("kh")
+            s.fuel = fuel
+            s.money = 0
+            s.forceFair = 1
+            let e = engine(s)
+            e.setSail()
+            let first = messages(e.sailDay())[0]
+            XCTAssertTrue(first.contains(said), first)
+        }
     }
 
     // MARK: - Where and when
@@ -270,6 +291,32 @@ final class BalloonTests: XCTestCase {
         XCTAssertEqual(balloon.leaderDiedBody(s), Balloon.aloftAlone)
     }
 
+    func testWhenTheWholeCrewDiesInOneWatchNobodyLandsHer() {
+        var s = flying(mile: 9000)
+        for i in s.crew.indices { s.crew[i].hp = i == 2 ? 3 : 0 }
+        let e = engine(s)
+        var q: [Interrupt] = []
+        e.deaths(&q)
+        guard case .gameOver(_, let body)? = q.last else { return XCTFail("no ending") }
+        XCTAssertEqual(body, Balloon.aloftWithCrew, "Claire is still on her feet")
+
+        for i in s.crew.indices { s.crew[i].hp = -1 }
+        let all = engine(s)
+        q = []
+        all.deaths(&q)
+        guard case .gameOver(_, let none)? = q.last else { return XCTFail("no ending") }
+        XCTAssertEqual(none, Balloon.aloftAlone)
+    }
+
+    func testTheLastNinetyMilesAreMoroccoNotTheSea() {
+        XCTAssertTrue(flying(mile: 18200).region.has("sea"))
+        let land = flying(mile: 18250)
+        XCTAssertEqual(land.region.id, "morocco")
+        XCTAssertEqual(balloon.wreckedBody(land), Balloon.downOnLand)
+        XCTAssertEqual(balloon.wreckedTitle(land), "The [i]Skylark[/i] has come down.")
+        XCTAssertEqual(engine(land).fishingRefusal, "There's no sea below you to fish in.")
+    }
+
     // MARK: - The region rolls
 
     func testTheSouthernTrackThrowsThunderstormsAndTheForecastersDodgeMost() {
@@ -333,6 +380,18 @@ final class BalloonTests: XCTestCase {
         guard let no = choice(engine(s).beginArrival("him")) else { return XCTFail("no choice") }
         XCTAssertFalse(no.options[0].enabled)
         XCTAssertTrue(no.options[1].enabled)
+        XCTAssertTrue(no.options[0].label.hasPrefix("Climb over the range"))
+    }
+
+    func testInTheJetAlreadyYouHoldItOverTheRange() {
+        var s = flying(mile: 5050)
+        s.pace = .full
+        let e = engine(s)
+        guard let c = choice(e.beginArrival("him")) else { return XCTFail("no choice") }
+        XCTAssertEqual(c.options[0].label, "Hold the jet over the range (35 gal)")
+        let said = messages(e.resolve(c, option: 0))[0]
+        XCTAssertTrue(said.hasPrefix("You burn hard to hold your height over the summits"), said)
+        XCTAssertFalse(said.contains("climb"), said)
     }
 
     func testTheForkAndTheForecasters() {
@@ -388,6 +447,19 @@ final class BalloonTests: XCTestCase {
         XCTAssertEqual(e.state.fuel, 500 - 2 * 10 * 0.95, accuracy: 1e-9)
     }
 
+    func testTheAzoresBoatNeedsCalmAir() {
+        var s = flying(mile: 17350)
+        s.weather = BalloonData.storm
+        guard let rough = choice(engine(s).beginArrival("azores")) else { return XCTFail("no choice") }
+        XCTAssertFalse(rough.options[0].enabled)
+        XCTAssertTrue(rough.options[1].enabled)
+        XCTAssertTrue(rough.detail?.contains("far too rough") == true)
+
+        s.weather = BalloonData.steady
+        guard let calm = choice(engine(s).beginArrival("azores")) else { return XCTFail("no choice") }
+        XCTAssertTrue(calm.options[0].enabled)
+    }
+
     // MARK: - Choices
 
     func testThunderheadsAroundCostAWatchAndThroughCanCostLift() {
@@ -420,6 +492,25 @@ final class BalloonTests: XCTestCase {
         XCTAssertEqual(drop.state.badLuck, 25)
     }
 
+    func testTheCameraPlaneCannotClimbToTheJet() {
+        func cameraCanCome(_ pace: Pace) -> Bool {
+            var s = flying(mile: 14000)
+            s.pace = pace
+            s.weather = BalloonData.steady
+            let e = engine(s)
+            return balloon.events(e, e.state.region).contains { ev in
+                guard ev.ok else { return false }
+                var q: [Interrupt] = []
+                ev.run(engine(s), &q)
+                if case .custom(let key, _)? = choice(q)?.kind { return key == "camera" }
+                return false
+            }
+        }
+        XCTAssertTrue(cameraCanCome(.steady))
+        XCTAssertTrue(cameraCanCome(.easy))
+        XCTAssertFalse(cameraCanCome(.full))
+    }
+
     func testTheCameraPlanePaysOrShakesYou() {
         let paid = engine(flying(), [0, 0])
         _ = paid.resolve(ask("camera"), option: 0)
@@ -430,21 +521,77 @@ final class BalloonTests: XCTestCase {
         XCTAssertEqual(shaken.state.sails, 88)
     }
 
-    func testTheFreighterNeverTradesPropaneOrBallast() {
+    /// Through the freighter's own answer: whatever she offers comes up a trail line.
+    func testTheFreighterNeverTradesPropaneBallastOrWater() {
         var offers = 0
+        var propaneElsewhere = false
         for seed in UInt64(0)..<300 {
             var s = flying(mile: 9000)
-            s.fuel = 900
+            s.fuel = 400
+            s.water = 40
             s.timber = 10
             let e = GameEngine(state: s, rng: SeededRNG(seed: seed))
-            guard let o = e.makeOffer(excluding: [.fuel, .timber]) else { continue }
+            if let o = GameEngine(state: s, rng: SeededRNG(seed: seed)).makeOffer(), o.give == .item(.fuel) {
+                propaneElsewhere = true
+            }
+            guard case .tradeOffer(let o, _)? = choice(e.resolve(ask("freighter"), option: 0))?.kind else { continue }
             offers += 1
             for g in [o.give, o.want] {
                 XCTAssertNotEqual(g, .item(.fuel))
                 XCTAssertNotEqual(g, .item(.timber))
+                XCTAssertNotEqual(g, .item(.water))
             }
         }
         XCTAssertGreaterThan(offers, 100)
+        XCTAssertTrue(propaneElsewhere, "a field's trader can offer propane in the same state")
+    }
+
+    /// A trader never hands over more than there is room for, so a trade never pays for
+    /// goods that would be thrown away.
+    func testNoOfferGivesMoreThanThereIsRoomFor() {
+        var offers = 0
+        var cut = 0
+        for seed in UInt64(0)..<400 {
+            for landedAt in [false, true] {
+                var s = landedAt ? landed("abq") : flying(mile: 9000)
+                s.water = 40
+                s.fuel = 900
+                s.food = 390
+                s.meds = 9
+                s.limes = 22
+                let e = GameEngine(state: s, rng: SeededRNG(seed: seed))
+                guard let o = e.makeOffer() else { continue }
+                offers += 1
+                XCTAssertNotEqual(o.give, .item(.water))
+                XCTAssertNotEqual(o.want, .item(.water))
+                XCTAssertGreaterThan(o.wantAmount, 0)
+                guard case .item(let k) = o.give else { continue }
+                XCTAssertGreaterThan(o.giveAmount, 0)
+                XCTAssertLessThanOrEqual(Double(o.giveAmount), balloon.item(k).cap - s[k], "\(o)")
+                if Double(o.giveAmount) == balloon.item(k).cap - s[k] { cut += 1 }
+            }
+        }
+        XCTAssertGreaterThan(offers, 300)
+        XCTAssertGreaterThan(cut, 20, "big offers are cut, not dropped")
+    }
+
+    func testAnOfferTooBigIsCutToFitAndItsPriceWithIt() {
+        var s = flying()
+        s.fuel = 900
+        s.meds = 5
+        let e = engine(s)
+        let big = Offer(give: .item(.fuel), giveAmount: 1200, want: .item(.meds), wantAmount: 10)
+        XCTAssertEqual(balloon.fitOffer(e, big), Offer(give: .item(.fuel), giveAmount: 300, want: .item(.meds), wantAmount: 3))
+        let small = Offer(give: .item(.fuel), giveAmount: 300, want: .money, wantAmount: 150)
+        XCTAssertEqual(balloon.fitOffer(e, small), small)
+        e.applyTrade(balloon.fitOffer(e, big)!)
+        XCTAssertEqual(e.state.fuel, 1200)
+        XCTAssertEqual(e.state.meds, 2)
+
+        s.food = 495
+        XCTAssertNil(balloon.fitOffer(engine(s), Offer(give: .item(.food), giveAmount: 50, want: .money, wantAmount: 300)),
+                     "not one 10-lb unit fits")
+        XCTAssertEqual(balloon.fitOffer(engine(s), Offer(give: .money, giveAmount: 50, want: .item(.meds), wantAmount: 1))?.giveAmount, 50)
     }
 
     // MARK: - Fishing
@@ -511,6 +658,9 @@ final class BalloonTests: XCTestCase {
         s.day = 160
         let f = Balloon.finale(s)
         XCTAssertTrue(f.contains("at 0000 GMT on January 28, 1999 — 26 days and 16 hours after you lifted off."), f)
+        s.day = 162
+        let whole = Balloon.finale(s)
+        XCTAssertTrue(whole.contains("at 0800 GMT on January 28, 1999 — 27 days after you lifted off."), whole)
         XCTAssertTrue(Balloon.shortfall(flying(mile: 17000)).hasSuffix("17,000 nautical miles flown, 1,300 short of the finish line."))
     }
 
@@ -597,15 +747,21 @@ final class BalloonTests: XCTestCase {
         }
     }
 
+    /// Some losses come down for want of lift and some are the pilot's death, and neither
+    /// kind is a single cause.
     func testLosingFlightsEndMoreThanOneWay() {
-        var endings = Set<String>()
+        var comeDown = Set<String>()
+        var died = Set<String>()
         for role in [Role.shipwright, .whaler] {
             for i in 0..<30 {
                 let r = JourneyBot(journey: balloon, role: role, seed: 500 + UInt64(1000 * role.scoreMultiplier + i),
                                    policy: Self.policy()).play()
-                if !r.won { endings.insert(r.ending) }
+                if r.won { continue }
+                if r.ending.contains("has come down") { comeDown.insert(r.ending) } else if r.ending.contains("have died of") { died.insert(r.ending) }
             }
         }
-        XCTAssertGreaterThanOrEqual(endings.count, 3, "\(endings)")
+        XCTAssertFalse(comeDown.isEmpty, "no flight came down: \(died)")
+        XCTAssertGreaterThanOrEqual(died.count, 2, "\(died)")
+        XCTAssertGreaterThanOrEqual(comeDown.count + died.count, 3, "\(comeDown) \(died)")
     }
 }
