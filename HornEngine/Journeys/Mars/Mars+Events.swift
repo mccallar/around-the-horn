@@ -9,8 +9,9 @@ extension Mars {
         let debris = reg.has("traffic") || reg.has("ice")
         let full = s.pace == .full
         let forecasts = !reg.has("quiet")
-        let current = stops[s.stopIndex]
-        let leavingPort = current.type == .port && s.mile - current.mile < 1500
+        // A shuttle can still catch you a few days out from a station you docked at.
+        let lastPort = stops[...s.stopIndex].last { $0.type == .port && $0.id != "cycler" }
+        let leavingPort = lastPort.map { s.mile - $0.mile < 1500 } ?? false
         let nextPort = stops[(s.stopIndex + 1)...].first { $0.type == .port && $0.id != "cycler" }
 
         return [
@@ -87,7 +88,7 @@ extension Mars {
                 let want = wantsWater ? "\(litres) litres of water" : "a hull patch"
                 let can = wantsWater ? e.state.water >= Double(litres) : e.state.timber >= 1
                 q.append(e.ask("distress", [wantsWater ? "water" : "patch", "\(litres)"],
-                               prompt: "A call on the common channel: a small survey ship with a cracked tank, two days off your course and in trouble. Her captain asks for \(want), if you can spare it.",
+                               prompt: "A call on the common channel: a small survey ship with a cracked tank, not far off your course and in trouble. Her captain asks for \(want), if you can spare it.",
                                options: [.init("Send \(want) across", enabled: can), .init("Say you're sorry, and mean it")]))
             },
             JourneyEvent(4, when: !s.stowawaySeen && leavingPort && nextPort != nil && s.living.count < 6) { e, q in
@@ -96,7 +97,7 @@ extension Mars {
                 let free = self.firstNames.filter { f in !e.state.crew.contains { $0.name == f } }
                 let name = e.pick(free) ?? "Anan"
                 q.append(e.ask("hitch", [name, port.id],
-                               prompt: "A shuttle from \(current.name) catches you up before you are far gone. Aboard is a technician called \(name), who missed a ship and has a job waiting at \(port.name).",
+                               prompt: "A shuttle from \(lastPort?.name ?? "the yard") catches you up before you are far gone. Aboard is a technician called \(name), who missed a ship and has a job waiting at \(port.name).",
                                detail: "A pump fitter, by trade and by conversation. One more pair of hands; one more mouth.",
                                options: [.init("Take \(name) as far as \(port.short)"), .init("Send \(name) back with the shuttle")]))
             },

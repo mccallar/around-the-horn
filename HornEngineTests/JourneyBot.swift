@@ -19,6 +19,9 @@ final class JourneyBot {
         /// Multiplies the run's food, water, fuel or preventive by item (1 if absent): heat
         /// drinks more than the tables' daily ration, cold burns more.
         var stockFactor: [ItemKey: Double] = [:]
+        /// A factor for one item at the port being shopped, in place of `stockFactor` when it
+        /// answers: a forager who knows there is a catch ahead buys less of it.
+        var stockFactorHere: ((GameEngine, ItemKey) -> Double?)?
         /// What to hold after shopping, in stored units, bought in this order after the
         /// consumables and the warm clothes.
         var spares: [(ItemKey, Double)] = [(.meds, 2), (.sailcloth, 2), (.timber, 2)]
@@ -140,7 +143,7 @@ final class JourneyBot {
         let pace = j.pace(e.state.pace)
         let turns = Double(next.mile - e.state.mile) / (pace.speed * policy.speedShare) + policy.marginTurns
         let n = crew
-        func f(_ k: ItemKey) -> Double { policy.stockFactor[k] ?? 1 }
+        func f(_ k: ItemKey) -> Double { policy.stockFactorHere?(e, k) ?? policy.stockFactor[k] ?? 1 }
         var wants: [(ItemKey, Double)] = [
             (.food, n * j.rations(e.state.rations).amount * turns * f(.food)),
             (.water, n * j.rules.water * turns * f(.water)),

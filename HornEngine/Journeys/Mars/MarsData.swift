@@ -51,23 +51,23 @@ enum MarsData {
     // MARK: - Stock
 
     static let items: [Item] = [
-        Item(key: .food, name: "Rations", unit: "kg", one: "kg", step: 25, per: 1, price: 0.3, max: 450,
+        Item(key: .food, name: "Rations", unit: "kg", one: "kg", step: 25, per: 1, price: 0.18, max: 450,
              desc: "Freeze-dried, tinned and vacuum-packed. Five people on full rations eat 4 kg a day."),
-        Item(key: .water, name: "Water", unit: "litres", one: "litre", step: 50, per: 1, price: 0.04, max: 700,
+        Item(key: .water, name: "Water", unit: "litres", one: "litre", step: 50, per: 1, price: 0.23, max: 800,
              desc: "The recycler gives back most of what you use. The rest, 2 litres a head a day, is gone for good. Ice caught on the tether tops it up."),
-        Item(key: .fuel, name: "Propellant", unit: "tonnes", one: "tonne", step: 5, per: 10, price: 1.2, max: 100,
+        Item(key: .fuel, name: "Propellant", unit: "tonnes", one: "tonne", step: 5, per: 10, price: 0.74, max: 100,
              desc: "The drive burns a tonne a day at cruise, 0.7 at economy and 1.6 at a hard burn. The tanks hold 100 tonnes, which is not enough to reach Mars."),
-        Item(key: .limes, name: "Supplement packs", unit: "packs", one: "pack", step: 1, per: 1, price: 2.5, max: 20,
+        Item(key: .limes, name: "Supplement packs", unit: "packs", one: "pack", step: 1, per: 1, price: 2.3, max: 20,
              desc: "Calcium, vitamin D and a pill nobody can pronounce. A pack lasts one person 50 days. A month without and bones start to thin."),
-        Item(key: .meds, name: "Medical kits", unit: "kits", one: "kit", step: 1, per: 1, price: 10, max: 8,
+        Item(key: .meds, name: "Medical kits", unit: "kits", one: "kit", step: 1, per: 1, price: 9, max: 8,
              desc: "Dressings, antibiotics, splints, burn gel. Opened the moment someone falls ill."),
-        Item(key: .clothes, name: "Thermal suits", unit: "suits", one: "suit", step: 1, per: 1, price: 6, max: 10,
+        Item(key: .clothes, name: "Thermal suits", unit: "suits", one: "suit", step: 1, per: 1, price: 5.5, max: 10,
              desc: "One each. The cabin is heated by the same power that drives the ship; when the power fails, so does the heat."),
-        Item(key: .sailcloth, name: "Array panels", unit: "panels", one: "panel", step: 1, per: 1, price: 14, max: 8,
+        Item(key: .sailcloth, name: "Array panels", unit: "panels", one: "panel", step: 1, per: 1, price: 13, max: 8,
              desc: "Spare solar panels and drive parts. One panel and a day on the truss puts power & drive a good way right."),
-        Item(key: .timber, name: "Hull patches", unit: "patches", one: "patch", step: 1, per: 1, price: 12, max: 8,
+        Item(key: .timber, name: "Hull patches", unit: "patches", one: "patch", step: 1, per: 1, price: 11, max: 8,
              desc: "Sealant, a plate and a lot of patience. One patch and a day mends the pressure hull."),
-        Item(key: .tackle, name: "Tether cartridges", unit: "cartridges", one: "cartridge", step: 1, per: 20, price: 3, max: 10,
+        Item(key: .tackle, name: "Tether cartridges", unit: "cartridges", one: "cartridge", step: 1, per: 20, price: 2.75, max: 10,
              desc: "A cartridge fires the grapple 20 times. In a comet's old debris stream, ice is water for the price of a shot."),
     ]
 

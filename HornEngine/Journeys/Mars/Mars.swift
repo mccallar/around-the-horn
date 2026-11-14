@@ -39,14 +39,14 @@ public final class Mars: Journey {
         roles[.shipwright] = RoleInfo(label: "Be a yard rigger who bought the ship she used to fix", title: "yard rigger",
                                       money: 850, mend: 40, patch: 32, catchLimit: 60, aim: 1.5)
         roles[.whaler] = RoleInfo(label: "Be an ice hauler from the lunar tugs", title: "ice hauler",
-                                  money: 500, mend: 25, patch: 20, catchLimit: 100, aim: 4)
+                                  money: 625, mend: 25, patch: 20, catchLimit: 100, aim: 4)
 
-        paces[.easy] = PaceInfo(name: "Economy burn", speed: 250, hp: 0.5, wear: 1.2, fuel: 7,
-                                desc: "About 2.5 million km a day on 0.7 tonnes of propellant. Easy on the drive and on everyone.")
-        paces[.steady] = PaceInfo(name: "Cruise", speed: 300, hp: 0, wear: 2, fuel: 10,
-                                  desc: "About 3 million km a day on a tonne of propellant.")
-        paces[.full] = PaceInfo(name: "Hard burn", speed: 350, hp: -1, wear: 3.4, fuel: 16,
-                                desc: "About 3.5 million km a day on 1.6 tonnes. Noise, heat, wear, and nobody sleeps.")
+        paces[.easy] = PaceInfo(name: "Economy burn", speed: 310, hp: 0.5, wear: 1.2, fuel: 7,
+                                desc: "About 3.1 million km a day on 0.7 tonnes of propellant. Easy on the drive and on everyone.")
+        paces[.steady] = PaceInfo(name: "Cruise", speed: 370, hp: 0, wear: 2, fuel: 10,
+                                  desc: "About 3.7 million km a day on a tonne of propellant.")
+        paces[.full] = PaceInfo(name: "Hard burn", speed: 430, hp: -1, wear: 3.4, fuel: 16,
+                                desc: "About 4.3 million km a day on 1.6 tonnes. Noise, heat, wear, and nobody sleeps.")
 
         rationings[.filling] = RationsInfo(name: "Full", amount: 0.8, hp: 1, desc: "0.8 kg a head a day. Three meals and something hot.")
         rationings[.meager] = RationsInfo(name: "Lean", amount: 0.55, hp: -0.3, desc: "0.55 kg a head a day. Nobody starves; nobody is pleased.")
@@ -77,7 +77,7 @@ public final class Mars: Journey {
         rules.tradeWorth = 20
         rules.tradeCash = 40
         rules.tradeSize = 15...45
-        rules.rankCuts = [7000, 4000, 2000]
+        rules.rankCuts = [8000, 5000, 2500]
     }
 
     // MARK: - Sentences
