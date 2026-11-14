@@ -374,7 +374,7 @@ final class MarsTests: XCTestCase {
         XCTAssertEqual(shelter.state.day, 1)
         XCTAssertEqual(shelter.state.mile, 1000)
 
-        // One person, the first, and the 60% comes up.
+        // One person, the first, and the 75% comes up.
         let work = engine(ship(), [0, 0, 0])
         let q = work.resolve(ask(work, "flare"), option: 1)
         XCTAssertEqual(work.state.crew[0].ailment, MarsData.radiation)

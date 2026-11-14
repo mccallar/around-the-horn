@@ -148,7 +148,7 @@ enum MarsData {
 
     // MARK: - Ailments
 
-    static let radiation = Ailment("radiation sickness", damage: 3, days: 6...12)
+    static let radiation = Ailment("radiation sickness", damage: 4, days: 6...12)
     static let decompression = Ailment("a decompression injury", damage: 2.5, days: 4...8, death: "a decompression injury")
     static let badAir = Ailment("bad air", damage: 2, days: 3...6)
     static let fracture = Ailment("a fracture", damage: 1.2, days: 12...20, death: "complications of a fracture")

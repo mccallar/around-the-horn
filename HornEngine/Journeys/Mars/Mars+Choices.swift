@@ -72,9 +72,9 @@ extension Mars {
                 let c = Self.wellCrew(e)
                 guard !c.isEmpty else { break }
                 let idx = e.pick(c)!
-                if e.chance(0.6) {
+                if e.chance(0.75) {
                     hurt += 1
-                    e.state.crew[idx].hp -= 5
+                    e.state.crew[idx].hp -= 8
                     e.sicken(idx, &q, e.state.temperature(in: e.state.region), nil, MarsData.radiation)
                 }
             }
