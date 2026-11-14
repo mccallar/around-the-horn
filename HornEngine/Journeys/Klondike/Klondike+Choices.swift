@@ -32,7 +32,7 @@ extension Klondike {
             prompt += " [red]The snow on the passes is going rotten. It's slide season.[/red]"
         }
         return e.ask("fork", prompt: prompt,
-                     detail: "Two landings lie a few miles apart. From [amber]Dyea[/amber] the trail goes over the [amber]Chilkoot Pass[/amber]: short, steep, too steep for anything but people. From [amber]Skagway[/amber] it goes over the [amber]White Pass[/amber]: lower and longer, and a bog whenever it isn't frozen.",
+                     detail: "Two landings lie a few miles apart. From [amber]Dyea[/amber] the trail goes over the [amber]Chilkoot Pass[/amber]: short, steep, too steep for anything but people. From [amber]Skagway[/amber] it goes over the [amber]White Pass[/amber]: lower and gentler but slower going, and a bog whenever it isn't frozen.",
                      options: [.init("Land at Dyea for the Chilkoot"), .init("Land at Skagway for the White Pass"),
                                .init("Ask the purser's advice")])
     }
@@ -100,7 +100,7 @@ extension Klondike {
                 e.state.vars[KlondikeData.routeKey] = KlondikeData.whitePass
                 return [.message("You make for Skagway, where the wharf is long, the street is mud, and everyone seems to have something to sell you.")]
             default:
-                return [.message("The purser leans on the rail: “The Chilkoot's shorter, and the steps up the last pitch will break your heart and nothing else. The White Pass is easier going and ten miles longer, and when it thaws it's a swamp. In the cold months, take the Chilkoot — and if you can pay for packers, so much the better. Come slide season, I'd want the White Pass.”"),
+                return [.message("The purser leans on the rail: “The Chilkoot's shorter, and the steps up the last pitch will break your heart and nothing else. The White Pass is easier going but slower, and when it thaws it's a swamp. In the cold months, take the Chilkoot — and if you can pay for packers, so much the better. Come slide season, I'd want the White Pass.”"),
                         forkChoice(e)]
             }
 
@@ -239,7 +239,7 @@ extension Klondike {
             let d = e.ri(5, 15)
             e.state.hull = max(0, e.state.hull - Double(d))
             var q: [Interrupt] = [.message("With a crack like a rifle shot, the ice gives way under a loaded sled! [red](Outfit −\(d)%)[/red]")]
-            overboard(e, &q, onFoot: true, epitaph: nil)
+            overboard(e, &q, onFoot: true, onLake: true, epitaph: nil)
             e.checkSink(&q)
             return q
 

@@ -72,7 +72,7 @@ final class KlondikeTests: XCTestCase {
         // The packers carry only as far as the summit.
         s.mile = 11400
         XCTAssertEqual(speed(engine(s)), 9, accuracy: 1e-9)
-        // The White Pass is longer: the same miles at nine tenths the speed.
+        // The White Pass is slower: the same miles at nine tenths the speed.
         XCTAssertEqual(speed(engine(party(mile: 11250, pass: KlondikeData.whitePass))), 9 * 0.9, accuracy: 1e-9)
         XCTAssertEqual(speed(engine(party(mile: 13500))), 300, accuracy: 1e-9)
         XCTAssertEqual(Klondike.legName(party(mile: 11250)), "foot")
@@ -570,6 +570,91 @@ final class KlondikeTests: XCTestCase {
         XCTAssertEqual(klondike.score(party(role: .whaler)).multiplier, 3)
         XCTAssertEqual(klondike.rank(7000), "Sourdough")
         XCTAssertEqual(klondike.rank(1999), "Cheechako")
+    }
+
+    // MARK: - What the words say matches the tables
+
+    func testJuneauFursAreCheaperThanSeattlesAsTheStorekeeperSays() {
+        let s = party(mile: 10200)
+        let seattle = klondike.port(s, at: "seattle")!.price(.clothes)
+        let juneau = klondike.port(s, at: "juneau")!
+        XCTAssertTrue(juneau.talk.contains { $0.contains("Furs are cheaper here than in Seattle") })
+        XCTAssertEqual(seattle, 12)
+        XCTAssertEqual(juneau.price(.clothes), 11.25, accuracy: 1e-9)
+        XCTAssertLessThan(juneau.price(.clothes), seattle)
+    }
+
+    /// Both passes run the same miles in the table; the White Pass is only slower going.
+    func testTheWhitePassIsSlowerNotLonger() {
+        let e = engine(party(mile: 11100))
+        let fork = choice(e.beginArrival("lynn"))!
+        let advice = messages(e.resolve(fork, option: 2)).joined()
+        for line in [advice, fork.detail ?? ""] {
+            XCTAssertFalse(line.contains("longer"), line)
+            XCTAssertFalse(line.contains("ten miles"), line)
+        }
+        XCTAssertTrue(advice.contains("slower"))
+        let skagway = party(mile: 11200, pass: KlondikeData.whitePass)
+        XCTAssertFalse(klondike.port(skagway, at: "landing")!.talk.contains { $0.contains("long.") })
+        XCTAssertEqual(KlondikeData.bennettMile - KlondikeData.landingMile, 330)
+    }
+
+    func testTheWhitePassSmithPointsToBennettWhereTheSledMakerIs() {
+        let white = party(mile: KlondikeData.campMile, pass: KlondikeData.whitePass)
+        let talk = klondike.port(white, at: "camp")!.talk.joined()
+        XCTAssertFalse(talk.contains("no smith"))
+        XCTAssertTrue(talk.contains("Bennett"))
+        // And Bennett's yard does mend sleds before the boat.
+        let e = atBennett()
+        e.state.sails = 30
+        XCTAssertTrue(e.canRecutSailsAtYard)
+        XCTAssertEqual(klondike.repaired(e.state, .yardSails), "The sled maker fits new runners and fresh harness.")
+    }
+
+    func testTheStowawayIsNotAlwaysTwoDaysOut() {
+        var s = party(mile: 8000)
+        s.day = 7
+        s.stowawaySeen = false
+        let e = engine(s)
+        let events = klondike.trailEvents(e, e.state.region)
+        var q: [Interrupt] = []
+        events[11].run(e, &q)
+        let ask = choice(q)!
+        XCTAssertEqual(key(ask), "partner")
+        XCTAssertFalse(ask.prompt.contains("Two days out"))
+        XCTAssertTrue(ask.prompt.contains("purser"))
+    }
+
+    func testABreakThroughOnTheLakeIsOnTheLake() {
+        let e = engine(party(mile: 11500, pass: KlondikeData.chilkoot), [0, 0, 0, 0.9])
+        guard case .choice(let ask) = e.ask("thinice", prompt: "x", options: [.init("a"), .init("b")]) else { return XCTFail() }
+        let lines = messages(e.resolve(ask, option: 1)).joined(separator: "\n")
+        XCTAssertTrue(lines.contains("the ice gives way under a loaded sled"), lines)
+        XCTAssertFalse(lines.contains("creek"), lines)
+        XCTAssertTrue(lines.contains("is gone"), lines)
+        XCTAssertEqual(e.state.graves.last?.epitaph, "Lost through the lake ice. No grave but the lake.")
+        // A break-through on the trail itself (E8) is still at a creek.
+        var q: [Interrupt] = []
+        klondike.overboard(engine(party(mile: 11400), [0, 0]), &q, onFoot: true, epitaph: nil)
+        XCTAssertTrue(messages(q)[0].contains("creek"))
+    }
+
+    func testARuinedOutfitPastTheSummitHasNoPoliceToShow() {
+        XCTAssertTrue(klondike.wreckedBody(party(mile: 11300)).contains("show the police"))
+        XCTAssertTrue(klondike.wreckedBody(party(mile: KlondikeData.summitMile)).contains("show the police"))
+        let past = klondike.wreckedBody(party(mile: 11500))
+        XCTAssertFalse(past.contains("police"), past)
+        var boat = party(mile: 13500)
+        boat.vars[KlondikeData.boatKey] = 1
+        XCTAssertEqual(klondike.wreckedBody(boat), klondike.text.wreckedBody)
+    }
+
+    /// Alaska begins at Dixon Entrance, about mile 650.
+    func testTheAlaskaCoastStartsAtDixonEntrance() {
+        XCTAssertEqual(region(party(mile: 4500)).name, "The British Columbia coast")
+        XCTAssertEqual(region(party(mile: 6499)).name, "The British Columbia coast")
+        XCTAssertEqual(region(party(mile: 6500)).name, "The Alaska coast")
+        XCTAssertEqual(Klondike.legName(party(mile: 4500)), "steamer")
     }
 
     // MARK: - Balance

@@ -14,7 +14,7 @@ extension Klondike {
                 "A doctor on the dock: “Take lime juice. A winter on beans and bacon and your gums go soft and your old cuts open up again. I saw it all last year in Circle City.”",
              ]),
         Port(id: "juneau", journey: Klondike.id, name: "Juneau", shop: "A general store on Front Street", mult: 1.25,
-             mods: [.water: 1.5, .clothes: 0.9],
+             mods: [.water: 1.5, .clothes: 0.75],
              arrive: "Juneau is a mining town wedged between the water and a mountain. The steamer stops for coal and mail, and half the passengers go ashore to buy what they forgot in Seattle.",
              talk: [
                 "A clerk at the mining office: “They say there are more people on the trail than there's grub in the whole Yukon. That's why the police make you carry your own.”",
@@ -61,14 +61,14 @@ extension Klondike {
              arrive: "Skagway is a few months old and already has a dozen saloons, a newspaper and a reputation. The street is ankle-deep in mud, and every second man has something to sell you.",
              talk: [
                 "A storekeeper behind a plank counter: “Keep your money in your boot. There are men in this town who can find it anywhere else.”",
-                "A teamster: “The White Pass was a swamp last fall. Frozen, it's not so bad. Just long.”",
+                "A teamster: “The White Pass was a swamp last fall. Frozen, it's not so bad. Just slow.”",
                 "A newsboy: “Extra! Another strike on the Klondike! Only a nickel!”",
              ]),
         Port(id: "camp", journey: Klondike.id, name: "White Pass City", shop: "A log store at White Pass City", mult: 1.8,
              mods: [.water: 2.0],
              arrive: "White Pass City is a camp of tents and log shanties where the wagon road gives out. From here the trail climbs over rock and ice to the summit.",
              talk: [
-                "A blacksmith: “Bring your sled to me before the summit, not after. There's no smith on the other side.”",
+                "A blacksmith: “Bring your sled to me before the summit, not after. The next smith is at Bennett, and he charges like it.”",
                 "A cook ladling beans: “Fifty cents a plate. The coffee's free if you'll listen to me complain.”",
                 "A tired stampeder: “Last fall this trail was mud to your knees, and worse. Be glad it's frozen.”",
              ]),

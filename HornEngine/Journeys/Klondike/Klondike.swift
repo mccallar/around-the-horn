@@ -294,8 +294,12 @@ public final class Klondike: Journey {
         Self.hasBoat(s) ? text.wrecked(TextMarkup.escape(s.ship)) : "Your outfit is ruined."
     }
 
+    /// Ruined before the summit, there is nothing to show the police; past it, nothing to
+    /// build a boat with.
     public override func wreckedBody(_ s: GameState) -> String {
-        Self.hasBoat(s) ? text.wreckedBody
+        if Self.hasBoat(s) { return text.wreckedBody }
+        return s.mile > KlondikeData.summitMile
+            ? "Split sacks, sodden flour, a stove with no pipe. There's nothing left worth carrying to the lakes and nothing to live on if you got there. You sell the scraps to a party coming up and walk back over the pass for a ticket home."
             : "Split sacks, sodden flour, a stove with no pipe. There's nothing left worth carrying and nothing to show the police. You sell the scraps for a ticket home."
     }
 

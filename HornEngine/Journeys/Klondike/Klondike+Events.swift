@@ -62,14 +62,16 @@ extension Klondike {
         q.append(.message("A roar, a white wall — and \(name) is under the snow. You dig until dark. [red]\(name) is gone.[/red]"))
     }
 
-    /// Through the ice at a creek, or over the side in fast water. Never the leader.
-    func overboard(_ e: GameEngine, _ q: inout [Interrupt], onFoot: Bool, epitaph: String?) {
+    /// Through the ice at a creek or on a lake, or over the side in fast water. Never the leader.
+    func overboard(_ e: GameEngine, _ q: inout [Interrupt], onFoot: Bool, onLake: Bool = false, epitaph: String?) {
         let candidates = e.state.crew.indices.filter { e.state.crew[$0].alive && !e.state.crew[$0].isCaptain }
         guard let idx = e.pick(candidates) else { return }
         let name = TextMarkup.escape(e.state.crew[idx].name)
         if e.chance(0.65) {
             e.state.crew[idx].hp = max(1, e.state.crew[idx].hp - 25)
-            q.append(.message(onFoot
+            q.append(.message(onLake
+                ? "\(name) goes into the black water after the sled! The others crawl out flat on the ice and haul \(name) back, soaked and blue with cold."
+                : onFoot
                 ? "\(name) breaks through the ice at a creek crossing! The others haul \(name) out, soaked and blue with cold."
                 : "The boat lurches in fast water and \(name) goes over the side! You get an oar to \(name) and haul \(name) back aboard, half-drowned."))
             return
@@ -77,9 +79,12 @@ extension Klondike {
         e.state.crew[idx].alive = false
         e.state.crew[idx].hp = 0
         e.state.graves.append(Grave(name: e.state.crew[idx].name, cause: "drowned", date: e.state.dateText,
-                                    epitaph: epitaph ?? (onFoot ? "Lost through the ice. No grave but the creek."
-                                                                : "Lost to the river. No grave but the Yukon.")))
-        q.append(.message(onFoot
+                                    epitaph: epitaph ?? (onLake ? "Lost through the lake ice. No grave but the lake."
+                                                         : onFoot ? "Lost through the ice. No grave but the creek."
+                                                         : "Lost to the river. No grave but the Yukon.")))
+        q.append(.message(onLake
+            ? "\(name) goes into the black water after the sled, and the ice closes over. [red]\(name) is gone.[/red] There was nothing anyone could do."
+            : onFoot
             ? "\(name) breaks through the ice at a creek crossing, and the current takes \(name) under. [red]\(name) is gone.[/red] There was nothing anyone could do."
             : "The boat lurches in fast water and \(name) goes over the side. [red]\(name) is gone.[/red] In that current, there was no going back."))
     }
@@ -215,11 +220,12 @@ extension Klondike {
                 e.state.stowawaySeen = true
                 guard let town = nextTown else { return }
                 let free = self.firstNames.filter { f in !e.state.crew.contains { $0.name == f } }
-                let name = e.pick(free) ?? self.firstNames[0]
+                let drawn = e.pick(free) ?? self.firstNames[0]
+                let name = TextMarkup.escape(drawn)
                 let next = Self.name(town, e.state)
-                q.append(e.ask("partner", [name, town.id, next],
+                q.append(e.ask("partner", [drawn, town.id, next],
                                prompt: steamer
-                                   ? "Two days out, the purser finds a youngster hiding among the freight with no ticket, no outfit and no money — only a great wish to see the Klondike. The name is \(name)."
+                                   ? "The purser comes along the deck with a youngster he found hiding among the freight: no ticket, no outfit and no money — only a great wish to see the Klondike. The name is \(name)."
                                    : "A young stampeder is sitting on a sack beside the trail. \(name)'s partners quit and went home, and took the outfit with them.",
                                options: [.init("Take \(name) on as a partner"),
                                          .init("Feed \(name) and send them on to \(next)")]))

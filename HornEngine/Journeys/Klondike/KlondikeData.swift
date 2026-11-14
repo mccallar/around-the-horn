@@ -193,6 +193,9 @@ enum KlondikeData {
                weights: odds["insidePassage"]![1]),
         Region(id: "queenCharlotte", to: 3600, name: "Queen Charlotte Sound", temp: .cool, tags: ["steamer", "open"],
                weights: odds["queenCharlotte"]![1]),
+        // Dixon Entrance, where Alaska begins, is about mile 650.
+        Region(id: "bcCoast", to: 6500, name: "The British Columbia coast", temp: .cool, tags: ["steamer"],
+               weights: odds["bcCoast"]![1]),
         Region(id: "alaskaCoast", to: landingMile, name: "The Alaska coast", temp: .cool, tags: ["steamer"],
                weights: odds["alaskaCoast"]![1]),
         Region(id: "taiya", to: campMile + 1, name: "The Taiya valley", temp: .cool, tags: ["foot", "timber"],
@@ -229,6 +232,7 @@ enum KlondikeData {
     static let temps: [RegionID: [Temp]] = [
         "insidePassage": [.cool, .cool, .cool],
         "queenCharlotte": [.cool, .cool, .cool],
+        "bcCoast": [.cool, .cool, .cool],
         "alaskaCoast": [.cool, .cool, .cool],
         "taiya": [.cold, .cool, .cool],
         "chilkootSummit": [.freezing, .cold, .cool],
@@ -247,6 +251,9 @@ enum KlondikeData {
         let insideSpring: WeatherOdds = [(fair, 30), (rain, 30), (fog, 15), (wind, 12), (snow, 8), (clear, 5)]
         let charlotteSpring: WeatherOdds = [(wind, 30), (rain, 25), (fair, 15), (fog, 15), (snow, 10), (blizzard, 5)]
         let coastSpring: WeatherOdds = [(rain, 28), (fair, 22), (fog, 14), (snow, 14), (wind, 14), (clear, 8)]
+        let coast: [WeatherOdds] = [
+            [(rain, 28), (fair, 22), (fog, 14), (snow, 24), (wind, 20), (clear, 8), (blizzard, 4)], coastSpring, coastSpring,
+        ]
         let lindeman: [WeatherOdds] = [
             [(clear, 26), (snow, 24), (wind, 18), (fair, 14), (blizzard, 10), (fog, 8)],
             [(thaw, 22), (fair, 22), (snow, 16), (clear, 16), (wind, 14), (fog, 10)],
@@ -257,8 +264,8 @@ enum KlondikeData {
             "insidePassage": [[(fair, 30), (rain, 21), (fog, 15), (wind, 18), (snow, 16), (clear, 5)], insideSpring, insideSpring],
             "queenCharlotte": [[(wind, 40), (rain, 25), (fair, 15), (fog, 15), (snow, 10), (blizzard, 11)], charlotteSpring,
                                charlotteSpring],
-            "alaskaCoast": [[(rain, 28), (fair, 22), (fog, 14), (snow, 24), (wind, 20), (clear, 8), (blizzard, 4)], coastSpring,
-                            coastSpring],
+            "bcCoast": coast,
+            "alaskaCoast": coast,
             "taiya": [
                 [(clear, 28), (snow, 26), (fair, 16), (wind, 12), (fog, 8), (blizzard, 6), (rain, 4)],
                 [(thaw, 28), (rain, 20), (fair, 20), (snow, 10), (fog, 10), (clear, 8), (wind, 4)],
