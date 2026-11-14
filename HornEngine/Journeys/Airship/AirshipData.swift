@@ -57,7 +57,7 @@ enum AirshipData {
              desc: "A hundred kilos of water and alcohol, so it won't freeze. Drop a bag and she rises."),
         Item(key: .tackle, name: "Pilot balloons", unit: "boxes", one: "box", step: 1, per: 10, price: 4, max: 30,
              desc: "Small red balloons for reading the winds aloft. Each box is 10 balloons."),
-        Item(key: .fuel, name: "Petrol", unit: "kg", one: "kg", step: 100, per: 1, price: 0.02, max: 8000,
+        Item(key: .fuel, name: "Petrol", unit: "kg", one: "kg", step: 100, per: 1, price: 0.015, max: 8000,
              desc: "Airships reckon petrol by weight. Cruising, she burns 250 kg a watch."),
     ]
 

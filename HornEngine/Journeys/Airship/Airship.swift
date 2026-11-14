@@ -37,9 +37,9 @@ public final class Airship: Journey {
         roles[.merchant] = RoleInfo(label: "Be a financier from New York", title: "financier",
                                     money: 1200, mend: 25, patch: 20, catchLimit: 450, aim: 1.5)
         roles[.shipwright] = RoleInfo(label: "Be an airship engineer from Rome", title: "engineer",
-                                      money: 650, mend: 40, patch: 35, catchLimit: 450, aim: 1.5)
+                                      money: 575, mend: 40, patch: 35, catchLimit: 450, aim: 1.5)
         roles[.whaler] = RoleInfo(label: "Be a meteorologist from Bergen", title: "meteorologist",
-                                  money: 425, mend: 25, patch: 20, catchLimit: 900, aim: 4)
+                                  money: 490, mend: 25, patch: 20, catchLimit: 900, aim: 4)
 
         paces[.easy] = PaceInfo(name: "Economical", speed: 190, hp: 0.5, wear: 0.6, fuel: 150,
                                 desc: "One engine turning. Easy on everything, and on the petrol.")
