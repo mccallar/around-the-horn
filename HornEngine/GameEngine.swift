@@ -329,9 +329,7 @@ public final class GameEngine {
     func wear(_ q: inout [Interrupt], _ reg: Region) {
         let r = journey.rules
         let text = journey.text
-        let w = state.weather
-        state.sails = max(0, state.sails - journey.pace(state.pace).wear * w.wear
-            * rnd(r.wearJitter.lowerBound, r.wearJitter.upperBound))
+        state.sails = max(0, state.sails - journey.propulsionWear(self))
         let hd = journey.structureDamage(self, reg)
         state.hull = max(0, state.hull - hd)
         if state.hull < r.spoilBelow && state.food > r.spoilFoodOver && chance(r.spoilChance) {
@@ -357,7 +355,7 @@ public final class GameEngine {
             state.hull = 0
             state.over = true
             q.append(.gameOver(title: journey.text.wrecked(TextMarkup.escape(state.ship)),
-                               body: journey.text.wreckedBody))
+                               body: journey.wreckedBody(state)))
         }
     }
 

@@ -309,6 +309,16 @@ public class Journey {
         return hd
     }
 
+    /// What the drive (`sails`) loses this turn under way: the pace's wear, the weather's,
+    /// and a jitter. Override when the drive can rest while moving (an airship adrift).
+    func propulsionWear(_ e: GameEngine) -> Double {
+        e.journey.pace(e.state.pace).wear * e.state.weather.wear
+            * e.rnd(rules.wearJitter.lowerBound, rules.wearJitter.upperBound)
+    }
+
+    /// The paragraph under `text.wrecked`. Override when where it happens changes it.
+    public func wreckedBody(_ s: GameState) -> String { text.wreckedBody }
+
     /// Bookkeeping of the journey's own, once a turn after health and wear, in every mode.
     func tick(_ e: GameEngine, _ q: inout [Interrupt], _ mode: GameEngine.DayMode, _ reg: Region) {}
 
@@ -417,7 +427,7 @@ public class Journey {
 public enum Journeys {
     /// Every journey, in the order the picker shows them. Adding one is this line and
     /// its folder.
-    public static let all: [Journey] = [Horn1849(), Rail()]
+    public static let all: [Journey] = [Horn1849(), Rail(), Airship()]
 
     private static let byID: [String: Journey] = Dictionary(uniqueKeysWithValues: all.map { ($0.id, $0) })
 
