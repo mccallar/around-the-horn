@@ -166,11 +166,13 @@ extension Balloon {
         case "thunderheads":
             if option == 0 {
                 var q: [Interrupt] = []
+                let dry = e.state.fuel <= 0
                 e.state.day += 1
                 e.state.fuel -= min(e.state.fuel, burn(e.state, e.state.region))
                 e.consume(&q, .sail)
                 e.health(&q, .sail)
                 if e.state.over { return q }
+                if dry { e.state.hull -= BalloonData.emptyLift }
                 if e.chance(0.1) {
                     let d = e.ri(6, 12)
                     e.state.hull -= Double(d)

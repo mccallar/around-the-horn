@@ -1628,3 +1628,156 @@ so a journey that never meets it never draws.
 29. **Luxor's propane price** stays at mod 0.8 (1.04× Marrakech): the driver's line was
     reworded to "cheaper here than at any field ahead of you", which is true (§6), instead
     of cutting the price to 0.7, which would have moved the balance.
+
+---
+
+## As built
+
+Engine files: `HornEngine/Journeys/Balloon/` (`Balloon.swift` rules and sentences,
+`BalloonData.swift` tables, `Balloon+Fields.swift` the six fields, `Balloon+Events.swift`
+the region rolls and the seventeen events, `Balloon+Choices.swift` set pieces and answers).
+Tests: `HornEngineTests/BalloonTests.swift` (30 rule tests, 4 balance tests). The title
+card, setup, outfit, burial, status and chart copy (§2, §3, §12.1's labels, §15's game,
+§16, §19) belong to the skin, which is not built yet.
+
+### The numbers as shipped
+
+Everything in §4–§15 and §17 is as written above, with these exceptions:
+
+- **Purses:** chocolate maker $15,000, **balloon builder $7,250** (spec $6,250), **bush
+  pilot $6,500** (spec $5,000). The skin's comparison page must say so.
+- **Warnings re-arm** at 18 watches of need for food, water and propane alike (the engine
+  has one `rearmTicks`; the spec has 18 / 12 / 12).
+
+The rest, as engine `Rules`: watch 4 h from 0800 on the 1st; water 0.2 (0.3 hot); rime
+2–6 gal in snow; low food 12, low water 6, low propane 6 watches; freezing −1.6 / −4.5
+with no seasonal extra; stale air after 18 watches at 0.006 a watch over, up to 0.12;
+lift leak 0.08 a watch flown; sink-and-dump below 35 lift with food over 20, 5–15 lb at
+6%; riggers $20 a point of lift and $15 of burners × the field's multiplier; trades $250–700,
+wanted at $250 of a good or $300 cash; 11% event chance; rank cuts 7,000 / 4,000 / 2,000.
+Propane: altitude 12 / 14 / 16 × temperature 0.85 / 0.95 / 1 / 1.1 / 1.2; 10 × temperature
+loitering; nothing on the ground; 25 a launch; dry → 40 nm base and −5 lift a watch.
+
+### The bot, by departure
+
+`JourneyBot` with `BalloonTests.policy()`: the chocolate maker in the middle air and the
+other two in the jet while the crew's average health is 75+, the air is not freezing and
+the tanks are not dry (else the middle air); hot meals for the chocolate maker, half
+portions for the others; at every field, food and scrubbers for nm ÷ 90 + 12 watches,
+half again that in water, propane for as many watches at the altitude's rate, five suits,
+two each of medical kits, burner kits and ballast, and 60 casts of line for the two
+poorer roles; supplies first, then the riggers below 70% if affordable; ballast and
+burner kits aloft below 40%; fishing below 12 watches of food over the sea. North or south
+at random; the forecasters only with more than $1,500; stays south of the Himalaya, holds
+the party, meets the Azores boat, flies on from the freighter, keeps the bear, goes round
+thunderheads, climbs out of icing, waves the camera plane off.
+
+Thirty flights a role from seed 500 (the test), then 180 a role over six seed sets (500,
+1999, 50000, 90000, 123456, 777777):
+
+| Departure | Chocolate maker | Builder | Bush pilot | Median winning flight |
+|---|---|---|---|---|
+| November 1998 | 29/30 · 176/180 | 17/30 · 93/180 | 8/30 · 55/180 | 167 watches |
+| December 1998 | 30/30 · 180/180 | 25/30 · 131/180 | 15/30 · 90/180 | 162 |
+| **January 1999 (tested)** | **30/30 · 180/180 (100%)** | **25/30 · 131/180 (73%)** | **15/30 · 90/180 (50%)** | **162 (157–164)** |
+| February 1999 | 30/30 · 180/180 | 25/30 · 131/180 | 15/30 · 90/180 | 162 |
+| March 1999 | 23/30 · 146/180 | 10/30 · 57/180 | 4/30 · 39/180 | 179 |
+
+December, January and February are identical, as §18.4 found: they share every seasonal
+rule and a flight ends before March.
+
+Choices, January, 180 flights a role (chocolate maker / builder / bush pilot, median):
+
+| Flown as | Wins | Median |
+|---|---|---|
+| the bot | 180 / 131 / 90 | 162 |
+| always the northern track | 180 / 135 / 88 | 157 |
+| always the southern track, forecasters by the $1,500 rule | 178 / 128 / 96 | 164 |
+| always the southern track, never the forecasters | 165 / 125 / 87 | 166 |
+| middle air all the way | 180 / 137 / 96 | 164 |
+| the jet all the way | 180 / 109 / 62 | 141 |
+| low and slow all the way | 175 / 65 / 21 | 216 |
+| never the riggers | 179 / 164 / 150 | 175 |
+
+How the January losses end (180 a role): builder 36 down in the sea, 13 the pilot's death
+(hypothermia, exhaustion, an infected wound, frostbite, a fever, food poisoning,
+influenza); bush pilot 68 down in the sea, 1 down on land, 21 the pilot's death
+(exhaustion, influenza, hypothermia, an infected wound, altitude sickness, frostbite).
+Coming down in the sea is nearly always the Atlantic with dry tanks and no money left
+at Kitty Hawk, as §18.3 predicted.
+
+The tests assert the January bands (85–100 / 60–90 / 35–70%) and a median winning flight
+of 145–180 watches; that November is at least 10 points and March at least 30 points
+harder for the two poorer roles, and March at least 10 watches longer; that flying low
+all the way is at least 20 points worse for them; and that the losses of the two poorer
+roles end at least three ways.
+
+### Departures from the spec, and why
+
+1. **The bands.** This build was asked for 85–100 / 60–90 / 35–70%, not §18.1's ≥85 /
+   45–85 / 15–50%. At the spec's purses the engine's bot (in the middle air) won 30, 15
+   and 4 of 30 January flights; the purses were raised until the 180-flight rates sat
+   mid-band. The rate
+   moves about 3 points per $100 for both poorer roles (builder $7,000 → 71%, $7,500 → 83%;
+   pilot $6,000 → 38%, $7,000 → 67%, measured with the middle-air bot).
+2. **The bot** is the shared `JourneyBot`, which gained three knobs, each off by default so
+   rail and the airship fly exactly as before: `yardAfterShop` (§18.2's supplies before the
+   riggers), `stockFactor` (water × 1.5 for the hot legs; buying only the table's ration
+   left crews dying of thirst on the southern track) and `choosePace` (§18.2's altitude rule). It flies one
+   departure (January) rather than December–February by seed; it buys propane for the
+   leg's watches at the altitude's rate rather than W × 15 + 65, and has no special 1,200 at
+   Saga (W is 77 there, which buys about 1,080).
+3. **Propane** is built on the shared fuel rule. `noFuelSpeed` is 1; `adjustSpeed` records
+   the tank at the start of the watch, sets the 40-nm drift when it is dry, and otherwise
+   leaves the tank holding what makes the shared deduction come out at the altitude's
+   gallons × the temperature factor (or empty, when the watch empties it). Loitering burns
+   in `tick`. The dry-tank lift loss is taken in `tick`, after health and wear, not inside
+   `consume` before health, so the shared `consume` needs no change. The two propane
+   warnings come from the shared rule and are said only on a watch flown, not loitering.
+4. **Launch and relaunch** use two new shared hooks, no-ops by default: `mayDepart` (the
+   launch director's refusal reads `text.noProvisions`, which names both food and the 25
+   gallons) and `leaving` (called by `depart`, and by `setSail` only when leaving the
+   ground; the app also calls `setSail` to resume between fields, which costs nothing).
+   `setSail` cannot refuse, so the relaunch refusal is `Balloon.relaunchRefusal(_:)`,
+   for the app to ask before relaunching; without it the ground team's top-up applies.
+   The relaunch note and the ground team's words are said on the first watch after.
+5. **Coming down** has its title by place through a new hook, `Journey.wreckedTitle`
+   ("…has come down in the sea." / "…has come down."), and the pilot's death its body by
+   place and company through `Journey.leaderDiedBody`. Both default to the old text.
+6. **Fishing airs the capsule** through a new hook, `Journey.foraged`, called when the
+   catch is stowed and before the watch passes.
+7. **The freighter's offer** uses `makeOffer(excluding:)`, the shared offer with goods left
+   out before the draws (§20.25); an empty list is the old offer.
+8. **The date line** in the status panel is the shared one for short turns ("January 5,
+   1999, 4 p.m."), as rail's and the airship's are, not "January 5, 1999 · 1600 GMT". The
+   launch and the finale print the hour themselves, "0800 GMT" and "HHMM GMT", as written.
+   The finale's lines and the game-over footer are `Balloon.finale(_:)` and
+   `Balloon.shortfall(_:)`, for the skin.
+9. **Stop types:** the Himalaya and the date line are `.line`, the edge of the Pacific
+   `.fork`, the Azores `.island`; the landfall is a mark whose sentence `arrive` chooses
+   by track.
+10. **Injuries** from a parted load cable, the iced roof and the Azores net open no medical
+    kit (as 1849's Galápagos does not), and the roof leaves anyone at 1 health at worst.
+11. **Two event messages say what was found**: "+1 burner kit." and "+N lbs of rations."
+    in green.
+12. **Going round the thunderheads with dry tanks** costs the 5 lift a consumed watch
+    would.
+13. **Skies:** jet streak `.breeze`, stalled `.still`, hot sun `.heat`, in cloud `.fog`,
+    rough air `.gale`, snow `.snow`, thunderstorm `.storm`, dust `.dust`. Only the stalled
+    air has a status note, as §9 gives only that one.
+
+### Things worth knowing
+
+- **The riggers are a trap for a poor crew.** Ballast at $60 a sack gives 20 or 30 points
+  of lift; the riggers charge $20–32 a point. A builder or bush pilot who never hires them
+  wins 91% and 83% of January flights; the bands above are measured with the spec's bot,
+  which hires them below 70% when it can pay. If that is too generous to a careful player,
+  the rigger prices, not the purses, are the lever. With the riggers kept for money to
+  spare (a $1,000 reserve), the bush pilot's rate is very steep in his purse: $5,000 → 20%,
+  $5,500 → 63%.
+- **The southern track is no worse for a poor crew** in the engine: its warm air burns less
+  propane, which is what a short purse runs out of. Without the forecasters the chocolate
+  maker loses a few flights to its thunderstorms.
+- **The jet all the way** is the fastest flight (141 watches) and the worst for the
+  poorer roles: the cold and the −1 health a watch kill pilots.
+- Seed 500's builder wins 25 of 30, near the top of the band; over 180 flights it is 73%.
