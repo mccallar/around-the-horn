@@ -186,6 +186,9 @@ extension Klondike {
                 return [.choice(e.tradeChoice(o, intro: "They're sick of the North and want to trade."))]
             }
             let n = min(Int(e.state.money.rounded(.down)), e.ri(40, 140))
+            if n == 0 {
+                return [.message("It's a crooked game of chance, and the “quitters” are partners in it. They take one look at your empty pockets and go back to waiting for somebody richer.")]
+            }
             e.state.money -= Double(n)
             return [.message("It's a crooked game of chance, and the “quitters” are partners in it. By the time you see the trick, $\(n) of yours has changed hands.")]
 
