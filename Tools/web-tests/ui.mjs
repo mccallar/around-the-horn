@@ -118,7 +118,7 @@ async function page({ seed = '13', storage = new MemoryStorage() } = {}) {
   await new Promise((r) => setTimeout(r, 200));
   check(flow.screen.cart.food === held, 'let go, it stops');
   const row = plus.parentNode.parentNode;
-  check(row.querySelector('.count').textContent === String(held), 'the count shows it');
+  check(row.querySelector('.count').textContent === held.toLocaleString('en-US'), 'the count shows it, grouped as the app does');
   minus.click({ detail: 0 });
   settle();
   check(flow.screen.cart.food === held - 100, 'a key press on − is one step back');

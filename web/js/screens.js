@@ -23,7 +23,9 @@ const heading = (text) => ({ type: 'heading', text });
 const para = (markup, size = 22, color = null) => ({ type: 'para', markup, size, color });
 const message = (markup) => ({ type: 'message', markup });
 const scene = (moving = false) => ({ type: 'scene', moving });
-const row = (label, value, color = null) => ({ type: 'row', label, value, color });
+const row = (label, value, color = null, pad = false) => ({ type: 'row', label, value, color, pad });
+/** A row with room above and below, as the supplies list and the score have them. */
+const spaced = (label, value) => row(label, value, null, true);
 const bar = (value) => ({ type: 'bar', value });
 
 const percent = (x) => `${jsRounded(x)}%`;
@@ -226,7 +228,8 @@ export function describe(c) {
           type: 'item', key: it.key, name: it.name,
           price: Stores.priceLabel(it, port.prices[it.key], sign, words.lots.includes(it.key)),
           have: `Have ${have} ${Stores.unit(it, have, how)}. ${it.desc}`,
-          qty, qtyUnit: Stores.unit(it, String(qty), how),
+          // SwiftUI writes an Int in a Text with the thousands grouped: "1,200".
+          qty, count: formatNumber(qty), qtyUnit: Stores.unit(it, String(qty), how),
           less: () => c.shopStep(it.key, -1), more: () => c.shopStep(it.key, 1),
         });
       }
@@ -307,8 +310,8 @@ export function describe(c) {
       const living = g.crew.filter((p) => p.alive);
       blocks = [
         heading('Supplies'),
-        row(words.cash, `${words.currency}${formatNumber(g.money)}`),
-        ...J.items.map((it) => row(words.storeNames[it.key] ?? it.name, Stores.amount(it, g, words))),
+        spaced(words.cash, `${words.currency}${formatNumber(g.money)}`),
+        ...J.items.map((it) => spaced(words.storeNames[it.key] ?? it.name, Stores.amount(it, g, words))),
         heading(words.vesselHeading),
         row(words.meters[0], percent(g.hull)), bar(g.hull),
         row(words.meters[1], percent(g.sails)), bar(g.sails),
@@ -392,9 +395,9 @@ export function describe(c) {
       const f = s.finale, sc = f.score;
       blocks = [
         scene(), message(words.arrival), para(words.arrivalBody), heading('Your score'),
-        ...sc.lines.map((l) => row(l.label, formatNumber(l.points))),
-        row('Subtotal', formatNumber(sc.subtotal)),
-        row(words.bonus, `×${sc.multiplier}`),
+        ...sc.lines.map((l) => spaced(l.label, formatNumber(l.points))),
+        spaced('Subtotal', formatNumber(sc.subtotal)),
+        spaced(words.bonus, `×${sc.multiplier}`),
         { type: 'rule' },
         { ...row('Final score', formatNumber(sc.total)), total: true },
         { type: 'center', text: `Rank: ${f.rank}${f.place != null ? ` · #${f.place + 1} in the top ten!` : ''}`, color: 'amber' },

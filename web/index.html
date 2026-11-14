@@ -7,13 +7,14 @@
 <title>Around the Horn</title>
 <link rel="preload" href="fonts/VT323-Regular.ttf" as="font" type="font/ttf" crossorigin>
 <link rel="preload" href="fonts/PressStart2P-Regular.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="preload" href="horn.wasm" as="fetch" type="application/wasm" crossorigin>
 <link rel="stylesheet" href="style.css">
 <script type="module" src="js/main.js"></script>
 </head>
 <body>
 <div id="app">
   <div class="topbar"><span id="banner" aria-hidden="true"></span><button id="snd" type="button" hidden></button></div>
-  <main id="screen"></main>
+  <main id="screen"><p class="amber blink" aria-hidden="true">▌</p></main>
 </div>
 <noscript><p class="center dim">This game needs JavaScript.</p></noscript>
 </body>

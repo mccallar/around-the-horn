@@ -21,7 +21,7 @@ function blockHTML(b) {
     case 'message': return `<div class="msg mk">${toHTML(b.markup)}</div>`;
     case 'title': return `<h1 aria-label="${html(b.label)}">${b.text.split('\n').map(html).join('<br>')}</h1>`;
     case 'center': return `<p class="${cls('center', b.color)}">${html(b.text)}</p>`;
-    case 'row': return `<div class="${cls('row', b.total && 'total')}"><span class="mk">${toHTML(b.label)}</span>`
+    case 'row': return `<div class="${cls('row', b.total && 'total', b.pad && 'pad')}"><span class="mk">${toHTML(b.label)}</span>`
       + `<span${b.color ? ` class="${b.color}"` : ''}>${html(b.value)}</span></div>`;
     case 'bar': return `<div class="bar" role="img" aria-label="${Math.round(b.value)} percent">`
       + `<i style="width:${Math.min(100, Math.max(0, b.value))}%;background:${barColor(b.value)}"></i></div>`;
@@ -36,9 +36,9 @@ function blockHTML(b) {
     case 'item':
       return `<div class="item"><div><div>${html(b.name)} <span class="dim small">${html(b.price)}</span></div>`
         + `<div class="dim small have">${html(b.have)}</div></div>`
-        + `<div class="qty" aria-label="${html(`${b.qty} ${b.qtyUnit} in the cart`)}">`
+        + `<div class="qty" aria-label="${html(`${b.count} ${b.qtyUnit} in the cart`)}">`
         + `<button type="button" data-step="-1" aria-label="${html(`Less ${b.name}`)}">−</button>`
-        + `<span class="count" aria-hidden="true">${b.qty}</span>`
+        + `<span class="count" aria-hidden="true">${html(b.count)}</span>`
         + `<button type="button" data-step="1" aria-label="${html(`More ${b.name}`)}">+</button></div></div>`;
     case 'place':
       return `<div class="${cls('place', b.highlight && 'amber')}"><span class="who">${html(b.text)}</span>`
@@ -171,8 +171,8 @@ export class UI {
       old.html = next;
       if (b.type === 'item') {
         // Patched, not replaced: a + held down must stay the same button.
-        old.el.querySelector('.qty').setAttribute('aria-label', `${b.qty} ${b.qtyUnit} in the cart`);
-        old.el.querySelector('.count').textContent = String(b.qty);
+        old.el.querySelector('.qty').setAttribute('aria-label', `${b.count} ${b.qtyUnit} in the cart`);
+        old.el.querySelector('.count').textContent = b.count;
         old.el.querySelector('.have').textContent = b.have;
         return;
       }
