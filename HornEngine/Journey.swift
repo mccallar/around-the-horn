@@ -450,7 +450,7 @@ public class Journey {
 public enum Journeys {
     /// Every journey, in the order the picker shows them. Adding one is this line and
     /// its folder.
-    public static let all: [Journey] = [Horn1849(), Rail(), Airship(), Balloon()]
+    public static let all: [Journey] = [Horn1849(), Rail(), Airship(), Balloon(), Mars()]
 
     private static let byID: [String: Journey] = Dictionary(uniqueKeysWithValues: all.map { ($0.id, $0) })
 
