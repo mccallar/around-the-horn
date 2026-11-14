@@ -39,7 +39,7 @@ extension Klondike {
              ]),
         Port(id: "bennett", journey: Klondike.id, name: "Lake Bennett", shop: "The sawmill store at Bennett", mult: 2.2,
              mods: [.water: 0.25, .timber: 0.8],
-             arrive: "Lake Bennett is a city of tents on the shore of a long, narrow lake. Every tree for miles has been cut, and the whipsaws never stop. Half-built boats stand everywhere.",
+             arrive: "Lake Bennett is a city of tents on the shore of a long, narrow lake. Every good tree for miles has gone under a whipsaw, and the saws never stop; the offcuts and slash keep the stoves going. Half-built boats stand everywhere.",
              talk: [
                 "A boatbuilder with pitch to the elbows: “Plank her thick at the bow and pitch every seam twice. The river finds any seam you skipped.”",
                 "A mounted policeman: “We'll stop you at Tagish to number your boat. And nobody runs Miles Canyon now without a pilot.”",

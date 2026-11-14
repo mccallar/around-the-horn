@@ -51,7 +51,7 @@ Three gates prove 1849 is unchanged and are never re-recorded: `PrototypeParityT
 | `wreckedTitle(_:)`, `wreckedBody(_:)`, `leaderDiedBody(_:)` | `text.wrecked`, `text.wreckedBody`, `text.leaderDiedBody` | where it happens, or who is left, changes the ending |
 | `mayDepart(_:)` | true | leaving the first port needs more than food (`text.noProvisions` says why) |
 | `leaving(_:)` | nothing | leaving the ground costs something (a balloon's climb) |
-| `holdInPort(_:)` | nil: you leave | leaving a port along the way needs something first (Bennett's boat and ice). `setSail()` then returns what happens instead and you stay ashore until `state.atPort` is cleared |
+| `holdInPort(_:)` | nil: you leave | leaving a port along the way needs something first (Bennett's boat and ice). `setSail()` then returns what happens instead and you stay ashore until `state.atPort` is cleared; `sailDay()` called while still ashore returns the same hold and passes no day |
 | `port(_:at:)` | the table's port at that stop | a fork changes who keeps the store (Dyea or Skagway) |
 | `repaired(_:_:)` | `text.mended`, `patched`, `yardHull`, `yardSails` | what is mended changes on the way (an outfit, then a boat) |
 | `foraged(_:)` | nothing | a foraging outing does more than stow its catch |

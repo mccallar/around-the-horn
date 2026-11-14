@@ -79,6 +79,10 @@ public final class GameEngine {
         var q: [Interrupt] = []
         state.note = ""
         guard let ns = state.nextStop, !state.over else { return q }
+        // Still ashore where the journey holds you (`setSail` was skipped or its hold
+        // ignored): no day passes, and the hold is asked again. No journey but the
+        // Klondike holds anyone, and asking draws nothing.
+        if state.atPort, let hold = journey.holdInPort(self) { return hold }
         state.day += 1
         let reg = state.region
         state.weather = rollWeather(reg)

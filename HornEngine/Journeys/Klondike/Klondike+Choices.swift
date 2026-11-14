@@ -122,7 +122,7 @@ extension Klondike {
                 return [.message("A trader with a sled full of flour is delighted to see you. [amber](+\(formatNumber(short)) lbs of provisions)[/amber] The constable waves you through.")]
             case 1:
                 e.state.money -= b
-                let q = e.passDays(6, .sea)
+                let q = haulDays(e, 6)
                 if e.state.over { return q }
                 e.state.add(.food, back)
                 return q + [.message(Self.onWhitePass(e.state)
@@ -144,7 +144,7 @@ extension Klondike {
                 }
                 return [.message("A pilot steps aboard, takes the sweep, and says nothing at all for six of the longest minutes of your life. Then you're through, soaked and laughing, in the slack water below the rapids.")]
             case 1:
-                let q = e.passDays(4, .sea)
+                let q = haulDays(e, 4)
                 if e.state.over { return q }
                 if e.chance(0.15 + (e.state.hull < 50 ? 0.10 : 0)) {
                     let d = e.ri(10, 25)
@@ -204,8 +204,9 @@ extension Klondike {
 
         case "slidewarning":
             if option == 0 {
-                return [.message("You wait two days in camp while the mountain grumbles. On the third morning it is quiet, and you go on.")]
-                    + e.passDays(2, .sea)
+                let q = e.passDays(2, .sea)
+                if e.state.over { return q }
+                return q + [.message("You wait two days in camp while the mountain grumbles. On the third morning it is quiet, and you go on.")]
             }
             let risk = 0.15 + (e.state.weather == KlondikeData.thaw ? 0.15 : 0) + (e.state.pace == .full ? 0.10 : 0)
             if e.chance(risk) {
@@ -245,7 +246,7 @@ extension Klondike {
 
         case "rumour":
             if option == 1 { return [.message("You let them run. By nightfall the first of them are trickling back, saying nothing.")] }
-            let q = e.passDays(3, .sea)
+            let q = haulDays(e, 3)
             if e.state.over { return q }
             if e.chance(0.15) {
                 let n = e.ri(40, 160)
@@ -257,6 +258,25 @@ extension Klondike {
         default:
             return []
         }
+    }
+
+    /// Days of hauling off the route (back down the pass for grub, round the canyon with
+    /// the outfit, up a creek after a rumour): no miles and no wear, but eaten and endured
+    /// as days on the trail at the party's pace, never as rest.
+    func haulDays(_ e: GameEngine, _ n: Int) -> [Interrupt] {
+        var q: [Interrupt] = []
+        e.state.vars[KlondikeData.haulingKey] = 1
+        defer { e.state.vars[KlondikeData.haulingKey] = nil }
+        var i = 0
+        while i < n && !e.state.over {
+            e.state.day += 1
+            e.state.weather = e.rollWeather(e.state.region)
+            e.consume(&q, .sea)
+            e.health(&q, .sail)
+            if !e.state.over { tick(e, &q, .sea, e.state.region) }
+            i += 1
+        }
+        return q
     }
 
     /// The boat takes `d` points of damage and says so; she may break up.

@@ -73,6 +73,8 @@ enum KlondikeData {
     static let breakupKey = "klondike.breakup"
     static let clearKey = "klondike.clear"
     static let rumourKey = "klondike.rumour"
+    /// Set only while `haulDays` runs: the pace's health is the trail's.
+    static let haulingKey = "klondike.hauling"
     static let chilkoot = 1.0
     static let whitePass = 2.0
 

@@ -76,7 +76,7 @@ final class KlondikeTests: XCTestCase {
         XCTAssertEqual(speed(engine(party(mile: 11250, pass: KlondikeData.whitePass))), 9 * 0.9, accuracy: 1e-9)
         XCTAssertEqual(speed(engine(party(mile: 13500))), 300, accuracy: 1e-9)
         XCTAssertEqual(Klondike.legName(party(mile: 11250)), "foot")
-        XCTAssertEqual(Klondike.legName(party(mile: KlondikeData.bennettMile)), "boat")
+        XCTAssertEqual(Klondike.legName(party(mile: KlondikeData.bennettMile + 10)), "boat")
     }
 
     func testHaulingIsHarderWorkThanRowing() {
@@ -570,6 +570,103 @@ final class KlondikeTests: XCTestCase {
         XCTAssertEqual(klondike.score(party(role: .whaler)).multiplier, 3)
         XCTAssertEqual(klondike.rank(7000), "Sourdough")
         XCTAssertEqual(klondike.rank(1999), "Cheechako")
+    }
+
+    // MARK: - Time off the route
+
+    func testWaitingOutASlideSaysSoOnlyIfYouLive() {
+        let e = engine(party(mile: 11400, pass: KlondikeData.chilkoot))
+        e.state.crew[0].hp = 1
+        e.state.crew[0].ailment = KlondikeData.pneumonia
+        e.state.crew[0].ailDays = 8
+        guard case .choice(let ask) = e.ask("slidewarning", prompt: "x", options: [.init("a"), .init("b")]) else { return XCTFail() }
+        let q = e.resolve(ask, option: 0)
+        XCTAssertTrue(e.state.over)
+        guard case .gameOver? = q.last else { return XCTFail("the ending is not last: \(q)") }
+        XCTAssertFalse(messages(q).contains { $0.contains("you go on") })
+
+        // Alive, the days pass first and the line comes after them.
+        let fine = engine(party(mile: 11400, pass: KlondikeData.chilkoot))
+        let ok = fine.resolve(ask, option: 0)
+        XCTAssertEqual(fine.state.day, 2)
+        XCTAssertTrue(messages(ok).last?.contains("you go on") ?? false)
+    }
+
+    /// Going back down for grub is six days of climbing with sacks, not six days of rest.
+    func testTheTripDownForGrubIsHardWorkNotRest() {
+        var s = party(mile: KlondikeData.summitMile, pass: KlondikeData.chilkoot)
+        s.food = 5000
+        s.rations = .meager
+        for i in s.crew.indices { s.crew[i].hp = 40 }
+        let ask = choice(engine(s).beginArrival("summit"))!
+        let e = engine(s)
+        _ = e.resolve(ask, option: 1)
+        XCTAssertEqual(e.state.day, 6)
+        // A day: Meager −0.3, the trail's −1.7, well +1, freezing in furs −1.4.
+        XCTAssertEqual(e.state.crew[0].hp, 40 - 6 * 2.4, accuracy: 1e-9)
+        XCTAssertNil(e.state.vars[KlondikeData.haulingKey])
+        XCTAssertEqual(klondike.paceHP(e.state), -1.7)
+    }
+
+    func testThePortageAndTheStampedeAreHardWorkToo() {
+        var s = party(mile: 12530, month: 5)
+        s.vars[KlondikeData.boatKey] = 1
+        s.rations = .meager
+        for i in s.crew.indices { s.crew[i].hp = 40 }
+        let canyon = engine(s)
+        _ = canyon.resolve(choice(canyon.beginArrival("canyon"))!, option: 1)
+        XCTAssertEqual(canyon.state.day, 4)
+        XCTAssertLessThan(canyon.state.crew[0].hp, 40)
+
+        let rumour = engine(s)
+        guard case .choice(let ask) = rumour.ask("rumour", prompt: "x", options: [.init("a"), .init("b")]) else { return XCTFail() }
+        _ = rumour.resolve(ask, option: 0)
+        XCTAssertEqual(rumour.state.day, 3)
+        XCTAssertLessThan(rumour.state.crew[0].hp, 40)
+        // On the river, rowing at a steady pace costs nothing.
+        XCTAssertEqual(klondike.paceHP(rumour.state), 0)
+    }
+
+    // MARK: - Bennett before the boat
+
+    func testBennettBeforeTheBoatIsStillTheTrail() {
+        let e = atBennett()
+        XCTAssertEqual(Klondike.legName(e.state), "foot")
+        XCTAssertTrue(Klondike.burialText(e.state, name: "Gus").contains("cairn"))
+        // No ice running on a lake that is frozen solid.
+        let w = klondike.weatherWeights(e, e.state.region, cursed: false)
+        XCTAssertFalse(w.contains { $0.0 == KlondikeData.ice })
+        XCTAssertFalse(w.isEmpty)
+
+        e.state.vars[KlondikeData.boatKey] = 1
+        XCTAssertEqual(Klondike.legName(e.state), "boat")
+        XCTAssertTrue(Klondike.burialText(e.state, name: "Gus").contains("river"))
+
+        // Out on the lakes after the breakup, the ice cakes are back.
+        let may = engine(party(mile: 11600, month: 4))
+        may.state.vars[KlondikeData.boatKey] = 1
+        XCTAssertTrue(klondike.weatherWeights(may, may.state.region, cursed: false).contains { $0.0 == KlondikeData.ice })
+    }
+
+    /// The engine holds the party at Bennett even if travel starts without `setSail`.
+    func testTravelCannotStartFromBennettWithoutABoatAndOpenWater() {
+        let e = atBennett()
+        let q = e.sailDay()
+        XCTAssertEqual(key(choice(q)), "boat")
+        XCTAssertEqual(e.state.day, 0)
+        XCTAssertEqual(e.state.mile, KlondikeData.bennettMile)
+        XCTAssertTrue(e.state.atPort)
+
+        e.state.vars[KlondikeData.boatKey] = 1
+        e.state.vars[KlondikeData.breakupKey] = Double(KlondikeData.breakupEarliest)
+        XCTAssertEqual(key(choice(e.sailDay())), "ice")
+        XCTAssertEqual(e.state.day, 0)
+
+        let june = atBennett(month: 5)
+        june.state.vars[KlondikeData.boatKey] = 1
+        _ = june.sailDay()
+        XCTAssertEqual(june.state.day, 1)
+        XCTAssertGreaterThan(june.state.mile, KlondikeData.bennettMile)
     }
 
     // MARK: - What the words say matches the tables

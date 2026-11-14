@@ -158,7 +158,17 @@ public final class Klondike: Journey {
     }
 
     /// "steamer", "foot" or "boat": how the party is travelling where it is.
-    public static func legName(_ s: GameState) -> String { KlondikeData.leg(s.region).rawValue }
+    public static func legName(_ s: GameState) -> String { leg(s).rawValue }
+
+    /// The leg the party is on. Camped at Bennett, it is still on foot until it has a boat:
+    /// the town stands at the start of the boat leg's country.
+    static func leg(_ s: GameState) -> KlondikeData.Leg {
+        if s.mile == KlondikeData.bennettMile && !hasBoat(s) { return .foot }
+        return KlondikeData.leg(s.region)
+    }
+
+    /// Camped at Lake Bennett before the ice goes out.
+    static func frozenAtBennett(_ s: GameState) -> Bool { s.mile == KlondikeData.bennettMile && !iceOut(s) }
 
     /// "You have reached ___": the pass's own name once the pass is chosen. Before it, the
     /// landing reads as the head of Lynn Canal's.
@@ -204,7 +214,7 @@ public final class Klondike: Journey {
     /// The burial screen's line, by where it happens. `name` is escaped here.
     public static func burialText(_ s: GameState, name: String) -> String {
         let n = TextMarkup.escape(name)
-        switch KlondikeData.leg(s.region) {
+        switch leg(s) {
         case .steamer: return "The purser has \(n) carried ashore at the next landing and buried on a hill above the water. What words will you say?"
         case .foot: return "Your partners lay \(n) to rest beside the trail under a cairn of stones, with a cross cut from a packing crate. What words will you say?"
         case .boat: return "You bury \(n) on a bluff above the river, where the boats going by can see the cross. What words will you say?"
@@ -233,7 +243,10 @@ public final class Klondike: Journey {
         if (e.state.vars[KlondikeData.clearKey] ?? 0) > 0 { return [(KlondikeData.clear, 1)] }
         let month = e.state.month
         var w = KlondikeData.odds[reg.id]?[KlondikeData.season(month).rawValue] ?? reg.weights
-        if KlondikeData.leg(reg) == .boat && month >= 6 { w.removeAll { $0.0 == KlondikeData.ice } }
+        // No ice running on the river from July, nor on a lake that is still frozen.
+        if KlondikeData.leg(reg) == .boat && (month >= 6 || Self.frozenAtBennett(e.state)) {
+            w.removeAll { $0.0 == KlondikeData.ice }
+        }
         return w
     }
 
@@ -257,9 +270,11 @@ public final class Klondike: Journey {
     }
 
     /// Hauling a ton over a pass is harder than rowing, and the steamer is no work at all.
+    /// A day of hauling off the route (`haulDays`) is the trail's work wherever it is.
     public override func paceHP(_ s: GameState) -> Double {
         let reg = s.region
-        let hp = KlondikeData.paceHP(KlondikeData.leg(reg), s.pace)
+        let leg = s.vars[KlondikeData.haulingKey] != nil ? KlondikeData.Leg.foot : KlondikeData.leg(reg)
+        let hp = KlondikeData.paceHP(leg, s.pace)
         return reg.has("gentle") ? hp * KlondikeData.gentleFactor : hp
     }
 
