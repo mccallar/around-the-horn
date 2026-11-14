@@ -558,8 +558,9 @@ final class AirshipTests: XCTestCase {
     // MARK: - Balance
 
     /// How the balance test flies: cruising, the two poorer roles on short rations, two of
-    /// each spare and three bags of ballast, pilot balloons when the tanks run low, mend
-    /// below 60%, gas and engines at a mast below 55%, and every choice the cautious way.
+    /// each spare and three bags of ballast, pilot balloons for every role (30, 60 or 100) sent
+    /// up when the tanks run low, mend below 60%, gas and engines at a mast below 55%, and
+    /// every choice the cautious way.
     static func policy(departure: Int = 1, pace: Pace = .steady) -> JourneyBot.Policy {
         var p = JourneyBot.Policy()
         p.departure = departure
@@ -568,8 +569,8 @@ final class AirshipTests: XCTestCase {
         p.speedShare = 0.7
         p.marginTurns = 4
         p.spares = [(.meds, 2), (.sailcloth, 2), (.timber, 3)]
-        p.tackle = [.shipwright: 60, .whaler: 100]
-        p.forageBelowTurns = [.shipwright: 6, .whaler: 15]
+        p.tackle = [.merchant: 30, .shipwright: 60, .whaler: 100]
+        p.forageBelowTurns = [.merchant: 4, .shipwright: 6, .whaler: 15]
         p.hitChance = [.merchant: 0.35, .shipwright: 0.35, .whaler: 0.55]
         p.mendBelow = 60
         p.yardBelow = 55
@@ -587,12 +588,20 @@ final class AirshipTests: XCTestCase {
         return p
     }
 
+    /// The balance tests fly 180 flights a role from one seed base. Thirty is too few: the
+    /// engineer's rate moves ten points from one block of thirty seeds to the next, so a band
+    /// checked on thirty says more about the seeds than the rules. From seed 12345 the rates sit
+    /// close to those of 600 flights a role (docs/journeys/airship.md, "Balance").
+    static let flights = 180
+    static let seed: UInt64 = 12345
+    static let may = JourneyBot.survey(Journeys.journey(Airship.id), count: flights, seed: seed, policy: policy())
+
     /// May is the month the old balloonist recommends. The financier should nearly always
     /// arrive, the engineer usually, the meteorologist about half the time, and a winning
-    /// flight should take about fourteen days.
+    /// flight should take about thirteen days.
     func testMayBalanceStaysInItsBands() {
         XCTAssertEqual(AirshipData.departures[1].month, 4)
-        let r = JourneyBot.survey(airship, count: 30, seed: 500, policy: Self.policy())
+        let r = Self.may
         print(r.report)
         XCTAssertGreaterThanOrEqual(r.rates[.merchant] ?? 0, 0.85, r.report)
         XCTAssertGreaterThanOrEqual(r.rates[.shipwright] ?? 0, 0.6, r.report)
@@ -602,10 +611,11 @@ final class AirshipTests: XCTestCase {
         XCTAssertTrue((70...100).contains(r.medianTurns), r.report)
     }
 
-    /// Leave in July and the polar fog is waiting: the two poorer roles do clearly worse.
+    /// Leave in July and the polar fog and the contrary winds are waiting: the two poorer
+    /// roles do clearly worse.
     func testJulyIsHarder() {
-        let may = JourneyBot.survey(airship, count: 30, seed: 500, policy: Self.policy())
-        let july = JourneyBot.survey(airship, count: 30, seed: 500, policy: Self.policy(departure: 3))
+        let may = Self.may
+        let july = JourneyBot.survey(airship, count: Self.flights, seed: Self.seed, policy: Self.policy(departure: 3))
         print(july.report)
         for role in [Role.shipwright, .whaler] {
             XCTAssertLessThan(july.rates[role] ?? 1, (may.rates[role] ?? 0) - 0.15, july.report)
@@ -614,10 +624,10 @@ final class AirshipTests: XCTestCase {
     }
 
     /// Full speed all the way burns too much petrol to cross the ice on what a poorer
-    /// purse can buy.
+    /// purse can buy. (It wins so rarely that 60 flights a role show it.)
     func testFullSpeedOverThePoleIsAMistake() {
-        let may = JourneyBot.survey(airship, count: 30, seed: 500, policy: Self.policy())
-        let full = JourneyBot.survey(airship, count: 30, seed: 500, policy: Self.policy(pace: .full))
+        let may = Self.may
+        let full = JourneyBot.survey(airship, count: 60, seed: Self.seed, policy: Self.policy(pace: .full))
         print(full.report)
         for role in [Role.shipwright, .whaler] {
             XCTAssertLessThan(full.rates[role] ?? 1, (may.rates[role] ?? 0) / 2, full.report)
