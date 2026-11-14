@@ -6,8 +6,9 @@
 // the flow opens on the picker (flow.js, `hasPicker`), as the app does.
 
 import * as horn1849 from './horn1849-skin.js';
+import * as rail from './rail-skin.js';
 
-export const all = [horn1849];
+export const all = [horn1849, rail];
 
 /** The skins for the journeys the engine has, in the engine's order: `[{ journey, skin }]`. */
 export function offered(journeys, skins = all) {
