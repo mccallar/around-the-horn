@@ -1092,8 +1092,8 @@ losing flights end at least three ways.
 ### Departures from the spec, and why
 
 1. **The bands.** This build was asked for 85–100 / 60–90 / 35–70%, not the spec's
-   ≥85 / 45–85 / 15–50%. With the spec's prices and purses the bot won 29 / 4 / 0 of 30 in
-   May: what decides a flight is whether the money lasts to the Kings Bay leap, and the
+   ≥85 / 45–85 / 15–50%. With the spec's prices and purses an early version of this bot won
+   28 / 11 / 0 of 30 in May: what decides a flight is whether the money lasts to the Kings Bay leap, and the
    spec's engineer and meteorologist cannot pay for it. Petrol came down a quarter and the
    two poorer purses were reset to $575 and $490. The win rate is steep in the purse: the
    meteorologist wins 4 of 30 at $425, 18 at $490 and 29 at $575.
