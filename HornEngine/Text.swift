@@ -54,21 +54,23 @@ extension StringProtocol {
         return String(String.UnicodeScalarView(u[lo..<hi]))
     }
 
+    /// By Characters, as Foundation's search on Apple platforms goes: a "[" carrying a
+    /// combining mark is another character and is left alone.
     func replacingOccurrences(of target: String, with replacement: String) -> String {
-        let t = Array(target.unicodeScalars)
-        let u = Array(unicodeScalars)
-        var out = String.UnicodeScalarView()
+        let t = Array(target)
+        let u = Array(self)
+        var out = ""
         var i = 0
         while i < u.count {
             if !t.isEmpty && i + t.count <= u.count && Array(u[i..<i + t.count]) == t {
-                out.append(contentsOf: replacement.unicodeScalars)
+                out += replacement
                 i += t.count
             } else {
                 out.append(u[i])
                 i += 1
             }
         }
-        return String(out)
+        return out
     }
 }
 #endif

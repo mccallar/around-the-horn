@@ -3,7 +3,6 @@
 // a bot that plays a voyage through either.
 import { spawn, spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
-import { createInterface } from 'node:readline';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import os from 'node:os';
@@ -71,7 +70,7 @@ export class Fnv {
 /** horn.wasm, through web/engine.js. */
 export async function wasmBackend() {
   const engine = await loadEngine();
-  return { name: 'wasm', call: (req) => Promise.resolve(engine.request(req)), close() {} };
+  return { name: 'wasm', call: async (req) => engine.request(req), close() {} };
 }
 
 /**
@@ -91,9 +90,16 @@ export function nativeBinary() {
 
 export function nativeBackend(bin) {
   const child = spawn(bin, [], { stdio: ['pipe', 'pipe', 'inherit'] });
-  const lines = createInterface({ input: child.stdout });
   const waiting = [];
-  lines.on('line', (l) => waiting.shift()(l));
+  // Split on "\n" alone: readline would also split inside a string at U+2028 and U+2029,
+  // which JSON leaves unescaped.
+  let rest = '';
+  child.stdout.setEncoding('utf8');
+  child.stdout.on('data', (chunk) => {
+    const parts = (rest + chunk).split('\n');
+    rest = parts.pop();
+    for (const l of parts) waiting.shift()(l);
+  });
   return {
     name: 'native',
     call(req) {
@@ -233,7 +239,7 @@ export class Bot {
         let route = await this.seaTurn();
         if (route.over) { ending = route.over; break loop; }
         this.ticks += 1;
-        if (this.saveEvery && this.ticks % this.saveEvery === 0) await this.saveAndLoad([]);
+        if (this.saveEvery && this.ticks % this.saveEvery === 0 && !this.s.over) await this.saveAndLoad([]);
         route = await this.process((await this.call({ op: 'sailDay' })).interrupts);
         if (route.port) {
           const p = await this.portVisit();
@@ -367,7 +373,7 @@ export class Bot {
       const i = q.shift();
       const [type] = Object.keys(i);
       const x = i[type];
-      if (this.saveEvery && type !== 'enterPort' && type !== 'finale' && type !== 'gameOver'
+      if (this.saveEvery && !this.s.over && type !== 'enterPort' && type !== 'finale' && type !== 'gameOver'
           && this.d.chance(0.02)) {
         // Leave with this on screen and the rest queued; come back to the same.
         q = await this.saveAndLoad([i, ...q]);

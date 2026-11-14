@@ -218,7 +218,11 @@ public final class Bridge {
             for (k, n) in try need(r.cart, "cart") { if let key = ItemKey(rawValue: k) { cart[key] = n } }
             return Reply(["result": AnyEncodable(GameEngine.bill(cart, at: port))])
         case "formatNumber":
-            return Reply(["result": AnyEncodable(formatNumber(try need(r.n, "n")))])
+            // An Int is 32 bits in WebAssembly: past that, `formatNumber` would trap. No
+            // amount in the game comes near it.
+            let n = try need(r.n, "n")
+            guard n.isFinite, abs(n) < 2_147_483_647 else { throw Failure(message: "n is out of range") }
+            return Reply(["result": AnyEncodable(formatNumber(n))])
         case "escape":
             return Reply(["result": AnyEncodable(TextMarkup.escape(try need(r.text, "text")))])
         case "name":
@@ -441,7 +445,9 @@ struct RegionInfo: Encodable {
     }
 
     let id: String
-    let to: Int
+    /// Null for a region that runs to the end (`Int.max`, which is 2^31 - 1 in WebAssembly
+    /// and 2^63 - 1 on the Mac, and in neither case a number JavaScript holds exactly).
+    let to: Int?
     let name: String
     let temp: Temp
     /// Sorted: a Set has no order of its own.
@@ -451,7 +457,7 @@ struct RegionInfo: Encodable {
 
     init(_ r: Region) {
         id = r.id.rawValue
-        to = r.to
+        to = r.to == Int.max ? nil : r.to
         name = r.name
         temp = r.temp
         tags = r.tags.sorted()
