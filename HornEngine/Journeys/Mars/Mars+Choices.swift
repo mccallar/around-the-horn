@@ -17,7 +17,7 @@ extension Mars {
                                     .init("Run on four more days and brake hard (\(burn))", enabled: e.state.fuel >= MarsData.turnoverBurn)])]
         case "approach":
             return [e.ask("capture",
-                          prompt: "Mars approach. The planet fills the forward window, and the ship is coming in far too fast to stay.",
+                          prompt: "Mars approach. Mars is the brightest thing in the sky after the Sun, and brighter every hour, and the ship is coming in far too fast to stay.",
                           detail: "Aerobrake: skim the top of the atmosphere and let the air do the braking. Quick and free, and very hard on the hull. Or burn into orbit: about \(MarsData.tonnes(MarsData.captureBurn)) of propellant and two or three days longer, and kind to the hull.\n[dim]Pressure hull \(Int(jsRound(e.state.hull)))% · you have \(MarsData.tonnes(e.state.fuel)).[/dim]",
                           options: [.init("Aerobrake"), .init("Propulsive capture (\(MarsData.tonnes(MarsData.captureBurn)))")])]
         default:
@@ -91,26 +91,20 @@ extension Mars {
             switch e.ri(0, 5) {
             case 0:
                 let kg = e.ri(40, 90)
-                e.state.add(.food, Double(kg))
-                found = "rations, still sealed and still in date, more or less. [green]+\(kg) kg of rations.[/green]"
+                found = "rations, still sealed and still in date, more or less. " + stow(e, .food, kg)
             case 1:
                 let l = e.ri(80, 160)
-                e.state.add(.water, Double(l))
-                found = "water bladders, full. [green]+\(l) litres of water.[/green]"
+                found = "water bladders, full. " + stow(e, .water, l)
             case 2:
                 let n = e.ri(1, 2)
-                e.state.add(.meds, Double(n))
-                found = "a hospital's worth of dressings. [green]+\(n) medical \(n == 1 ? "kit" : "kits").[/green]"
+                found = "a hospital's worth of dressings. " + stow(e, .meds, n)
             case 3:
-                e.state.add(.sailcloth, 1)
-                found = "a spare array panel, still in its foam. [green]+1 array panel.[/green]"
+                found = "a spare array panel, still in its foam. " + stow(e, .sailcloth, 1)
             case 4:
-                e.state.add(.timber, 1)
-                found = "hull sealant and plate. [green]+1 hull patch.[/green]"
+                found = "hull sealant and plate. " + stow(e, .timber, 1)
             default:
                 let t = e.ri(4, 8) * 10
-                e.state.add(.fuel, Double(t))
-                found = "a propellant bladder, nearly full. [green]+\(MarsData.tonnes(Double(t))) of propellant.[/green]"
+                found = "a propellant bladder, nearly full. " + stow(e, .fuel, t)
             }
             return [.message("An hour of careful flying and a grapple, and the pod is open on the cargo deck. Inside: \(found)")]
 
@@ -126,7 +120,7 @@ extension Mars {
             }
             let wired = e.ri(3, 6) * 5
             e.state.vars[MarsData.owedKey, default: 0] += Double(wired)
-            return [.message("You send it across on a drone. An hour later the survey ship's whole crew crowd into her camera to say thank you, and her captain promises a transfer at your next port.")]
+            return [.message("You send it across on a drone. An hour later the survey ship's whole crew crowd into her camera to say thank you, and her captain promises a transfer at the next station you reach.")]
 
         case "hitch":
             guard args.count == 2 else { return [] }
@@ -161,5 +155,16 @@ extension Mars {
         default:
             return []
         }
+    }
+
+    /// Puts what the pod held in the hold, as far as there is room, and says what went in:
+    /// "[green]+20 litres of water.[/green] The rest stays in the pod."
+    func stow(_ e: GameEngine, _ key: ItemKey, _ amount: Int) -> String {
+        let before = e.state[key]
+        e.state.add(key, Double(amount))
+        let got = (e.state[key] - before).rounded(.down)
+        if got < 1 { return "There is no room aboard for any of it, so it stays in the pod." }
+        let rest = got < Double(amount) ? " The rest stays in the pod." : ""
+        return "[green]+\(describe(.item(key), got)).[/green]\(rest)"
     }
 }

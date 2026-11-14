@@ -68,7 +68,7 @@ extension Mars {
             JourneyEvent(full ? 6 : 0, when: full) { e, q in
                 let d = e.ri(8, 15)
                 e.state.sails = max(0, e.state.sails - Double(d))
-                q.append(.message("Weeks of hard burning have eaten a groove in the thruster grid. The drive's glow has a flicker in it now. [red](Power & drive −\(d)%)[/red]"))
+                q.append(.message("Running the drive this hard has worn a groove in the thruster grid. The drive's glow has a flicker in it now. [red](Power & drive −\(d)%)[/red]"))
             },
 
             // Choices
@@ -96,10 +96,11 @@ extension Mars {
                 guard let port = nextPort else { return }
                 let free = self.firstNames.filter { f in !e.state.crew.contains { $0.name == f } }
                 let name = e.pick(free) ?? "Anan"
+                let shown = TextMarkup.escape(name)
                 q.append(e.ask("hitch", [name, port.id],
-                               prompt: "A shuttle from \(lastPort?.name ?? "the yard") catches you up before you are far gone. Aboard is a technician called \(name), who missed a ship and has a job waiting at \(port.name).",
+                               prompt: "A shuttle from \(lastPort?.name ?? "the yard") catches you up before you are far gone. Aboard is a technician called \(shown), who missed a ship and has a job waiting at \(port.name).",
                                detail: "A pump fitter, by trade and by conversation. One more pair of hands; one more mouth.",
-                               options: [.init("Take \(name) as far as \(port.short)"), .init("Send \(name) back with the shuttle")]))
+                               options: [.init("Take \(shown) as far as \(port.short)"), .init("Send \(shown) back with the shuttle")]))
             },
             JourneyEvent(2.5, when: s.money >= Self.dronePrice && s.meds < item(.meds).max) { e, q in
                 q.append(e.ask("drone", prompt: "A pedlar's drone matches course with you and blinks a sign: ONE MEDICAL KIT, VERY GOOD, VERY FRESH.",
@@ -118,9 +119,18 @@ extension Mars {
             JourneyEvent(2.5) { e, q in
                 let kg = e.ri(30, 60)
                 let packs = e.ri(1, 3)
+                let food = e.state.food, limes = e.state.limes
                 e.state.add(.food, Double(kg))
                 e.state.add(.limes, Double(packs))
-                q.append(.message("A marker buoy on the arc has a supply cache strapped to it, left by somebody for anybody. You take what you need and leave a note. [green]+\(kg) kg of rations, +\(packs) supplement \(packs == 1 ? "pack" : "packs").[/green]"))
+                var got: [String] = []
+                let f = (e.state.food - food).rounded(.down)
+                if f >= 1 { got.append("+" + self.describe(.item(.food), f)) }
+                let p = (e.state.limes - limes).rounded(.down)
+                if p >= 1 { got.append("+" + self.describe(.item(.limes), p)) }
+                let cache = "A marker buoy on the arc has a supply cache strapped to it, left by somebody for anybody."
+                q.append(.message(got.isEmpty
+                    ? cache + " There is nothing in it you are short of, so you leave a note to say so."
+                    : cache + " You take what you need and leave a note. [green]\(got.joined(separator: ", ")).[/green]"))
             },
             JourneyEvent(3, when: forecasts && (s.nextStop.map { $0.mile - s.mile > 400 } ?? false)) { e, q in
                 let gain = Self.cappedGain(e, e.ri(150, 300))
@@ -145,7 +155,7 @@ extension Mars {
 
             // Sights
             Self.sight(1.5, when: s.mile < 8_000, "Earth is a bright star now, with a dimmer one beside it. Somebody has taped a note under the window: YOU ARE HERE, with an arrow pointing the wrong way."),
-            Self.sight(1.5, when: s.mile >= 30_000, "Mars has stopped being a star. This morning it is a disc, small and orange and patient, and everybody finds a reason to pass the window."),
+            Self.sight(1.5, when: s.mile >= 30_000, "In the navigation telescope Mars has stopped being a star. This morning it is a disc, small and orange and patient, and everybody finds a reason to borrow the telescope."),
             Self.sight(1, "A comet crosses the far side of the sky, its tail laid out like a scarf. The crew name it after the cook, who is delighted, then suspicious."),
             Self.sight(1.5, "The cabin lights go off for a power check, and the Milky Way is suddenly everywhere. Nobody turns them back on for an hour."),
             Self.sight(1, "It is somebody's birthday. There is a cake, of a kind, and a candle that is not allowed to be lit, and singing that is allowed but not encouraged."),

@@ -34,19 +34,20 @@ extension Mars {
              ]),
         Port(id: "phobos", journey: Mars.id, name: "Phobos Yard", shop: "Phobos Yard supply", mult: 0.8,
              mods: [.food: 0.7, .fuel: 2.2, .water: 1.2],
-             arrive: "Phobos Yard is dug into the side of a moon so small you could throw a ball clean off it, and some of the yard crew have. Mars fills half the sky, rust and butterscotch. Repairs are cheap here, and so is food: the settlements grow more than they eat.",
+             arrive: "Phobos Yard is dug into the side of a moon so small you could throw a ball clean off it, and some of the yard crew have. Mars hangs overhead, enormous, rust and butterscotch. Repairs are cheap here, and so is food: the settlements grow more than they eat.",
              talk: [
-                 "A yard foreman: \"Seven million km to Jezero and then down. Get her fixed while you're here. We're the cheapest yard between here and Earth.\"",
+                 "A yard foreman: \"A couple of days lining up on Jezero, and then down. Get her fixed while you're here. We're the cheapest yard between here and Earth.\"",
                  "A grower from the settlement, selling greens off a tray: \"Rations are cheap. Propellant isn't: it comes up from the surface a little at a time.\"",
                  "A traffic controller: \"Jezero takes you whenever you come in. The contract bonus stops at day 170, but nobody down there turns away cargo.\"",
              ]),
     ]
 
-    /// The cycler asks before it is a port; a station pays what a grateful ship wired.
+    /// A station pays what a grateful ship wired as soon as you reach it, docked or not; the
+    /// cycler then asks before it is a port.
     func stationArrival(_ e: GameEngine, _ stop: Stop) -> [Interrupt]? {
         guard stop.type == .port else { return nil }
         if stop.id == "cycler" {
-            return [e.ask("cycler", [stop.id],
+            return paid(e) + [e.ask("cycler", [stop.id],
                           prompt: "The cycler Perpetua is coming up on her endless loop between the planets. She will not slow down for you.",
                           detail: "Matching orbits to dock costs \(MarsData.tonnes(MarsData.dockBurn)) of propellant. Her stores are open to anyone who does.\n[dim]You have \(MarsData.tonnes(e.state.fuel)).[/dim]",
                           options: [.init("Match and dock (\(MarsData.tonnes(MarsData.dockBurn)))", enabled: e.state.fuel >= MarsData.dockBurn),
@@ -55,7 +56,7 @@ extension Mars {
         return paid(e) + e.portArrival(stop)
     }
 
-    /// Money a ship you helped has wired, collected at the next port.
+    /// Money a ship you helped has wired, collected at the next station you reach.
     func paid(_ e: GameEngine) -> [Interrupt] {
         let owed = e.state.vars[MarsData.owedKey] ?? 0
         guard owed > 0 else { return [] }
@@ -68,8 +69,19 @@ extension Mars {
         guard let id = args.first, let stop = e.journey.stop(id) else { return [] }
         if option == 0 {
             e.state.fuel = max(0, e.state.fuel - MarsData.dockBurn)
-            return [.message("A long, careful burn, a lot of small corrections, and the latches close with a clunk you feel in your teeth.")]
-                + paid(e) + e.portArrival(stop)
+            // Docking is going aboard: the shared arrival's bookkeeping, its description as a
+            // message, and straight into her stores, with no second offer to dock.
+            var q: [Interrupt] = []
+            var said = "A long, careful burn, a lot of small corrections, and the latches close with a clunk you feel in your teeth."
+            for i in e.portArrival(stop) {
+                if case .choice(let c) = i, case .portArrival = c.kind {
+                    if let d = c.detail, !d.isEmpty { said += "\n\n" + d }
+                } else {
+                    q.append(i)
+                }
+            }
+            e.state.atPort = true
+            return [.message(said)] + q + [.enterPort]
         }
         return [.message("The Perpetua slides past a few kilometres off, lit up like a town at night. Somebody in her observation ring waves. Everybody waves back.")]
     }

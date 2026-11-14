@@ -84,7 +84,7 @@ public final class Mars: Journey {
 
     static let strings = JourneyText(
         rainCaught: { "The condensers wring \($0) litres out of the cabin air." },
-        outOfFood: "[red]The galley is empty.[/red] Five people are looking at one another and doing arithmetic.",
+        outOfFood: "[red]The galley is empty.[/red] There is a lot of arithmetic going on aboard, and none of it comes out well.",
         lowFood: "The quartermaster, who is also the cook, reports about a week of rations left.",
         outOfWater: "[red]The water tanks are dry.[/red] The recycler can only give back what it is given.",
         lowWater: "About five days of water left in the tanks, by the recycler's count.",
@@ -94,7 +94,7 @@ public final class Mars: Journey {
         deficiencyCured: { "\($0)'s bones have stopped aching. The supplements are doing their work." },
         wellAgain: { "\($0) is back on the duty roster." },
         hasAilment: { name, a in "\(name) has \(a.name)." },
-        deficiencyHint: " Supplement packs, or a station's gravity ring, will put it right.",
+        deficiencyHint: " Supplement packs will put it right, and so will a few days docked at a station, whose doctor has a cupboard full of them.",
         medsUsed: { " [dim]You open a medical kit (\($0) left).[/dim]" },
         causeThirst: "thirst",
         causeStarvation: "hunger",
@@ -208,6 +208,16 @@ public final class Mars: Journey {
     static func aerobraking(_ s: GameState, _ reg: Region) -> Bool {
         reg.id == "capture" && s.mile < MarsData.captureEnds && s.vars[MarsData.captureKey] == 1
     }
+
+    /// The shared rule stops at the captain's death, so anyone it would have taken the same
+    /// day is still marked alive: only someone with health left can bring the ship in.
+    public override func leaderDiedBody(_ s: GameState) -> String {
+        if s.living.contains(where: { $0.hp > 0 }) { return text.leaderDiedBody }
+        return s.atPort ? Self.nobodyLeftDocked : Self.nobodyLeftAboard
+    }
+
+    static let nobodyLeftAboard = "There is nobody left aboard to take the helm. The autopilot holds her to the arc exactly as it was told, and in time a tug goes out to bring her in. Jezero gets its cargo, very late, and flies its flag at half height for a day."
+    static let nobodyLeftDocked = "There is nobody left aboard to take her on. The station crew move her to a quiet berth, and the cargo goes the rest of the way to Jezero in somebody else's hold."
 
     public override func wreckedBody(_ s: GameState) -> String {
         if Self.aerobraking(s, s.region) {

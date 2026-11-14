@@ -189,8 +189,11 @@ final class MarsTests: XCTestCase {
         XCTAssertTrue(c!.options[0].enabled)
         let after = e.resolve(c!, option: 0)
         XCTAssertEqual(e.state.fuel, 440)
-        guard let yard = choice(after), case .portArrival(let stop) = yard.kind else { return XCTFail("no port") }
-        XCTAssertEqual(stop, "cycler")
+        // Docking is going aboard: no second offer to dock, and her stores open.
+        XCTAssertNil(choice(after))
+        XCTAssertEqual(after.last, .enterPort)
+        XCTAssertTrue(e.state.atPort)
+        XCTAssertTrue(messages(after).first?.contains("comes up out of the dark") ?? false)
     }
 
     func testWavingTheCyclerBySkipsHerAndAnEmptyTankCannotDock() {
@@ -214,11 +217,22 @@ final class MarsTests: XCTestCase {
         let owed = e.state.vars[MarsData.owedKey] ?? 0
         XCTAssertTrue((15...30).contains(owed))
 
+        // Paid on reaching the station, before the offer to dock: keeping going keeps it.
         let q = e.beginArrival("midway")
         XCTAssertEqual(e.state.money, 100 + owed)
         XCTAssertEqual(e.state.vars[MarsData.owedKey], 0)
         XCTAssertTrue(messages(q).first?.contains("+$\(Int(owed))") ?? false)
-        XCTAssertNotNil(choice(q))
+        XCTAssertEqual(e.resolve(choice(q)!, option: 1), [])
+        XCTAssertEqual(e.state.money, 100 + owed)
+
+        // The cycler pays too, even to a ship that waves her by.
+        let c = engine(ship(mile: 15_500))
+        c.state.money = 100
+        c.state.vars[MarsData.owedKey] = 20
+        let wave = c.beginArrival("cycler")
+        XCTAssertEqual(c.state.money, 120)
+        _ = c.resolve(choice(wave)!, option: 1)
+        XCTAssertEqual(c.state.money, 120)
 
         // A patch, and a refusal costs nothing.
         let p = engine(ship())
@@ -257,6 +271,64 @@ final class MarsTests: XCTestCase {
         let q = e.beginArrival("midway")
         XCTAssertEqual(e.state.living.count, 5)
         XCTAssertTrue(choice(q)?.detail?.contains("Noor") ?? false)
+    }
+
+    /// A pod or a cache says what actually went into the hold, not what it held.
+    func testFindsReportWhatFitsAboard() {
+        // Water bladders: 150 litres, room for 20.
+        let e = engine(ship(), [0.5, 0.2, 0.87])
+        e.state.water = 780
+        let q = e.resolve(ask(e, "pod"), option: 0)
+        XCTAssertEqual(e.state.water, 800)
+        XCTAssertTrue(messages(q)[0].contains("+20 litres of water"), messages(q)[0])
+        XCTAssertTrue(messages(q)[0].contains("The rest stays in the pod"), messages(q)[0])
+        XCTAssertFalse(messages(q)[0].contains("150"), messages(q)[0])
+
+        // Medical kits, with the locker full: nothing goes in and it says so.
+        let full = engine(ship(), [0.5, 0.4, 0.9])
+        full.state.meds = 8
+        let m = messages(full.resolve(ask(full, "pod"), option: 0))[0]
+        XCTAssertEqual(full.state.meds, 8)
+        XCTAssertTrue(m.contains("no room aboard"), m)
+        XCTAssertFalse(m.contains("+"), m)
+
+        // The cache: 30 kg of rations, room for 10; one pack.
+        let s = ship()
+        var said: [String] = []
+        for ev in mars.events(engine(s), s.region) where ev.ok {
+            let c = engine(s, [], fallback: 0)
+            c.state.food = 440
+            var q: [Interrupt] = []
+            ev.run(c, &q)
+            said += messages(q).filter { $0.contains("supply cache") }
+            if !messages(q).filter({ $0.contains("supply cache") }).isEmpty { XCTAssertEqual(c.state.food, 450) }
+        }
+        XCTAssertEqual(said.count, 1)
+        XCTAssertTrue(said[0].contains("+10 kg of rations, +1 supplement pack."), said[0])
+    }
+
+    /// The captain's death says who is left to bring the ship in, and someone dying the
+    /// same day is not anyone.
+    func testTheCaptainsDeathSaysWhetherAnyoneIsLeft() {
+        func body(_ setUp: (GameEngine) -> Void) -> String {
+            let e = engine(ship())
+            setUp(e)
+            e.state.crew[0].hp = 0
+            var q: [Interrupt] = []
+            e.deaths(&q)
+            for i in q { if case .gameOver(_, let b) = i { return b } }
+            XCTFail("no game over")
+            return ""
+        }
+        XCTAssertEqual(body { _ in }, mars.text.leaderDiedBody)
+        XCTAssertEqual(body { e in for i in 1..<5 { e.state.crew[i].alive = false } }, Mars.nobodyLeftAboard)
+        XCTAssertEqual(body { e in for i in 1..<5 { e.state.crew[i].hp = 0 } }, Mars.nobodyLeftAboard)
+        XCTAssertEqual(body { e in
+            e.state.atPort = true
+            for i in 1..<5 { e.state.crew[i].alive = false }
+        }, Mars.nobodyLeftDocked)
+        // Nor does running out of food count heads.
+        XCTAssertFalse(mars.text.outOfFood.lowercased().contains("five"))
     }
 
     func testStationPricesFollowWhatEachHasPlentyOf() {

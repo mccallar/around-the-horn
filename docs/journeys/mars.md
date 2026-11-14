@@ -282,7 +282,7 @@ None the engine cannot express: every rule above maps onto a hook rail already u
 Engine files: `HornEngine/Journeys/Mars/` (`Mars.swift` rules, sentences and hooks,
 `MarsData.swift` tables, `Mars+Ports.swift` the four stations and the cycler's offer,
 `Mars+Events.swift` the 23 events, `Mars+Choices.swift` turnover, capture and every
-answer), one entry in `Journeys.all`. Tests: `HornEngineTests/MarsTests.swift` (26 rule
+answer), one entry in `Journeys.all`. Tests: `HornEngineTests/MarsTests.swift` (28 rule
 tests, 4 balance tests); `JourneyContractTests` runs over it with no special case. The
 title card, setup and outfit copy, learn pages, burial wording, status labels, scene,
 chart and the grapple's drawing (§1's card, §15's canvas, §16, §19) belong to the skin,
@@ -336,7 +336,8 @@ Skies: clear, still, breeze, dust, fog, storm, gale.
 the second ice stream, the shadow). The shadow has no Good tracking weather, no flare
 warning and no tracking-fix event.
 
-**Set pieces.** The cycler: dock for 6 t (disabled under 6 t) and her shop opens; wave
+**Set pieces.** The cycler: dock for 6 t (disabled under 6 t) and you are aboard with her shop
+open, with no second offer to dock; wave
 and she is not a port at all. Turnover: on schedule, nothing; run on (8 t, disabled
 under 8 t) gains 1,400 units, four days at cruise, with a 30% chance (50% under 50%
 power) of 10–20 points off power. Approach: aerobrake (speed × 1.5 and 4–10 hull a day
@@ -435,8 +436,8 @@ the two poorer roles' losses end at least three ways.
    region's `dust` tag is kept for the skin but no rule reads it.
 9. **The hitch-hiker** is offered only within 1,500 units (15 million km) after Gateway
    or Midway, and is always bound for Midway or Phobos, never the cycler, which the
-   player may wave by. A grateful ship's transfer ($15–30) is paid at the next station
-   you dock with.
+   player may wave by. A grateful ship's transfer ($15–30) is paid when you reach the
+   next station, whether you dock or keep going.
 10. **Money** reads "$" in engine text, as the shop shows it; §2's thousand-dollar unit is
     the learn page's business.
 11. **The spec's sample lines** are used where they fit (the recycler, the window note, the
