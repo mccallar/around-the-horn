@@ -29,7 +29,7 @@ public enum Role: String, Codable, CaseIterable {
 }
 
 public struct RoleInfo {
-    /// The menu line: "Be a merchant from Boston".
+    /// The menu line: "A Boston merchant".
     public let label: String
     /// As in "Bonus for being a merchant".
     public let title: String

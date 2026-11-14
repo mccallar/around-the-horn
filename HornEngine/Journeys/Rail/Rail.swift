@@ -30,11 +30,11 @@ public final class Rail: Journey {
         fairWeather = RailData.fair
         ailments = [RailData.mountainFever, RailData.exhaustion, RailData.crushedHand, RailData.scald]
 
-        roles[.merchant] = RoleInfo(label: "Be a freight contractor from Chicago", title: "freight contractor",
+        roles[.merchant] = RoleInfo(label: "A Chicago freight contractor", title: "freight contractor",
                                     money: 1000, mend: 25, patch: 20, catchLimit: 40, aim: 1.5)
-        roles[.shipwright] = RoleInfo(label: "Be a boilermaker from Pittsburgh", title: "boilermaker",
+        roles[.shipwright] = RoleInfo(label: "A Pittsburgh boilermaker", title: "boilermaker",
                                       money: 520, mend: 40, patch: 35, catchLimit: 40, aim: 1.5)
-        roles[.whaler] = RoleInfo(label: "Be a river hand from St. Louis", title: "river hand",
+        roles[.whaler] = RoleInfo(label: "A St. Louis river hand", title: "river hand",
                                   money: 350, mend: 25, patch: 20, catchLimit: 60, aim: 4)
 
         paces[.easy] = PaceInfo(name: "Easy", speed: 32, hp: 0.5, wear: 1.3, fuel: 7,

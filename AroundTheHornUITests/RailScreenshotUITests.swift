@@ -43,7 +43,7 @@ final class RailScreenshotUITests: ScreenshotWalk {
         tap("How do they compare?")
         shot("04-differences")
         tap("Back")
-        tap("Be a freight contractor from Chicago")
+        tap("A Chicago freight contractor")
         shot("05-names")
         tap("Use these names")
         shot("06-month")
@@ -57,7 +57,7 @@ final class RailScreenshotUITests: ScreenshotWalk {
     func testShopAndTheRoad() {
         relaunch(["-HornTickSeconds", "6"])
         tap("Take the contract")
-        tap("Be a river hand from St. Louis")
+        tap("A St. Louis river hand")
         tap("Use these names")
         tap("October 1869")
         tap("Enter the store")

@@ -136,3 +136,15 @@ as before, and older saves read with nothing waiting. Continuing shows what was 
 then a menu (spec §2: a menu, not the loop). A save standing on the last stop with
 nothing waiting, as older builds could leave one, is told of its arrival. Nothing 1849
 says or shows changes.
+
+## D11 — 1849's role, ration and trade lines in its own words (2026-11-14)
+
+The role screen, the ration names and the trade row kept the prototype's wording, which
+sat close to an older game's. Ryan ruled to reword them: the role intro now reads "Every
+sort of person sailed for California in 1849. Choose who you will be:", the roles are "A
+Boston merchant", "A Mystic shipwright" and "A Nantucket whaler", the differences are
+"How do they compare?" / "How they compare", the rations are Full / Short / Scant, and the
+port row is "Seek a trade". Words only: no number, formula or random draw changed, so the
+prototype parity, balance and golden-voyage tests are untouched. The rail journey's
+matching lines were reworded the same day. The reference screenshots of the screens that
+show these lines are retaken with the next screenshot walk.
