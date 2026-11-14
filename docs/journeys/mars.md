@@ -423,7 +423,8 @@ the two poorer roles' losses end at least three ways.
    With §2's $850 and $500 no price level put both poorer roles in their bands (at the
    level where the yard rigger fell under 90%, the ice hauler won 0–5%). Prices were cut
    until the rigger sat mid-band at $850, and the hauler's purse raised until it did too.
-   Measured on seeds 500 and 1999: the hauler at $600 wins about 37%, at $650 about 72%.
+   During tuning (seeds 500 and 1999, prices within a few percent of these) the hauler won
+   about 37% at $600 and 72% at $650.
 5. **Water is the dear good**, at 0.23 a litre (the cycler sells it at 0.10): the ice
    hauler's grapple is what makes her trip affordable. Only she grapples whenever there
    is room.
@@ -454,4 +455,5 @@ the two poorer roles' losses end at least three ways.
   a litre. A player who watches the tanks and grapples in the streams avoids most of it.
 - Sheltering from a flare and working through it come out about even for the bot: a
   day's rations and water against a 75% chance of radiation sickness for one or two.
-- No bot run loses the ship except when it aerobrakes on a tired hull.
+- Losing the ship is rare for the bot: about one run in a hundred, mostly from late
+  launches, and four in 180 when it aerobrakes whatever the hull.
