@@ -66,3 +66,9 @@ SIMCTL_CHILD_HORN_SHOTS=/path/to/dir sh Tools/run_tests.sh AroundTheHornUITests 
 
 `python3 Tools/make_icon.py` writes the icon: the prototype's pixel ship on navy, opaque
 1024×1024 (spec M9).
+
+## License
+
+MIT, see [`LICENSE`](LICENSE). The two fonts in `AroundTheHorn/Resources/Fonts`
+(VT323 and Press Start 2P) are not covered by it: they ship under the SIL Open Font
+License 1.1, in [`OFL.txt`](AroundTheHorn/Resources/Fonts/OFL.txt) beside them.
