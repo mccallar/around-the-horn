@@ -377,14 +377,20 @@ public class Journey {
         }
     }
 
-    /// "120 lbs of provisions", "$45". `amount` is in stored units.
+    /// "120 lbs of provisions", "$45". `amount` is in stored units. An item named for the
+    /// unit it is counted in is counted by its name: "3 medicine kits", "1 wool blanket".
     public func describe(_ good: TradeGood, _ amount: Double) -> String {
         switch good {
         case .money: return "$\(jsNumber(amount))"
         case .item(let k):
             let it = item(k)
             let n = amount / Double(it.per)
-            return "\(jsNumber(n)) \(n == 1 ? it.one : it.unit) of \(it.name.lowercased())"
+            let unit = n == 1 ? it.one : it.unit
+            let name = it.name.lowercased()
+            if name == it.unit || name.hasSuffix(" " + it.unit) {
+                return "\(jsNumber(n)) \(name.dropLast(it.unit.count))\(unit)"
+            }
+            return "\(jsNumber(n)) \(unit) of \(name)"
         }
     }
 

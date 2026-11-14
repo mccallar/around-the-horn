@@ -64,7 +64,7 @@ enum RailData {
         Stop(id: "greenriver", name: "Green River", short: "Green River", type: .port, mile: 845),
         Stop(id: "ogden", name: "Ogden", short: "Ogden", type: .port, mile: 1032),
         Stop(id: "promontory", name: "Promontory Summit", short: "Promontory", type: .mark, mile: 1084,
-             note: "Promontory Summit, where the two roads met. The gold spike and the laurel tie spent one afternoon in the ground and were taken up again before dark; what holds the rails now is pine and iron, like everywhere else. [amber]Salt desert from here: the boiler drinks from your tank car for the next 166 miles.[/amber]"),
+             note: "Promontory Summit, where the two roads met. The gold spike and the laurel tie spent one afternoon in the ground and were taken up again before dark; what holds the rails now is pine and iron, like everywhere else. [amber]The salt desert began back at Ogden, and the boiler drinks from your tank car for 166 miles yet.[/amber]"),
         Stop(id: "elko", name: "Elko", short: "Elko", type: .port, mile: 1305),
         Stop(id: "sink", name: "the Humboldt Sink", short: "Humboldt Sink", type: .mark, mile: 1530,
              note: "The Humboldt gives up here and soaks into the ground. The wagon people called what comes next the Forty-Mile Desert and counted the miles in dead oxen. [amber]It is sixty miles by rail, and the boiler drinks from your tank car for all of them.[/amber]"),

@@ -114,7 +114,8 @@ enum RailSkin {
             distanceUnit: "miles",
             distance: { formatNumber(Double($0)) },
             meters: ("Running gear", "Engine"),
-            clock: ("Contract", left > 0 ? "\(span(left)) left" : left == 0 ? "due now" : "\(span(-left)) late"),
+            // Late from the turn the engine calls it late, as the note and the score have it.
+            clock: ("Contract", left > 0 ? "\(span(left)) left" : left == 0 ? "late" : "\(span(-left)) late"),
             cash: "Cash",
             currency: "$",
             storeNames: [.clothes: "Blankets"],

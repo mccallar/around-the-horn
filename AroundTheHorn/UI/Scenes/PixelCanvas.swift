@@ -89,6 +89,17 @@ struct PixelCanvas {
         ctx.stroke(path, with: .color(color), lineWidth: scale)
     }
 
+    /// The body font's advance, as a share of its size: VT323 is monospaced.
+    static let advance = 0.4
+
+    /// How wide `s` is in the body font at `size`, in logical pixels: measured where
+    /// there is something to draw on, counted by the font's advance where there is not.
+    func width(_ s: String, size: Double) -> Double {
+        guard let ctx else { return Double(s.count) * size * Self.advance }
+        let text = ctx.resolve(Text(s).font(.custom(Theme.bodyFont, fixedSize: size * scale)))
+        return Double(text.measure(in: CGSize(width: CGFloat.greatestFiniteMagnitude, height: .greatestFiniteMagnitude)).width / scale)
+    }
+
     /// Words in the body font, `size` logical pixels tall, standing on (x, y).
     func text(_ s: String, x: Double, y: Double, size: Double, _ color: Color) {
         tally.marks += 1

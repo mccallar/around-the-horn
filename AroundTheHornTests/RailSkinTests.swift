@@ -71,7 +71,7 @@ final class RailSkinTests: XCTestCase {
         XCTAssertEqual(clock(0), "12 days left")
         XCTAssertEqual(clock(30), "7 days left")
         XCTAssertEqual(clock(71), "4 hours left")
-        XCTAssertEqual(clock(72), "due now")
+        XCTAssertEqual(clock(72), "late")
         XCTAssertEqual(clock(73), "4 hours late")
         XCTAssertEqual(clock(90), "3 days late")
 
@@ -79,6 +79,7 @@ final class RailSkinTests: XCTestCase {
         for (day, late) in [(40, false), (71, false), (72, true), (80, true)] {
             g.day = day
             let w = skin.words(g)
+            XCTAssertEqual(w.clock?.value.hasSuffix("late"), late, "day \(day): the status row and the note agree")
             XCTAssertEqual(w.suppliesNote.contains("the freight is late"), late, "day \(day)")
             XCTAssertEqual(w.suppliesNote.contains("left on the contract"), !late, "day \(day)")
             XCTAssertEqual(w.arrivalBody.contains("The freight is on time."), !late, "day \(day)")
@@ -279,20 +280,69 @@ final class RailSkinTests: XCTestCase {
         return out
     }
 
+    /// Every sentence the road's engine can write, read from its source: each string
+    /// literal, with the code inside its interpolations taken out. The engine is not the
+    /// skin, but the player reads both in the same box.
+    func engineSaid() throws -> [String] {
+        let dir = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+            .appendingPathComponent("HornEngine/Journeys/Rail")
+        let files = try fm.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil).filter { $0.pathExtension == "swift" }
+        XCTAssertGreaterThanOrEqual(files.count, 4, "the road's engine is in \(dir.path)")
+        let literal = try NSRegularExpression(pattern: #""((?:[^"\\\n]|\\.)*)""#)
+        let code = try NSRegularExpression(pattern: #"\\\((?:[^()]|\([^()]*\))*\)"#)
+        var out: [String] = []
+        for file in files {
+            for line in try String(contentsOf: file, encoding: .utf8).split(separator: "\n").map(String.init)
+            where !line.trimmingCharacters(in: .whitespaces).hasPrefix("//") {
+                for m in literal.matches(in: line, range: NSRange(line.startIndex..., in: line)) {
+                    let s = String(line[Range(m.range(at: 1), in: line)!])
+                    out.append(code.stringByReplacingMatches(in: s, range: NSRange(s.startIndex..., in: s), withTemplate: ""))
+                }
+            }
+        }
+        // And what it says through the shell's own sentences.
+        out += rail.items.flatMap { it in [1, 2].map { rail.describe(.item(it.key), Double(it.per * $0)) } }
+        return out
+    }
+
     func testNothingOnTheRoadIsSaidInASailorsWords() throws {
         let said = everythingSaid()
         XCTAssertGreaterThan(Set(said).count, 150, "the walk found the words")
+        // A landsman may still reach for a ship to say what a trestle feels like.
+        let figures = ["like a ship at a dock", "I'd fish for it"]
+        let engine = try engineSaid().map { s in figures.reduce(s) { $0.replacingOccurrences(of: $1, with: "") } }
+        XCTAssertGreaterThan(Set(engine).count, 300, "the source was read")
         let sea = try NSRegularExpression(
             pattern: #"\b(ships?|shipyard|sail(s|ed|ing)?|captain|seas?|ocean|nm|nautical|knots?|anchor(s|ed)?|harpoons?|"#
                 + #"fish(ing|ed)?|voyages?|hull|masts?|deck|harbou?r|ports?|scurvy|citrus|limes?|leagues?)\b"#,
             options: [.caseInsensitive])
-        for s in Set(said) {
+        for s in Set(said + engine) {
             let m = sea.firstMatch(in: s, range: NSRange(s.startIndex..., in: s))
             XCTAssertNil(m, "a sailor's word in “\(s)”")
         }
         // The same sieve does catch a ship: 1849's words are full of them.
         let old = strings(Horn1849Skin.skin.words(Horn1849Skin.skin.debug.start(3, 0))).joined(separator: "\n")
         XCTAssertNotNil(sea.firstMatch(in: old, range: NSRange(old.startIndex..., in: old)))
+    }
+
+    /// What a trader offers is said once per unit, and the departure has one full stop.
+    func testTradesAndTheDepartureReadRight() {
+        XCTAssertEqual(rail.describe(.item(.meds), 3), "3 medicine kits")
+        XCTAssertEqual(rail.describe(.item(.clothes), 1), "1 wool blanket")
+        XCTAssertEqual(rail.describe(.item(.clothes), 2), "2 wool blankets")
+        XCTAssertEqual(rail.describe(.item(.fuel), 30), "3 cords of firewood")
+        XCTAssertEqual(rail.describe(.item(.sailcloth), 1), "1 set of boiler fittings")
+        for it in rail.items {
+            let said = rail.describe(.item(it.key), Double(it.per * 2))
+            XCTAssertEqual(said.components(separatedBy: it.unit).count, 2, "“\(it.unit)” once in “\(said)”")
+        }
+        var g = nearing("northplatte")
+        for day in 0..<6 {
+            g.day = day
+            let depart = rail.text.depart(g)
+            XCTAssertFalse(depart.contains(".."), depart)
+            has(depart, g.dateText)
+        }
     }
 
     // MARK: The picture
@@ -330,14 +380,22 @@ final class RailSkinTests: XCTestCase {
         g.sails = 100
         let plain = picture(frame(g))
 
-        // Dale Creek: a few miles of trestle inside Sherman Hill, and the label says so.
-        var hill = g, bridge = g
+        // Dale Creek: the trestle inside Sherman Hill once the train has reached it, and
+        // the label says so; not on the way there, with the stop still ahead.
+        let dale = rail.stop("dalecreek")!
+        var hill = g, bridge = g, approach = g
         hill.mile = 565
-        bridge.mile = rail.stop("dalecreek")!.mile - 3
+        hill.stopIndex = stopIndex("dalecreek")
+        bridge.mile = dale.mile
+        bridge.stopIndex = stopIndex("dalecreek")
+        approach.mile = dale.mile - 3
+        approach.stopIndex = stopIndex("cheyenne")
         XCTAssertEqual(hill.region.id, bridge.region.id)
+        XCTAssertEqual(approach.region.id, bridge.region.id)
         XCTAssertNotEqual(picture(frame(hill)), picture(frame(bridge)))
         has(skin.scene.label(frame(bridge)), "Dale Creek trestle")
         XCTAssertFalse(skin.scene.label(frame(hill)).contains("trestle"))
+        XCTAssertFalse(skin.scene.label(frame(approach)).contains("trestle"), "not before the stop")
 
         // A yard at a stop.
         var yard = g
@@ -384,8 +442,55 @@ final class RailSkinTests: XCTestCase {
         XCTAssertEqual(chart.footer(g), "281 of 1,776 miles covered. 1,495 to go. The ringed stops have a yard.")
         XCTAssertEqual(chart.label(g), "Map of the railroad from Omaha to Sacramento. You are in \(RailChart.place(g)).")
         XCTAssertFalse(RailChart.place(g).hasPrefix("The "), "mid-sentence")
-        // A ring for every yard.
-        XCTAssertEqual(rail.stops.filter { $0.type == .port }.count, rail.ports.count)
+        // A ring for every yard: four strokes each, and the two ends named.
+        let yards = rail.stops.filter { $0.type == .port }
+        XCTAssertEqual(yards.count, rail.ports.count)
+        let rings = PixelCanvas(w: chart.w, h: chart.h)
+        RailChart.names(rings)
+        XCTAssertEqual(rings.tally.marks, yards.count * 4 + 2)
+        for stop in yards {
+            let at = road.first { Int($0.2) == stop.mile }!
+            let q = RailChart.project((at.0, at.1))
+            XCTAssertTrue(rings.tally.bounds?.contains(CGPoint(x: q.x, y: q.y)) ?? false, "\(stop.id) has no ring")
+        }
+    }
+
+    /// Where the road is at `mile`, between the map's points.
+    func onTheRoad(_ mile: Double) -> RailChart.Point {
+        let road = RailChart.road
+        let i = road.firstIndex { $0.2 >= mile }!
+        guard i > 0 else { return (road[0].0, road[0].1) }
+        let a = road[i - 1], b = road[i], t = (mile - a.2) / (b.2 - a.2)
+        return (a.0 + (b.0 - a.0) * t, a.1 + (b.1 - a.1) * t)
+    }
+
+    /// The stippled deserts are where the boiler drinks from the tank car, and the road
+    /// keeps to the shore of the Salt Lake.
+    func testTheMapsDesertsAreTheDryCountry() {
+        func inADesert(_ p: RailChart.Point) -> Bool {
+            RailChart.deserts.contains { (p.lon >= $0.0 && p.lon <= $0.1) && (p.lat >= $0.2 && p.lat <= $0.3) }
+        }
+        var from = 0
+        for reg in rail.regions {
+            // A couple of miles' grace at each end, where a stop stands on the line.
+            for mile in stride(from: from + 3, through: reg.to - 3, by: 1) {
+                XCTAssertEqual(inADesert(onTheRoad(Double(mile))), reg.has("dry"),
+                               "mile \(mile), in \(reg.name), on the map")
+            }
+            from = reg.to
+        }
+        // Inside the lake by the even-odd rule, a step at a time along the road.
+        func inTheLake(_ p: RailChart.Point) -> Bool {
+            let lake = RailChart.saltLake
+            var inside = false
+            for (a, b) in zip(lake, Array(lake.dropFirst()) + [lake[0]]) where (a.lat > p.lat) != (b.lat > p.lat) {
+                if p.lon < a.lon + (p.lat - a.lat) / (b.lat - a.lat) * (b.lon - a.lon) { inside.toggle() }
+            }
+            return inside
+        }
+        for mile in stride(from: 0.0, through: Double(rail.totalMiles), by: 0.5) {
+            XCTAssertFalse(inTheLake(onTheRoad(mile)), "mile \(mile) is in the Salt Lake")
+        }
     }
 
     // MARK: Driftwood
@@ -410,6 +515,19 @@ final class RailSkinTests: XCTestCase {
         XCTAssertTrue(forage.field.oneWay)
         XCTAssertGreaterThan(forage.field.origin.y, forage.field.h * 0.75)
         XCTAssertEqual(forage.throwsLabel, "Casts")
+
+        // The longest a pop can be stays on the field, wherever the hit; where it fits it
+        // stands where it always did, just left of the hit.
+        let px = PixelCanvas(w: forage.field.w, h: forage.field.h)
+        for wood in rail.quarry {
+            let pop = forage.pop(reward.count(rail.role(.whaler).catchLimit), wood)
+            let width = px.width(pop, size: 8)
+            for hit in stride(from: 0.0, through: forage.field.w, by: 2) {
+                let x = FishingView.popX(hit, width: width, field: forage.field.w)
+                XCTAssertTrue(x >= 0 && x + width <= forage.field.w, "“\(pop)” at \(hit) runs off the field")
+            }
+        }
+        XCTAssertEqual(FishingView.popX(100, width: 40, field: 160), 94)
         XCTAssertEqual(forage.caughtLabel, "Hauled")
     }
 
@@ -422,14 +540,46 @@ final class RailSkinTests: XCTestCase {
     }
 
     /// Answers whatever the road raises, first open option each time, until it ends.
-    func playOut(_ c: GameController, maxSteps: Int = 5_000) -> String {
+    /// With `restock`, a little more care: wood, water, food and spares at every yard
+    /// it can afford, the roundhouse when the train is worn, and a repair on the road
+    /// when the engine is failing.
+    func playOut(_ c: GameController, maxSteps: Int = 5_000, restock: Bool = false) -> String {
         for _ in 0..<maxSteps {
             switch c.screen {
-            case .travel: c.tick()
+            case .travel:
+                let g = c.game!
+                if restock && (g.sails < 40 || g.hull < 40) && (g.sailcloth >= 1 || g.timber >= 1) {
+                    c.heaveTo()
+                    if g.sails < 40 && g.sailcloth >= 1 { c.mendSails() } else if g.timber >= 1 { c.patchHull() }
+                    continue
+                }
+                c.tick()
+            case .repairs, .shipyard: c.backToMenu()
             case .message(_, _, let then): then()
             case .choice(let e): c.choose(e, option: e.options.firstIndex(where: \.enabled)!)
             case .burial(let id, let cause): c.bury(crewID: id, cause: cause, epitaph: "")
-            case .portMenu, .seaMenu: c.startTravel()
+            case .portMenu:
+                if restock {
+                    c.run { e in
+                        let wood = max(0, 16 - Int(e.state.fuel / 10))
+                        let water = max(0, (1200 - Int(e.state.water)) / 100)
+                        let food = max(0, (300 - Int(e.state.food)) / 25)
+                        _ = e.buy([.fuel: wood, .water: water, .food: food]) || e.buy([.fuel: wood]) || e.buy([.fuel: wood / 2])
+                        if e.state.sailcloth < 2 { _ = e.buy([.sailcloth: 1]) }
+                        if e.state.timber < 2 { _ = e.buy([.timber: 1]) }
+                    }
+                    let g = c.game!
+                    if g.hull < 70 && c.read({ $0.canRepairHullAtYard }) {
+                        c.repairHullAtYard()
+                        continue
+                    }
+                    if g.sails < 70 && c.read({ $0.canRecutSailsAtYard }) {
+                        c.recutSailsAtYard()
+                        continue
+                    }
+                }
+                c.startTravel()
+            case .seaMenu: c.startTravel()
             case .finale: return "finale"
             case .gameOver: return "gameover"
             default:
@@ -567,6 +717,8 @@ final class RailSkinTests: XCTestCase {
         guard case .seaMenu = c.screen else { return XCTFail("\(c.screen) after \(said)") }
         XCTAssertNotNil(p.loadSave(rail.id), "one turn in hand")
         c.rest(days: 1)
+        // Whatever else the last turn brought (a fever, a kit opened) comes first.
+        _ = settle(c)
         guard case .gameOver(let title, let body) = c.screen else { return XCTFail("\(c.screen)") }
         XCTAssertEqual(title, "The contract is forfeit.")
         has(body, "Sixteen days out of Omaha")
@@ -599,9 +751,11 @@ final class RailSkinTests: XCTestCase {
     }
 
     /// A whole run from the title card, the way a player's taps would make it: the
-    /// store at Omaha, the road, and whichever ending the dice bring.
+    /// store at Omaha, the road, wood and water bought at every yard, and whichever
+    /// ending the dice bring. The dice are seeded, so the runs are always the same ones,
+    /// and Sacramento is among the endings.
     func testAWholeRunFromTheTitleCardReachesAnEnding() {
-        var endings: Set<String> = []
+        var endings: [String] = []
         for round in 0..<4 {
             let c = controller()
             c.chooseJourney(rail.id)
@@ -609,6 +763,7 @@ final class RailSkinTests: XCTestCase {
             c.chooseRole(Role.allCases[round % Role.allCases.count])
             c.setNames(ship: "", captain: "Ira", crew: ["", "", "", ""])
             c.chooseDeparture(year: 1869, month: 9)
+            c.run { $0.rng = SeededRNG(seed: UInt64(round + 1)) }
             XCTAssertTrue(rail.vesselNames.contains(c.game!.ship))
             c.enterFirstShop()
             guard case .shop(let done) = c.screen else { return XCTFail("\(c.screen)") }
@@ -616,11 +771,12 @@ final class RailSkinTests: XCTestCase {
             done()
             guard case .depart = c.screen else { return XCTFail("\(c.screen)") }
             c.startTravel()
-            let end = playOut(c, maxSteps: 20_000)
-            endings.insert(end)
+            let end = playOut(c, maxSteps: 20_000, restock: true)
+            endings.append(end)
             XCTAssertNil(p.loadSave(rail.id), "no save after the run ends")
             XCTAssertFalse(c.traveling)
         }
-        XCTAssertTrue(endings.isSubset(of: ["finale", "gameover"]), "\(endings)")
+        XCTAssertTrue(Set(endings).isSubset(of: ["finale", "gameover"]), "\(endings)")
+        XCTAssertTrue(endings.contains("finale"), "a run can reach Sacramento: \(endings)")
     }
 }

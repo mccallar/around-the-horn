@@ -155,8 +155,8 @@ final class RailScreenshotUITests: ScreenshotWalk {
     func testTheTrestleAndTheSummit() {
         relaunch(["-HornDebugStart", "dalecreek", "-HornTickSeconds", "30"])
         shot("38-dale-creek-menu")
-        tap("Continue down the line")
-        XCTAssertTrue(app.buttons["Stop the train & take stock"].waitForExistence(timeout: 5))
+        // On the trestle only once the train has reached it.
+        relaunch(["-HornDebugStart", "dalecreek", "-HornDebugAtStop", "YES", "-HornTickSeconds", "30"])
         shot("39-dale-creek")
 
         relaunch(["-HornDebugStart", "donner", "-HornTickSeconds", "1"])

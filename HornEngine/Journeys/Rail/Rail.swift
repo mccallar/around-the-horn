@@ -108,7 +108,7 @@ public final class Rail: Journey {
         wrecked: { "The [i]\($0)[/i] is off the rails." },
         wreckedBody: "Something under the train finally let go. The engine is on her side in the ditch, the cars are stacked behind her like dropped cards, and everybody is alive to stand and look at it. The freight will go west on another train.",
         depart: { s in
-            "The [i]\(TextMarkup.escape(s.ship))[/i] whistles off from the Omaha yard at \(s.dateText). The freight is due in Sacramento in twelve days, and the consignee will not wait past sixteen. Ahead: 1,776 miles of track so new the ties still smell of sap."
+            "The [i]\(TextMarkup.escape(s.ship))[/i] whistles off from the Omaha yard, \(s.dateText), with the freight due in Sacramento in twelve days and a consignee who will not wait past sixteen. Ahead: 1,776 miles of track so new the ties still smell of sap."
         },
         noProvisions: "You can't pull out with nothing to eat aboard! The outfitter points you back at the provisions.",
         rested: { turns, h in

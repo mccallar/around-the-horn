@@ -252,6 +252,16 @@ struct FishingView: View {
         skin.backdrop(px, now)
         for f in m.fish { skin.quarry(px, f) }
         if let h = m.harpoon { skin.thrown(px, h) }
-        for p in m.pops { px.text(p.text, x: p.x - 6, y: p.y, size: 8, Theme.amber.opacity(p.t)) }
+        for p in m.pops {
+            let x = popX(p.x, width: px.width(p.text, size: 8), field: px.w)
+            px.text(p.text, x: x, y: p.y, size: 8, Theme.amber.opacity(p.t))
+        }
+    }
+
+    /// Where a pop `width` wide starts, for a hit at `x`: just left of the hit, or as
+    /// far left as it must go to stay inside the field. A long one ("+0.8 cords,
+    /// cottonwood limb") from a hit near the right bank would otherwise run off it.
+    static func popX(_ x: Double, width: Double, field: Double) -> Double {
+        max(0, min(x - 6, field - 1 - width))
     }
 }

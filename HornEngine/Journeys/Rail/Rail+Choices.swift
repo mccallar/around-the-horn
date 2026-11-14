@@ -73,7 +73,7 @@ extension Rail {
             if e.chance(0.3) {
                 let d = e.ri(3, 7)
                 e.state.hull = max(0, e.state.hull - Double(d))
-                return [.message("The herd will not be hurried. You inch through with the whistle going, and an old bull takes the opportunity to scratch himself on the baggage car until the door comes off. [red](Running gear −\(d)%)[/red]")]
+                return [.message("The herd will not be hurried. You inch through with the whistle going, and an old bull takes the opportunity to scratch himself on the first boxcar until her door comes off its track. [red](Running gear −\(d)%)[/red]")]
             }
             return [.message("At the first long blast the herd parts around the engine like a river around a rock, and closes again behind the caboose.")]
 

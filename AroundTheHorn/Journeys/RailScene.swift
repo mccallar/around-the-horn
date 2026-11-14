@@ -148,10 +148,15 @@ enum RailScene {
 
     static func isNight(_ hour: Int) -> Bool { hour >= 20 || hour < 5 }
 
-    /// The Dale Creek trestle, for the few miles either side of it.
+    /// Dale Creek, where the road reaches it.
+    static let daleCreek = RailSkin.journey.stop("dalecreek")!
+
+    /// On the Dale Creek trestle: from the stop, where the crossing is told, to the far
+    /// end of the gorge. Not on the way to it: the bridge is the stop's, and the train
+    /// is not on it until it has got there.
     static func onTrestle(_ f: SceneFrame) -> Bool {
         guard let g = f.state, !f.atPort else { return false }
-        return (540...556).contains(g.mile)
+        return g.currentStop.id == daleCreek.id && (daleCreek.mile...daleCreek.mile + 3).contains(g.mile)
     }
 
     static func draw(_ px: PixelCanvas, _ f: SceneFrame) {

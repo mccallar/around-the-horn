@@ -49,7 +49,7 @@ enum RailChart {
     ]
 
     static let saltLake: [Point] = [
-        (-112.9, 41.7), (-112.2, 41.6), (-112.0, 41.05), (-112.3, 40.7), (-112.8, 40.9), (-113.0, 41.3),
+        (-112.9, 41.58), (-112.45, 41.45), (-112.0, 41.05), (-112.3, 40.7), (-112.8, 40.9), (-113.0, 41.3),
     ]
 
     static let rivers: [[Point]] = [
@@ -90,11 +90,14 @@ enum RailChart {
         (-114.2, 40.2),
     ]
 
-    /// The three deserts the boiler cannot drink in: [west, east, south, north].
+    /// The three deserts the boiler cannot drink in: [west, east, south, north]. East and
+    /// west are where the road enters and leaves each dry region (Rawlins to Green River,
+    /// Ogden to past Promontory, the Sink to the Truckee), so the stipple is under the
+    /// marker exactly while the tank car is being drunk from.
     static let deserts: [(Double, Double, Double, Double, UInt32)] = [
-        (-109.3, -107.5, 41.35, 42.3, 0xB5673F),
-        (-114.7, -113.0, 40.1, 41.6, 0xE2DFD2),
-        (-119.5, -118.7, 39.55, 40.0, 0xD2C8A8),
+        (-109.46, -107.25, 41.35, 42.3, 0xB5673F),
+        (-115.2, -111.98, 40.3, 41.9, 0xE2DFD2),
+        (-119.39, -118.62, 39.55, 40.0, 0xD2C8A8),
     ]
 
     static func background(_ px: PixelCanvas) {

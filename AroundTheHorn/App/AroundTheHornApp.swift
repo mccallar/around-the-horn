@@ -15,7 +15,8 @@ struct AroundTheHornApp: App {
         }
         #if DEBUG
         if let stop = UserDefaults.standard.string(forKey: "HornDebugStart") {
-            c.debugStart(at: stop, month: UserDefaults.standard.integer(forKey: "HornDebugMonth"))
+            c.debugStart(at: stop, month: UserDefaults.standard.integer(forKey: "HornDebugMonth"),
+                         atStop: UserDefaults.standard.bool(forKey: "HornDebugAtStop"))
         }
         #endif
         return c
