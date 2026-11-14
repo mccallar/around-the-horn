@@ -59,6 +59,8 @@ Three gates prove 1849 is unchanged and are never re-recorded: `PrototypeParityT
 | `resolve(_:_:_:_:)` | nothing | always: answers to `GameEngine.ask(key, args, …)` |
 | `forageRefusal(_:)` | no gear; rough weather | foraging needs a place or a state |
 | `tradeValue`, `roundTrade`, `describe` | from the item table | odd units |
+| `tradeKeys` | every stocked item | a good nobody trades (the balloon's water) |
+| `fitOffer(_:_:)` | the offer as drawn | an offer must fit the room left (the balloon cuts it, and its price) |
 | `score(_:)`, `rank(_:)` | five generic lines; `Rules.rankCuts` | a bonus of its own |
 
 ### Rules of authorship

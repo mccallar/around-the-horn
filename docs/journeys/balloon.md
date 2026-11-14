@@ -224,8 +224,14 @@ Nine items, Marrakech base prices. Port price = base × port mult × item mod (1
 | 8 | `line` | Fishing line | spools (spool) | 1 | **20** | $30 | 30 | Line and lures for trailing from the hatch. Each spool is 20 casts. | forage (state stores casts) |
 | 9 | `fuel` | Propane | gal (gal) | 50 | 1 | $0.45 / gal | **1,200** | Burns 12–16 gallons a watch, more in the cold. Run out and you sink. | fuel |
 
-Trade values (the 1849 `VAL`, per stored unit): food 4.2, water 0.6, scrubbers 25,
+Trade values (the 1849 `VAL`, per stored unit): food 4.2, scrubbers 25,
 meds 100, suits 80, ballast 60, spares 140, line 1.5 per cast, fuel 0.55, money 1.
+**Water is not traded** (review, 2026-11-13): the jugs hold $150 of it at the 0.6 the
+first draft gave it, under the $250 a trader wants, and the smallest trade ($200) is 330
+gallons, more than the jugs hold. **No offer gives more than there is room for**: one that
+would is cut to the room left, in whole trading units (10 lbs or gallons, a spool, a
+kit), and what is wanted for it by the same share (`Journey.fitOffer`); not one unit of
+room, no offer.
 
 `describe` phrases: "N lbs of rations", "N gallons of water", "N scrubber canister(s)",
 "N medical kit(s)", "N down suit(s)", "N sack(s) of ballast", "N burner kit(s)",
@@ -311,7 +317,7 @@ Talk:
 ### Saga
 Arrival: "You come down on the wide gravel bed of the Kase River, where the city holds its balloon fiesta every autumn. A crowd is already lining the bank, waving paper flags."
 Talk:
-1. A fiesta organiser: "From here the jet runs straight out over the ocean at a hundred knots and more. The next land is America. There is nothing in between."
+1. A fiesta organiser: "From here the jet runs straight out over the ocean, faster than any ship. The next land is America. There is nothing in between."
 2. A balloon maker: "Last winter a team left here with half-full tanks. A fishing boat found them near Midway, sitting on their capsule. Fill your tanks."
 3. A doctor at the field: "The winter flu is everywhere this month. Wash your hands, and don't linger."
 
@@ -375,7 +381,8 @@ Weather weights are **ordered lists** (1849 rule: order is data).
 | 13,500 | The American Southwest | cool | jet | steady 30, jet 22, light 14, shear 12, dust 10, cloud 8, stalled 4 |
 | 15,000 | The Great Plains | cold | jet | jet 26, steady 24, shear 16, cloud 12, snow 10, storm 6, light 6 |
 | 17,350 | The North Atlantic | cool | sea, atlantic | steady 26, jet 22, cloud 16, shear 16, storm 8, snow 6, light 6 |
-| ∞ | The Azores & home | warm | sea | steady 34, light 18, jet 14, cloud 14, sun 8, stalled 8, shear 4 |
+| 18,225 | Past the Azores | warm | sea | steady 34, light 18, jet 14, cloud 14, sun 8, stalled 8, shear 4 |
+| ∞ | Morocco & home | warm | — | steady 34, light 18, jet 14, sun 12, dust 8, stalled 8, shear 6 |
 
 **Southern track** (replaces nm 7,800–12,599 when `passage == .south`; the northern
 track is the default list above, as the Horn is in 1849):
@@ -390,12 +397,15 @@ the Gulf of Oman (56.6°–62° E); at 3,800 it reaches the Makran coast near Gw
 to Karachi (4,070) and crosses Sindh and the Thar to Jodhpur. So only 3,500–3,800 is sea:
 the old single "Arabian Sea" region (to 4,400, flagged `sea`) let a player fish over the
 desert, meet a container ship there and "come down in the sea" over Rajasthan. The Indus &
-the Thar takes Arabia's weights (dry, sunny and dusty in winter) at `warm`.
+the Thar takes Arabia's weights (dry, sunny and dusty in winter) at `warm`. The same holds
+at the other end: the route reaches the Moroccan coast between Safi and Essaouira at about
+18,225 nm, and the finish line is 75 nm inland, so the last stretch is land (review,
+2026-11-13).
 
 Expected weather speed factor (Σ weight × speed ÷ Σ weight, before seasons): Sahara 0.93,
 Arabia 0.84, Gulf of Oman 0.84, Indus & Thar 0.84, N. India 0.98, Himalaya & China 1.07,
 East China Sea 1.02, North Pacific 1.05, NE Pacific 1.04, Southwest 0.99, Plains 1.04,
-N. Atlantic 1.01, Azores & home 0.87; southern track 0.88 and 0.86.
+N. Atlantic 1.01, Past the Azores 0.87, Morocco & home 0.86; southern track 0.88 and 0.86.
 
 The southern track is longer than marked (§1), so its winds are slower: over the ocean
 (7,800–12,600 nm) its expected speed is 0.869 against the north's 1.046, a ratio of 0.83,
@@ -686,7 +696,7 @@ among the eligible, as 1849. `rough` = shear or storm.
 | 12 | 2 | cold or freezing region, not yet seen | **choice: the mascot** |
 | 13 | 5 | warm or hot region, or a `storms` region | **choice: thunderheads** |
 | 14 | 4 | cold or freezing region, weather snow or cloud | **choice: ice on the envelope** |
-| 15 | 2 | not a `sea` region, not rough | **choice: the camera plane** |
+| 15 | 2 | not a `sea` region, not rough, not at The jet | **choice: the camera plane** |
 | 16 | 2 | not rough | flavour (a quiet watch) |
 | 17 | 1.5 | rough | forceFair = 2 (`steady` for two watches) |
 
@@ -719,7 +729,7 @@ Options: "Drop down to meet her (1 watch)" / "Wave and fly on".
   - 75%: `makeOffer(excluding: [fuel, ballast])` → trade choice with intro "Her bosun ties a sack to your trail line and shouts up what's in it." If no offer: "She has nothing you need. Her cook sends up a bag of oranges anyway, and the football scores."
     **The freighter never trades propane or ballast**, either way: an offer's 250–700
     dollars of value would be 450–1,400 gallons of propane or 4–12 sacks of sand, tons on
-    a trail line. Both are left out of `wantable` and of the `give` candidates before the
+    a trail line. (Water, heavier still, is not traded anywhere: §5.) Both are left out of `wantable` and of the `give` candidates before the
     picks are drawn (so the draw order is 1849's: same picks, smaller lists). The fields'
     traders (§16.3) keep all nine items; trucks can carry anything.
   - 25%: burners −10: "The line snags on her radio mast as she rolls. It parts before it can drag you down, but the jolt rattles every burner. [red](Burners −10%)[/red]"
@@ -743,7 +753,7 @@ Options: "Climb above the cloud to melt it (40 gal)" (enabled only if propane �
 - Climb: propane −40: "You burn hard and climb out of the cloud into clear, dry air. Within the hour the ice is sliding off the envelope in sheets and tumbling away below."
 - Ride: lift −ri(5, 15): "You ride it out. By the time the cloud thins, the balloon is carrying a ton of ice and sagging like a wet tent. [red](Lift −N%)[/red]" Check down.
 
-**15 — The camera plane** (new).
+**15 — The camera plane** (new). Not at The jet's altitude, which no small plane reaches.
 Prompt: "A small plane full of television cameras climbs up to circle you. Its pilot comes on the radio: closer, they want closer."
 Options: "Wave them in close" / "Wave them off".
 - Close, 50%: money += 50 × ri(6, 16) ($300–$800): "The pictures go out on the news around the world. Your sponsors are delighted, and wire you a bonus. [green](+$N)[/green]"
@@ -770,16 +780,16 @@ and nobody can board a balloon.)
 
 **Special — the Himalaya (5,050 nm):**
 Prompt: "You are passing the Himalaya."
-Detail: "The whole range stands up out of the haze to the north, a white wall two hundred miles long. Mission Control says the jet is running hard just over the top — if you can stand the cold."
-Options: "Climb over the range into the jet (35 gal)" (disabled if propane < 35) / "Stay south of the range".
-- Climb: propane −35; mile += 200, but never beyond `nextStop.mile − 1`; every living crew member hp −3, and each one without a down suit (index ≥ suits) a further −10; 25%: burners −10. Text: "You climb to thirty thousand feet and the jet takes you like a leaf in a gutter. For an hour Everest stands just below the porthole, close enough to see the snow streaming off the summit. You've gained two hundred miles. The cold has gained on all of you. [red](Crew health falls.)[/red]" + if burners hit: " Ice forms in a burner valve on the way down. [red](Burners −10%)[/red]". Deaths are checked (1849 `deaths`).
+Detail: "The whole range stands up out of the haze to the north, a white wall two hundred miles long. Mission Control says the jet is running hard right over the summits — if you can stand the cold."
+Options: "Climb over the range into the jet (35 gal)", or at The jet already "Hold the jet over the range (35 gal)" (disabled if propane < 35) / "Stay south of the range".
+- Climb: propane −35; mile += 200, but never beyond `nextStop.mile − 1`; every living crew member hp −3, and each one without a down suit (index ≥ suits) a further −10; 25%: burners −10. Text: "You burn hard and climb up over the summits into the jet, and it takes you like a leaf in a gutter." (at The jet: "You burn hard to hold your height over the summits, and the jet takes you like a leaf in a gutter.") + " For an hour Everest stands just below the porthole, close enough to see the snow streaming off the summit. You've gained two hundred miles. The cold has gained on all of you. [red](Crew health falls.)[/red]" + if burners hit: " Ice forms in a burner valve over the range. [red](Burners −10%)[/red]". Deaths are checked (1849 `deaths`).
 - Stay: "You keep to the warm side of the mountains. The peaks slide past to the north, one white summit after another."
 
 **Fork — the edge of the Pacific (7,800 nm):**
 Prompt: "You are leaving the coast of Japan. Ahead lies the Pacific: five thousand miles with nowhere to land." + if month is November, March or April: " [red]The jet is weak this time of year.[/red]"
 Detail: "You may ride the [amber]northern track[/amber] in the core of the jet — fast, and bitter cold — or drop south to the [amber]southern track[/amber], warmer and slower, where the thunderstorms grow."
 Options: "Ride the northern track" / "Take the southern track" / "Ask Mission Control's advice".
-- North: `passage = .north` (default regions): "You climb into the jet, and the Pacific starts to slide by at a hundred knots. Everyone puts on a second pair of socks."
+- North: `passage = .north` (default regions): "You climb into the jet, and the Pacific starts to slide by faster than any ship could cross it. Everyone puts on a second pair of socks."
 - South: `passage = .south` (southern regions for 7,800–12,599), then the guide offer.
 - Advice (message, then the fork again): "Mission Control's chief meteorologist comes on the radio: “The north is quicker if the jet holds, and it's brutal cold up there — nobody without a down suit should go. The south is warmer and slower, and it's thunderstorm country. If you go south and can spare the money, buy the storm plots.”"
 
@@ -813,8 +823,8 @@ Options: "Hold a party (1 watch)" / "Keep to the watch schedule".
 
 **Special — the Azores (17,350 nm)** (the 1849 Galápagos):
 Prompt: "You are passing over the Azores."
-Detail: "Green volcanic islands in the middle of the Atlantic. A fishing boat out of Ponta Delgada has heard you on the radio, and offers to meet you off the coast with fresh water and bread if you'll come down to the wave tops."
-Options: "Drop down to meet her (2 watches)" / "Fly on".
+Detail: "Green volcanic islands in the middle of the Atlantic. A fishing boat out of Ponta Delgada has heard you on the radio, and offers to meet you off the coast with fresh water and bread if you'll come down to the wave tops." + in rough air (`shear`, `storm`): " [red]But the air is far too rough to come down that low today.[/red]"
+Options: "Drop down to meet her (2 watches)" (disabled in rough air, as fishing is) / "Fly on".
 - Drop: water += ri(20, 40), food += ri(10, 25), `noScrubbers = 0`, stale-air sickness cured for everyone; message "Her crew passes up water jugs, bread, cheese and oranges in a net on the end of your trail line. With the hatch open at sea level, the capsule fills with real air for the first time in days. (+W gallons of water, +F lbs of rations.)"; then 15%: a healthy living non-captain gets a broken arm (14–22): "NAME caught a hand in the line hauling the net up, and has a broken arm."; then two watches of `consume(.sea)` + `health(.sea)` **without** the weather roll (as 1849's Galápagos), propane at the loiter rate.
 - Fly on: nothing.
 
@@ -933,7 +943,8 @@ field props → balloon → rain → snow → dust → fog → lightning.
 | The American Southwest | `#B5754A` | `#D9A06F` | — |
 | The Great Plains | `#9C9A6A` (Dec–Feb: `#DDE4EA`) | `#C2BE8E` (Dec–Feb: `#B8C3CC`) | — |
 | The North Atlantic | `#1D4E7A` | `#E9F4FB` | — |
-| The Azores & home | `#1A4A78` | `#7FB8DE` | — |
+| Past the Azores | `#1A4A78` | `#7FB8DE` | — |
+| Morocco & home | `#C49A62` | `#E2BD86` | — |
 
 **On the field:** weather fair (`steady` sky), the field fill from y 46 to 80, the balloon
 standing on it (sprite at (50, 33)). Props, as rects (x, y, w, h), in this order:
@@ -1162,8 +1173,8 @@ Button "Enter the supply hangar". (`[b]` as in the 1849 list in `Copy.swift`.)
 
 **Launch** (burns 25 gal; `DATE` = `dateOnlyText`, §12.1): "The [i]SHIP[/i] lifts off from the launch field outside Marrakech at 0800 GMT on DATE. The crowd shrinks to a scatter of dots, and the Atlas rises white to the south. Ahead lie eighteen thousand miles of sky." Button "Climb away".
 
-**Relaunch refusal** (propane < 25 **and** money ≥ 50 × this field's propane price, §6): "You need at least 25 gallons of propane to relaunch. The ground crew points at the fuel truck."
-**Sponsor's top-up** (propane < 25 and money below that; once per landing; propane := 25, then the relaunch burns it): message "The ground-team chief looks at your gauges, then at your wallet, and waves the fuel truck over. “On the sponsor's account,” he says. “Just enough to get you off the ground. After that you're drifting.” [dim](+N gallons.)[/dim]" — then the relaunch note, then the out-of-propane warning (§12.2) on the first watch.
+**Relaunch refusal** (on the ground, propane < 25 **and** money ≥ 50 × this field's propane price, §6): "You need at least 25 gallons of propane to relaunch. The ground crew points at the fuel truck."
+**Sponsor's top-up** (propane < 25 and money below that; once per landing; propane := 25, then the relaunch burns it): message "The ground-team chief looks at your gauges, then at your wallet, and waves the fuel truck over. “On the sponsor's account,” he says. “Just enough to get you off the ground. After that you're drifting.” [dim](+N gallons.)[/dim]" (N to a tenth: "+0.7 gallons", "+1 gallon") — then the relaunch note, then the out-of-propane warning (§12.2) on the first watch.
 **Relaunch** note line: "Relaunched. The climb back to cruising height burned 25 gallons."
 
 ---
@@ -1171,7 +1182,7 @@ Button "Enter the supply hangar". (`[b]` as in the 1849 list in `Copy.swift`.)
 ## 17. Ending & scoring
 
 **Finale** (finish line):
-"Finish line! The [i]SHIP[/i] crosses eight degrees west, the meridian of Marrakech, at HHMM GMT on DATE — D days and H hours after you lifted off." (`DATE` = `dateOnlyText`, §12.1; HHMM is the watch's GMT time.)
+"Finish line! The [i]SHIP[/i] crosses eight degrees west, the meridian of Marrakech, at HHMM GMT on DATE — D days and H hours after you lifted off." (" and H hours" left out when H is 0; `DATE` = `dateOnlyText`, §12.1; HHMM is the watch's GMT time.)
 "At the next sunrise you come down on a stony plain outside the city, bounce twice, and stop. Children run out from a village to see what has fallen out of the sky." + (living > 1) "Your crew climbs out, stiff and blinking, and stands on the ground as if it might move." / (one left) "You climb out alone and stand on the ground as if it might move."
 Then the score table, rank, "Lost on the flight" list. Buttons "Fly again" / "See the top ten". After the top ten: "Thanks for flying." + "Fly again".
 
@@ -1181,7 +1192,7 @@ Then the score table, rank, "Lost on the flight" list. Buttons "Fly again" / "Se
 
 **Game over — the pilot dies** (title "You, NAME, have died of CAUSE." in every case):
 - aloft, with crew still alive: body "Your co-pilot brings the balloon down at the first safe place, and the ground team flies everyone home. The attempt is over."
-- aloft, with nobody else left alive: body "With nobody at the burners, the balloon drifts on alone until it settles, far from anywhere. A search plane finds it two days later. The attempt is over."
+- aloft, with nobody else left alive (or with health left: whoever the same watch takes is still marked alive when the pilot dies): body "With nobody at the burners, the balloon drifts on alone until it settles, far from anywhere. A search plane finds it two days later. The attempt is over."
 - on the ground at a field: body "The ground team packs up the balloon and flies everyone home. The attempt is over."
 
 Game-over footer: "DATE · N nautical miles flown, M short of the finish line." (N = `mile`,
@@ -1636,7 +1647,7 @@ so a journey that never meets it never draws.
 Engine files: `HornEngine/Journeys/Balloon/` (`Balloon.swift` rules and sentences,
 `BalloonData.swift` tables, `Balloon+Fields.swift` the six fields, `Balloon+Events.swift`
 the region rolls and the seventeen events, `Balloon+Choices.swift` set pieces and answers).
-Tests: `HornEngineTests/BalloonTests.swift` (30 rule tests, 4 balance tests). The title
+Tests: `HornEngineTests/BalloonTests.swift` (38 rule tests, 4 balance tests). The title
 card, setup, outfit, burial, status and chart copy (§2, §3, §12.1's labels, §15's game,
 §16, §19) belong to the skin, which is not built yet.
 
@@ -1663,8 +1674,12 @@ loitering; nothing on the ground; 25 a launch; dry → 40 nm base and −5 lift 
 `JourneyBot` with `BalloonTests.policy()`: the chocolate maker in the middle air and the
 other two in the jet while the crew's average health is 75+, the air is not freezing and
 the tanks are not dry (else the middle air); hot meals for the chocolate maker, half
-portions for the others; at every field, food and scrubbers for nm ÷ 90 + 12 watches,
-half again that in water, propane for as many watches at the altitude's rate, five suits,
+portions for the others; at every field, food, half again the table's water, propane at
+the altitude's rate and scrubbers, in that order, for nm ÷ (the altitude's speed × 0.6) +
+12 watches, where the altitude is the one last flown before landing: nm ÷ 90 + 12 in the
+middle air, but nm ÷ 111 + 12 in the jet, which is where a builder or bush pilot usually
+lands from after Marrakech (at Saga, for the 5,850 nm to Albuquerque, about 65 watches of
+food, scrubbers and propane at 16 gallons, not 77); then five suits,
 two each of medical kits, burner kits and ballast, and 60 casts of line for the two
 poorer roles; supplies first, then the riggers below 70% if affordable; ballast and
 burner kits aloft below 40%; fishing below 12 watches of food over the sea. North or south
@@ -1677,11 +1692,16 @@ Thirty flights a role from seed 500 (the test), then 180 a role over six seed se
 
 | Departure | Chocolate maker | Builder | Bush pilot | Median winning flight |
 |---|---|---|---|---|
-| November 1998 | 29/30 · 176/180 | 17/30 · 93/180 | 8/30 · 55/180 | 167 watches |
-| December 1998 | 30/30 · 180/180 | 25/30 · 131/180 | 15/30 · 90/180 | 162 |
-| **January 1999 (tested)** | **30/30 · 180/180 (100%)** | **25/30 · 131/180 (73%)** | **15/30 · 90/180 (50%)** | **162 (157–164)** |
-| February 1999 | 30/30 · 180/180 | 25/30 · 131/180 | 15/30 · 90/180 | 162 |
-| March 1999 | 23/30 · 146/180 | 10/30 · 57/180 | 4/30 · 39/180 | 179 |
+| November 1998 | 29/30 · 176/180 | 18/30 · 89/180 | 7/30 · 46/180 | 168 watches |
+| December 1998 | 30/30 · 180/180 | 24/30 · 126/180 | 16/30 · 86/180 | 160 |
+| **January 1999 (tested)** | **30/30 · 180/180 (100%)** | **24/30 · 126/180 (70%)** | **16/30 · 86/180 (48%)** | **160** |
+| February 1999 | 30/30 · 180/180 | 24/30 · 126/180 | 16/30 · 86/180 | 160 |
+| March 1999 | 23/30 · 146/180 | 12/30 · 63/180 | 2/30 · 28/180 | 181 |
+
+Measured again after the 2026-11-13 review fixes (offers cut to fit, no water trades, the
+Azores boat only in calm air, no camera plane at The jet, the Moroccan coast as land);
+the January rates fell from 131 and 90 of 180 to 126 and 86, inside the bands, so no
+number was re-tuned.
 
 December, January and February are identical, as §18.4 found: they share every seasonal
 rule and a flight ends before March.
@@ -1690,19 +1710,19 @@ Choices, January, 180 flights a role (chocolate maker / builder / bush pilot, me
 
 | Flown as | Wins | Median |
 |---|---|---|
-| the bot | 180 / 131 / 90 | 162 |
-| always the northern track | 180 / 135 / 88 | 157 |
-| always the southern track, forecasters by the $1,500 rule | 178 / 128 / 96 | 164 |
-| always the southern track, never the forecasters | 165 / 125 / 87 | 166 |
-| middle air all the way | 180 / 137 / 96 | 164 |
-| the jet all the way | 180 / 109 / 62 | 141 |
-| low and slow all the way | 175 / 65 / 21 | 216 |
-| never the riggers | 179 / 164 / 150 | 175 |
+| the bot | 180 / 126 / 86 | 160 |
+| always the northern track | 180 / 138 / 96 | 156 |
+| always the southern track, forecasters by the $1,500 rule | 178 / 127 / 90 | 164 |
+| always the southern track, never the forecasters | 165 / 122 / 80 | 165 |
+| middle air all the way | 180 / 137 / 98 | 164 |
+| the jet all the way | 180 / 105 / 67 | 140 |
+| low and slow all the way | 175 / 66 / 21 | 217 |
+| never the riggers | 179 / 163 / 157 | 175 |
 
-How the January losses end (180 a role): builder 36 down in the sea, 13 the pilot's death
-(hypothermia, exhaustion, an infected wound, frostbite, a fever, food poisoning,
-influenza); bush pilot 68 down in the sea, 1 down on land, 21 the pilot's death
-(exhaustion, influenza, hypothermia, an infected wound, altitude sickness, frostbite).
+How the January losses end (180 a role): builder 42 down in the sea, 12 the pilot's death
+(an infected wound, influenza, hypothermia, frostbite, exhaustion); bush pilot 73 down in
+the sea, 5 down on land, 17 the pilot's death (exhaustion, influenza, an infected wound,
+hypothermia, a fever, altitude sickness).
 Coming down in the sea is nearly always the Atlantic with dry tanks and no money left
 at Kitty Hawk, as §18.3 predicted.
 
@@ -1710,7 +1730,8 @@ The tests assert the January bands (85–100 / 60–90 / 35–70%) and a median 
 of 145–180 watches; that November is at least 10 points and March at least 30 points
 harder for the two poorer roles, and March at least 10 watches longer; that flying low
 all the way is at least 20 points worse for them; and that the losses of the two poorer
-roles end at least three ways.
+roles end at least three ways, at least one of them coming down and at least two of them
+the pilot's death by different causes.
 
 ### Departures from the spec, and why
 
@@ -1726,7 +1747,10 @@ roles end at least three ways.
    left crews dying of thirst on the southern track) and `choosePace` (§18.2's altitude rule). It flies one
    departure (January) rather than December–February by seed; it buys propane for the
    leg's watches at the altitude's rate rather than W × 15 + 65, and has no special 1,200 at
-   Saga (W is 77 there, which buys about 1,080).
+   Saga (W is 77 there, which buys about 1,080). It buys in the shared bot's order, food,
+   water, propane, scrubbers, not §18.2's propane first; and it works W out from the
+   altitude it last flew, so a crew landing from the jet stocks for nm ÷ 111 + 12 watches,
+   not nm ÷ 90 + 12. The bands above were measured with the bot as coded.
 3. **Propane** is built on the shared fuel rule. `noFuelSpeed` is 1; `adjustSpeed` records
    the tank at the start of the watch, sets the 40-nm drift when it is dry, and otherwise
    leaves the tank holding what makes the shared deduction come out at the altitude's
@@ -1765,12 +1789,31 @@ roles end at least three ways.
 13. **Skies:** jet streak `.breeze`, stalled `.still`, hot sun `.heat`, in cloud `.fog`,
     rough air `.gale`, snow `.snow`, thunderstorm `.storm`, dust `.dust`. Only the stalled
     air has a status note, as §9 gives only that one.
+14. **Trades fit the room** (review, 2026-11-13). A new shared hook, `Journey.fitOffer`,
+    has the last word on a drawn offer after every draw; its default returns the offer as
+    drawn, so 1849, rail and the airship trade as before. The balloon's cuts an offer that
+    gives more than there is room for down to the room left, in whole trading units, and
+    what is wanted by the same share (never more than first asked); no room for one unit,
+    no offer. Water is left out of `tradeKeys` altogether (§5), which also settles the
+    freighter: no ton of water comes up a trail line.
+15. **Morocco is land** (review, 2026-11-13): the last region, "The Azores & home", is
+    split at the coast, 18,225 nm, into "Past the Azores" (sea) and "Morocco & home" (no
+    tags), so nothing over Morocco fishes, meets the freighter or comes down in the sea.
+16. **Smaller review fixes, 2026-11-13:** `relaunchRefusal` is nil aloft (the app also
+    calls `setSail` to resume between fields); the sponsor's top-up counts gallons to a
+    tenth; when the pilot's death comes in a watch that also leaves everyone else at 0
+    health, nobody is left to land the balloon (the shared `deaths` stops at the pilot, so
+    `leaderDiedBody` asks who still has health); the finale leaves out "and 0 hours"; the
+    Azores boat needs calm air; the camera plane does not come at The jet; the Himalaya
+    set piece holds the jet rather than climbing into it when you are already there; and no
+    sentence promises a hundred knots (the fastest watch the tables allow is 308 nm, about
+    77 knots).
 
 ### Things worth knowing
 
 - **The riggers are a trap for a poor crew.** Ballast at $60 a sack gives 20 or 30 points
   of lift; the riggers charge $20–32 a point. A builder or bush pilot who never hires them
-  wins 91% and 83% of January flights; the bands above are measured with the spec's bot,
+  wins 91% and 87% of January flights; the bands above are measured with the spec's bot,
   which hires them below 70% when it can pay. If that is too generous to a careful player,
   the rigger prices, not the purses, are the lever. With the riggers kept for money to
   spare (a $1,000 reserve), the bush pilot's rate is very steep in his purse: $5,000 → 20%,
@@ -1778,6 +1821,6 @@ roles end at least three ways.
 - **The southern track is no worse for a poor crew** in the engine: its warm air burns less
   propane, which is what a short purse runs out of. Without the forecasters the chocolate
   maker loses a few flights to its thunderstorms.
-- **The jet all the way** is the fastest flight (141 watches) and the worst for the
+- **The jet all the way** is the fastest flight (140 watches) and the worst for the
   poorer roles: the cold and the −1 health a watch kill pilots.
-- Seed 500's builder wins 25 of 30, near the top of the band; over 180 flights it is 73%.
+- Seed 500's builder wins 24 of 30; over 180 flights it is 70%.

@@ -669,8 +669,8 @@ final class BalloonTests: XCTestCase {
     /// The sensible flier of the spec (§18.2), as far as `JourneyBot` can fly it: the
     /// chocolate maker in the middle air throughout, the others in the jet while the crew is
     /// well, the air not freezing and the tanks not dry, and the middle air otherwise; hot meals for the chocolate maker and half portions for the others; for
-    /// each leg, food, half again the water, scrubbers and propane for nm ÷ 90 + 12
-    /// watches; two each of medical kits, burner kits and ballast; line for the two poorer
+    /// each leg, food, half again the water, propane and scrubbers for nm ÷ (the speed of
+    /// the altitude last flown × 0.6) + 12 watches; two each of medical kits, burner kits and ballast; line for the two poorer
     /// roles; supplies before the riggers, who are hired below 70%. North or south at
     /// random, the forecasters only with $1,500 to spare; stays south of the Himalaya,
     /// holds the party, meets the Azores boat, waves off the freighter and the camera plane.
