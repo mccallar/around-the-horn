@@ -27,12 +27,21 @@ extension Airship {
         }
     }
 
+    /// Whether, this month, it really is warmer under the fog than above it (it is never
+    /// colder). In April the cold is the same at both heights, and in July the sun has warmed both.
+    func warmerUnderTheFog(_ s: GameState) -> Bool {
+        temperature(s, in: AirshipData.underFog) != temperature(s, in: AirshipData.aboveFog)
+    }
+
     func poleChoice(_ e: GameEngine) -> Interrupt {
+        let low = warmerUnderTheFog(e.state)
+            ? "where it is warmer but the fog turns to ice on everything it touches"
+            : "where it is no warmer at this time of year and the fog turns to ice on everything it touches"
         var prompt = "You are at the North Pole!"
         if e.state.month == 3 { prompt += " [red]The cold up here is iron-hard.[/red]" }
         if e.state.month == 6 { prompt += " [red]The summer fog lies thick on the ice ahead.[/red]" }
         return e.ask("pole", prompt: prompt,
-                     detail: "Every direction is south. The flags go over the side on their weighted staffs and stick upright in the snow. Ahead lie two thousand kilometres of ice that nobody has ever seen. You may [amber]climb above the fog[/amber] into clear, bitter air, or [amber]stay low under it[/amber], where it is warmer but the fog turns to ice on everything it touches.",
+                     detail: "Every direction is south. The flags go over the side on their weighted staffs and stick upright in the snow. Ahead lie two thousand kilometres of ice that nobody has ever seen. You may [amber]climb above the fog[/amber] into clear, bitter air, or [amber]stay low under it[/amber], \(low).",
                      options: [.init("Climb above the fog"), .init("Stay low, under the fog"), .init("Ask the navigator's advice")])
     }
 
@@ -66,7 +75,8 @@ extension Airship {
                 e.state.vars[AirshipData.routeKey] = AirshipData.routeLow
                 return [forecastChoice(e)]
             default:
-                return [.message("Your navigator taps the barometer: “Above the fog it's clear and cold, and the sun will cook a little gas out of her every watch — so carry ballast. Under it, it's warmer, but the fog freezes on everything, and there are ridges down there you won't see until you hit them. If you go low, pay for the forecasts.”"),
+                let under = warmerUnderTheFog(e.state) ? "Under it, it's warmer, but" : "Under it, it's no warmer this time of year, and"
+                return [.message("Your navigator taps the barometer: “Above the fog it's clear and cold, and the sun will cook a little gas out of her every watch — so carry ballast. \(under) the fog freezes on everything, and there are ridges down there you won't see until you hit them. If you go low, pay for the forecasts.”"),
                         poleChoice(e)]
             }
 

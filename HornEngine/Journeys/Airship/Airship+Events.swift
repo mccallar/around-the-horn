@@ -11,6 +11,8 @@ extension Airship {
         let rough = w.isRough
         let north = reg.has("north")
         let sea = reg.has("sea")
+        let overIce = reg.has("pack")
+        let engines = !Self.drifting(s) && s.fuel > 0
         let temp = s.temperature(in: reg)
         let cold = temp == .cold || temp == .freezing
         let km = s.mile
@@ -122,7 +124,7 @@ extension Airship {
                 let free = self.firstNames.filter { f in !e.state.crew.contains { $0.name == f } }
                 let name = e.pick(free) ?? AirshipData.stowawayFallback
                 q.append(e.ask("stowaway", [name],
-                               prompt: "A pair of boots is sticking out from behind the petrol tanks. They belong to \(name), an apprentice from the ground crew at Rome, who wants to see the top of the world more than anything in it.",
+                               prompt: "A pair of boots is sticking out from behind the petrol tanks. They belong to \(TextMarkup.escape(name)), an apprentice from the ground crew at Rome, who wants to see the top of the world more than anything in it.",
                                options: [.init("Sign them on as a hand"), .init("Put them off at Pulham")]))
             },
             // 13. Distress flares on the ice.
@@ -131,8 +133,9 @@ extension Airship {
                 q.append(e.ask("flares", prompt: "Red flares rise from the ice ahead. A small expedition ship lies crushed between the floes, and her crew stands beside her on the ice, waving.",
                                options: [.init("Come down and drop what you can spare (1 watch)"), .init("Fly on")]))
             },
-            // 14. Fog down to the ice.
-            JourneyEvent(5, when: temp == .freezing || (north && km > 5300 && km < AirshipData.forkTo)) { e, q in
+            // 14. Fog down to the ice: over the pack when it freezes, and always on the polar
+            // leap. A drifting ship cannot circle, so it is not asked.
+            JourneyEvent(5, when: engines && overIce && (temp == .freezing || (km > 5300 && km < AirshipData.forkTo))) { e, q in
                 let what = foggy ? "The fog has" : "Low cloud has"
                 q.append(e.ask("murk", [foggy ? "fog" : "cloud"],
                                prompt: "\(what) come right down to the ice. Somewhere below, pressure ridges stand as high as houses, and the trail rope is bumping over them.",
@@ -145,6 +148,8 @@ extension Airship {
                     var t = "A ring of light surrounds the sun, with two bright mock suns burning on either side of it. The crew crowds to the windows."
                     if e.state.role == .whaler { t += " You fill three pages of your notebook." }
                     q.append(.message(t))
+                } else if sea {
+                    q.append(.message("Far below, a fishing fleet has stopped work to watch you pass. The crews wave their caps from every deck until you are out of sight."))
                 } else {
                     q.append(.message("Far below, a whole village has come out to watch you pass. Children run along the road beneath you, waving, until they are left behind."))
                 }
@@ -160,8 +165,8 @@ extension Airship {
                 e.state.fuel = max(0, e.state.fuel - Double(n))
                 q.append(.message("A petrol line cracks in the cold. Petrol sprays along the keel before the mechanic can shut it off. \(n) kg are lost. For once, nobody needs telling not to smoke."))
             },
-            // 18. A newspaper wants photographs.
-            JourneyEvent(2, when: s.vars[AirshipData.newsKey] != 1) { e, q in
+            // 18. A newspaper wants photographs, if the engines can circle for them.
+            JourneyEvent(2, when: engines && s.vars[AirshipData.newsKey] != 1) { e, q in
                 e.state.vars[AirshipData.newsKey] = 1
                 let pay = e.ri(8, 18) * 5
                 q.append(e.ask("news", [String(pay)],

@@ -3,12 +3,13 @@ import Foundation
 // The five mooring masts: where she can be fed, gassed, mended and gossiped about.
 
 extension Airship {
-    /// Petrol is cheap in England and dearer every mast north; furs are the other way round.
+    /// Everything costs more the further north the mast, but Pulham's petrol only a little;
+    /// furs are dear in England and at Kings Bay, and cheap in Rome and Norway.
     static let masts: [Port] = [
         Port(id: "rome", journey: Airship.id, name: "Rome", shop: "The stores at the Ciampino airship works", mult: 1,
              arrive: "",
              talk: [
-                "A rigger coiling a trail rope: “Every kilo you carry is a kilo the gas has to lift. Buy what you need, not what you fancy. But buy the fur suits. Whatever you think the cold is like up there, it's worse.”",
+                "A rigger coiling a trail rope: “Nothing north of here is cheaper than it is in Rome, so buy what you can before you go. And buy the fur suits. Whatever you think the cold is like up there, it's worse.”",
                 "An old balloonist on a bench outside the shed: “Leave in May. Before that the Arctic is iron-hard; after June the fog comes down on the ice and stays there. In May the sun never sets up north and you can see where you're going.”",
                 "The works doctor: “Coffee, Captain. Strong, hot, and every watch. Men who haven't slept in two days start making mistakes, and in an airship a mistake is a long way down.”",
              ]),
@@ -16,7 +17,7 @@ extension Airship {
              mods: [.fuel: 0.9, .clothes: 1.5, .limes: 1.4],
              arrive: "Two enormous sheds rise out of the flat Norfolk fields, and beside them stands a steel mast as tall as a church spire. A ground crew of two hundred men runs out across the grass to catch your ropes.",
              talk: [
-                "A ground-crew sergeant: “Petrol we've got, and cheap. Coffee you'll pay through the nose for. This is tea country, Captain.”",
+                "A ground-crew sergeant: “Petrol we've got, at a fair price. Coffee you'll pay through the nose for. This is tea country, Captain.”",
                 "A navigator from the station: “Over the North Sea the wind backs and freshens without warning. Watch your drift, and don't trust the coast of Norway to be where the chart says until you can see it.”",
                 "A rigger at the mast head: “Mind your gas when the sun's on her. She warms up, the gas swells, the valves let it go — and come evening you're heavy and wondering where it went.”",
              ]),
@@ -26,7 +27,7 @@ extension Airship {
              talk: [
                 "A ski-maker in the crowd: “Buy your furs here, not in England. We have winter eight months of the year. We know what keeps a person warm.”",
                 "An old ice-pilot: “North of the Circle the fog lies on the sea like wool on a sheep. You'll fly blind for hours. Trust your compass and your clock, and nothing else.”",
-                "A newspaperman: “Every paper in Europe wants your story. Wire it to us first and we'll pay you. Wire it to the others and we'll print it anyway.”",
+                "A newspaperman: “Every paper in Europe wants your story. We'll print it whether you tell it to us or not, so you may as well tell us and get the names right.”",
              ]),
         Port(id: "vadso", journey: Airship.id, name: "Vadsø", shop: "The general store at Vadsø", mult: 1.45,
              mods: [.clothes: 0.7, .food: 0.9, .fuel: 1.1],
@@ -42,7 +43,7 @@ extension Airship {
              talk: [
                 "A mechanic from an aeroplane party: “We'll fly to the Pole and back before your engines are warm. Of course, we have to come back. You don't.”",
                 "The camp doctor: “There's influenza in the bunkhouses. Don't let your crew sleep ashore any longer than they have to.”",
-                "The mast foreman: “Last mast between here and anywhere. Whatever you leave here, you'll do without. Whatever you take, you'll have to lift.”",
+                "The mast foreman: “Last mast between here and anywhere. Whatever you leave here, you'll do without until Alaska.”",
              ]),
     ]
 }

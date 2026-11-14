@@ -71,14 +71,14 @@ enum AirshipData {
 
     static let stops: [Stop] = [
         Stop(id: "rome", name: "Rome", short: "Rome", type: .port, mile: 0),
-        Stop(id: "rhone", name: "the Rhône valley", short: "Rhône Valley", type: .mark, mile: 800,
+        Stop(id: "rhone", name: "the Rhône valley", short: "Rhône Valley", type: .mark, mile: 650,
              note: "You cross the coast at the mouth of the Rhône and turn north up its valley. The mistral comes funnelling down between the hills to meet you, and the mechanics frown at their gauges."),
         Stop(id: "pulham", name: "the air station at Pulham, England", short: "Pulham", type: .port, mile: 1700),
         Stop(id: "oslo", name: "the Ekeberg mast at Oslo", short: "Oslo", type: .port, mile: 2750),
         Stop(id: "circle", name: "the Arctic Circle", short: "Arctic Circle", type: .line, mile: 3650),
         Stop(id: "vadso", name: "the mast at Vadsø", short: "Vadsø", type: .port, mile: 4200),
         Stop(id: "bear", name: "Bear Island", short: "Bear Island", type: .mark, mile: 4800,
-             note: "Bear Island slides past to the west: a black wedge of cliffs streaked with snow, with a cloud of seabirds around it. After this there is no more Norway. Next stop, Spitsbergen."),
+             note: "Bear Island slides past to the west: a black wedge of cliffs streaked with snow, with a cloud of seabirds around it. After this there is nothing below but the Barents Sea, all the way to Spitsbergen."),
         Stop(id: "kingsbay", name: "Kings Bay, Spitsbergen", short: "Kings Bay", type: .port, mile: 5300),
         Stop(id: "pole", name: "the North Pole", short: "North Pole", type: .fork, mile: 6550),
         Stop(id: "barrow", name: "Point Barrow", short: "Point Barrow", type: .island, mile: 8600),
@@ -107,10 +107,11 @@ enum AirshipData {
     // MARK: - Country
 
     /// Tags: "sea" (open water below: steamers and fishing boats), "north" (the seasons
-    /// move the weather and the cold), "ridges" (pressure ridges hidden in the fog). Numbers:
+    /// move the weather and the cold), "pack" (sea ice below, at least when it freezes),
+    /// "ridges" (pressure ridges hidden in the fog). Numbers:
     /// "superheat" (lift lost to the sun every flying watch), "iceMult" (multiplies icing).
     static let regions: [Region] = [
-        Region(id: "med", to: 700, name: "Mediterranean", temp: .warm, tags: ["sea"],
+        Region(id: "med", to: 650, name: "Mediterranean", temp: .warm, tags: ["sea"],
                weights: [(fair, 35), (tail, 15), (head, 18), (rain, 12), (fog, 6), (gale, 6), (storm, 4)]),
         Region(id: "france", to: 1700, name: "France", temp: .cool,
                weights: [(fair, 28), (head, 22), (tail, 14), (rain, 18), (fog, 10), (gale, 5), (storm, 3)]),
@@ -118,22 +119,22 @@ enum AirshipData {
                weights: [(fair, 20), (head, 20), (tail, 14), (rain, 14), (fog, 18), (gale, 14)]),
         Region(id: "scandinavia", to: 4200, name: "Scandinavia", temp: .cold, tags: ["north"],
                weights: [(fair, 26), (head, 16), (tail, 14), (snow, 18), (fog, 10), (gale, 10), (ice, 6)]),
-        Region(id: "barents", to: 5300, name: "Barents Sea", temp: .cold, tags: ["north", "sea"],
+        Region(id: "barents", to: 5300, name: "Barents Sea", temp: .cold, tags: ["north", "sea", "pack"],
                weights: [(fog, 24), (fair, 16), (head, 14), (tail, 10), (snow, 14), (gale, 12), (ice, 10)]),
-        Region(id: "polarSea", to: forkFrom, name: "The Polar Sea", temp: .freezing, tags: ["north"],
+        Region(id: "polarSea", to: forkFrom, name: "The Polar Sea", temp: .freezing, tags: ["north", "pack"],
                weights: [(fair, 24), (fog, 20), (tail, 12), (head, 12), (snow, 12), (ice, 12), (gale, 8)]),
         aboveFog,
-        Region(id: "alaska", to: 9601, name: "Alaskan Coast", temp: .cold, tags: ["north"],
+        Region(id: "alaska", to: 9601, name: "Alaskan Coast", temp: .cold, tags: ["north", "pack"],
                weights: [(fog, 20), (gale, 18), (head, 16), (ice, 10), (snow, 10), (fair, 16), (tail, 10)]),
     ]
 
     /// The two heights beyond the Pole. The table holds the high one, which is also the
     /// region before the choice is made.
-    static let aboveFog = Region(id: "aboveFog", to: forkTo, name: "Above the Fog", temp: .freezing, tags: ["north"],
+    static let aboveFog = Region(id: "aboveFog", to: forkTo, name: "Above the Fog", temp: .freezing, tags: ["north", "pack"],
                                  nums: ["superheat": 0.6],
                                  weights: [(fair, 26), (tail, 10), (head, 26), (snow, 6), (fog, 8), (ice, 4), (gale, 12)])
     static let underFog = Region(id: "underFog", to: forkTo, name: "Under the Fog", temp: .cold,
-                                 tags: ["north", "ridges"], nums: ["iceMult": 1.5],
+                                 tags: ["north", "pack", "ridges"], nums: ["iceMult": 1.5],
                                  weights: [(fog, 30), (ice, 20), (fair, 12), (head, 10), (snow, 10), (tail, 8), (gale, 8)])
 
     // MARK: - Ailments

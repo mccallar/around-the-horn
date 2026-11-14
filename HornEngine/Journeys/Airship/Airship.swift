@@ -24,7 +24,7 @@ public final class Airship: Journey {
         super.init(id: Self.id, text: Self.strings)
         title = "Over the Pole"
         subtitle = "1926 · Rome to Nome by airship, over the top of the world"
-        blurb = "Nine thousand six hundred kilometres in a hydrogen airship: five mooring masts, then 4,300 kilometres over the North Pole with no mast at all. Every kilo has to be lifted, and petrol is life."
+        blurb = "Nine thousand six hundred kilometres in a hydrogen airship: five mooring masts, then 4,300 kilometres over the North Pole with no mast at all. Lift is precious, and petrol is life."
         items = AirshipData.items
         stops = AirshipData.stops
         regions = AirshipData.regions
@@ -153,6 +153,7 @@ public final class Airship: Journey {
         ranks: ["Commander", "Navigator", "Rigger", "Ballast"])
 
     static let forcedDownOnIce = "With no gas left to hold her and no ballast left to drop, she sank slowly onto the ice and would not rise again. The crew made camp beside the wreck of the gondola, and it was weeks before a ship found them. The expedition is over."
+    static let forcedDownAtSea = "With no gas left to hold her and no ballast left to drop, she sank slowly onto the sea and would not rise again. The crew clung to the wreck of the gondola until a fishing boat came alongside and hauled them aboard, soaked and very quiet. The expedition is over."
     static let forcedDownInAField = "With no gas left to hold her and no ballast left to drop, she sank slowly into a field and would not rise again. The crew climbed out of the wreck of the gondola to find a farmer and his dog staring at them. The expedition is over."
 
     /// The finale's opening lines, for the skin: the arrival, the town, and who climbs down.
@@ -246,7 +247,7 @@ public final class Airship: Journey {
     }
 
     public override func wreckedBody(_ s: GameState) -> String {
-        s.region.has("north") ? Self.forcedDownOnIce : Self.forcedDownInAField
+        s.region.has("north") ? Self.forcedDownOnIce : s.region.has("sea") ? Self.forcedDownAtSea : Self.forcedDownInAField
     }
 
     override func tick(_ e: GameEngine, _ q: inout [Interrupt], _ mode: GameEngine.DayMode, _ reg: Region) {
@@ -318,7 +319,7 @@ public final class Airship: Journey {
         }
     }
 
-    /// "120 kg of provisions", "1 medicine kit", "2 boxes of pilot balloons", "$45".
+    /// "120 kg of provisions", "1 medicine kit", "2 boxes of pilot balloons", "85 pilot balloons", "$45".
     public override func describe(_ good: TradeGood, _ amount: Double) -> String {
         let n = jsNumber(amount)
         let one = amount == 1
@@ -332,8 +333,12 @@ public final class Airship: Journey {
         case .item(.sailcloth): return "\(n) \(one ? "box" : "boxes") of engine spares"
         case .item(.timber): return "\(n) \(one ? "bag" : "bags") of ballast"
         case .item(.tackle):
+            // Whole boxes when they are; a broken box is counted in balloons.
+            guard amount.truncatingRemainder(dividingBy: 10) == 0 else {
+                return "\(n) \(one ? "pilot balloon" : "pilot balloons")"
+            }
             let boxes = amount / 10
-            return "\(jsNumber(boxes)) \(amount <= 10 ? "box" : "boxes") of pilot balloons"
+            return "\(jsNumber(boxes)) \(boxes == 1 ? "box" : "boxes") of pilot balloons"
         case .item(.fuel): return "\(formatNumber(amount)) kg of petrol"
         case .item: return super.describe(good, amount)
         }

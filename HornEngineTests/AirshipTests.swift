@@ -150,6 +150,33 @@ final class AirshipTests: XCTestCase {
         ice.checkSink(&q)
         guard case .gameOver(_, let polar)? = q.last else { return XCTFail("no ending") }
         XCTAssertTrue(polar.contains("onto the ice"))
+
+        // Over open water she comes down on the sea, not in a field.
+        for km in [300, 2000] {
+            s = flying(km: km)
+            s.hull = 0
+            let wet = engine(s)
+            q = []
+            wet.checkSink(&q)
+            guard case .gameOver(_, let sea)? = q.last else { return XCTFail("no ending") }
+            XCTAssertTrue(sea.contains("onto the sea"), "\(km)")
+            XCTAssertFalse(sea.contains("farmer"), "\(km)")
+        }
+    }
+
+    /// The sights below match the country: mock suns in the north, a fishing fleet at sea,
+    /// a village over land.
+    func testWhatYouSeeBelowMatchesTheCountry() {
+        func sight(_ km: Int) -> String {
+            let e = engine(flying(km: km))
+            var q: [Interrupt] = []
+            airship.events(e, e.state.region)[14].run(e, &q)
+            return messages(q).first ?? ""
+        }
+        XCTAssertTrue(sight(300).contains("fishing fleet"))
+        XCTAssertTrue(sight(2000).contains("fishing fleet"))
+        XCTAssertTrue(sight(1000).contains("village"))
+        XCTAssertTrue(sight(6000).contains("mock suns"))
     }
 
     // MARK: - The fork
@@ -220,6 +247,22 @@ final class AirshipTests: XCTestCase {
         XCTAssertTrue(q.isEmpty)
     }
 
+    /// At the Pole, the low route is only called warmer in the months it is: in April both
+    /// heights freeze, and in July both are merely cold.
+    func testThePoleOnlyPromisesWarmthUnderTheFogWhenThereIsSome() {
+        for (month, warmer) in [(3, false), (4, true), (5, true), (6, false)] {
+            let e = engine(flying(km: 6550, month: month))
+            XCTAssertEqual(airship.temperature(e.state, in: AirshipData.underFog) != airship.temperature(e.state, in: AirshipData.aboveFog),
+                           warmer, "month \(month)")
+            guard let pole = choice(e.beginArrival("pole")) else { return XCTFail("no choice") }
+            XCTAssertEqual(pole.detail?.contains("where it is warmer") ?? false, warmer, "month \(month)")
+            XCTAssertEqual(pole.detail?.contains("no warmer at this time of year") ?? false, !warmer, "month \(month)")
+            let advice = messages(e.resolve(pole, option: 2)).first ?? ""
+            XCTAssertEqual(advice.contains("Under it, it's warmer"), warmer, "month \(month)")
+            XCTAssertEqual(advice.contains("no warmer this time of year"), !warmer, "month \(month)")
+        }
+    }
+
     // MARK: - Season
 
     func testTheSeasonMovesTheColdAndTheFog() {
@@ -239,6 +282,48 @@ final class AirshipTests: XCTestCase {
         XCTAssertEqual(odds(6, "polarSea", AirshipData.fair), 24 * 0.6, accuracy: 1e-9)
         XCTAssertEqual(odds(5, "med", AirshipData.storm), 8)
         XCTAssertEqual(odds(4, "med", AirshipData.storm), 4)
+    }
+
+    /// The fog comes down to the ice only where there is ice below: over the pack when it
+    /// freezes, and always on the polar leap. Never over the forests of Norway.
+    func testFogToTheIceNeedsIceBelow() {
+        func murk(_ km: Int, month: Int) -> Bool {
+            let e = engine(flying(km: km, month: month))
+            return airship.events(e, e.state.region)[13].ok
+        }
+        XCTAssertEqual(airship.temperature(flying(km: 3000, month: 3), in: region("scandinavia")), .freezing)
+        XCTAssertFalse(murk(3000, month: 3), "April over Scandinavia")
+        XCTAssertTrue(murk(4500, month: 3), "April over the Barents pack")
+        XCTAssertFalse(murk(4500, month: 4), "May over the open Barents Sea")
+        XCTAssertTrue(murk(6000, month: 4))
+        XCTAssertTrue(murk(7000, month: 6))
+        XCTAssertFalse(murk(1000, month: 3))
+    }
+
+    /// With the tanks dry she cannot circle: neither the newspaper nor the murk asks.
+    func testADriftingShipIsNotAskedToCircle() {
+        func asked(_ fuel: Double) -> (news: Bool, murk: Bool) {
+            var s = flying(km: 6000)
+            s.fuel = fuel
+            s.forceFair = 1
+            let e = engine(s)
+            var sp = 0.0
+            airship.adjustSpeed(e, e.state.region, &sp)
+            let ev = airship.events(e, e.state.region)
+            return (ev[17].ok, ev[13].ok)
+        }
+        XCTAssertTrue(asked(4000).news)
+        XCTAssertTrue(asked(4000).murk)
+        XCTAssertFalse(asked(0).news)
+        XCTAssertFalse(asked(0).murk)
+    }
+
+    /// The Rhône mark is where the coast is crossed: the Mediterranean ends there.
+    func testTheCoastIsCrossedAtTheRhone() {
+        let rhone = airship.stops.first { $0.id == "rhone" }!
+        XCTAssertEqual(region("med").to, rhone.mile)
+        XCTAssertEqual(flying(km: rhone.mile - 1).region.id, "med")
+        XCTAssertEqual(flying(km: rhone.mile).region.id, "france")
     }
 
     // MARK: - Coffee, sickness, the masts
@@ -430,6 +515,10 @@ final class AirshipTests: XCTestCase {
         XCTAssertEqual(j.describe(.item(.timber), 3), "3 bags of ballast")
         XCTAssertEqual(j.describe(.item(.tackle), 10), "1 box of pilot balloons")
         XCTAssertEqual(j.describe(.item(.tackle), 20), "2 boxes of pilot balloons")
+        // A broken box is counted in balloons, never in fractions of a box.
+        XCTAssertEqual(j.describe(.item(.tackle), 85), "85 pilot balloons")
+        XCTAssertEqual(j.describe(.item(.tackle), 5), "5 pilot balloons")
+        XCTAssertEqual(j.describe(.item(.tackle), 1), "1 pilot balloon")
         XCTAssertEqual(j.describe(.item(.fuel), 1400), "1,400 kg of petrol")
         XCTAssertEqual(j.describe(.money, 45), "$45")
 
