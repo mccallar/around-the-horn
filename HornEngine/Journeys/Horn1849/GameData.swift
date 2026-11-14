@@ -17,9 +17,9 @@
 public extension Role {
     var label: String {
         switch self {
-        case .merchant: return "Be a merchant from Boston"
-        case .shipwright: return "Be a shipwright from Mystic"
-        case .whaler: return "Be a whaler from Nantucket"
+        case .merchant: return "A Boston merchant"
+        case .shipwright: return "A Mystic shipwright"
+        case .whaler: return "A Nantucket whaler"
         }
     }
 
@@ -339,9 +339,9 @@ public extension Rations {
 
     var name: String {
         switch self {
-        case .filling: return "Filling"
-        case .meager: return "Meager"
-        case .bare: return "Bare bones"
+        case .filling: return "Full"
+        case .meager: return "Short"
+        case .bare: return "Scant"
         }
     }
 

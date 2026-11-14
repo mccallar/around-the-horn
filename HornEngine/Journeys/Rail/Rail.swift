@@ -30,11 +30,11 @@ public final class Rail: Journey {
         fairWeather = RailData.fair
         ailments = [RailData.mountainFever, RailData.exhaustion, RailData.crushedHand, RailData.scald]
 
-        roles[.merchant] = RoleInfo(label: "Be a freight contractor from Chicago", title: "freight contractor",
+        roles[.merchant] = RoleInfo(label: "A Chicago freight contractor", title: "freight contractor",
                                     money: 1000, mend: 25, patch: 20, catchLimit: 40, aim: 1.5)
-        roles[.shipwright] = RoleInfo(label: "Be a boilermaker from Pittsburgh", title: "boilermaker",
+        roles[.shipwright] = RoleInfo(label: "A Pittsburgh boilermaker", title: "boilermaker",
                                       money: 520, mend: 40, patch: 35, catchLimit: 40, aim: 1.5)
-        roles[.whaler] = RoleInfo(label: "Be a river hand from St. Louis", title: "river hand",
+        roles[.whaler] = RoleInfo(label: "A St. Louis river hand", title: "river hand",
                                   money: 350, mend: 25, patch: 20, catchLimit: 60, aim: 4)
 
         paces[.easy] = PaceInfo(name: "Easy", speed: 32, hp: 0.5, wear: 1.3, fuel: 7,
@@ -44,9 +44,9 @@ public final class Rail: Journey {
         paces[.full] = PaceInfo(name: "Wide open", speed: 54, hp: -1, wear: 4.4, fuel: 15,
                                 desc: "About 54 miles in four hours. Half again the wood, most of twice the wear, and nobody sleeps.")
 
-        rationings[.filling] = RationsInfo(name: "Filling", amount: 0.5, hp: 1, desc: "Three square meals a day.")
-        rationings[.meager] = RationsInfo(name: "Meager", amount: 0.35, hp: -0.3, desc: "Two meals and a lot of coffee.")
-        rationings[.bare] = RationsInfo(name: "Bare bones", amount: 0.2, hp: -2.2, desc: "Hard bread and the memory of bacon.")
+        rationings[.filling] = RationsInfo(name: "Hearty", amount: 0.5, hp: 1, desc: "Three square meals a day.")
+        rationings[.meager] = RationsInfo(name: "Lean", amount: 0.35, hp: -0.3, desc: "Two meals and a lot of coffee.")
+        rationings[.bare] = RationsInfo(name: "Scraps", amount: 0.2, hp: -2.2, desc: "Hard bread and the memory of bacon.")
 
         departures = RailData.departures
         firstNames = RailData.firstNames

@@ -112,8 +112,7 @@ a bigger catch."
 pilot triple."
 Button: "Back".
 
-(1849's own role screen, "Many kinds of people made the voyage in 1849. You may:" with
-"Find out the differences", is not touched by this journey; see §20.14.)
+(1849's own role screen is not touched by this journey; see §20.14.)
 
 ---
 
@@ -1561,15 +1560,9 @@ so a journey that never meets it never draws.
     then need, which is why this revision removed the words instead.
 13. **Spelling of "CO2"**: written without a subscript because the pixel fonts may not have
     "₂". If they do, "CO₂" everywhere.
-14. **For Ryan — 1849's own lines that sit close to a commercial game's wording.** Review
-    (2026-11-10) found this journey's first draft copying the shape of The Oregon Trail's
-    role screen, ration names and port menu; this revision rewrote all of them (§2, §10,
-    §16.3). 1849 already ships some of the same: "Many kinds of people made the voyage in
-    1849. You may:" and "Find out the differences" (`Copy.roleIntro`, `SetupScreens`), the
-    heading "The differences", "Be a merchant from Boston" (`Role.label`), the rations
-    "Filling / Meager / Bare bones" (`Rations.name`) and the port items "Attempt to trade" /
-    "Talk to people" (`VoyageScreens`). They are not changed here — 1849 must not change in
-    the journeys work — but they are worth a look under the brief's rule 4 (spec §13).
+14. **Role screen, rations and port menu wording.** Every journey writes these in its own
+    words, 1849 included (its role screen, ration names and trade row were reworded on
+    2026-11-14); this journey's are in §2, §10 and §16.3.
 15. **Seasonal weather rules as data.** 1849 hard-codes two rules in `weatherWeights`:
     `south` regions in the southern winter (May–Sep): gale +20, storm +(horn ? 30 : 18),
     cold +15, fair ×0.5, fresh ×0.6; and the North Atlantic (by region id) in Dec–Feb:
