@@ -36,7 +36,7 @@ public final class Klondike: Journey {
         roles[.merchant] = RoleInfo(label: "Be a storekeeper from Seattle", title: "storekeeper",
                                     money: 1700, mend: 25, patch: 20, catchLimit: 150, aim: 1.5)
         roles[.shipwright] = RoleInfo(label: "Be a boatbuilder from Port Townsend", title: "boatbuilder",
-                                      money: 1050, mend: 40, patch: 35, catchLimit: 150, aim: 1.5)
+                                      money: 1000, mend: 40, patch: 35, catchLimit: 150, aim: 1.5)
         roles[.whaler] = RoleInfo(label: "Be a hard-rock miner from Leadville", title: "miner",
                                   money: 720, mend: 25, patch: 20, catchLimit: 150, aim: 1.5)
 

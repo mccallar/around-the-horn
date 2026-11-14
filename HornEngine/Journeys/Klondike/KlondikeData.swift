@@ -41,9 +41,9 @@ enum KlondikeData {
     static func paceHP(_ leg: Leg, _ pace: Pace) -> Double {
         switch (leg, pace) {
         case (.steamer, _): return 0
-        case (.foot, .easy): return -0.4
-        case (.foot, .steady): return -1.4
-        case (.foot, .full): return -2.8
+        case (.foot, .easy): return -0.5
+        case (.foot, .steady): return -1.7
+        case (.foot, .full): return -3.4
         case (.boat, .easy): return 0.5
         case (.boat, .steady): return 0
         case (.boat, .full): return -1
