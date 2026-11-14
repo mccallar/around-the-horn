@@ -1,4 +1,8 @@
+#if os(WASI)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 public struct CrewMember: Codable, Equatable, Identifiable {
     public var id: UUID

@@ -1,4 +1,8 @@
+#if os(WASI)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 // The two set pieces (the Dale Creek trestle and the descent from Donner Summit) and the
 // answer to everything the road asks.

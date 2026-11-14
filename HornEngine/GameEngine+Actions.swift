@@ -1,4 +1,8 @@
+#if os(WASI)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 // What the player does from a menu: shop, depart, rest, repair, trade, talk, forage, bury.
 

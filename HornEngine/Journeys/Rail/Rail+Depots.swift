@@ -1,4 +1,8 @@
+#if os(WASI)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 // The seven yards where a train can lay over, and the two where a helper engine waits at
 // the foot of a grade.

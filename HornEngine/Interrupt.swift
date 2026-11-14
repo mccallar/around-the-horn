@@ -1,4 +1,8 @@
+#if os(WASI)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 // Things that stop the voyage and need the player (spec §2). The engine returns them in
 // order; the controller presents them in that order, then resumes travel unless one
