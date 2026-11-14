@@ -137,6 +137,8 @@ Also shared and journey-aware:
   back. Launch argument `-journey <id>` goes straight to a title card (UI tests).
 - **Saves and top tens are per journey**: `save-<id>.json`, `topten-<id>.json`. The files
   from before journeys (`save.json`, `topten.json`) are 1849's and are read as such.
+  A save also keeps, under `pending`, whatever the last turn raised that the player has
+  not yet answered (D10), so a voyage left mid-queue comes back to it.
 - **A contract test** over `Journeys.all`: every journey has a skin, every skin's copy is
   non-empty, every skin's draws run without trapping for every weather and stop.
 
@@ -228,7 +230,8 @@ SIMCTL_CHILD_HORN_SHOTS="$TMPDIR/shots-<id>" sh Tools/run_tests.sh AroundTheHorn
 Its walk taps 1849's own buttons, so a new journey wants its own walk beside it (same
 helper, its own labels). The launch arguments that get it anywhere quickly are
 `-journey <id>` (straight to that title card), `-HornDebugStart <stop id>` with
-`-HornDebugMonth <n>` (the skin's `debug.start`), and `-HornSceneGallery YES` (every
+`-HornDebugMonth <n>` (the skin's `debug.start`; add `-HornDebugAtStop YES` to stand at
+the stop itself, its arrival already told), and `-HornSceneGallery YES` (every
 weather and the skin's extra cells on one screen). The walk is not seeded: crew names,
 weather and wear differ from run to run, so compare two runs by eye or by the regions
 that cannot move, not by whole-image equality.

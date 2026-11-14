@@ -123,3 +123,16 @@ became the first journey.
 - New journeys' balance is set by their own bots and bands
   (`HornEngineTests/<Name>Tests.swift`); none of it touches a 1849 number.
 - 1849's reference screenshots are in `docs/reference/shots-1849/`.
+
+## D10 — The save keeps what is still waiting to be shown (2026-11-13)
+
+The engine moves the voyage on before the player sees what a turn raised: a stop is
+behind you before its arrival is offered. The spec saves after every turn and resumes on
+a menu, so a voyage left with a warning on screen came back past the stop, its question
+never asked, and at the last stop could never end. The controller now saves the queue
+with the voyage, the interrupt on screen first, under a `pending` key that is written
+only when something is waiting: a save with nothing waiting is the voyage alone, exactly
+as before, and older saves read with nothing waiting. Continuing shows what was waiting,
+then a menu (spec §2: a menu, not the loop). A save standing on the last stop with
+nothing waiting, as older builds could leave one, is told of its arrival. Nothing 1849
+says or shows changes.
