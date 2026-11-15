@@ -79,7 +79,7 @@ enum AirshipSkin {
         crewLabel: "Crew member",
         monthHeading: "When will you cast off?",
         monthIntro: "Five mooring masts stand ready between Rome and Spitsbergen, the hydrogen cylinders are stacked at Kings Bay, and the newspapers are running out of patience. When will you leave?",
-        monthAdvice: "The old balloonist on the bench outside the shed knocks out his pipe. “Go in April and the cold up there will freeze your crew to their seats. Go in July and the summer fog will freeze to your envelope instead. Go in May, when the sun never sets up north and the air is clear. June, if you must. July is for people who enjoy a long walk home.”",
+        monthAdvice: "The old balloonist on the bench outside the shed knocks out his pipe. “Go in April and the cold up there will freeze your crew to their seats. Go in July and the summer fog will freeze to your envelope instead. Go in May, when the sun never sets up north and the air is clear. June, if you must. Any later and you may be walking home.”",
         outfitHeading: "Fitting out",
         outfitIntro: { "You have [amber]$\(formatNumber($0.money))[/amber] to fit out the [i]\(Markup.escape($0.ship))[/i]. The stores at the Ciampino works have what you need:" },
         outfitBullets: [

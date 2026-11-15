@@ -307,6 +307,52 @@ SIMCTL_CHILD_HORN_SHOTS="$TMPDIR/shots-rail" sh Tools/run_tests.sh AroundTheHorn
 Look at every one. A new shell member is the last resort: add it with no default, give
 every existing skin the answer that changes nothing, and say so here.
 
+### Airship skin, as built
+
+Over the Pole (`airship`) is the third skin: `AirshipSkin` (copy, words, debug starts),
+`AirshipScene`, `AirshipChart`, `AirshipForage`, and its entry in `Skins.all`. 1849 and the
+Iron Road look, read and play as they did.
+
+- **One new shell member, `Words.departRefusal`**: why the first port won't let the vessel
+  go beyond the engine's own refusal (nothing to eat). The airship answers "empty tanks"
+  when there is no petrol aboard, as its spec asked and its engine left to the app (As
+  built 7); 1849 and rail answer `nil`. `GameController.depart` asks it first.
+- **One debug launch argument**, `-HornDebugHull <n>` with `-HornDebugStart`: the vessel's
+  structure down to `n`%, so a walk can reach a wreck. Debug builds only; nothing reads it
+  otherwise.
+- **The engine's text, three changes, no numbers**: the role labels in this journey's own
+  words (D11: "A New York financier", "An engineer from the airship works at Rome", "A
+  meteorologist trained at Bergen"), and the departure sentence, which put a full stop
+  after "a.m." ("On May 1, 1926, 8 a.m., the ... slips the mast at Ciampino.").
+- **Two weathers can share a sky.** The following wind and the headwind are both
+  `.breeze`, fog and icing fog both `.fog`; the scene tells them apart by the rules' own
+  figures (`speed > 1` carries her, `harsh > 0` is the icing), never by a name.
+- **At the end the engine leaves her `atPort`** at Nome, which has no mast. The scene asks
+  `journey.port(stop)` before drawing a mast (`AirshipScene.moored`); a stop with none is
+  drawn as the stop.
+- **A curved chart gives its route already projected** (`AirshipChart.route`, with
+  `project` the identity), so the marker moves in straight lines on the page through the
+  Pole, where longitude means nothing. The chart's Mediterranean coast is crossed at about
+  km 510; the scene's sea runs to the Rhône stop at 650.
+- **What the scene shows** for every place: the region's ground under nine skies, a mast
+  and its town at each of the five masts, and every other stop drawn as itself (the
+  Rhône's mouth, a line nobody can see at the Circle, Bear Island's cliffs, flags at the
+  Pole, the village at Point Barrow, two coasts at Cape Prince of Wales, the roofs of
+  Nome). She flies up to ten pixels lower as her lift goes, her fabric creases, her
+  propeller stutters and smokes as the engines fail and stops with the tanks dry, icing
+  fog rimes her; forced down, she lies on the ice beside a camp, on the sea with a boat
+  alongside, or in a field. South of the Arctic the sun crosses the side of the sky she
+  isn't in and nights are dark; in the north the midnight sun circles low.
+- `AirshipSkinTests` holds every figure the card states to the tables, sieves everything
+  the skin and the engine can say for a sailor's or a railroader's word, tells every
+  weather, region, mast and stop apart, checks the chart and the winds, and flies seeded
+  flights from the title card to an ending; `ResumeTests` resumes at the Pole, its
+  forecasts, Kings Bay, Point Barrow and Nome.
+- `AirshipScreenshotUITests` walks it. Its patience leaves out the masts' "Fly on without
+  stopping" and the Circle's "No time for speeches" while rolling toward them (they race
+  the button it is waiting for), and its setup test is named to run first, so the title
+  card has no voyage to resume on a freshly installed app.
+
 ## 3. Adding a journey
 
 1. Spec in `docs/journeys/<id>.md` (the brief's 20-section template, or compact).

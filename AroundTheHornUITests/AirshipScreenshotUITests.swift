@@ -24,7 +24,8 @@ final class AirshipScreenshotUITests: ScreenshotWalk {
     func roll(until label: String, tries: Int = 60) {
         let target = button(startingWith: label)
         for _ in 0..<tries where !target.exists {
-            if next.waitForExistence(timeout: 2) { next.tap() }
+            // Both can arrive on one screen ("Fly on" beside what is wanted): look again first.
+            if next.waitForExistence(timeout: 2) && !target.exists { next.tap() }
         }
         XCTAssertTrue(target.waitForExistence(timeout: 10), "never reached \(label)")
     }
@@ -32,7 +33,8 @@ final class AirshipScreenshotUITests: ScreenshotWalk {
     /// Answers until the flight is under way with nothing on screen but the status.
     func settleAloft(_ tries: Int = 12) {
         let halt = app.buttons["Stop the engines & take stock"]
-        for _ in 0..<tries where !(halt.exists && halt.isHittable) {
+        // Screens are swapped whole, so the button is there exactly when nothing is asked.
+        for _ in 0..<tries where !(halt.exists && !onward.exists) {
             if onward.waitForExistence(timeout: 6) { onward.tap() }
         }
         XCTAssertTrue(halt.waitForExistence(timeout: 5))
@@ -126,7 +128,7 @@ final class AirshipScreenshotUITests: ScreenshotWalk {
     func testTheCountry() {
         for (stop, month, name) in [("rhone", "4", "25-france-may"), ("circle", "3", "26-scandinavia-april"),
                                     ("bear", "6", "27-barents-july"), ("kingsbay", "4", "28-polar-sea-may"),
-                                    ("wales", "5", "29-alaska-june")] {
+                                    ("barrow", "5", "29-alaska-june")] {
             relaunch(["-HornDebugStart", stop, "-HornDebugMonth", month, "-HornTickSeconds", "4"])
             tap("Continue the flight")
             // The first watch reaches the stop and says so; the shot is of the country
@@ -182,8 +184,8 @@ final class AirshipScreenshotUITests: ScreenshotWalk {
         shot("40-forecasts")
         button(startingWith: "Pay for the forecasts").tap()
         tap("Continue")
-        shot("41-pole-menu")
-        tap("Continue the flight")
+        // Answered under way, the flight goes on from the Pole.
+        shot("41-at-the-pole")
         sleep(5)
         settleAloft()
         shot("42-under-the-fog")

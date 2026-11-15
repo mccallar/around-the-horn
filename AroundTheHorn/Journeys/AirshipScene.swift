@@ -166,12 +166,13 @@ enum AirshipScene {
     }
 
     /// In the south, climbing and sinking across whichever side of the sky she isn't in;
-    /// in the north the midnight sun, circling low.
+    /// in the north the midnight sun, circling low and never setting.
     static func sun(_ px: PixelCanvas, _ f: SceneFrame, north: Bool, moored: Bool) {
         let color = Color(hex: 0xFFE27A)
         if north {
             let a = Double(f.hour) / 24 * 2 * .pi
-            px.sun(x: (74 + 52 * cos(a)).rounded(.down), y: (40 + 4 * cos(a)).rounded(.down), color)
+            // Round the far side of her: at (126, 44) at midnight, highest and nearest at noon.
+            px.sun(x: (96 + 30 * cos(a)).rounded(.down), y: (40 + 4 * cos(a)).rounded(.down), color)
         } else {
             let across = Double(max(0, min(14, f.hour - 5))) / 14
             let x = (moored ? 60 : 140) - across * 40
@@ -481,6 +482,9 @@ enum AirshipScene {
         let hz = horizon
         let ink = Color(hex: 0x2A2A30), face = Color(hex: 0xEFD6B0)
         if region?.has("north") == true {
+            // The floe she came down on, and the camp beside the gondola.
+            px.polygon([(40, hz + 1), (146, hz + 1), (152, hz + 6), (142, hz + 10), (48, hz + 9), (36, hz + 5)], tint(0xE6EDF2))
+            px.rect(48, hz + 9, 94, 1, tint(0x9FB0BF))
             px.polygon([(104, hz + 6), (111, hz - 2), (118, hz + 6)], tint(0xD9C9A0))
             px.rect(110, hz + 2, 2, 4, tint(0x6B4A2B))
             for (i, x) in [122.0, 127, 131].enumerated() {

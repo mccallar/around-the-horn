@@ -64,18 +64,18 @@ calendar advances four hours a turn:
 | `engineer` | An engineer from the airship works at Rome | **$580** | ×2 | Repairs aloft: a bag of ballast restores **+35** lift (others +20); a box of engine spares restores **+40** engines (others +25) |
 | `meteorologist` | A meteorologist trained at Bergen | **$470** | ×3 | Pilot balloons: hit padding **4** px (others 1.5); can use **900 kg** of winds per session (others 450) |
 
-`title` (as in “Bonus for being a ___”): `financier`, `engineer`, `meteorologist`.
+`title` (as in “Bonus for being a ___”, “an” before the engineer): `financier`, `engineer`, `meteorologist`.
 
-**Role screen.** Heading “Who are you?”, then:
-“All sorts of people dreamed of flying to the Pole in 1926. You may:” — the three roles, then
-*Find out the differences*:
+**Role screen** (in this journey's own words, D11). Heading “Who are you?”, then:
+“A flight to the Pole in 1926 took money, nerve or know-how, and seldom all three at once. Which
+do you bring?” — the three roles, then *What does each one bring?*:
 
-> **The differences**
-> An airship costs a fortune to fly, and not everyone who flies one is rich.
+> **What each one brings**
+> An airship burns money by the tonne, and only one of these three has much of it.
 > [amber]Financier[/amber] — starts with $1,200.
 > [amber]Airship engineer[/amber] — starts with $580. Gets far more out of every bag of ballast and every box of engine spares.
-> [amber]Meteorologist[/amber] — starts with $470. Reads the winds aloft like a newspaper, and makes every pilot balloon count.
-> The poorer you start, the more your arrival is worth: the engineer scores double, the meteorologist triple.
+> [amber]Meteorologist[/amber] — starts with $470. Reads the winds aloft like a morning paper: a surer eye with a pilot balloon, and twice the petrol's worth of winds from every session.
+> The leaner the purse, the more a landing at Nome is worth: the engineer's counts double, the meteorologist's triple.
 
 Button: *Back*.
 
@@ -941,7 +941,7 @@ them is Ryan's call (spec §0.5).
   • **Medicine & pilot balloons**.
   Button *Enter the stores*.
 - **Aloft menu** (1849's sea menu): Continue · Check supplies & crew · Look at the chart · Change speed (now: X) · Change rations (now: X) · Stop the engines and rest · Make repairs aloft · Send up pilot balloons. Travel button: *Stop the engines & take stock*.
-- **Mast menu** (1849's port menu): Cast off · Check supplies & crew · Look at the chart · Change speed · Change rations · Rest at the mast · Attempt to trade · Talk to people · Buy supplies · Visit the gas plant and the mechanics.
+- **Mast menu** (1849's port menu): Cast off · Check supplies & crew · Look at the chart · Change speed · Change rations · Rest at the mast · Barter with the ground crew · Talk to people · Buy supplies · Visit the gas plant and the mechanics.
 - **Trading at a mast:** intro “A ground-crew foreman looks over your stores.”; none left “Nobody else at the mast wants to trade with you today.”; no offer “You walk the field, but nobody wants what you have.”; accepted “Done. Goods change hands.”
 - **Supplies screen:** “Lift” and “Engines” bars; red “Not everyone aboard has a fur suit.” when furs < crew; red “N watches without coffee” when > 6.
 - **Chart heading:** “Chart of the flight”.
@@ -1181,3 +1181,23 @@ their chances, and that losing flights end at least three ways.
 - The meteorologist's balloons are worth a great deal: a session of 15 at 55% finds ~800 kg
   of petrol for $6 of balloons. Its high median score is the ×3 on a flight that usually
   arrives with petrol in hand.
+
+### The skin
+
+The app's skin (`AroundTheHorn/Journeys/Airship*.swift`, docs/design/journeys-architecture.md
+§2 "Airship skin, as built") follows §1–§19 except:
+
+- Leaving Rome with empty tanks is refused by the app (`Words.departRefusal`): “You can't cast
+  off with empty tanks! The storekeeper shakes his head and points you back to the petrol.”
+- The departure sentence reads “On DATE, the [i]SHIP[/i] slips the mast at Ciampino. …”: the
+  date line ends in “a.m.” or “p.m.”, and a full stop after it doubled.
+- The role screen, its labels and the mast menu's trade row are in this journey's own words
+  (D11), as §2 and §19 now show.
+- The weather turns red in the status panel on the thunderstorm only (the shell's rule: the
+  hardest weather by `harsh`), not on icing fog; the scene rimes the airship white instead.
+- The rest menu reads “1 watch”, “3 watches”, “6 watches (1 day)”, “12 watches (2 days)”.
+- The sun: south of the Arctic it crosses the side of the sky away from the airship, and
+  nights are dark; in a `north` region the midnight sun circles low, at (126, 44) at midnight.
+- The chart is §16's; its Mediterranean coast is crossed at about km 510, while the scene's
+  sea (the region) runs to the Rhône stop at 650.
+- Forced down, the scene puts her on the surface; at the end she comes down over Nome's roofs.
