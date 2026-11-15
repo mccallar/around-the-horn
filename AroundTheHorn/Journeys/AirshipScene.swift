@@ -88,15 +88,28 @@ enum AirshipScene {
 
     static func isNight(_ hour: Int) -> Bool { hour >= 20 || hour < 5 }
 
+    /// The mast she is moored to, if she is: in port at a stop that has one. (At the end
+    /// of the flight she is "in port" at Nome, which has no mast.)
+    static func moored(_ f: SceneFrame) -> String? {
+        guard f.atPort, let g = f.state, AirshipSkin.journey.port(g.currentStop.id) != nil else { return nil }
+        return g.currentStop.id
+    }
+
     /// With the tanks dry, once the flight is under way: a fresh voyage has bought nothing yet.
     static func drifting(_ f: SceneFrame) -> Bool {
-        guard let g = f.state, !f.atPort else { return false }
+        guard let g = f.state, moored(f) == nil, !down(f) else { return false }
         return g.fuel <= 0 && g.day > 0
+    }
+
+    /// Forced down: the flight is over and her lift is gone.
+    static func down(_ f: SceneFrame) -> Bool {
+        guard let g = f.state else { return false }
+        return g.over && g.hull <= 0
     }
 
     /// The stop she is standing at, its arrival told, when it isn't a mast she is moored to.
     static func landmark(_ f: SceneFrame) -> Stop? {
-        guard let g = f.state, !f.atPort, g.stopIndex > 0 else { return nil }
+        guard let g = f.state, moored(f) == nil, !down(f), g.stopIndex > 0 else { return nil }
         let stop = g.currentStop
         return stop.type != .port && g.mile == stop.mile ? stop : nil
     }
@@ -117,13 +130,13 @@ enum AirshipScene {
         let night = dark && !north
         let dry = drifting(f)
         let stop = landmark(f)
-        let port = f.atPort ? f.state?.currentStop.id : nil
+        let port = moored(f)
         let tint: (UInt32) -> Color = { PixelCanvas.mix($0, 0x000000, 1 - s.ground) }
         // How fast the nearest country slides by, in pixels a second.
         let pace = f.moving ? 14 * (dry ? 0.25 : f.weather.speed) + 2 : 1.5
 
         px.sky(top: s.top, bottom: s.bot, horizon: hz)
-        if s.sun && !night { sun(px, f, north: north) }
+        if s.sun && !night { sun(px, f, north: north, moored: port != nil) }
         let drift = f.moving ? (f.weather.sky == .breeze && !following(f.weather) ? 3.2 : 1.6) : 0.4
         px.clouds(s.clouds * 2, Color(hex: s.cloud), t: t, drift: drift)
 
@@ -134,11 +147,12 @@ enum AirshipScene {
         detail(px, country, t: t, pace: pace, rough: s.rough, tint)
         if let port { mast(px, port, t: t, tint) }
         if let stop { landmark(px, stop.id, t: t, tint) }
+        if down(f) { camp(px, f.region, t: t, tint) }
 
         let at = position(f, s)
-        airship(px, f, s, dry: dry, at: at)
+        airship(px, f, s, dry: dry || down(f), at: at)
 
-        if region == "underFog" && port == nil && stop == nil { ceiling(px, t: t) }
+        if region == "underFog" && port == nil && stop == nil && !down(f) { ceiling(px, t: t) }
         if following(f.weather) { streaks(px, t: t, pace: pace) }
         px.air(f.weather.sky, t: t)
 
@@ -151,15 +165,17 @@ enum AirshipScene {
         }
     }
 
-    /// High and crossing the sky in the south; in the north the midnight sun, circling low.
-    static func sun(_ px: PixelCanvas, _ f: SceneFrame, north: Bool) {
+    /// In the south, climbing and sinking across whichever side of the sky she isn't in;
+    /// in the north the midnight sun, circling low.
+    static func sun(_ px: PixelCanvas, _ f: SceneFrame, north: Bool, moored: Bool) {
         let color = Color(hex: 0xFFE27A)
         if north {
             let a = Double(f.hour) / 24 * 2 * .pi
             px.sun(x: (74 + 52 * cos(a)).rounded(.down), y: (40 + 4 * cos(a)).rounded(.down), color)
         } else {
             let across = Double(max(0, min(14, f.hour - 5))) / 14
-            px.sun(x: (138 - across * 122).rounded(.down), y: (5 + abs(Double(f.hour) - 12) * 2.2).rounded(.down), color)
+            let x = (moored ? 60 : 140) - across * 40
+            px.sun(x: x.rounded(.down), y: (5 + abs(Double(f.hour) - 12) * 2.2).rounded(.down), color)
         }
     }
 
@@ -239,7 +255,9 @@ enum AirshipScene {
             let y = (hz + 2 + Double(row) * 3.4).rounded(.down)
             let rs = pace * (0.4 + Double(row) * 0.18)
             for i in 0..<7 {
-                let x = (wrap(Double(i * 29 + row * 17) - t * rs, w + 12) - 6).rounded(.down)
+                // Spread along the row, each nudged its own way, so no two rows line up.
+                let spot = Double(i * 25 + (row * 41) % 25 + (i * 13 + row * 29) % 11)
+                let x = (wrap(spot - t * rs, w + 12) - 6).rounded(.down)
                 let k = (i + row) % 3
                 let jitter = rough > 1 ? jsRounded(sin(t * 3 + Double(i + row))) : 0
                 switch id {
@@ -455,12 +473,46 @@ enum AirshipScene {
         }
     }
 
+    // MARK: Forced down
+
+    /// Beside her where she came down: a camp on the ice, a fishing boat at sea, or a
+    /// farmer and his dog in a field.
+    static func camp(_ px: PixelCanvas, _ region: Region?, t: Double, _ tint: (UInt32) -> Color) {
+        let hz = horizon
+        let ink = Color(hex: 0x2A2A30), face = Color(hex: 0xEFD6B0)
+        if region?.has("north") == true {
+            px.polygon([(104, hz + 6), (111, hz - 2), (118, hz + 6)], tint(0xD9C9A0))
+            px.rect(110, hz + 2, 2, 4, tint(0x6B4A2B))
+            for (i, x) in [122.0, 127, 131].enumerated() {
+                px.rect(x, hz + 2, 1, 3, ink)
+                px.rect(x, hz + 1, 1, 1, face)
+                if i == 1 && Int(t * 2) % 2 == 0 { px.rect(x + 1, hz, 1, 1, ink) }
+            }
+        } else if region?.has("sea") == true {
+            let bob = jsRounded(sin(t * 2))
+            px.rect(112, hz + 6 + bob, 16, 3, tint(0x6B4A2B))
+            px.rect(114, hz + 9 + bob, 12, 1, tint(0x4A2E1A))
+            px.rect(121, hz - 4 + bob, 1, 10, tint(0x4A2E1A))
+            px.rect(122, hz - 3 + bob, 4, 3, tint(0xD9C9A0))
+            px.rect(116, hz + 4 + bob, 1, 2, ink)
+        } else {
+            px.rect(112, hz + 4, 1, 4, ink)
+            px.rect(112, hz + 3, 1, 1, face)
+            px.rect(111, hz + 2, 3, 1, tint(0x6B4A2B))
+            let wag = Int(t * 4) % 2 == 0 ? 1.0 : 0
+            px.rect(116, hz + 6, 4, 2, tint(0x8A6A48))
+            px.rect(119, hz + 5, 2, 1, tint(0x8A6A48))
+            px.rect(115, hz + 5 - wag, 1, 1, tint(0x8A6A48))
+        }
+    }
+
     // MARK: The airship
 
     /// Where her top-left corner is: on the mast, coming down at Nome, or flying, lower
     /// as the gas goes and pitching with the air.
     static func position(_ f: SceneFrame, _ s: Palette) -> (x: Double, y: Double) {
-        if f.atPort { return (mooredX, mooredY) }
+        if moored(f) != nil { return (mooredX, mooredY) }
+        if down(f) { return (flyingX + 8, horizon - 10) }
         if landmark(f)?.id == AirshipSkin.journey.stops.last?.id { return (flyingX + 20, 30) }
         let drop = jsRounded((100 - max(0, min(100, f.hull))) / 10)
         let bob = jsRounded(sin(f.t * (1.4 + s.rough * 0.7)) * (0.5 + s.rough * 0.5))
@@ -530,9 +582,14 @@ enum AirshipScene {
 
     static func label(_ f: SceneFrame) -> String {
         guard let g = f.state else { return "An airship flying north in clear weather" }
-        if f.atPort {
-            let mast = AirshipSkin.journey.port(g.currentStop.id)?.name ?? g.currentStop.short
-            return "Airship moored at the mast at \(mast)"
+        if let id = moored(f) {
+            return "Airship moored at the mast at \(AirshipSkin.journey.port(id)?.name ?? g.currentStop.short)"
+        }
+        if down(f) {
+            let r = f.region
+            return r?.has("north") == true ? "The airship down on the ice, her crew camped beside the gondola"
+                : r?.has("sea") == true ? "The airship down on the sea, a fishing boat coming alongside"
+                : "The airship down in a field, a farmer and his dog looking her over"
         }
         let weather = f.weather.name.lowercased()
         if let stop = landmark(f) {

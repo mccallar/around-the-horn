@@ -517,6 +517,33 @@ final class AirshipSkinTests: XCTestCase {
         XCTAssertEqual(seen.count, air.stops.count)
         has(skin.scene.label(frame(at("pole"), moving: false)), "North Pole")
         has(skin.scene.label(frame(at("barrow"), moving: false)), "Point Barrow")
+
+        // At the end the engine has her "in port" at Nome, which has no mast: she is
+        // still coming down over its roofs, not moored to anything.
+        var end = at("nome")
+        end.weather = air.fairWeather
+        var landed = end
+        landed.atPort = true
+        XCTAssertNil(AirshipScene.moored(frame(landed, moving: false)))
+        XCTAssertEqual(picture(frame(landed, moving: false)), picture(frame(end, moving: false)))
+        has(skin.scene.label(frame(landed, moving: false)), "roofs of Nome")
+    }
+
+    /// Forced down: on the ice with a camp beside her in the north, on the sea, in a field.
+    func testForcedDownIsDrawnWhereSheCameDown() {
+        for (stop, words) in [("kingsbay", "down on the ice"), ("pulham", "down in a field"), ("rhone", "down on the sea")] {
+            var g = nearing(stop)
+            g.weather = air.fairWeather
+            g.hull = 0
+            let failing = picture(frame(g, moving: false))
+            g.over = true
+            let f = frame(g, moving: false)
+            XCTAssertTrue(AirshipScene.down(f))
+            XCTAssertFalse(AirshipScene.drifting(f))
+            XCTAssertNotEqual(picture(f), failing, stop)
+            has(skin.scene.label(f), words)
+            XCTAssertEqual(AirshipScene.position(f, AirshipScene.palette(g.weather)).y, AirshipScene.horizon - 10)
+        }
     }
 
     func testTheNightTheMidnightSunTheWearAndTheDrift() {

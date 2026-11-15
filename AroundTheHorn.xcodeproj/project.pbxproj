@@ -39,6 +39,7 @@
 		42A00B72C6A0E3290224E8B0 /* ChoiceList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 338B3382DF5DB3F0A539995D /* ChoiceList.swift */; };
 		457D26E80866FFA534E4D020 /* SkinContractTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30041FBF2E158954803C5ED6 /* SkinContractTests.swift */; };
 		47AD7D91637B665461598327 /* Horn1849Scene.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0E192B3F213935447BEC520 /* Horn1849Scene.swift */; };
+		48D1CFE2742A32C1FC482AE2 /* AirshipScreenshotUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B9958CF117F65D96C1227 /* AirshipScreenshotUITests.swift */; };
 		4B70AD3EA102F30CF1CF85A0 /* Klondike+Events.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71872D68791ABA1244FB04AD /* Klondike+Events.swift */; };
 		4F8C5D5FB80B7B3F2BD16CBA /* Airship+Masts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6099B49B31492A6F9190EE30 /* Airship+Masts.swift */; };
 		54E22ECBF4E88BF7A4608CA0 /* AirshipScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C802F0633CB47BCA69931C7 /* AirshipScene.swift */; };
@@ -309,6 +310,7 @@
 		C75ACC56221506F21CF03D24 /* BalloonData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalloonData.swift; sourceTree = "<group>"; };
 		C7BBEE9C984E82C11E2A8805 /* Balloon+Choices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Balloon+Choices.swift"; sourceTree = "<group>"; };
 		D3D5EC138C0C4B40C49F14A1 /* StoresTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoresTests.swift; sourceTree = "<group>"; };
+		D44B9958CF117F65D96C1227 /* AirshipScreenshotUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirshipScreenshotUITests.swift; sourceTree = "<group>"; };
 		D78D4D01109F06BE35F45A3F /* VoyageScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoyageScreens.swift; sourceTree = "<group>"; };
 		D9A32CC23A2A3A9A97B2F390 /* TestSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestSupport.swift; sourceTree = "<group>"; };
 		DFB564D802B4628FB60D9483 /* GameEngine+Actions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GameEngine+Actions.swift"; sourceTree = "<group>"; };
@@ -527,6 +529,7 @@
 		965A18746D8A01C6C804C9DF /* AroundTheHornUITests */ = {
 			isa = PBXGroup;
 			children = (
+				D44B9958CF117F65D96C1227 /* AirshipScreenshotUITests.swift */,
 				0F41F0439CB6BDE9D136E712 /* LaunchUITests.swift */,
 				746C70F5F36AC967DD5E9C22 /* RailScreenshotUITests.swift */,
 				2A5B3A3831A7A90C960BDFD0 /* ResumeUITests.swift */,
@@ -849,6 +852,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				48D1CFE2742A32C1FC482AE2 /* AirshipScreenshotUITests.swift in Sources */,
 				CFA59275DDFEF23A3004F4F7 /* LaunchUITests.swift in Sources */,
 				87F0DA05537FCFF0B3BB75A4 /* RailScreenshotUITests.swift in Sources */,
 				A6A0CD5D814E1017E1BCADA0 /* ResumeUITests.swift in Sources */,
