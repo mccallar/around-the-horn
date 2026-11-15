@@ -82,6 +82,8 @@ export class Element {
     this.width = 300;
     this.height = 150;
     this.clientWidth = 360;
+    this.clientLeft = 0;
+    this.clientTop = 0;
     const el = this;
     this.dataset = new Proxy({}, {
       get: (_, k) => el.getAttribute(`data-${String(k).replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}`) ?? undefined,
@@ -220,9 +222,14 @@ export class Element {
     return this.dispatch('click', { detail: 1, button: 0, ...props });
   }
 
+  /** A canvas's content box keeps the picture's shape, as `width: 100%` makes it. */
+  get clientHeight() { return this.clientWidth * this.height / this.width; }
+
+  /** The border box: the content box and a border of clientLeft by clientTop around it. */
   getBoundingClientRect() {
-    const h = this.clientWidth * this.height / this.width;
-    return { left: 0, top: 0, width: this.clientWidth, height: h, right: this.clientWidth, bottom: h };
+    const w = this.clientWidth + 2 * this.clientLeft;
+    const h = this.clientHeight + 2 * this.clientTop;
+    return { left: 0, top: 0, width: w, height: h, right: w, bottom: h };
   }
 
   getContext(kind) {

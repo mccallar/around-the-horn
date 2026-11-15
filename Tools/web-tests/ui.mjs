@@ -87,7 +87,22 @@ async function page({ seed = '13', storage = new MemoryStorage(), journey = 'hor
   check(flow.screen.name === 'role', 'who are you?');
   click('A Nantucket whaler');
   const fields = root.querySelectorAll('input[data-field]');
-  check(fields.length === 6 && fields[0].maxLength === 22 && fields[1].maxLength === 16, 'six fields, with their limits');
+  check(fields.length === 6 && fields.every((f) => !f.hasAttribute('maxlength')), 'six fields, with no maxlength of the browser\'s');
+  // PixelField's limits count Characters, as Swift does: 22 for the ship, 16 for a person.
+  const flag = '\u{1F1FA}\u{1F1F8}';
+  const typed = (f, value, more = {}) => {
+    f.value = value;
+    f.dispatch('input', { isComposing: false, ...more });
+    return f.value;
+  };
+  check(typed(fields[1], flag.repeat(10)) === flag.repeat(10), 'ten flags fit in a name, as in the app');
+  check(typed(fields[1], flag.repeat(20)) === flag.repeat(16), 'twenty are cut to sixteen');
+  check(typed(fields[0], 'x'.repeat(30)) === 'x'.repeat(22), 'a ship\'s name is cut to twenty-two');
+  check(typed(fields[1], '\u{1F469}\u{200D}\u{1F680}'.repeat(17)) === '\u{1F469}\u{200D}\u{1F680}'.repeat(16), 'an astronaut is one character');
+  check(typed(fields[2], '\u{3042}'.repeat(20), { isComposing: true }) === '\u{3042}'.repeat(20), 'nothing is cut while a word is being composed');
+  fields[2].dispatch('compositionend');
+  check(fields[2].value === '\u{3042}'.repeat(16), 'and it is cut when the word is done');
+  for (const f of fields) f.value = '';
   check(fields[0].placeholder === flow.suggestions.ship && fields[0].getAttribute('aria-label') === "Ship's name", 'placeholders and labels');
   p.doc.dispatch('keydown', { key: '1', target: fields[0] });
   settle();
@@ -276,6 +291,7 @@ for (const [seed, role, want] of [['13', 'A Boston', 'finale'], ['11', 'A Nantuc
     `the map: the country, the road, the two ends named (${JSON.stringify(map.ctx.ops)})`);
   check(map.getAttribute('aria-label').startsWith('Map of the railroad from Omaha to Sacramento.'), 'the map says what it shows');
   click('Back');
+  check(flow.v.fishingRefusal == null, `the river can be worked here (${flow.v.fishingRefusal})`);
   if (flow.v.fishingRefusal == null) {
     click('Haul driftwood');
     const river = root.querySelector('canvas');
@@ -283,6 +299,19 @@ for (const [seed, role, want] of [['13', 'A Boston', 'finale'], ['11', 'A Nantuc
     const casts = flow.game.tackle;
     river.click({ clientX: 180, clientY: 200 });
     check(flow.game.tackle === casts - 1, 'a tap on the river casts the grapnel');
+    // The picture sits inside the canvas's 2px border: its corners are the field's.
+    const model = flow.screen.model;
+    const taps = [];
+    model.throwAt = (x, y) => taps.push([x, y]);
+    Object.assign(river, { clientLeft: 2, clientTop: 2, clientWidth: 356 });
+    river.click({ clientX: 2, clientY: 2 });
+    river.click({ clientX: 358, clientY: 2 + river.clientHeight });
+    river.click({ clientX: 180, clientY: 2 + river.clientHeight / 2 });
+    delete model.throwAt;
+    river.clientLeft = river.clientTop = 0;
+    river.clientWidth = 360;
+    const { w, h } = model.field;
+    check(JSON.stringify(taps) === JSON.stringify([[0, 0], [w, h], [w / 2, h / 2]]), `taps land in the drawing as the app's do: ${JSON.stringify(taps)}`);
     river.click({ clientX: 180, clientY: 690 });
     for (let i = 0; i < 3000 && flow.screen.name === 'fishing'; i++) {
       if (i % 40 === 0) p.doc.dispatch('keydown', { key: ' ', target: p.doc.body });

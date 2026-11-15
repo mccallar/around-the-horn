@@ -3,7 +3,7 @@
 // column at most 540 wide, numbered choices, pixel canvases scaled up crisply.
 
 import { describe } from './screens.js';
-import { toHTML, html } from './markup.js';
+import { toHTML, html, characters } from './markup.js';
 import { ContextCanvas } from './pixels.js';
 import { SCENE_W, SCENE_H, sceneFrame, drawChart } from './drawing.js';
 import { drawFishing } from './fishing.js';
@@ -206,7 +206,16 @@ export class UI {
       i.className = 'txt';
       i.type = 'text';
       i.dataset.field = b.id;
-      i.maxLength = b.maxLength;
+      // PixelField's limit, in Characters as Swift counts them. The browser's maxlength
+      // counts UTF-16 units, and would cut a name in emoji to a quarter of its length.
+      const cut = () => {
+        const c = characters(i.value);
+        if (c.length > b.maxLength) i.value = c.slice(0, b.maxLength).join('');
+      };
+      i.addEventListener('input', (e) => {
+        if (!e.isComposing) cut();
+      });
+      i.addEventListener('compositionend', cut);
       i.placeholder = b.placeholder;
       i.setAttribute('aria-label', b.label);
       i.autocomplete = 'off';
@@ -293,9 +302,11 @@ export class UI {
     c.addEventListener('click', (e) => {
       const s = this.flow.screen;
       if (s.name !== 'fishing') return;
+      // Within the drawing, which sits inside the canvas's border, as the app places a tap.
       const r = c.getBoundingClientRect();
       const field = s.model.field;
-      s.model.throwAt((e.clientX - r.left) / r.width * field.w, (e.clientY - r.top) / r.height * field.h);
+      s.model.throwAt((e.clientX - r.left - c.clientLeft) / c.clientWidth * field.w,
+        (e.clientY - r.top - c.clientTop) / c.clientHeight * field.h);
     });
   }
 
