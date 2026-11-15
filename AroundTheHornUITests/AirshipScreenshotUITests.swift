@@ -34,10 +34,11 @@ final class AirshipScreenshotUITests: ScreenshotWalk {
     func settleAloft(_ tries: Int = 12) {
         let halt = app.buttons["Stop the engines & take stock"]
         // Screens are swapped whole, so the button is there exactly when nothing is asked.
-        for _ in 0..<tries where !(halt.exists && !onward.exists) {
+        for _ in 0..<tries {
+            if halt.exists && !onward.exists { return }
             if onward.waitForExistence(timeout: 6) { onward.tap() }
         }
-        XCTAssertTrue(halt.waitForExistence(timeout: 5))
+        XCTFail("never settled aloft")
     }
 
     func testAPickerAndSetup() {
