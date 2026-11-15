@@ -425,6 +425,47 @@ await test('left at Donner Summit, the descent is there to come back to', async 
   noProblems(b);
 });
 
+// MARK: - Breakdowns
+
+/** A train on the Platte from the debug start (stop 2), with `set` applied to it. */
+async function trainAt(set, seed = '9') {
+  const p = await railPlayer({ engine: e1, seeds: ['31'], random: lcg(31) });
+  e1.start({ journey: 'rail', role: 'merchant', ship: 'Prairie Queen', captain: 'Amos', crew: ['Hattie', 'Lars', 'Clara', 'Otto'],
+    year: 1869, month: 9, seed });
+  const s = e1.save([]);
+  p.f.skin.debug.start(s, 2);
+  set(s);
+  p.f.loadForDebug(s);
+  return p;
+}
+
+/** The status box's rows by label: { value, color }. */
+const statusRows = (p) => Object.fromEntries((p.look().blocks.find((b) => b.type === 'status')?.rows ?? [])
+  .map((r) => [plain(r.label), { value: r.value, color: r.color }]));
+
+await test('Ryan\'s report: an engine run down to nothing, no wood, nothing to mend with', async () => {
+  const p = await trainAt((s) => Object.assign(s, { sails: 3, fuel: 0, sailcloth: 0, timber: 0, money: 0 }));
+  p.press('Continue down the line');
+  const meters = [], troubles = [], movedAtZero = [];
+  for (let i = 0; i < 60 && p.screen !== 'gameOver'; i++) {
+    if (p.screen !== 'travel') {
+      p.look().choices.find((c) => c.enabled).act();
+      continue;
+    }
+    const rows = statusRows(p);
+    meters.push(rows['Running gear · Engine'].value);
+    if (rows.Train) troubles.push(`${rows.Train.value}/${rows.Train.color}`);
+    const g = p.f.game, mile = g.mile, zero = Math.round(g.sails) <= 0 || Math.round(g.hull) <= 0;
+    p.timers.fire();
+    if (zero) movedAtZero.push(p.f.game.mile - mile);
+  }
+  check(!meters.some((m) => m.includes('-')), `no meter below 0 (${[...new Set(meters)].slice(-4).join(' | ')})`);
+  check(troubles.some((t) => t === 'Out of wood/red'), `the status box says the wood is gone (${[...new Set(troubles)]})`);
+  check(movedAtZero.every((d) => d === 0), `a train at 0% does not move (${movedAtZero.join(',')})`);
+  check(p.screen === 'gameOver', `with nothing to mend her and no money the run ends (${p.screen})`);
+  noProblems(p);
+});
+
 // MARK: - Two voyages at once
 
 await test('a voyage on each journey, in progress at once, each with its own save', async () => {
