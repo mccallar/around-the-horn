@@ -151,7 +151,7 @@ show these lines are retaken with the next screenshot walk.
 
 ## D12 — The web version runs the engine itself, compiled to WebAssembly (2026-11-14)
 
-Ryan ruled that the browser runs the exact Swift engine, not a second copy of the rules.
+It was ruled that the browser runs the exact Swift engine, not a second copy of the rules.
 `HornWeb/` is a JSON bridge over the engine's public calls (GameController's, one for
 one), built by `Tools/build_web.sh` into the committed `web/horn.wasm` (web/README.md).
 Under WASI the engine imports FoundationEssentials instead of Foundation: the full
