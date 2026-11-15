@@ -19,8 +19,11 @@ const errors = [];
 const realError = console.error;
 console.error = (...a) => errors.push(a.map(String).join(' '));
 
-/** A page: the flow, the UI and the elements it draws in. */
-async function page({ seed = '13', storage = new MemoryStorage() } = {}) {
+/**
+ * A page: the flow, the UI and the elements it draws in. `journey` opens on its title card
+ * (`?journey=<id>`); null, as a plain visit does.
+ */
+async function page({ seed = '13', storage = new MemoryStorage(), journey = 'horn1849' } = {}) {
   const doc = new FakeDocument();
   const win = new FakeWindow();
   const app = doc.body.appendChild(doc.createElement('div'));
@@ -30,7 +33,7 @@ async function page({ seed = '13', storage = new MemoryStorage() } = {}) {
   const timers = new FakeTimers();
   const played = [];
   const flow = new Flow({ engine: await engine(), storage, timers, random: lcg(Number(seed)), seed: () => seed,
-    sound: (c) => played.push(c) });
+    sound: (c) => played.push(c), journey });
   const clicks = [];
   const ui = new UI(flow, { root, banner, sound, synth: { play: (c) => clicks.push(c) }, doc, win });
   const settle = () => ui.render();
@@ -57,7 +60,8 @@ async function page({ seed = '13', storage = new MemoryStorage() } = {}) {
   check(p.sound.textContent === '♪ on' && p.sound.getAttribute('aria-label') === 'Sound on', 'the sound button');
   const h1 = root.querySelector('h1');
   check(h1 && h1.innerText === 'AROUND\nTHE HORN' && h1.getAttribute('aria-label') === 'Around the Horn', 'the title, on two lines');
-  check(buttons().map(label).join('/') === 'Sail for California/Learn about the passage/See the top ten', 'the title card\'s choices');
+  check(buttons().map(label).join('/') === 'Sail for California/Learn about the passage/See the top ten/Choose another journey',
+    'the title card\'s choices');
   check(buttons()[0].querySelector('.num').textContent === '1.', 'numbered');
   const scene = root.querySelector('canvas');
   p.win.frame();

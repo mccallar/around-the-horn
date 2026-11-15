@@ -225,7 +225,7 @@ await test('a save standing on the last stop is told of its arrival', async () =
   const storage = new MemoryStorage();
   const p = await Player.make({ engine: e1, storage, seeds: ['3'] });
   p.setUp();
-  p.topUp(SAFE);
+  p.topUp(SAFE.horn1849);
   p.press(1);
   const s = p.f.engine.save([]);
   const J = p.f.journey;
@@ -242,7 +242,7 @@ await test('leaving the page under way stops the clock on a menu', async () => {
   const storage = new MemoryStorage();
   const p = await Player.make({ engine: e1, storage, seeds: ['31'] });
   p.setUp();
-  p.topUp(SAFE);
+  p.topUp(SAFE.horn1849);
   p.press(1);
   p.press('Set sail');
   check(p.screen === 'travel' && p.timers.running === 1, 'under way, the clock running');
@@ -260,14 +260,15 @@ await test('leaving the page under way stops the clock on a menu', async () => {
 await test('every menu row leads somewhere and back', async () => {
   const p = await Player.make({ engine: e1, seeds: ['41'], random: lcg(41) });
   p.setUp();
-  p.topUp(SAFE);
+  p.topUp(SAFE.horn1849);
   p.press(1);
   p.press('Set sail');
   p.press('Heave to');
   check(p.screen === 'seaMenu', 'hove to');
   const rows = p.labels();
   check(rows.join('/') === 'Continue on your voyage/Check supplies & crew/Look at the chart/Change pace (Steady)'
-    + '/Change rations (Full)/Heave to and rest/Make repairs/Go fishing', `the sea menu (${rows.join('/')})`);
+    + '/Change rations (Full)/Heave to and rest/Make repairs/Go fishing/Save and return to the title',
+    `the sea menu, with the way back to the picker's journeys (${rows.join('/')})`);
   for (const [row, screen] of [['Check supplies', 'supplies'], ['Look at the chart', 'chart'], ['Make repairs', 'repairs']]) {
     p.press(row);
     check(p.screen === screen, `${row} opens ${screen}`);

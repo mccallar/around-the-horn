@@ -96,10 +96,17 @@ export class Player {
     this.screens = [];
   }
 
-  static async make({ engine: e, storage = new MemoryStorage(), seeds = ['1'], random = lcg(7), log } = {}) {
+  /**
+   * `journey` opens on that journey's title card, as the app's UI tests launch with
+   * `-journey <id>`; null opens as a plain launch does, on the picker or the journey last
+   * chosen.
+   */
+  static async make({ engine: e, storage = new MemoryStorage(), seeds = ['1'], random = lcg(7), log,
+    journey = 'horn1849' } = {}) {
     const timers = new FakeTimers();
     let n = 0;
-    const flow = new Flow({ engine: e ?? await engine(), storage, timers, random, seed: () => seeds[n++ % seeds.length] });
+    const flow = new Flow({ engine: e ?? await engine(), storage, timers, random, seed: () => seeds[n++ % seeds.length],
+      journey });
     return new Player({ flow, timers, log });
   }
 
@@ -114,6 +121,14 @@ export class Player {
   }
 
   labels() { return this.look().choices.map((c) => plain(c.label)); }
+
+  /** The skin's words for the voyage in hand. */
+  get words() { return this.f.skin.words(this.f.v); }
+
+  /** Presses the choice that reads as the skin's `markup` does, as far as it goes. */
+  say(markup, input) {
+    this.press(plain(markup), input);
+  }
 
   /** Presses the choice whose words start with `start` (or the n-th, 1-based). */
   press(start, input) {
@@ -144,13 +159,14 @@ export class Player {
     }
   }
 
-  /** From the title card to the first shop. */
-  setUp({ role = 'A Boston', month = 'January 1849', names = {} } = {}) {
-    this.press('Sail for California');
-    this.press(role);
+  /** From the title card to the first shop: the journey's first role and usual month by default. */
+  setUp({ role, month, names = {} } = {}) {
+    const J = this.f.journey, card = this.f.skin.card;
+    this.say(card.start);
+    this.press(role ?? J.roles[0].label);
     this.press('Use these names', names);
-    this.press(month);
-    this.press('Enter the shop');
+    this.press(month ?? MONTHS[J.id]);
+    this.say(card.enterShop);
   }
 
   /** What to buy to bring each store up to `targets` (stored units), as shop presses. */
@@ -181,18 +197,23 @@ export class Player {
 
   /**
    * Plays to the end, carefully: tops up at every port, mends and patches, rests a sick
-   * crew once a stop, takes the first answer offered, fishes once. Heaves to every few
-   * days to look after the ship. The ending's screen name, or 'limit'.
+   * crew once a stop, takes the first answer offered, forages once. Stops every few turns
+   * to look after the vessel. `layOver` more rests of the longest kind at every port, as a
+   * player in no hurry takes them. The ending's screen name, or 'limit'. Every row it
+   * presses is the skin's own words, so it plays any journey.
    */
-  voyage({ targets = SAFE, heaveEvery = 4, fishOnce = true, maxSteps = 20000, onScreen = () => {} } = {}) {
+  voyage({ targets = SAFE[this.f.journey.id], heaveEvery = 4, fishOnce = true, maxSteps = 20000, layOver = 0,
+    onScreen = () => {} } = {}) {
     let ticks = 0, fished = !fishOnce;
-    const rested = new Set(), shopped = new Set();
+    const rested = new Set(), shopped = new Set(), laid = new Map();
+    let restFor = 3;
     this.caught = null;
     for (let n = 0; n < maxSteps; n++) {
       const name = this.screen;
       if (onScreen(this) === 'stop') return 'stopped';
       const d = this.look();
-      const g = this.f.game;
+      const g = this.f.game, v = this.f.v;
+      const w = g ? this.words : null;
       switch (name) {
         case 'finale':
         case 'gameOver':
@@ -224,39 +245,44 @@ export class Player {
           const key = `${g.stopIndex}`;
           if (!shopped.has(key)) {
             shopped.add(key);
-            this.press('Buy supplies');
-          } else if (this.f.v.canRepairHullAtYard && g.hull < 70) {
-            this.press('Visit the shipyard');
+            this.say(w.buy);
+          } else if ((laid.get(key) ?? 0) < layOver) {
+            laid.set(key, (laid.get(key) ?? 0) + 1);
+            restFor = Math.max(...this.f.journey.rules.restChoices);
+            this.say(w.restInPort);
+          } else if (v.canRepairHullAtYard && g.hull < 70) {
+            this.say(w.yard);
           } else {
-            this.press('Weigh anchor');
+            this.say(w.leavePort);
           }
           break;
         }
         case 'shipyard':
-          if (this.f.v.canRepairHullAtYard && g.hull < 70) this.press('Haul out');
-          else if (this.f.v.canRecutSailsAtYard && g.sails < 70) this.press('Have new sails');
-          else this.press('Leave the shipyard');
+          if (v.canRepairHullAtYard && g.hull < 70) this.say(w.yardHull(v.shipyardHullCost));
+          else if (v.canRecutSailsAtYard && g.sails < 70) this.say(w.yardSails(v.shipyardSailsCost));
+          else this.say(w.leaveYard);
           break;
         case 'seaMenu':
-          if ((g.sails < 45 && this.f.v.canMendSails) || (g.hull < 45 && this.f.v.canPatchHull)) {
-            this.press('Make repairs');
-          } else if (this.f.v.averageHP < 50 && !rested.has(g.stopIndex)) {
+          if ((g.sails < 45 && v.canMendSails) || (g.hull < 45 && v.canPatchHull)) {
+            this.say(w.repairs);
+          } else if (v.averageHP < 50 && !rested.has(g.stopIndex)) {
             rested.add(g.stopIndex);
-            this.press('Heave to and rest');
-          } else if (!fished && g.tackle > 0) {
+            restFor = 3;
+            this.say(w.rest);
+          } else if (!fished && g.tackle > 0 && v.fishingRefusal == null) {
             fished = true;
-            this.press('Go fishing');
+            this.say(w.forage);
             if (this.screen === 'fishing') this.caught = this.fish();
           } else {
-            this.press('Continue on your voyage');
+            this.say(w.carryOn);
           }
           break;
         case 'rest':
-          this.press('3 days');
+          this.say(w.restChoice(restFor));
           break;
         case 'repairs':
-          if (g.sails < 45 && this.f.v.canMendSails) this.press('Mend sails');
-          else if (g.hull < 45 && this.f.v.canPatchHull) this.press('Patch the hull');
+          if (g.sails < 45 && v.canMendSails) this.say(w.mend);
+          else if (g.hull < 45 && v.canPatchHull) this.say(w.patch);
           else this.press('Done');
           break;
         default:
@@ -267,5 +293,14 @@ export class Player {
   }
 }
 
-/** What the careful player keeps aboard, in stored units (the golden voyages' bot's list). */
-export const SAFE = { food: 1500, water: 600, limes: 10, clothes: 5, meds: 3, sailcloth: 3, timber: 3, tackle: 40 };
+/**
+ * What the careful player keeps aboard, in stored units, by journey: for 1849 the golden
+ * voyages' bot's list; on the Iron Road a full tender and tank car, and the rest likewise.
+ */
+export const SAFE = {
+  horn1849: { food: 1500, water: 600, limes: 10, clothes: 5, meds: 3, sailcloth: 3, timber: 3, tackle: 40 },
+  rail: { fuel: 160, water: 1200, food: 300, clothes: 5, meds: 3, sailcloth: 3, timber: 3, tackle: 40 },
+};
+
+/** The month each journey's careful player leaves in. */
+export const MONTHS = { horn1849: 'January 1849', rail: 'October 1869' };

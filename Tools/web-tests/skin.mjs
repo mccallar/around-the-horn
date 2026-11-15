@@ -142,7 +142,7 @@ for (const name of ['Scene', 'Chart', 'Forage']) {
 
 const e = await engine();
 const timers = new FakeTimers();
-const flow = new Flow({ engine: e, storage: new MemoryStorage(), timers, random: lcg(5), seed: () => '77' });
+const flow = new Flow({ engine: e, storage: new MemoryStorage(), timers, random: lcg(5), seed: () => '77', journey: 'horn1849' });
 const J = flow.journey;
 const sk = flow.skin;
 let screensLooked = 0;
