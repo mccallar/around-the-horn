@@ -1,4 +1,8 @@
+#if os(WASI)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 // The Iron Road: 1869. Omaha to Sacramento on the new Pacific Railroad, 1,776 miles with a
 // chartered freight, a wood-burning engine and five people, a few weeks after the last

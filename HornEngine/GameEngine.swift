@@ -1,4 +1,8 @@
+#if os(WASI)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 /// The game's rules (spec §5). Mutates `state` and returns `[Interrupt]`; never touches
 /// UI. Every random number comes from `rng`.

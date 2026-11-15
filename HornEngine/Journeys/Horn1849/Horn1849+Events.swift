@@ -1,4 +1,8 @@
+#if os(WASI)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 // The 1849 voyage's sea events (spec §5.6), landmarks (§5.7) and the choices both raise.
 

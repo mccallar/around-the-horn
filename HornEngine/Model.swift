@@ -1,4 +1,8 @@
+#if os(WASI)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 // The shapes every journey fills in. The tables themselves live in each journey's folder
 // (Journeys/<Name>/); nothing in this file knows which voyage is being played.

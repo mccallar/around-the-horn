@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0e14">
+<title>Around the Horn</title>
+<link rel="preload" href="fonts/VT323-Regular.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="preload" href="fonts/PressStart2P-Regular.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="preload" href="horn.wasm" as="fetch" crossorigin>
+<link rel="stylesheet" href="style.css">
+<script>
+  // Browsers run the game's modules, and fetch horn.wasm, only from a web server. When
+  // main.js cannot run (the page opened straight from disk, or its code failed to load),
+  // it cannot say why, so this does.
+  function cannotStart(why) {
+    const say = () => {
+      const p = document.createElement('p');
+      p.className = 'failed';
+      p.textContent = why;
+      document.getElementById('screen').replaceChildren(p);
+    };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', say);
+    else say();
+  }
+  if (location.protocol === 'file:') {
+    cannotStart('The game could not start: a browser runs it only from a web server, not from a file opened on disk. '
+      + "From the repository's root, run python3 -m http.server -d web 8000 and open http://localhost:8000.");
+  }
+</script>
+<script type="module" src="js/main.js" onerror="cannotStart('The game could not start: its code did not load.')"></script>
+</head>
+<body>
+<div id="app">
+  <div class="topbar"><span id="banner" aria-hidden="true"></span><button id="snd" type="button" hidden></button></div>
+  <main id="screen"><p class="amber blink" aria-hidden="true">▌</p></main>
+</div>
+<noscript><p class="center dim">This game needs JavaScript.</p></noscript>
+</body>
+</html>
