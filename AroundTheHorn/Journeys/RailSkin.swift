@@ -123,6 +123,7 @@ enum RailSkin {
             fractional: [],
             singular: true,
             lots: [.water],
+            departRefusal: nil,
             vesselHeading: "The \(g.ship)",
             suppliesNote: "Pace: \(pace.name) · Rations: \(rations.name) · "
                 + (left > 0 ? "\(span(left)) left on the contract" : "[red]the freight is late[/red]"),

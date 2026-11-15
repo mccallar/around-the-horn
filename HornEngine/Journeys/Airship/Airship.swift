@@ -34,11 +34,11 @@ public final class Airship: Journey {
         deficiency = AirshipData.watchFatigue
         ailments = AirshipData.mildPool
 
-        roles[.merchant] = RoleInfo(label: "Be a financier from New York", title: "financier",
+        roles[.merchant] = RoleInfo(label: "A New York financier", title: "financier",
                                     money: 1200, mend: 25, patch: 20, catchLimit: 450, aim: 1.5)
-        roles[.shipwright] = RoleInfo(label: "Be an airship engineer from Rome", title: "engineer",
+        roles[.shipwright] = RoleInfo(label: "An engineer from the airship works at Rome", title: "engineer",
                                       money: 580, mend: 40, patch: 35, catchLimit: 450, aim: 1.5)
-        roles[.whaler] = RoleInfo(label: "Be a meteorologist from Bergen", title: "meteorologist",
+        roles[.whaler] = RoleInfo(label: "A meteorologist trained at Bergen", title: "meteorologist",
                                   money: 470, mend: 25, patch: 20, catchLimit: 900, aim: 4)
 
         paces[.easy] = PaceInfo(name: "Economical", speed: 190, hp: 0.5, wear: 0.6, fuel: 150,

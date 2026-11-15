@@ -271,6 +271,9 @@ final class GameController {
     }
 
     func depart() {
+        if let g = game, let why = skin.words(g).departRefusal {
+            return message(why) { [weak self] in self?.enterFirstShop() }
+        }
         guard let text = run({ $0.depart() }) else {
             return message(journey.text.noProvisions) { [weak self] in self?.enterFirstShop() }
         }

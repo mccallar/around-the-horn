@@ -60,9 +60,9 @@ calendar advances four hours a turn:
 
 | id | Menu label | Start money | Score × | Perk |
 |---|---|---|---|---|
-| `financier` | Be a financier from New York | **$1,200** | ×1 | — |
-| `engineer` | Be an airship engineer from Rome | **$580** | ×2 | Repairs aloft: a bag of ballast restores **+35** lift (others +20); a box of engine spares restores **+40** engines (others +25) |
-| `meteorologist` | Be a meteorologist from Bergen | **$470** | ×3 | Pilot balloons: hit padding **4** px (others 1.5); can use **900 kg** of winds per session (others 450) |
+| `financier` | A New York financier | **$1,200** | ×1 | — |
+| `engineer` | An engineer from the airship works at Rome | **$580** | ×2 | Repairs aloft: a bag of ballast restores **+35** lift (others +20); a box of engine spares restores **+40** engines (others +25) |
+| `meteorologist` | A meteorologist trained at Bergen | **$470** | ×3 | Pilot balloons: hit padding **4** px (others 1.5); can use **900 kg** of winds per session (others 450) |
 
 `title` (as in “Bonus for being a ___”): `financier`, `engineer`, `meteorologist`.
 

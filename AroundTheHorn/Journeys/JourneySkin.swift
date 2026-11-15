@@ -22,7 +22,7 @@ struct JourneySkin {
 
 /// Every skin. Adding a journey's skin is this line and its file.
 enum Skins {
-    static let all: [JourneySkin] = [Horn1849Skin.skin, RailSkin.skin]
+    static let all: [JourneySkin] = [Horn1849Skin.skin, RailSkin.skin, AirshipSkin.skin]
 
     static func skin(_ id: String) -> JourneySkin? { all.first { $0.id == id } }
 }
@@ -131,6 +131,9 @@ struct Words {
     /// Items the shop prices by the lot they are sold in (`Item.step` of them at a time)
     /// where one alone costs pennies: "$2/100 gallons".
     let lots: Set<ItemKey>
+    /// Why the first port won't let the vessel go yet, beyond the engine's own refusal
+    /// (nothing to eat): an airship with empty tanks. Nil when nothing else stops it.
+    let departRefusal: String?
     let vesselHeading: String
     /// The line under the meters: pace, rations and anything worth a warning.
     let suppliesNote: String
