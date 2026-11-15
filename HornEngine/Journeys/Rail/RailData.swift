@@ -31,8 +31,8 @@ enum RailData {
     static let walkSickness = 0.3
     /// Speed on a turn with too little wood (the engine's `noFuelSpeed`), and what burning
     /// fence posts and sagebrush takes out of the engine on each such turn.
-    static let noWoodSpeed = 0.15
-    static let noWoodWear = 1.0...3.0
+    static let noWoodSpeed = 0.2
+    static let noWoodWear = 0.5...1.5
 
     enum Season { case spring, summer, autumn, winter }
 
