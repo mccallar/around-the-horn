@@ -166,11 +166,13 @@ is 32 bits in WebAssembly; no amount in the game comes near 2^31.
 
 ## D13 — The web game is the app's shell, ported file for file (2026-11-14)
 
-The browser game (web/README.md) plays 1849 through `horn.wasm` with the app's own flow,
-words and pictures: `web/js/flow.js` is GameController line for line (the queue, the
-0.7 s turn, the save that keeps what is waiting), and the 1849 skin's four files are the
-Swift skin's, function for function. `Tools/web-tests/skin.mjs` checks every literal,
-colour, sprite row and map point against the Swift source. What the web has that the app
+The browser game (web/README.md) plays 1849 and the Iron Road through `horn.wasm` with
+the app's own flow, words and pictures: `web/js/flow.js` is GameController line for line
+(the picker, the queue, the 0.7 s turn, the save that keeps what is waiting), and each
+journey's four skin files are its Swift skin's, function for function.
+`Tools/web-tests/skin.mjs` and `rail-skin.mjs` check every literal, colour, sprite row and
+map point against the Swift source. `?journey=<id>` and `horn.lastJourney` stand for the
+app's `-journey` launch argument and the journey it remembers. What the web has that the app
 does not, or lacks: saves in `localStorage` (`horn.save-<id>`, `horn.topten-<id>`); Space
 throws at the nearest fish, as VoiceOver's double-tap does in the app; no haptics; text
 sizes fixed at the app's defaults rather than following Dynamic Type; canvases drawn a
