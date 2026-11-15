@@ -20,6 +20,9 @@ function storage() {
 }
 
 async function main() {
+  // Opened from disk, index.html has said why the game cannot start (where a browser does
+  // run modules from a file, it still won't fetch horn.wasm from one).
+  if (location.protocol === 'file:') return;
   const root = document.getElementById('screen');
   try {
     const engine = await loadEngine(new URL('../horn.wasm', import.meta.url));

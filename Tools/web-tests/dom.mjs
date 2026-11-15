@@ -127,6 +127,11 @@ export class Element {
     n.parentNode = null;
   }
 
+  replaceChildren(...nodes) {
+    this.textContent = '';
+    for (const n of nodes) this.appendChild(n);
+  }
+
   replaceWith(n) {
     const p = this.parentNode;
     if (!p) throw new Error('replaceWith on an element with no parent');

@@ -3,6 +3,7 @@
 // keys and taps work, the canvases are drawn, and a whole voyage can be played by clicking.
 //
 //   node Tools/web-tests/ui.mjs
+import { readFileSync } from 'node:fs';
 import { FakeDocument, FakeWindow } from './dom.mjs';
 import { Player, FakeTimers, engine, lcg, plain } from './player.mjs';
 import { Flow, MemoryStorage } from '../../web/js/flow.js';
@@ -326,6 +327,38 @@ for (const [seed, role, want] of [['13', 'A Boston', 'finale'], ['11', 'A Nantuc
   check(c.problems.length === 0, `the buttons read as the screens say: ${c.problems.slice(0, 3).join(' | ')}`);
   p.settle();
   check(root.querySelector('.msg').innerText.startsWith('Sacramento! The '), 'the arrival on the page');
+}
+
+// MARK: - The page opened from disk, where main.js never runs: index.html says why.
+{
+  const html = readFileSync(new URL('../../web/index.html', import.meta.url), 'utf8');
+  const code = html.match(/<script>([\s\S]*?)<\/script>/)?.[1] ?? '';
+  const handler = html.match(/<script type="module" src="js\/main\.js" onerror="([^"]*)"><\/script>/)?.[1];
+  const visit = (protocol, readyState = 'interactive') => {
+    const doc = new FakeDocument();
+    const screen = doc.body.appendChild(doc.createElement('main'));
+    screen.innerHTML = '<p class="amber blink" aria-hidden="true">▌</p>';
+    doc.getElementById = (id) => (id === 'screen' ? screen : null);
+    doc.readyState = readyState;
+    const cannotStart = new Function('document', 'location', `${code}\nreturn cannotStart;`)(doc, { protocol });
+    return { doc, screen, cannotStart };
+  };
+  const words = (screen) => screen.querySelector('p.failed')?.textContent ?? '';
+  const disk = visit('file:');
+  check(words(disk.screen).includes('python3 -m http.server -d web 8000') && words(disk.screen).includes('http://localhost:8000'),
+    `opened from disk, the page says how to serve it: ${words(disk.screen)}`);
+  check(!disk.screen.querySelector('.blink'), 'and the cursor gives way to it');
+  const early = visit('file:', 'loading');
+  check(words(early.screen) === '', 'while the page is still being read, the message waits');
+  early.doc.dispatch('DOMContentLoaded');
+  check(words(early.screen).startsWith('The game could not start'), 'and comes when it is read');
+  const served = visit('http:');
+  check(words(served.screen) === '' && served.screen.querySelector('.blink'), 'served, the page waits for the game');
+  check(handler != null, 'the module script has a handler for code that does not load');
+  new Function('cannotStart', handler ?? '')(served.cannotStart);
+  check(words(served.screen) === 'The game could not start: its code did not load.', 'and it says so');
+  check(readFileSync(new URL('../../web/js/main.js', import.meta.url), 'utf8').includes("if (location.protocol === 'file:') return;"),
+    'main.js leaves the message alone where a browser runs it from disk');
 }
 
 console.error = realError;
