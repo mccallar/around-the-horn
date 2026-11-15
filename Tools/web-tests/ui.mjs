@@ -240,6 +240,65 @@ for (const [seed, role, want] of [['13', 'A Boston', 'finale'], ['11', 'A Nantuc
   check(pg.root.querySelector('.msg') !== null && pg.buttons().length >= 1, 'the ending is on the page');
 }
 
+// MARK: - The picker and the Iron Road on the page
+
+{
+  const p = await page({ seed: '2', journey: null });
+  const { root, banner, flow, buttons, label, click } = p;
+  p.settle();
+  check(flow.screen.name === 'picker' && banner.textContent === 'AROUND THE HORN', `a plain visit opens on the picker (${banner.textContent})`);
+  check(root.querySelector('h2').textContent === 'Choose a journey', 'choose a journey');
+  check(buttons().map((b) => b.querySelector('.detail')?.textContent).join('|') === flow.journeys.map((j) => j.subtitle).join('|'),
+    'each row with its subtitle under it');
+  click('The Iron Road');
+  check(banner.textContent === 'THE IRON ROAD · 1869', 'the Iron Road\'s banner');
+  const h1 = root.querySelector('h1');
+  check(h1.innerText === 'THE IRON\nROAD' && h1.getAttribute('aria-label') === 'The Iron Road', 'its title, on two lines');
+  p.win.frame();
+  const scene = root.querySelector('canvas');
+  check(scene.getAttribute('aria-label') === 'A wood-burning freight train on the prairie' && scene.ctx.ops.fillRect > 100,
+    'the train on the title card');
+  check(label(buttons().at(-1)) === 'Choose another journey', 'and the way back to the picker');
+
+  const c = new Clicker(p);
+  c.setUp();
+  c.topUp({ fuel: 160, water: 1200, food: 300, clothes: 5, meds: 3, sailcloth: 3, timber: 3, tackle: 40 });
+  click('Pay');
+  click('Whistle off');
+  p.timers.fire();
+  p.settle();
+  while (!['seaMenu', 'portMenu'].includes(flow.screen.name)) click(label(buttons().find((b) => !b.disabled)));
+  click('Look at the map');
+  const map = root.querySelector('canvas');
+  p.win.frame(16);
+  check(map.width === 240 * Math.round(360 * 2 / 240) && map.height === 104 * Math.round(360 * 2 / 240), `the map's canvas (${map.width}×${map.height})`);
+  check(map.ctx.ops.fillRect > 300 && map.ctx.ops.fill >= 3 && map.ctx.ops.fillText === 2 * map.ctx.ops.clearRect,
+    `the map: the country, the road, the two ends named (${JSON.stringify(map.ctx.ops)})`);
+  check(map.getAttribute('aria-label').startsWith('Map of the railroad from Omaha to Sacramento.'), 'the map says what it shows');
+  click('Back');
+  if (flow.v.fishingRefusal == null) {
+    click('Haul driftwood');
+    const river = root.querySelector('canvas');
+    check(river.className.includes('fish') && river.height === 200 * Math.round(720 / 160), 'the river from the bank');
+    const casts = flow.game.tackle;
+    river.click({ clientX: 180, clientY: 200 });
+    check(flow.game.tackle === casts - 1, 'a tap on the river casts the grapnel');
+    river.click({ clientX: 180, clientY: 690 });
+    for (let i = 0; i < 3000 && flow.screen.name === 'fishing'; i++) {
+      if (i % 40 === 0) p.doc.dispatch('keydown', { key: ' ', target: p.doc.body });
+      p.win.frame(16);
+    }
+    p.settle();
+    check(flow.screen.name !== 'fishing', 'the haul is landed');
+  }
+  while (!['seaMenu', 'portMenu'].includes(flow.screen.name)) click(label(buttons().find((b) => !b.disabled)));
+  const end = c.voyage();
+  check(end === 'finale', `the Iron Road, clicked through to Sacramento (${end})`);
+  check(c.problems.length === 0, `the buttons read as the screens say: ${c.problems.slice(0, 3).join(' | ')}`);
+  p.settle();
+  check(root.querySelector('.msg').innerText.startsWith('Sacramento! The '), 'the arrival on the page');
+}
+
 console.error = realError;
 check(errors.length === 0, `nothing went to the console's errors: ${errors.slice(0, 3).join(' | ')}`);
 console.log(`ui: ${passed} checks passed, ${failures.length} failed`);

@@ -13,6 +13,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { repo } from './lib.mjs';
+import { portChecks, hexes } from './port.mjs';
 import { engine, lcg, describe, wordProblems, markupProblems, FakeTimers } from './player.mjs';
 import { Flow, MemoryStorage } from '../../web/js/flow.js';
 import { BufferCanvas } from '../../web/js/pixels.js';
@@ -30,68 +31,9 @@ function check(ok, what) {
 }
 
 const read = (p) => readFileSync(path.join(repo, p), 'utf8');
+const portCheck = (swiftFiles, jsFiles, ignore, o) => portChecks(check, swiftFiles, jsFiles, ignore, o);
 
 // MARK: - The port
-
-/** A Swift file's string literals, each as the fixed pieces around its interpolations. */
-function swiftLiterals(src) {
-  const out = [];
-  // Comments go first: a doc comment can hold quotes.
-  const code = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
-  let i = 0;
-  while (i < code.length) {
-    if (code[i] !== '"') { i++; continue; }
-    let j = i + 1;
-    const pieces = [];
-    let cur = '';
-    while (j < code.length && code[j] !== '"') {
-      if (code[j] === '\\' && code[j + 1] === '(') {
-        pieces.push(cur);
-        cur = '';
-        let depth = 1;
-        j += 2;
-        while (j < code.length && depth > 0) {
-          if (code[j] === '(') depth++;
-          else if (code[j] === ')') depth--;
-          else if (code[j] === '"') {
-            // A literal inside the interpolation: skip it.
-            j++;
-            while (j < code.length && code[j] !== '"') j += code[j] === '\\' ? 2 : 1;
-          }
-          j++;
-        }
-        continue;
-      }
-      if (code[j] === '\\') {
-        cur += code.slice(j, j + 2);
-        j += 2;
-        continue;
-      }
-      cur += code[j++];
-    }
-    pieces.push(cur);
-    out.push(pieces);
-    i = j + 1;
-  }
-  return out;
-}
-
-function portCheck(swiftFiles, jsFiles, ignore = new Set(), { allHaveWords = true } = {}) {
-  const js = jsFiles.map(read).join('\n');
-  for (const f of swiftFiles) {
-    let n = 0;
-    for (const pieces of swiftLiterals(read(f))) {
-      const whole = pieces.join('…');
-      if (ignore.has(whole)) continue;
-      for (const piece of pieces) {
-        if (piece.trim().length < 2 || !/[A-Za-z]/.test(piece)) continue;
-        n++;
-        check(js.includes(piece), `${path.basename(f)}: "${piece}" (of "${whole}") is not in the web version`);
-      }
-    }
-    if (allHaveWords) check(n > 0, `${f} has words to port`);
-  }
-}
 
 // The skin, word for word. The Swift's lone key names and debug names are not player words.
 portCheck(['AroundTheHorn/Journeys/Horn1849Skin.swift', 'AroundTheHorn/Journeys/Horn1849Chart.swift',
@@ -110,8 +52,6 @@ new Set([
   'title', '%.2f', 'VT323-Regular', 'PressStart2P-Regular',
 ]), { allHaveWords: false });
 
-/** Every 0x hex colour in a file, in order. */
-const hexes = (src) => [...src.matchAll(/0x([0-9A-Fa-f]{6})\b/g)].map((m) => m[1].toUpperCase());
 for (const name of ['Scene', 'Chart', 'Forage']) {
   const sw = hexes(read(`AroundTheHorn/Journeys/Horn1849${name}.swift`));
   const js = hexes(read(`web/js/journeys/horn1849-${name.toLowerCase()}.js`));

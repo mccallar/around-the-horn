@@ -10,7 +10,7 @@
 //   sailor's word, no "undefined" and no "NaN".
 //
 //   node Tools/web-tests/rail.mjs
-import { Player, engine, lcg, describe, texts, plain } from './player.mjs';
+import { Player, engine, lcg, describe, plain, sailorProblems } from './player.mjs';
 import { MemoryStorage } from '../../web/js/flow.js';
 import { APP_NAME } from '../../web/js/screens.js';
 import { reward } from '../../web/js/fishing.js';
@@ -37,26 +37,6 @@ const screenWords = (f) => {
   return JSON.stringify(d.blocks.filter((b) => b.type !== 'scene')) + JSON.stringify(d.choices.map((c) => [c.label, c.enabled]));
 };
 const wordsOn = (d) => d.blocks.map((b) => plain(b.markup ?? b.text ?? b.label ?? '')).filter(Boolean).join(' ');
-
-// MARK: - The sailor's words
-
-/**
- * 1849's words that must never reach the Iron Road. The engine's one simile ("sways under
- * you like a ship at a dock", crossing Dale Creek in a wind) is the road's own sentence.
- */
-const SAILOR = /\b(ships?|captain|captains|nm|sails?|sailed|sailing|sailors?|nautical|harpoons?|fishing|fish|voyage|chandler|shipyard|anchor)\b/i;
-const OWN = ['like a ship at a dock'];
-
-function sailorProblems(d, where) {
-  const out = [];
-  for (const { text } of texts(d)) {
-    let t = plain(text);
-    for (const o of OWN) t = t.split(o).join('');
-    const m = t.match(SAILOR);
-    if (m) out.push(`${where}: "${m[0]}" in ${JSON.stringify(text)}`);
-  }
-  return out;
-}
 
 /** A rail player whose every look is also checked for sailor's words and the rail banner. */
 async function railPlayer(o = {}) {

@@ -86,6 +86,24 @@ export function wordProblems(d, where = '') {
   return out;
 }
 
+/**
+ * 1849's words that must never reach the Iron Road. The engine's one simile ("sways under
+ * you like a ship at a dock", crossing Dale Creek in a wind) is the road's own sentence.
+ */
+const SAILOR = /\b(ships?|captain|captains|nm|sails?|sailed|sailing|sailors?|nautical|harpoons?|fishing|fish|voyage|chandler|shipyard|anchor)\b/i;
+const OWN = ['like a ship at a dock'];
+
+export function sailorProblems(d, where) {
+  const out = [];
+  for (const { text } of texts(d)) {
+    let t = plain(text);
+    for (const o of OWN) t = t.split(o).join('');
+    const m = t.match(SAILOR);
+    if (m) out.push(`${where}: "${m[0]}" in ${JSON.stringify(text)}`);
+  }
+  return out;
+}
+
 export class Player {
   constructor({ flow, timers, log = false }) {
     this.f = flow;
