@@ -96,6 +96,7 @@ enum Horn1849Skin {
             distance: { formatNumber(Double($0)) },
             meters: ("Hull", "Sails"),
             clock: nil,
+            trouble: nil,
             cash: "Cash",
             currency: "$",
             storeNames: [.clothes: "Woolens", .sailcloth: "Sailcloth", .timber: "Timber"],

@@ -8,7 +8,7 @@
 // function of the voyage takes the bridge's view `v`: `v.state` is the GameState, and the
 // rest is what the app reads off it (`v.dateText`, `v.healthLabel`, `v.region`, …).
 
-import { escape, formatNumber } from '../markup.js';
+import { escape, formatNumber, jsRounded } from '../markup.js';
 import * as scene from './rail-scene.js';
 import { chart } from './rail-chart.js';
 import { forage } from './rail-forage.js';
@@ -104,6 +104,15 @@ export const card = {
   rankLegend: 'Superintendent of the Line 7,000+ · Master Conductor 4,000+ · Brakeman 2,000+ · Section Hand',
 };
 
+/**
+ * The train's plight, for the status box: given out (the engine's rule, `Rail.brokenDown`:
+ * a meter showing 0%), or no wood.
+ */
+export function trouble(g) {
+  const broken = jsRounded(g.sails) <= 0 || jsRounded(g.hull) <= 0, dry = g.fuel <= 0;
+  return broken ? (dry ? 'Broken down, no wood' : 'Broken down') : dry ? 'Out of wood' : null;
+}
+
 /** What things are called on the road, worked out for the voyage in hand. */
 export function words(J, v) {
   const g = v.state;
@@ -140,6 +149,7 @@ export function words(J, v) {
     meters: ['Running gear', 'Engine'],
     // Late from the turn the engine calls it late, as the note and the score have it.
     clock: { label: 'Contract', value: left > 0 ? `${sp(left)} left` : left === 0 ? 'late' : `${sp(-left)} late` },
+    trouble: trouble(g) === null ? null : { label: 'Train', value: trouble(g) },
     cash: 'Cash',
     currency: '$',
     storeNames: { clothes: 'Blankets' },

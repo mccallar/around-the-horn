@@ -208,4 +208,44 @@ final class ResumeTests: XCTestCase {
         XCTAssertEqual(p.loadVoyage(Rail.id)!.pending, waiting)
         XCTAssertEqual(p.loadSave(Rail.id), s)
     }
+
+    /// A train whose engine has given out, on the Platte, under way.
+    func brokenDown(_ c: GameController, fittings: Int, money: Double) {
+        var s = Skins.skin(Rail.id)!.debug.start(2, 9)
+        s.sails = 0
+        s.sailcloth = fittings
+        s.money = money
+        c.loadForDebug(s)
+        c.startTravel()
+        c.tick()
+    }
+
+    func testABreakdownIsStillThereAfterAResumeAndMendingRollsOn() {
+        let c = controller(Rail.id)
+        brokenDown(c, fittings: 1, money: 100)
+        guard case .choice(let ask) = c.screen, case .custom("breakdown", _) = ask.kind else { return XCTFail("\(c.screen)") }
+        let mile = c.game!.mile
+        let d = quitAndResume(Rail.id)
+        guard case .choice(let again) = d.screen else { return XCTFail("the breakdown again: \(d.screen)") }
+        XCTAssertEqual(again, ask)
+        d.choose(again, option: 2)
+        guard case .seaMenu = d.screen else { return XCTFail("taking stock: \(d.screen)") }
+        XCTAssertEqual(d.game!.mile, mile)
+        d.startTravel()
+        d.tick()
+        guard case .choice(let third) = d.screen else { return XCTFail("still broken down: \(d.screen)") }
+        d.choose(third, option: 0)
+        XCTAssertEqual(answerMessages(d).last?.hasSuffix("[green](Engine now 25%)[/green]"), true)
+        guard case .travel = d.screen else { return XCTFail("rolling again: \(d.screen)") }
+        d.tick()
+        XCTAssertGreaterThan(d.game!.mile, mile)
+    }
+
+    func testNothingToMendWithAndNoMoneyEndsTheRun() {
+        let c = controller(Rail.id)
+        brokenDown(c, fittings: 0, money: 0)
+        guard case .gameOver(let title, _) = c.screen else { return XCTFail("\(c.screen)") }
+        XCTAssertTrue(title.hasPrefix("Stranded at mile"))
+        XCTAssertFalse(p.hasSave(Rail.id))
+    }
 }
