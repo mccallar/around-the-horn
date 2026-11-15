@@ -7,8 +7,21 @@
 export const STYLES = ['red', 'green', 'amber', 'dim', 'teal', 'i', 'b'];
 const COLORED = new Set(['red', 'green', 'amber', 'dim', 'teal']);
 
+// Swift's Characters: the app's Markup.runs reads text Character by Character, and a "["
+// or a "]" another character joins (a combining mark after it, a Prepend before it) is
+// that other character, not a bracket. Intl.Segmenter's graphemes are the same clusters.
+const GRAPHEMES = typeof Intl === 'object' && typeof Intl.Segmenter === 'function'
+  ? new Intl.Segmenter('en', { granularity: 'grapheme' }) : null;
+
+/** The text as Swift's Characters (by code point where a browser can't segment). */
+export function characters(s) {
+  return GRAPHEMES ? Array.from(GRAPHEMES.segment(s), (g) => g.segment) : Array.from(s);
+}
+
 /** Markup.runs: the text in runs, each with the styles open over it, innermost last. */
 export function runs(s) {
+  if (!s.includes('[')) return s ? [{ text: s, styles: [] }] : [];
+  const c = characters(s);
   const out = [];
   const stack = [];
   let buf = '';
@@ -17,16 +30,16 @@ export function runs(s) {
     buf = '';
   };
   let i = 0;
-  while (i < s.length) {
-    if (s.startsWith('[[', i)) {
+  while (i < c.length) {
+    if (c[i] === '[' && c[i + 1] === '[') {
       buf += '[';
       i += 2;
       continue;
     }
-    if (s[i] === '[') {
-      const close = s.indexOf(']', i);
+    if (c[i] === '[') {
+      const close = c.indexOf(']', i);
       if (close >= 0) {
-        const tag = s.slice(i + 1, close);
+        const tag = c.slice(i + 1, close).join('');
         if (tag.startsWith('/')) {
           const st = tag.slice(1);
           const at = STYLES.includes(st) ? stack.lastIndexOf(st) : -1;
@@ -44,7 +57,7 @@ export function runs(s) {
         }
       }
     }
-    buf += s[i];
+    buf += c[i];
     i += 1;
   }
   flush();
@@ -75,9 +88,14 @@ export function toHTML(s) {
   }).join('');
 }
 
-/** TextMarkup.escape: a player's string made safe to put in markup. */
+/**
+ * TextMarkup.escape, as Foundation finds "[" on Apple platforms: every "[" doubled, unless
+ * the scalar after it makes it another character (a combining mark, anything
+ * Grapheme_Extend, an emoji skin tone). A Prepend before it does not, unlike a Character.
+ */
+const LONE_BRACKET = /\[(?![\p{Grapheme_Extend}\p{Emoji_Modifier}])/gu;
 export function escape(s) {
-  return String(s).replaceAll('[', '[[');
+  return String(s).replace(LONE_BRACKET, '[[');
 }
 
 /** The engine's `formatNumber`: floor, then thousands separators. */

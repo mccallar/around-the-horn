@@ -270,18 +270,10 @@ public final class Bridge {
     }
 }
 
-/// `trimmingCharacters(in: .whitespacesAndNewlines)`, which FoundationEssentials lacks:
-/// Unicode's White_Space trimmed from both ends, scalar by scalar.
+/// GameController's trim, `trimmingCharacters(in: .whitespacesAndNewlines)`: Foundation's
+/// on the Mac, the engine's own under WASI (HornEngine/Text.swift), so the two cannot part.
 func trimmed(_ s: String) -> String {
-    #if os(WASI)
-    let u = s.unicodeScalars
-    var lo = u.startIndex, hi = u.endIndex
-    while lo < hi && u[lo].properties.isWhitespace { lo = u.index(after: lo) }
-    while hi > lo && u[u.index(before: hi)].properties.isWhitespace { hi = u.index(before: hi) }
-    return String(String.UnicodeScalarView(u[lo..<hi]))
-    #else
-    return s.trimmingCharacters(in: .whitespacesAndNewlines)
-    #endif
+    s.trimmingCharacters(in: .whitespacesAndNewlines)
 }
 
 // MARK: - Replies

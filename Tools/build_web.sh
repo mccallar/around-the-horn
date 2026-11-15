@@ -43,9 +43,13 @@ if [ -n "${SWIFT_WASM_SDKS:-}" ]; then set -- "$@" --swift-sdks-path "$SWIFT_WAS
 
 # A reactor: no main to run; the page calls _initialize, then the exports.
 # -Osize and --strip-all keep the download down; --gc-sections drops what nothing calls.
+# -disable-incremental-llvm-codegen: otherwise each object carries a hash of its LLVM
+# module (the .swift_modhash data, kept in the linked file), and that hash covers the
+# debug info's paths, so the same source built in another checkout gave other bytes.
 "$SWIFT" build --disable-sandbox "$@" --scratch-path "$SCRATCH" -c release --product HornWeb \
     -Xswiftc -Xclang-linker -Xswiftc -mexec-model=reactor \
     -Xswiftc -Osize \
+    -Xswiftc -Xfrontend -Xswiftc -disable-incremental-llvm-codegen \
     -Xlinker --strip-all -Xlinker --gc-sections
 
 OUT="$SCRATCH/release/HornWeb.wasm"

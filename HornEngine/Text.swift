@@ -38,15 +38,19 @@ func jsRound(_ x: Double) -> Double {
 #if os(WASI)
 // Under WASI the engine links FoundationEssentials alone (the full Foundation brings
 // tens of megabytes of ICU data to the browser), and Essentials lacks the two String
-// methods the engine uses. These are them, for what the engine asks of them.
-struct CharacterSet {
+// methods the engine uses. These are them, as Apple's Foundation answers what the engine
+// asks of them. They are public so the web bridge (HornWeb) trims as the engine does.
+// Tools/web-tests/parity.mjs holds them to Foundation on a Mac, scalar by scalar.
+public struct CharacterSet {
     let contains: (Unicode.Scalar) -> Bool
-    /// Unicode's White_Space: the Z categories, U+0009 to U+000D and U+0085.
-    static let whitespacesAndNewlines = CharacterSet { $0.properties.isWhitespace }
+    /// Apple's `.whitespacesAndNewlines`: Unicode's White_Space (the Z categories, U+0009
+    /// to U+000D and U+0085) and U+200B ZERO WIDTH SPACE, which Apple's set also holds.
+    public static let whitespacesAndNewlines = CharacterSet { $0.properties.isWhitespace || $0 == "\u{200B}" }
 }
 
 extension StringProtocol {
-    func trimmingCharacters(in set: CharacterSet) -> String {
+    /// Scalar by scalar from both ends, as Foundation trims.
+    public func trimmingCharacters(in set: CharacterSet) -> String {
         let u = unicodeScalars
         var lo = u.startIndex, hi = u.endIndex
         while lo < hi && set.contains(u[lo]) { lo = u.index(after: lo) }
@@ -54,23 +58,29 @@ extension StringProtocol {
         return String(String.UnicodeScalarView(u[lo..<hi]))
     }
 
-    /// By Characters, as Foundation's search on Apple platforms goes: a "[" carrying a
-    /// combining mark is another character and is left alone.
+    /// Foundation's search on Apple platforms, for a target of plain characters such as
+    /// TextMarkup.escape's "[": scalar for scalar, except that a match the next scalar
+    /// would extend (a combining mark, anything Grapheme_Extend, an emoji skin tone) is
+    /// another character and is left alone. This is not Swift's Character: a Prepend before
+    /// the target, or a zero-width joiner or a spacing mark after it, does not stop a match.
     func replacingOccurrences(of target: String, with replacement: String) -> String {
-        let t = Array(target)
-        let u = Array(self)
-        var out = ""
+        let t = Array(target.unicodeScalars)
+        let u = Array(unicodeScalars)
+        var out = String.UnicodeScalarView()
         var i = 0
         while i < u.count {
-            if !t.isEmpty && i + t.count <= u.count && Array(u[i..<i + t.count]) == t {
-                out += replacement
-                i += t.count
+            let end = i + t.count
+            if !t.isEmpty && end <= u.count && Array(u[i..<end]) == t
+                && (end == u.count || !(u[end].properties.isGraphemeExtend || u[end].properties.isEmojiModifier))
+            {
+                out.append(contentsOf: replacement.unicodeScalars)
+                i = end
             } else {
                 out.append(u[i])
                 i += 1
             }
         }
-        return out
+        return String(out)
     }
 }
 #endif
