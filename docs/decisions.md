@@ -157,12 +157,21 @@ one), built by `Tools/build_web.sh` into the committed `web/horn.wasm` (web/READ
 Under WASI the engine imports FoundationEssentials instead of Foundation: the full
 Foundation brings ICU's data and made the file 62 MB, Essentials 13 MB. Essentials lacks
 the two String methods the engine uses (`trimmingCharacters`, `replacingOccurrences`), so
-Text.swift has them behind `#if os(WASI)`, matching by Character as Apple's Foundation
-does. On Apple platforms nothing changes: the `#if` keeps `import Foundation`, and the
-three gates are untouched. `Tools/web-tests/golden.mjs` replays the 300 golden voyages
+Text.swift has them behind `#if os(WASI)`, answering as Apple's Foundation does: the trim
+takes Unicode's White_Space and U+200B, scalar by scalar, and the escape doubles a "["
+unless the scalar after it extends it (Grapheme_Extend, an emoji skin tone). That is not
+Swift's Character: a Prepend before the "[" (U+0600, say) does not stop it, and the app's
+Markup, which reads by Character, then takes what follows for a tag, so a name such as
+"؀[red]Queen" colours the rest of a line in the app. The web reads markup by Character too
+and does the same; a fix belongs to the engine's escape or the app's Markup. On Apple
+platforms nothing changes: the `#if` keeps `import Foundation`, and the three gates are
+untouched. `Tools/web-tests/golden.mjs` replays the 300 golden voyages
 through horn.wasm against the Mac's fixture, and `parity.mjs` compares every reply of
-seeded 1849 and rail voyages between horn.wasm and the bridge built for the Mac. An Int
-is 32 bits in WebAssembly; no amount in the game comes near 2^31.
+seeded 1849 and rail voyages between horn.wasm and the bridge built for the Mac, and the
+escape beside every scalar (the marks new in Unicode 17.0 aside, which Swift's tables know
+and macOS 15's Foundation does not). An Int is 32 bits in WebAssembly; no amount in the
+game comes near 2^31. The build leaves out the per-object LLVM module hash, which covered
+the checkout's paths, so horn.wasm is the same byte for byte wherever it is built.
 
 ## D13 — The web game is the app's shell, ported file for file (2026-11-14)
 

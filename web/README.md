@@ -12,8 +12,8 @@ From the repository's root:
     python3 -m http.server -d web 8000
 
 then open <http://localhost:8000>, and pick a journey. Any static file server will do;
-opening the files straight from disk will not, since browsers won't load WebAssembly from
-`file://`.
+opening the files straight from disk will not, since browsers won't run the modules or load
+WebAssembly from `file://` (the page says so).
 
 ## Rebuild horn.wasm
 
@@ -23,7 +23,9 @@ them. Then:
 
     SWIFT_WASM_TOOLCHAIN=<toolchain>/usr/bin SWIFT_WASM_SDKS=<sdk directory> sh Tools/build_web.sh
 
-It writes `web/horn.wasm` and prints its size (about 13 MB). Commit the new file with the
+It writes `web/horn.wasm` and prints its size (about 13 MB). The same source gives the same
+bytes from any checkout and any scratch directory, so a build after a change that does not
+reach the engine or the bridge leaves the file as it was. Commit the new file with the
 change that needed it, and run the tests below.
 
 ## Test
@@ -33,11 +35,12 @@ With Node 20 or later, from the repository's root:
     node Tools/web-tests/imports.mjs   # the WASI shim answers exactly what horn.wasm imports
     node Tools/web-tests/golden.mjs    # the 300 golden 1849 voyages hash as the Mac recorded them (~1 min)
     node Tools/web-tests/parity.mjs    # horn.wasm and the Mac build give identical replies (~1 min)
+    node Tools/web-tests/text.mjs      # names trimmed, "[" escaped and markup read as the app does (~3 s)
     node Tools/web-tests/play.mjs      # 1849's flow, played through its screens: wins, losses, saves
     node Tools/web-tests/skin.mjs      # 1849's skin is the app's, and every scene, chart and catch draws
     node Tools/web-tests/rail.mjs      # the Iron Road played: the picker, on time, late, forfeit, saves (~3 s)
     node Tools/web-tests/rail-skin.mjs # the Iron Road's skin is the app's; every scene, map and haul draws (~20 s)
-    node Tools/web-tests/ui.mjs        # the page on a small DOM of its own: keys, taps, the picker, whole runs clicked
+    node Tools/web-tests/ui.mjs        # the page on a small DOM of its own: keys, taps, fields, the picker, whole runs clicked, opened from disk
 
 `parity.mjs` builds the bridge for the Mac with `swift build` (Xcode's Swift); set
 `HORN_NATIVE` to an already built `HornWeb` to skip that, and `VOYAGES` to play more than
