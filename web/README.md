@@ -102,3 +102,9 @@ With Node 20 or later, from the repository's root:
 - Randomness: `newSeed()` draws 64 bits with `crypto.getRandomValues` for each voyage, and
   the engine plays it with its own `SeededRNG`, so a seed replays a voyage exactly.
   Loading a save takes a seed too (`view.rng` continues where the voyage left off).
+
+## Licences
+
+The game is under the MIT licence (`../LICENSE`). The fonts in `fonts/` are under the SIL
+Open Font License (`fonts/OFL.txt`). `horn.wasm` also contains parts of the Swift toolchain
+and wasi-libc; their notices are in `THIRD-PARTY-NOTICES.txt`.
