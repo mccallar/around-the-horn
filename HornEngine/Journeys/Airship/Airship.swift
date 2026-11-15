@@ -110,7 +110,7 @@ public final class Airship: Journey {
         wrecked: { "The [i]\($0)[/i] has been forced down." },
         wreckedBody: forcedDownOnIce,
         depart: { s in
-            "The [i]\(TextMarkup.escape(s.ship))[/i] slips the mast at Ciampino on \(s.dateText). The ground crew lets go the lines, the engines take up their roar, and Rome shrinks to a smudge of domes and umbrella pines. Ahead lie nine thousand six hundred kilometres, most of them cold."
+            "On \(s.dateText), the [i]\(TextMarkup.escape(s.ship))[/i] slips the mast at Ciampino. The ground crew lets go the lines, the engines take up their roar, and Rome shrinks to a smudge of domes and umbrella pines. Ahead lie nine thousand six hundred kilometres, most of them cold."
         },
         noProvisions: "You can't cast off with no provisions! The storekeeper shakes his head and points you back inside.",
         rested: { turns, h in

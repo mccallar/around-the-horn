@@ -6,7 +6,7 @@ import XCTest
 /// on before the player sees what the turn raised (a stop is behind you before its
 /// arrival is offered), so the save keeps what is still waiting, and a quit at any point
 /// in the queue resumes at that point: the warning, then the stop's question, then the
-/// end. Both journeys, because the queue is the shell's.
+/// end. Every journey with a skin, because the queue is the shell's.
 @MainActor
 final class ResumeTests: XCTestCase {
     var p: Persistence!
@@ -186,6 +186,48 @@ final class ResumeTests: XCTestCase {
         _ = asksAfterAResume(Horn1849.id, at: "rio") {
             if case .portArrival("rio") = $0.kind { true } else { false }
         }
+    }
+
+    // MARK: Over the Pole
+
+    func testTheFlightEndsAfterAResumeAtNome() { endsAfterAResume(Airship.id) }
+
+    func testAnOldFlightSaveAtNomeStillArrives() { arrivesFromAnOldSaveAtTheEnd(Airship.id) }
+
+    /// The Pole's question, then the wireless forecasts it leads to: both still asked, and
+    /// the height chosen is the country she flies over.
+    func testThePolesQuestionIsStillAskedAfterAResume() {
+        let c = asksAfterAResume(Airship.id, at: "pole", custom("pole"))
+        guard case .choice(let e) = c.screen else { return }
+        c.choose(e, option: 1)
+        guard case .choice(let offer) = c.screen, case .custom("forecast", _) = offer.kind else {
+            return XCTFail("then the forecasts: \(c.screen)")
+        }
+        c.choose(offer, option: 0)
+        answerMessages(c)
+        guard case .seaMenu = c.screen else { return XCTFail("a menu, not the loop, after a resume: \(c.screen)") }
+        XCTAssertEqual(c.game!.region.id, "underFog")
+        XCTAssertEqual(c.game!.vars["airship.forecasts"], 1)
+        XCTAssertNotNil(p.loadSave(Airship.id))
+    }
+
+    func testKingsBaysMastIsStillOfferedAfterAResume() {
+        let c = asksAfterAResume(Airship.id, at: "kingsbay") {
+            if case .portArrival("kingsbay") = $0.kind { true } else { false }
+        }
+        guard case .choice(let e) = c.screen else { return }
+        c.choose(e, option: 0)
+        answerMessages(c)
+        guard case .portMenu = c.screen else { return XCTFail("\(c.screen)") }
+        XCTAssertTrue(c.game!.atPort)
+    }
+
+    func testPointBarrowIsStillOfferedAfterAResume() {
+        let c = asksAfterAResume(Airship.id, at: "barrow", custom("barrow"))
+        guard case .choice(let e) = c.screen else { return }
+        let petrol = c.game!.fuel
+        c.choose(e, option: 0)
+        XCTAssertGreaterThan(c.game!.fuel, petrol, "the camp's petrol is taken on")
     }
 
     // MARK: The file

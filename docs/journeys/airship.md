@@ -501,7 +501,7 @@ Requires provisions > 0 **and** petrol > 0. Refusals:
 - “You can't cast off with no provisions! The storekeeper shakes his head and points you back inside.”
 - “You can't cast off with empty tanks! The storekeeper shakes his head and points you back inside.”
 
-Departure message: “The [i]SHIP[/i] slips the mast at Ciampino on DATE. The ground crew lets go the lines, the engines take up their roar, and Rome shrinks to a smudge of domes and umbrella pines. Ahead lie nine thousand six hundred kilometres, most of them cold.”
+Departure message: “On DATE, the [i]SHIP[/i] slips the mast at Ciampino. The ground crew lets go the lines, the engines take up their roar, and Rome shrinks to a smudge of domes and umbrella pines. Ahead lie nine thousand six hundred kilometres, most of them cold.”
 
 ---
 

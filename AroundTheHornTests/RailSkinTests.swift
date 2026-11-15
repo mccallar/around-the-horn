@@ -623,7 +623,7 @@ final class RailSkinTests: XCTestCase {
     func testTheAppOpensOnThePickerWithBothJourneys() {
         let c = controller()
         guard case .picker = c.screen else { return XCTFail("\(c.screen)") }
-        XCTAssertEqual(c.journeys.map(\.id), [Horn1849.id, Rail.id])
+        XCTAssertEqual(Array(c.journeys.map(\.id).prefix(2)), [Horn1849.id, Rail.id])
         XCTAssertTrue(c.hasPicker)
         XCTAssertEqual(c.inProgress, [])
         c.chooseJourney(Rail.id)

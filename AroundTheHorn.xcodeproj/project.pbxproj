@@ -84,6 +84,7 @@
 		A7AB9B118B3F8AD2574268BF /* BalloonTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B24C73833E8D0B97DD454423 /* BalloonTests.swift */; };
 		B18E94BFE40B9A36A7CD9AD2 /* Trade.swift in Sources */ = {isa = PBXBuildFile; fileRef = 101DC7E1126F062ED71F4B56 /* Trade.swift */; };
 		B82A3CF0792A5880E0AD517E /* BalloonData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C75ACC56221506F21CF03D24 /* BalloonData.swift */; };
+		BA8736C890A2831893403D4B /* AirshipSkinTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A807B556E06A4B497DA1B0B /* AirshipSkinTests.swift */; };
 		BB3B1340A172CD88BFC5EB27 /* SynthTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 272E9C7692171434AE6EB489 /* SynthTests.swift */; };
 		BD171FCFC9A30310717AB16D /* Airship.swift in Sources */ = {isa = PBXBuildFile; fileRef = 866BA73A1522E7813F5F2CBB /* Airship.swift */; };
 		BE239210C0C9AEAB4405C196 /* RailForage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CE3341E0B7B3F8DB390A723 /* RailForage.swift */; };
@@ -270,6 +271,7 @@
 		76DD21EFECB1A9AE7B8FAF27 /* Rail+Events.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Rail+Events.swift"; sourceTree = "<group>"; };
 		771DF7A9C743BD52E884EC30 /* Feedback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Feedback.swift; sourceTree = "<group>"; };
 		797CE7F576E9F694AA35ECB0 /* Mars+Events.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Mars+Events.swift"; sourceTree = "<group>"; };
+		7A807B556E06A4B497DA1B0B /* AirshipSkinTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirshipSkinTests.swift; sourceTree = "<group>"; };
 		7B60571B9AA8419DCF959008 /* prototype-traces.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "prototype-traces.json"; sourceTree = "<group>"; };
 		7C802F0633CB47BCA69931C7 /* AirshipScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirshipScene.swift; sourceTree = "<group>"; };
 		7F27D7F015ED625BDF69DBC4 /* Audio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Audio.swift; sourceTree = "<group>"; };
@@ -368,6 +370,7 @@
 		082DF9CE8A352F79D91584D3 /* AroundTheHornTests */ = {
 			isa = PBXGroup;
 			children = (
+				7A807B556E06A4B497DA1B0B /* AirshipSkinTests.swift */,
 				F099379FFDDA51A0BAFA3352 /* AppInfoTests.swift */,
 				711BBE96B8E230C92444CFFA /* ChartAndFishingTests.swift */,
 				6308324207F0B19AB2C51161 /* GameControllerTests.swift */,
@@ -858,6 +861,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BA8736C890A2831893403D4B /* AirshipSkinTests.swift in Sources */,
 				F1D702D9F2213EB9973B2A82 /* AppInfoTests.swift in Sources */,
 				71E118F1BA3180A2F7AF4028 /* ChartAndFishingTests.swift in Sources */,
 				27FAEDA776B23EEDF97FA2D0 /* GameControllerTests.swift in Sources */,
