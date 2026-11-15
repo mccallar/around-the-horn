@@ -1,0 +1,218 @@
+/* The app's look (AroundTheHorn/UI/Theme.swift), which is the prototype's CSS:
+   dark navy, parchment text, two pixel fonts, square bordered boxes, scanlines. */
+
+@font-face {
+  font-family: 'VT323';
+  src: url('fonts/VT323-Regular.ttf') format('truetype');
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'Press Start 2P';
+  src: url('fonts/PressStart2P-Regular.ttf') format('truetype');
+  font-display: block;
+}
+
+:root {
+  --bg: #0a0e14;
+  --panel: #101722;
+  --ink: #ece4cf;
+  --dim: #8f8a7a;
+  --amber: #f2b632;
+  --teal: #56d6c4;
+  --red: #ff6b5b;
+  --green: #8fe388;
+  --line: #2a3547;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'VT323', ui-monospace, Menlo, monospace;
+  font-size: 22px;
+  line-height: 1.15;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+/* 1-pixel dark lines every 3, over everything, never touchable. */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .16) 0 1px, transparent 1px 3px);
+  z-index: 50;
+}
+
+#app { max-width: 540px; margin: 0 auto; padding: 12px 14px 48px; min-height: 100vh; }
+
+h1 {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 21px;
+  line-height: 1.5;
+  font-weight: normal;
+  color: var(--amber);
+  margin: 16px 0 4px;
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+h2 {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 13px;
+  font-weight: normal;
+  color: var(--amber);
+  margin: 16px 0 10px;
+  line-height: 1.6;
+}
+
+p { margin: 9px 0; }
+
+.mk { white-space: pre-line; }
+.it { font-style: italic; }
+
+.dim { color: var(--dim); }
+.amber { color: var(--amber); }
+.teal { color: var(--teal); }
+.red { color: var(--red); }
+.green { color: var(--green); }
+.center { text-align: center; }
+.small { font-size: 18px; }
+
+canvas.pix {
+  width: 100%;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  display: block;
+  border: 2px solid var(--line);
+  background: #000;
+}
+
+canvas.fish { touch-action: manipulation; cursor: crosshair; }
+canvas.fish:focus-visible { outline: none; border-color: var(--amber); }
+
+.choices { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+
+button.choice {
+  font: inherit;
+  font-size: 22px;
+  text-align: left;
+  background: transparent;
+  color: var(--ink);
+  border: 2px solid var(--line);
+  padding: 9px 12px;
+  min-height: 48px;
+  cursor: pointer;
+  border-radius: 0;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+button.choice:hover, button.choice:focus-visible { border-color: var(--amber); outline: none; }
+button.choice:active:not(:disabled) { background: var(--amber); color: #000; }
+button.choice:active:not(:disabled) * { color: #000; }
+button.choice .num { color: var(--amber); }
+button.choice:disabled { opacity: .4; cursor: default; }
+button.choice.primary { border-color: var(--amber); }
+button.choice .detail { display: block; font-size: 18px; color: var(--dim); margin-top: 2px; }
+
+.status { border: 2px solid var(--line); padding: 8px 12px; margin-top: 10px; background: var(--panel); }
+.row { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+.row > span:last-child { text-align: right; }
+.row.pad { padding: 3px 0; }
+/* The final score: its figure amber, its label in ink as every row's label is. */
+.row.total { color: var(--amber); padding-top: 6px; }
+.row.total > span:first-child { color: var(--ink); }
+.rule { height: 2px; background: var(--line); margin-top: 3px; }
+.box { border: 2px solid var(--line); padding: 10px 12px; margin: 10px 0; background: var(--panel); }
+.msg { border: 2px solid var(--amber); padding: 14px; margin: 12px 0; background: var(--panel); font-size: 24px; line-height: 1.2; }
+.note { color: var(--teal); font-size: 19px; margin-top: 4px; min-height: 22px; }
+
+input.txt {
+  font: inherit;
+  font-size: 22px;
+  background: #000;
+  color: var(--ink);
+  border: 2px solid var(--line);
+  padding: 8px 10px;
+  width: 100%;
+  border-radius: 0;
+  margin-bottom: 6px;
+  caret-color: var(--amber);
+}
+
+input.txt:focus { border-color: var(--amber); outline: none; }
+input.txt::placeholder { color: #5c5a52; }
+label.fld { display: block; margin: 10px 0 4px; color: var(--dim); }
+
+.bar { height: 9px; background: #000; border: 1px solid var(--line); margin: 3px 0 2px; padding: 1px; }
+.bar > i { display: block; height: 100%; }
+
+.item {
+  border-bottom: 1px dashed var(--line);
+  padding: 9px 0;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 10px;
+  align-items: center;
+}
+
+.qty { display: flex; align-items: center; gap: 4px; }
+
+.qty button {
+  font: inherit;
+  font-size: 24px;
+  width: 44px;
+  height: 42px;
+  background: transparent;
+  color: var(--amber);
+  border: 2px solid var(--line);
+  cursor: pointer;
+  border-radius: 0;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.qty button.down, .qty button:active { background: var(--amber); color: #000; }
+.qty button:focus-visible { outline: none; border-color: var(--amber); }
+.qty span { min-width: 66px; text-align: center; }
+
+.topbar { display: flex; justify-content: space-between; align-items: center; color: var(--dim); font-size: 18px; margin-bottom: 8px; }
+
+.topbar button {
+  font: inherit;
+  font-size: 18px;
+  background: none;
+  border: 1px solid var(--line);
+  color: var(--dim);
+  cursor: pointer;
+  padding: 2px 8px;
+}
+
+.topbar button:focus-visible { outline: none; border-color: var(--amber); }
+
+.place { display: flex; align-items: baseline; gap: 8px; padding: 3px 0; }
+.place .who { flex: 1; }
+.place .score { min-width: 56px; text-align: right; }
+
+.crew { padding: 6px 0; border-bottom: 1px dashed var(--line); }
+.grave { padding: 6px 0; border-bottom: 1px dashed var(--line); }
+.legend { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; font-size: 18px; margin-top: 8px; }
+.tally { margin-bottom: 4px; }
+
+.failed { color: var(--red); }
+
+/* The cursor while the engine loads. */
+.blink { animation: blink 1.1s steps(2) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .blink { animation: none; } }

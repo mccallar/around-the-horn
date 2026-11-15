@@ -1,4 +1,8 @@
+#if os(WASI)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 // Arrivals and choices every journey shares: reaching a stop, going ashore, a trader's
 // offer, and the plumbing that routes an answer back to the journey that asked.

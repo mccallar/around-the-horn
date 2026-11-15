@@ -1,4 +1,8 @@
+#if os(WASI)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 // One journey: its tables, its sentences, and the handful of rules that are its own.
 //

@@ -1,4 +1,8 @@
+#if os(WASI)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 // The Iron Road's tables: what the train carries, where it stops, the country it crosses
 // and the weather there. Everything is in this namespace; nothing extends a shared type.

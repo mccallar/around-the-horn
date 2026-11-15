@@ -148,3 +148,42 @@ port row is "Seek a trade". Words only: no number, formula or random draw change
 prototype parity, balance and golden-voyage tests are untouched. The rail journey's
 matching lines were reworded the same day. The reference screenshots of the screens that
 show these lines are retaken with the next screenshot walk.
+
+## D12 — The web version runs the engine itself, compiled to WebAssembly (2026-11-14)
+
+It was ruled that the browser runs the exact Swift engine, not a second copy of the rules.
+`HornWeb/` is a JSON bridge over the engine's public calls (GameController's, one for
+one), built by `Tools/build_web.sh` into the committed `web/horn.wasm` (web/README.md).
+Under WASI the engine imports FoundationEssentials instead of Foundation: the full
+Foundation brings ICU's data and made the file 62 MB, Essentials 13 MB. Essentials lacks
+the two String methods the engine uses (`trimmingCharacters`, `replacingOccurrences`), so
+Text.swift has them behind `#if os(WASI)`, answering as Apple's Foundation does: the trim
+takes Unicode's White_Space and U+200B, scalar by scalar, and the escape doubles a "["
+unless the scalar after it extends it (Grapheme_Extend, an emoji skin tone). That is not
+Swift's Character: a Prepend before the "[" (U+0600, say) does not stop it, and the app's
+Markup, which reads by Character, then takes what follows for a tag, so a name such as
+"؀[red]Queen" colours the rest of a line in the app. The web reads markup by Character too
+and does the same; a fix belongs to the engine's escape or the app's Markup. On Apple
+platforms nothing changes: the `#if` keeps `import Foundation`, and the three gates are
+untouched. `Tools/web-tests/golden.mjs` replays the 300 golden voyages
+through horn.wasm against the Mac's fixture, and `parity.mjs` compares every reply of
+seeded 1849 and rail voyages between horn.wasm and the bridge built for the Mac, and the
+escape beside every scalar (the marks new in Unicode 17.0 aside, which Swift's tables know
+and macOS 15's Foundation does not). An Int is 32 bits in WebAssembly; no amount in the
+game comes near 2^31. The build leaves out the per-object LLVM module hash, which covered
+the checkout's paths, so horn.wasm is the same byte for byte wherever it is built.
+
+## D13 — The web game is the app's shell, ported file for file (2026-11-14)
+
+The browser game (web/README.md) plays 1849 and the Iron Road through `horn.wasm` with
+the app's own flow, words and pictures: `web/js/flow.js` is GameController line for line
+(the picker, the queue, the 0.7 s turn, the save that keeps what is waiting), and each
+journey's four skin files are its Swift skin's, function for function.
+`Tools/web-tests/skin.mjs` and `rail-skin.mjs` check every literal, colour, sprite row and
+map point against the Swift source. `?journey=<id>` and `horn.lastJourney` stand for the
+app's `-journey` launch argument and the journey it remembers. What the web has that the app
+does not, or lacks: saves in `localStorage` (`horn.save-<id>`, `horn.topten-<id>`); Space
+throws at the nearest fish, as VoiceOver's double-tap does in the app; no haptics; text
+sizes fixed at the app's defaults rather than following Dynamic Type; canvases drawn a
+whole number of device pixels to the logical pixel and scaled by the browser. No rule,
+number or sentence of the game changed.

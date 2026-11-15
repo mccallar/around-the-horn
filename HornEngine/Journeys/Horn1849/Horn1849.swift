@@ -1,4 +1,8 @@
+#if os(WASI)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 // The 1849 voyage: New York to San Francisco around Cape Horn.
 //

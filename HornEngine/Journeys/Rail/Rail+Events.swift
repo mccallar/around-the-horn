@@ -1,4 +1,8 @@
+#if os(WASI)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 // What can happen in a turn on the road. One of these, by weight, on about one turn in six.
 // Those that ask something are answered in Rail+Choices.swift.
