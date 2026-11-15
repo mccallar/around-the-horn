@@ -83,6 +83,7 @@ public final class GameEngine {
         var q: [Interrupt] = []
         state.note = ""
         guard let ns = state.nextStop, !state.over else { return q }
+        if let stopped = journey.stalled(self) { return stopped }
         state.day += 1
         let reg = state.region
         state.weather = rollWeather(reg)
@@ -353,7 +354,7 @@ public final class GameEngine {
             q.append(.message(text.sailsWarning))
         }
         if state.sails > r.warnRearm { state.flags.sails = false }
-        checkSink(&q)
+        if r.wearWrecks { checkSink(&q) }
     }
 
     func checkSink(_ q: inout [Interrupt]) {

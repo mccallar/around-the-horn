@@ -83,6 +83,8 @@ public final class Rail: Journey {
         rules.eventChance = 0.2
         rules.yardHull = 1.5
         rules.yardSails = 1.5
+        rules.wearWrecks = false
+        rules.noFuelSpeed = RailData.noWoodSpeed
     }
 
     // MARK: - Sentences
@@ -94,7 +96,7 @@ public final class Rail: Journey {
         outOfWater: "[red]The kegs are dry and so is the tank car.[/red] The crew cannot go long like this.",
         lowWater: "There is barely a day of drinking water left aboard.",
         preventiveGone: "",
-        outOfFuel: "[red]The woodpile is gone.[/red] The crew is feeding the firebox sagebrush, fence posts and bad language. You are barely moving.",
+        outOfFuel: "[red]The woodpile is gone.[/red] The crew is feeding the firebox sagebrush, fence posts and bad language. You are barely moving, and the engine hates every stick of it.",
         lowFuel: "The fireman can see the floor of the tender: about twelve hours of wood left.",
         deficiencyCured: { _ in "" },
         wellAgain: { "\($0) is fit for duty again." },
@@ -222,7 +224,10 @@ public final class Rail: Journey {
     static func boilerWater(_ s: GameState) -> Double { max(0, s.water - RailData.kegs) }
 
     /// Grades, unless a helper is coupled on; a dry boiler; a descent taken on the retainers.
+    /// A turn with too little wood for the pace crawls on the engine's `noFuelSpeed`, which
+    /// is applied next; it is noted here for `tick`, which charges the engine for it.
     override func adjustSpeed(_ e: GameEngine, _ reg: Region, _ sp: inout Double) {
+        e.state.vars[Self.noWoodKey] = e.state.fuel < e.journey.pace(e.state.pace).fuel ? 1 : nil
         let grade = reg.num("grade")
         if grade < 1 && e.state.vars[Self.helperKey(reg)] != 1 { sp *= grade }
         let dry = reg.num("dry", or: 0)
@@ -241,7 +246,15 @@ public final class Rail: Journey {
         return hd
     }
 
+    static let noWoodKey = "rail.noWood"
+
     override func tick(_ e: GameEngine, _ q: inout [Interrupt], _ mode: GameEngine.DayMode, _ reg: Region) {
+        // A turn run on fence posts and sagebrush.
+        if mode == .sail && e.state.vars.removeValue(forKey: Self.noWoodKey) != nil {
+            e.state.sails = max(0, e.state.sails - e.rnd(RailData.noWoodWear.lowerBound, RailData.noWoodWear.upperBound))
+            e.state.note = "No wood. The firebox is getting fence posts, sagebrush and anything else that will burn."
+        }
+
         // The boiler's share, in the deserts.
         let dry = reg.num("dry", or: 0)
         if mode == .sail && dry > 0 {
@@ -304,6 +317,14 @@ public final class Rail: Journey {
 
     override func events(_ e: GameEngine, _ reg: Region) -> [JourneyEvent] { roadEvents(e, reg) }
 
+    /// Nothing happens to a train that has just given out but the breakdown itself.
+    override func dayEvents(_ e: GameEngine, _ q: inout [Interrupt], _ reg: Region) {
+        if Self.brokenDown(e.state) { return }
+        super.dayEvents(e, &q, reg)
+    }
+
+    override func stalled(_ e: GameEngine) -> [Interrupt]? { breakdown(e) }
+
     override func arrive(_ e: GameEngine, _ stop: Stop) -> [Interrupt] {
         helperOffer(e, stop) ?? super.arrive(e, stop)
     }
@@ -311,7 +332,7 @@ public final class Rail: Journey {
     override func special(_ e: GameEngine, _ stop: Stop) -> [Interrupt] { setPiece(e, stop) }
 
     override func resolve(_ e: GameEngine, _ key: String, _ args: [String], _ option: Int) -> [Interrupt] {
-        answer(e, key, args, option)
+        key == "breakdown" ? answerBreakdown(e, args, option) : answer(e, key, args, option)
     }
 
     // MARK: - Score

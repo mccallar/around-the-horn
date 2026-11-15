@@ -105,6 +105,10 @@ public struct Rules {
     public var hullWarn = 30.0
     public var sailsWarn = 25.0
     public var warnRearm = 50.0
+    /// Whether wear that brings `hull` to nothing ends the journey (1849: she founders).
+    /// A journey that sets it false lets the vehicle break down instead, with its own
+    /// `Journey.stalled`; its violent events can still end it with `GameEngine.checkSink`.
+    public var wearWrecks = true
 
     // Yard prices, per percentage point restored, before the port's multiplier
     public var yardHull = 2.5
@@ -301,6 +305,12 @@ public class Journey {
     /// The journey's own speed factors, applied after sails, hull and crew and before the
     /// jitter.
     func adjustSpeed(_ e: GameEngine, _ reg: Region, _ sp: inout Double) {}
+
+    /// The vehicle cannot move: what to show instead of a turn under way, which then does
+    /// not happen (no time passes, no number is drawn). Nil, the default, while it can.
+    /// What is shown must lead somewhere the vehicle can be put right or the journey ends:
+    /// a choice that mends it, `.enterPort` to the menu, or `.gameOver`.
+    func stalled(_ e: GameEngine) -> [Interrupt]? { nil }
 
     /// What the structure loses this turn. Rough weather costs up to its `harsh` in
     /// points, more at full pace and less at an easy one.

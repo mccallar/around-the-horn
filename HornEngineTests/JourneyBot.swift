@@ -61,7 +61,10 @@ final class JourneyBot {
     func play() -> Result {
         shop()
         guard e.depart() != nil else { return Result(won: false, turns: 0, ending: "never left", score: 0) }
-        while e.state.day < policy.maxTurns {
+        // A stalled turn passes no time, so the steps are counted too.
+        var steps = 0
+        while e.state.day < policy.maxTurns && steps < policy.maxTurns * 4 {
+            steps += 1
             if let end = underWay() { return end }
             switch process(e.sailDay()) {
             case .resume: continue
@@ -172,7 +175,8 @@ final class JourneyBot {
                 transcript.append("burial: \(cause)")
                 e.commitBurial(crewID: id, cause: cause, epitaph: "")
             case .arrival(let id): q = e.beginArrival(id) + q
-            case .enterPort: return .port
+            // Under way it is the menu a stalled journey offers to take stock from.
+            case .enterPort: return e.state.atPort ? .port : .resume
             case .gameOver(let title, let body):
                 transcript += [title, body]
                 return .ended(Result(won: false, turns: e.state.day, ending: title, score: 0))

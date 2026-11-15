@@ -43,8 +43,8 @@ extension Rail {
             }
             if e.chance(0.35) {
                 let d = e.ri(8, 16)
-                e.state.hull = max(0, e.state.hull - Double(d))
-                var q: [Interrupt] = [.message("Halfway over, a gust takes the roof walk off the second car and slams a door flat on the third. Everyone aboard discovers they can hold their breath for 650 feet. [red](Running gear −\(d)%)[/red]")]
+                let hurt = knock(e, engine: false, d)
+                var q: [Interrupt] = [.message("Halfway over, a gust takes the roof walk off the second car and slams a door flat on the third. Everyone aboard discovers they can hold their breath for 650 feet.\(hurt)")]
                 e.checkSink(&q)
                 return q
             }
@@ -59,11 +59,11 @@ extension Rail {
             if e.state.hull < 50 { p += 0.15 }
             if e.chance(p) {
                 let d = e.ri(15, 30)
-                e.state.hull = max(0, e.state.hull - Double(d))
+                let hurt = knock(e, engine: false, d)
                 for i in e.state.crew.indices where e.state.crew[i].alive {
                     e.state.crew[i].hp = max(1, e.state.crew[i].hp - 6)
                 }
-                var q: [Interrupt] = [.message("Ten miles down, the brakes fade and the train gets away from you. You go through the snowsheds like a ball down a rifle barrel, and it takes the upgrade at Cape Horn to stop her. Every wheel on the train is flat on one side. [red](Running gear −\(d)%)[/red]")]
+                var q: [Interrupt] = [.message("Ten miles down, the brakes fade and the train gets away from you. You go through the snowsheds like a ball down a rifle barrel, and it takes the upgrade at Cape Horn to stop her. Every wheel on the train is flat on one side.\(hurt)")]
                 e.checkSink(&q)
                 return q
             }
@@ -76,8 +76,8 @@ extension Rail {
             }
             if e.chance(0.3) {
                 let d = e.ri(3, 7)
-                e.state.hull = max(0, e.state.hull - Double(d))
-                return [.message("The herd will not be hurried. You inch through with the whistle going, and an old bull takes the opportunity to scratch himself on the first boxcar until her door comes off its track. [red](Running gear −\(d)%)[/red]")]
+                let hurt = knock(e, engine: false, d)
+                return [.message("The herd will not be hurried. You inch through with the whistle going, and an old bull takes the opportunity to scratch himself on the first boxcar until her door comes off its track.\(hurt)")]
             }
             return [.message("At the first long blast the herd parts around the engine like a river around a rock, and closes again behind the caboose.")]
 
@@ -92,8 +92,8 @@ extension Rail {
             }
             if e.chance(0.4) {
                 let d = e.ri(10, 18)
-                e.state.hull = max(0, e.state.hull - Double(d))
-                var q: [Interrupt] = [.message("The engine gets across. The track sags under the second car, and it comes over leaning like a tired horse, dragging the third. [red](Running gear −\(d)%)[/red]")]
+                let hurt = knock(e, engine: false, d)
+                var q: [Interrupt] = [.message("The engine gets across. The track sags under the second car, and it comes over leaning like a tired horse, dragging the third.\(hurt)")]
                 e.checkSink(&q)
                 return q
             }
@@ -120,11 +120,11 @@ extension Rail {
             }
             if e.chance(0.45) {
                 let d = e.ri(6, 12)
-                e.state.hull = max(0, e.state.hull - Double(d))
+                let hurt = knock(e, engine: false, d)
                 for i in e.state.crew.indices where e.state.crew[i].alive {
                     e.state.crew[i].hp = max(1, e.state.crew[i].hp - 5)
                 }
-                return [.message("For half a mile there is nothing to breathe but smoke. You come out the far side with the paint blistered off the cars and everyone coughing. [red](Running gear −\(d)%)[/red]")]
+                return [.message("For half a mile there is nothing to breathe but smoke. You come out the far side with the paint blistered off the cars and everyone coughing.\(hurt)")]
             }
             return [.message("You go through the smoke with the throttle open and the cab windows shut, and come out the far side with nothing worse than watering eyes.")]
 
@@ -140,8 +140,8 @@ extension Rail {
             e.state.fuel = max(0, e.state.fuel - Double(n))
             if e.chance(0.4) {
                 let d = e.ri(8, 15)
-                e.state.sails = max(0, e.state.sails - Double(d))
-                return [.message("The engine hits the drift, climbs it, and stops dead with snow packed to the cab windows. Digging her out takes as long as digging the cut would have, and it has not done her front end any good. [red](Engine −\(d)%)[/red]")]
+                let hurt = knock(e, engine: true, d)
+                return [.message("The engine hits the drift, climbs it, and stops dead with snow packed to the cab windows. Digging her out takes as long as digging the cut would have, and it has not done her front end any good.\(hurt)")]
                     + e.passDays(1, .sea)
             }
             return [.message("The third run does it. The engine bursts out the far side wearing most of the drift, \(RailData.cords(n)) of wood the poorer.")]

@@ -24,36 +24,36 @@ extension Rail {
             // The train
             JourneyEvent(full ? 8 : 5) { e, q in
                 let d = e.ri(5, 11)
-                e.state.hull = max(0, e.state.hull - Double(d))
-                q.append(.message("Smoke from under the third car: a hot box. The crew stops, packs the journal with fresh waste and oil, and stands around it looking stern. [red](Running gear −\(d)%)[/red]"))
+                let hurt = self.knock(e, engine: false, d)
+                q.append(.message("Smoke from under the third car: a hot box. The crew stops, packs the journal with fresh waste and oil, and stands around it looking stern.\(hurt)"))
             },
             JourneyEvent(5) { e, q in
                 let d = e.ri(6, 13)
-                e.state.sails = max(0, e.state.sails - Double(d))
-                q.append(.message("A flue has started to weep into the firebox. The fireman says a word he will have to apologize for later. [red](Engine −\(d)%)[/red]"))
+                let hurt = self.knock(e, engine: true, d)
+                q.append(.message("A flue has started to weep into the firebox. The fireman says a word he will have to apologize for later.\(hurt)"))
             },
             JourneyEvent(6, when: s.sails < 70) { e, q in
                 let d = e.ri(10, 18)
-                e.state.sails = max(0, e.state.sails - Double(d))
-                q.append(.message("With a bang and a roar of steam, a tired flue lets go. The cab empties in a hurry. [red](Engine −\(d)%)[/red]"))
+                let hurt = self.knock(e, engine: true, d)
+                q.append(.message("With a bang and a roar of steam, a tired flue lets go. The cab empties in a hurry.\(hurt)"))
                 let c = e.state.crew.indices.filter { e.state.crew[$0].alive && e.state.crew[$0].ailment == nil }
                 if !c.isEmpty && e.chance(0.4) {
                     let idx = e.pick(c)!
-                    e.state.crew[idx].hp -= 8
+                    e.state.crew[idx].hp = max(1, e.state.crew[idx].hp - 8)
                     e.sicken(idx, &q, e.state.temperature(in: reg), nil, RailData.scald)
                 }
             },
             JourneyEvent(5, when: dry || reg.id == "humboldt") { e, q in
                 let d = e.ri(4, 8)
                 let gal = e.ri(40, 90)
-                e.state.sails = max(0, e.state.sails - Double(d))
+                let hurt = self.knock(e, engine: true, d)
                 e.state.water = max(0, e.state.water - Double(gal))
-                q.append(.message("The last water you took on was full of alkali, and the boiler is foaming like a washtub. You blow her down and lose \(gal) gallons doing it. [red](Engine −\(d)%)[/red]"))
+                q.append(.message("The last water you took on was full of alkali, and the boiler is foaming like a washtub. You blow her down and lose \(gal) gallons doing it.\(hurt)"))
             },
             JourneyEvent(full ? 5 : 2.5) { e, q in
                 let d = full ? e.ri(6, 14) : e.ri(3, 7)
-                e.state.hull = max(0, e.state.hull - Double(d))
-                q.append(.message("A rail has cracked clean through in the cold of the night, and you find it the way trains do. The whole train steps over the gap one wheel at a time. [red](Running gear −\(d)%)[/red]"))
+                let hurt = self.knock(e, engine: false, d)
+                q.append(.message("A rail has cracked clean through in the cold of the night, and you find it the way trains do. The whole train steps over the gap one wheel at a time.\(hurt)"))
             },
             JourneyEvent(5, when: climbing) { e, q in
                 let n = e.ri(8, 16)
@@ -69,7 +69,7 @@ extension Rail {
                 let c = e.state.crew.indices.filter { e.state.crew[$0].alive && e.state.crew[$0].ailment == nil }
                 if c.isEmpty { return }
                 let idx = e.pick(c)!
-                e.state.crew[idx].hp -= 8
+                e.state.crew[idx].hp = max(1, e.state.crew[idx].hp - 8)
                 q.append(.message("Coupling the cars after a water stop, \(TextMarkup.escape(e.state.crew[idx].name)) is a half second slow getting a hand clear of the link."))
                 e.sicken(idx, &q, e.state.temperature(in: reg), nil, RailData.crushedHand)
             },
