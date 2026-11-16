@@ -536,7 +536,7 @@ await test('out of wood she crawls, the box says so, and wood puts her right', a
   const mile = p.f.game.mile, sails = p.f.game.sails;
   p.press('Continue down the line');
   p.timers.fire();
-  check(p.screen === 'message' && p.f.screen.text.includes('You are barely moving'), `the woodpile is gone (${p.f.screen.text})`);
+  check(p.screen === 'message' && p.f.screen.text.includes('will barely move her'), `the woodpile is gone (${p.f.screen.text})`);
   const crawl = p.f.game.mile - mile;
   check(crawl > 0 && crawl <= 10, `crawling (${crawl} miles in four hours)`);
   check(p.f.game.sails < sails - 0.4, 'and the fence posts wear the engine');
@@ -553,6 +553,68 @@ await test('out of wood she crawls, the box says so, and wood puts her right', a
   p.timers.fire();
   check(p.f.game.mile - m2 > 20, `and full speed (${p.f.game.mile - m2} miles)`);
   noProblems(p);
+});
+
+await test('the last of the wood: the box says so, and a part cord burns for its share', async () => {
+  const p = await trainAt((s) => Object.assign(s, { fuel: 6, pace: 'steady', mile: 200 }));
+  check(statusRows(p).Train?.value === 'Last of the wood' && statusRows(p).Train.color === 'red', `the box says so (${statusRows(p).Train?.value})`);
+  const mile = p.f.game.mile;
+  p.press('Continue down the line');
+  p.timers.fire();
+  const ran = p.f.game.mile - mile;
+  check(ran > 15 && ran < 42, `most of a turn's run on six tenths of a cord (${ran} miles)`);
+  check(p.f.game.fuel === 0, 'and it is all burnt');
+  check(p.f.game.note === 'The wood gives out partway, and the fireman finishes the run on fence posts.', `the note says so (${p.f.game.note})`);
+  noProblems(p);
+});
+
+/** Standing in the yard at North Platte, where she gave out as she pulled in. */
+const inTheYard = (more) => trainAt((s) => Object.assign(s, { mile: 291, stopIndex: 2, atPort: true, sails: 0, sailcloth: 0, timber: 0 }, more));
+
+await test('given out in a yard: a spare aboard, or one from the store, gets her going (review)', async () => {
+  for (const money of [0, 30]) {
+    const p = await inTheYard({ sailcloth: 1, money });
+    check(p.screen === 'portMenu' && statusRows(p).Train?.value === 'Broken down', `in the yard, broken down (${p.screen})`);
+    p.press('Whistle off and roll on');
+    p.timers.fire();
+    check(breakdownKey(p), `asked, with $${money} (${p.screen})`);
+    check(wordsOn(p.look()).startsWith('The engine has given out. The Prairie Queen will not leave North Platte like this.'), `plainly (${wordsOn(p.look()).slice(0, 90)})`);
+    check(p.labels().join('/') === 'Work on the engine: 1 set of boiler fittings (have 1)/Climb down into the yard: the store and the roundhouse',
+      `fit the fittings, or the yard (${p.labels().join('/')})`);
+    p.press('Work on the engine');
+    check(p.screen === 'message' && p.f.screen.text.endsWith('[green](Engine now 25%)[/green]'), `mended (${p.f.screen.text})`);
+    p.press('Continue');
+    p.timers.fire();
+    check(p.f.game.mile > 291, `and away from North Platte (${p.f.game.mile})`);
+    noProblems(p);
+  }
+
+  // $20 and no fittings: down into the yard, a set from the store, and she is mended on the way out.
+  const p = await inTheYard({ money: 20 });
+  p.press('Whistle off and roll on');
+  p.timers.fire();
+  check(breakdownKey(p) && !p.look().choices[0].enabled, 'nothing aboard to fit');
+  p.press('Climb down into the yard');
+  check(p.screen === 'portMenu', `back in the yard (${p.screen})`);
+  p.press('Buy supplies');
+  p.shop({ sailcloth: 1 });
+  p.press('Pay');
+  check(p.f.game.sailcloth === 1, `a set of fittings bought (${p.f.game.sailcloth}, $${p.f.game.money})`);
+  while (p.screen !== 'portMenu') p.press(1);
+  p.press('Whistle off and roll on');
+  p.timers.fire();
+  check(breakdownKey(p) && p.look().choices[0].enabled, 'asked again, with the fittings to fit');
+  p.press('Work on the engine');
+  p.press('Continue');
+  p.timers.fire();
+  check(p.f.game.mile > 291 && p.f.game.day > 0, `rolling (${p.f.game.mile})`);
+  noProblems(p);
+
+  const r = await inTheYard({ money: 10 });
+  r.press('Whistle off and roll on');
+  r.timers.fire();
+  check(r.screen === 'gameOver' && r.f.screen.title === 'Stranded at North Platte.', `nothing to fit and not the price of a set: stranded (${r.screen}: ${r.f.screen?.title})`);
+  noProblems(r);
 });
 
 // MARK: - Two voyages at once
