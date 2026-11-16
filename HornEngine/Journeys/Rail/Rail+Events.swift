@@ -55,8 +55,9 @@ extension Rail {
                 let hurt = self.knock(e, engine: false, d)
                 q.append(.message("A rail has cracked clean through in the cold of the night, and you find it the way trains do. The whole train steps over the gap one wheel at a time.\(hurt)"))
             },
-            JourneyEvent(5, when: climbing) { e, q in
-                let n = e.ri(8, 16)
+            // With no wood she is barely turning a wheel, never mind spinning one.
+            JourneyEvent(5, when: climbing && s.fuel >= 1) { e, q in
+                let n = min(e.ri(8, 16), Int(e.state.fuel))
                 e.state.fuel = max(0, e.state.fuel - Double(n))
                 q.append(.message("The drivers lose their feet on the grade and spin. It takes sand, patience and \(RailData.cords(n)) of wood to get the train moving again."))
             },
@@ -90,7 +91,7 @@ extension Rail {
                 q.append(e.ask("express", prompt: "A flagman at a water tank waves you down. The westbound express is forty minutes behind you and wants the main line.",
                                detail: "The next station with a siding long enough is nine miles on.",
                                options: [.init("Back into the spur here and let her by"),
-                                         .init("Run for the next station, wide open")]))
+                                         Self.onWood("Run for the next station, wide open", e.state, RailData.dashWood.upperBound)]))
             },
             JourneyEvent(3, when: plains && !w.wet && (season == .summer || season == .autumn)) { e, q in
                 q.append(e.ask("fire", prompt: "A line of smoke on the horizon becomes a prairie fire, coming down on the track faster than a horse can run.",
@@ -99,7 +100,8 @@ extension Rail {
             },
             JourneyEvent(9, when: snowing || (mountain && season == .winter)) { e, q in
                 q.append(e.ask("drift", prompt: "A cut ahead has drifted full of snow, level with the top of the smokestack.",
-                               options: [.init("Dig it out by hand"), .init("Back up, open the throttle and buck it")]))
+                               options: [.init("Dig it out by hand"),
+                                         Self.onWood("Back up, open the throttle and buck it", e.state, RailData.buckWood.upperBound)]))
             },
             JourneyEvent(3, when: !s.stowawaySeen && nextYard != nil && s.living.count < 6) { e, q in
                 e.state.stowawaySeen = true

@@ -30,6 +30,11 @@ extension Rail {
         }
     }
 
+    /// An answer that burns wood hard, offered only with the most it can burn aboard.
+    static func onWood(_ label: String, _ s: GameState, _ most: Int) -> ChoiceEvent.Option {
+        s.fuel >= Double(most) ? .init(label) : .init("\(label) [dim](not on the wood aboard)[/dim]", enabled: false)
+    }
+
     // MARK: - Answers
 
     func answer(_ e: GameEngine, _ key: String, _ args: [String], _ option: Int) -> [Interrupt] {
@@ -104,7 +109,7 @@ extension Rail {
                 return [.message("You back into the spur and wait. The express goes by in a roar of varnish and lit windows, and a passenger in the dining car raises a glass to you.")]
                     + e.passDays(1, .sea)
             }
-            let n = e.ri(12, 22)
+            let n = min(e.ri(RailData.dashWood.lowerBound, RailData.dashWood.upperBound), Int(e.state.fuel))
             e.state.fuel = max(0, e.state.fuel - Double(n))
             if e.chance(0.3) {
                 let fine = min(e.state.money, Double(e.ri(4, 8) * 5))
@@ -136,7 +141,7 @@ extension Rail {
                 return [.message("Everybody digs, the conductor included. Four hours and one broken shovel later, there is a train-sized slot through the drift.")]
                     + e.passDays(1, .sea)
             }
-            let n = e.ri(8, 16)
+            let n = min(e.ri(RailData.buckWood.lowerBound, RailData.buckWood.upperBound), Int(e.state.fuel))
             e.state.fuel = max(0, e.state.fuel - Double(n))
             if e.chance(0.4) {
                 let d = e.ri(8, 15)

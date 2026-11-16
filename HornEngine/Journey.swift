@@ -41,6 +41,10 @@ public struct Rules {
     public var speedJitter = 0.85...1.15
     /// Multiplies speed on a turn the engine has no fuel for.
     public var noFuelSpeed = 0.25
+    /// Whether a part load, less than the pace burns in a turn, is burnt for its share of the
+    /// turn (only the rest runs on `noFuelSpeed`). False: it is thrown on with no effect and
+    /// the whole turn runs on `noFuelSpeed`.
+    public var burnsPartLoad = false
 
     // Eating and drinking, per person per turn
     public var water = 1.0
@@ -306,8 +310,9 @@ public class Journey {
     /// jitter.
     func adjustSpeed(_ e: GameEngine, _ reg: Region, _ sp: inout Double) {}
 
-    /// The vehicle cannot move: what to show instead of a turn under way, which then does
-    /// not happen (no time passes, no number is drawn). Nil, the default, while it can.
+    /// The vehicle cannot move, or has something to meet before it does: what to show
+    /// instead of a turn under way, which then does not happen (no time passes, no number is
+    /// drawn). Nil, the default, while it can go on.
     /// What is shown must lead somewhere the vehicle can be put right or the journey ends:
     /// a choice that mends it, `.enterPort` to the menu, or `.gameOver`.
     func stalled(_ e: GameEngine) -> [Interrupt]? { nil }

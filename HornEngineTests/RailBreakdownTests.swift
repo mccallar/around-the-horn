@@ -24,7 +24,7 @@ final class RailBreakdownTests: XCTestCase {
         var overReported: [String] = []
         /// Miles covered on a turn begun with a meter showing 0%.
         var movedAtZero: [Int] = []
-        /// Miles covered on a turn begun with less wood than the pace burns.
+        /// Miles covered on a turn begun with no wood at all.
         var movedWithoutWood: [Int] = []
         var ending: String?
     }
@@ -61,7 +61,7 @@ final class RailBreakdownTests: XCTestCase {
         for _ in 0..<turns where !e.state.over {
             let mile = e.state.mile, before = (e.state.sails, e.state.hull)
             let atZero = jsRound(before.0) <= 0 || jsRound(before.1) <= 0
-            let noWood = e.state.fuel < rail.pace(e.state.pace).fuel
+            let noWood = e.state.fuel <= 0
             let n = t.log.count
             play(e.sailDay())
             if e.state.atPort { e.setSail() }
@@ -246,20 +246,78 @@ final class RailBreakdownTests: XCTestCase {
         XCTAssertEqual(gameOver(gear.sailDay()), "Stranded at mile 100.")
     }
 
-    func testGivenOutInAYardGoesToTheRoundhouse() {
-        var s = train(mile: 291, sails: 0, money: 200)
+    /// Standing at North Platte, where she gave out on the turn she pulled in.
+    func inTheYard(sails: Double = 0, hull: Double = 100, fittings: Int = 0, spares: Int = 0, money: Double) -> GameState {
+        var s = train(mile: 291, sails: sails, hull: hull, fittings: fittings, spares: spares, money: money)
         s.stopIndex = rail.stops.firstIndex { $0.id == "northplatte" }!
-        let e = engine(s)
-        let q = e.sailDay()
-        XCTAssertEqual(q.last, .enterPort)
-        XCTAssertTrue(messages(q).first?.contains("will not leave North Platte like this") == true, "\(messages(q))")
+        return s
+    }
+
+    func testGivenOutInAYardGoesToTheRoundhouse() {
+        let e = engine(inTheYard(money: 200))
+        guard let ask = choice(e.sailDay()) else { return XCTFail("no breakdown") }
+        XCTAssertTrue(ask.prompt.contains("will not leave North Platte like this"), ask.prompt)
+        XCTAssertEqual(ask.options.map(\.label), ["Work on the engine: 1 set of boiler fittings [dim](have 0)[/dim]",
+                                                 "Climb down into the yard: the store and the roundhouse"])
+        XCTAssertFalse(ask.options[0].enabled)
+        XCTAssertEqual(e.state.day, 0)
+        XCTAssertEqual(e.resolve(ask, option: 1), [.enterPort])
         XCTAssertTrue(e.state.atPort)
         XCTAssertTrue(e.canRecutSailsAtYard)
         _ = e.recutSailsAtYard()
         XCTAssertFalse(Rail.brokenDown(e.state))
+        e.setSail()
+        _ = e.sailDay()
+        XCTAssertGreaterThan(e.state.mile, 291)
 
-        s.money = 0
-        XCTAssertEqual(gameOver(engine(s).sailDay()), "Stranded at mile 291.", "no spares, no money, not even for a set of fittings")
+        XCTAssertEqual(gameOver(engine(inTheYard(money: 0)).sailDay()), "Stranded at North Platte.", "no spares, no money, not even for a set of fittings")
+        XCTAssertEqual(gameOver(engine(inTheYard(sails: 100, hull: 0, fittings: 2, money: 12)).sailDay()), "Stranded at North Platte.",
+                       "fittings are no use to the running gear, and a crate of car spares is $12.65 here")
+    }
+
+    /// Found by review: a train that gave out in a yard with a spare aboard, or the money for
+    /// one but not for the roundhouse, went back to the yard every time she was sent on, and
+    /// nothing in the yard could mend her.
+    func testGivenOutInAYardWithASpareOrTheMoneyForOneGetsGoing() {
+        // A set of fittings aboard: fitted from the question, with or without money.
+        for money in [0.0, 30] {
+            let e = engine(inTheYard(fittings: 1, money: money))
+            guard let ask = choice(e.sailDay()) else { return XCTFail("no breakdown") }
+            XCTAssertTrue(ask.options[0].enabled)
+            _ = e.resolve(ask, option: 0)
+            XCTAssertEqual(e.state.sails, 25)
+            XCTAssertEqual(e.state.day, 1)
+            _ = e.sailDay()
+            XCTAssertGreaterThan(e.state.mile, 291, "with $\(money)")
+        }
+        // $20 and no fittings: the store sells a set for $16.10, and it goes in.
+        let e = engine(inTheYard(money: 20))
+        guard let ask = choice(e.sailDay()) else { return XCTFail("no breakdown") }
+        XCTAssertEqual(e.resolve(ask, option: 1), [.enterPort])
+        XCTAssertTrue(e.state.atPort)
+        XCTAssertFalse(e.canRecutSailsAtYard, "the roundhouse is beyond $20")
+        XCTAssertTrue(e.buy([.sailcloth: 1]))
+        e.setSail()
+        guard let again = choice(e.sailDay()) else { return XCTFail("still broken down") }
+        XCTAssertTrue(again.options[0].enabled)
+        _ = e.resolve(again, option: 0)
+        XCTAssertFalse(Rail.brokenDown(e.state))
+        _ = e.sailDay()
+        XCTAssertGreaterThan(e.state.mile, 291)
+
+        // Both out: a crate of car spares bought for the running gear, the fittings aboard.
+        let both = engine(inTheYard(hull: 0, fittings: 1, money: 13))
+        guard let two = choice(both.sailDay()) else { return XCTFail("no breakdown") }
+        XCTAssertEqual(two.options.count, 3)
+        XCTAssertFalse(two.options[1].enabled)
+        _ = both.resolve(two, option: 2)
+        XCTAssertTrue(both.buy([.timber: 1]))
+        both.setSail()
+        for _ in 0..<2 {
+            guard let q = choice(both.sailDay()) else { return XCTFail("still broken down") }
+            _ = both.resolve(q, option: q.options.firstIndex(where: \.enabled)!)
+        }
+        XCTAssertFalse(Rail.brokenDown(both.state))
     }
 
     func testTheTrestleAndTheRunawayCanStillWreckHer() {
@@ -306,7 +364,7 @@ final class RailBreakdownTests: XCTestCase {
         XCTAssertEqual(Double(crawl), Double(full) * RailData.noWoodSpeed, accuracy: 1, "\(crawl) of \(full) miles")
         XCTAssertEqual(wood.state.sails - none.state.sails, 1, accuracy: 1e-9, "fence posts take a point off the engine")
         XCTAssertEqual(messages(q).first, rail.text.outOfFuel)
-        XCTAssertTrue(rail.text.outOfFuel.contains("You are barely moving"))
+        XCTAssertTrue(rail.text.outOfFuel.contains("will barely move her"))
         XCTAssertEqual(none.state.note, "No wood. The firebox is getting fence posts, sagebrush and anything else that will burn.")
         XCTAssertNil(none.state.vars[Rail.noWoodKey], "nothing left over in the save")
 
@@ -320,11 +378,103 @@ final class RailBreakdownTests: XCTestCase {
     }
 
     /// The last cord burnt is a turn at full steam: only a turn begun short of wood crawls.
+    /// Found by review: the warning that came with it said she was barely moving.
     func testTheLastCordIsBurntAtFullSpeed() {
         let e = engine(train(fuel: 10), [], fallback: 0.5)
-        _ = e.sailDay()
+        let sails = e.state.sails
+        let q = e.sailDay()
         XCTAssertEqual(e.state.fuel, 0)
         XCTAssertGreaterThan(e.state.mile - 100, 30)
         XCTAssertNil(e.state.vars[Rail.noWoodKey])
+        XCTAssertLessThan(sails - e.state.sails, 1, "no fence posts yet")
+        XCTAssertTrue(messages(q).contains(rail.text.outOfFuel))
+        XCTAssertTrue(rail.text.outOfFuel.contains("From here"), "the warning looks ahead: \(rail.text.outOfFuel)")
+        XCTAssertFalse(rail.text.outOfFuel.contains("You are barely moving"))
+    }
+
+    /// Found by review: part of a cord, less than the pace burns, was thrown away and the turn
+    /// crawled as if there were none. It burns for its share of the turn.
+    func testAPartCordIsBurntForItsShare() {
+        let full = engine(train(fuel: 120), [], fallback: 0.5)
+        let part = engine(train(fuel: 6), [], fallback: 0.5)
+        _ = full.sailDay()
+        _ = part.sailDay()
+        let ran = Double(full.state.mile - 100)
+        // Six tenths at full speed and four at a fifth: 0.68 of the turn.
+        XCTAssertEqual(Double(part.state.mile - 100), ran * (0.6 + 0.4 * RailData.noWoodSpeed), accuracy: 1)
+        XCTAssertEqual(part.state.fuel, 0)
+        XCTAssertEqual(full.state.sails - part.state.sails, 0.4, accuracy: 1e-9, "fence posts for four tenths of the turn")
+        XCTAssertEqual(part.state.note, "The wood gives out partway, and the fireman finishes the run on fence posts.")
+        XCTAssertNil(part.state.vars[Rail.noWoodKey])
+    }
+
+    /// Found by review: with an empty tender the road still took wood from her ("sand,
+    /// patience and 1.2 cords"), and offered the dash ahead of the express and bucking a
+    /// drift, which burn it by the cord.
+    func testNoWoodIsNeverBurntThatIsNotThere() {
+        var s = GameState(journey: Rail.id, role: .merchant, ship: "Juniper", captain: "Amos",
+                          crew: ["Clara", "Ned", "Ruth", "Gideon"], startYear: 1869, startMonth: 11)
+        s.mile = 545
+        s.stopIndex = rail.stops.lastIndex { $0.mile <= 545 }!
+        s.food = 400
+        s.water = 900
+        s.atPort = false
+        let r = rail as! Rail
+        for fuel in [0.0, 5, 15, 30] {
+            s.fuel = fuel
+            let e = engine(s, [], fallback: 0.5)
+            let reg = e.state.region
+            XCTAssertEqual(reg.id, "sherman")
+            var said: [String] = [], options: [ChoiceEvent.Option] = []
+            for ev in r.roadEvents(e, reg) where ev.ok {
+                let f = engine(s, [], fallback: 0.5)
+                var q: [Interrupt] = []
+                ev.run(f, &q)
+                said += messages(q)
+                options += q.compactMap { if case .choice(let c) = $0 { return c } else { return nil } }.flatMap(\.options)
+                XCTAssertGreaterThanOrEqual(f.state.fuel, 0)
+            }
+            let spin = said.first { $0.hasPrefix("The drivers lose their feet") }
+            XCTAssertEqual(spin == nil, fuel < 1, "\(fuel): \(spin ?? "no spin")")
+            if let spin, fuel < 8 { XCTAssertTrue(spin.contains("and \(RailData.cords(Int(fuel))) of wood"), "all there was: \(spin)") }
+            let dash = options.first { $0.label.hasPrefix("Run for the next station, wide open") }
+            let buck = options.first { $0.label.hasPrefix("Back up, open the throttle and buck it") }
+            XCTAssertEqual(dash?.enabled, fuel >= 22, "\(fuel)")
+            XCTAssertEqual(buck?.enabled, fuel >= 16, "\(fuel)")
+            if fuel < 16 { XCTAssertEqual(buck?.label, "Back up, open the throttle and buck it [dim](not on the wood aboard)[/dim]") }
+        }
+    }
+
+    // MARK: - Set pieces
+
+    /// Found by review: a train that gave out on the turn she reached Donner Summit was
+    /// still asked how to come down it, and "She comes off the mountain singing" with the
+    /// running gear at 0%. The question waits until she is mended, and survives a save.
+    func testASetPieceWaitsUntilSheIsMended() throws {
+        let e = engine(train(mile: 1665, hull: 0.6, spares: 1), [], fallback: 0.5)
+        XCTAssertEqual(e.state.currentStop.id, "reno")
+        var q = e.sailDay()
+        XCTAssertTrue(Rail.brokenDown(e.state))
+        XCTAssertEqual(q.last, .arrival(stopID: "donner"))
+        q = e.beginArrival("donner")
+        XCTAssertEqual(q, [.message("The [i]Juniper[/i] gets as far as Donner Summit, and not a foot further.")])
+        XCTAssertNil(choice(q))
+        let day = e.state.day
+
+        let f = engine(try JSONDecoder().decode(GameState.self, from: JSONEncoder().encode(e.state)), [], fallback: 0.5)
+        guard let ask = choice(f.sailDay()) else { return XCTFail("no breakdown") }
+        XCTAssertTrue(ask.prompt.hasPrefix("[red]The running gear has given out.[/red]"), ask.prompt)
+        _ = f.resolve(ask, option: 0)
+        XCTAssertFalse(Rail.brokenDown(f.state))
+        let mended = f.state.day
+        XCTAssertEqual(mended, day + 1)
+        guard let donner = choice(f.sailDay()), case .custom("donner", _) = donner.kind else { return XCTFail("no Donner") }
+        XCTAssertEqual(f.state.day, mended, "the question takes no time")
+        XCTAssertEqual(f.state.mile, 1669)
+        XCTAssertNil(f.state.vars[Rail.heldKey])
+        _ = f.resolve(donner, option: 0)
+        XCTAssertEqual(f.state.vars["rail.retainers"], 1)
+        _ = f.sailDay()
+        XCTAssertGreaterThan(f.state.mile, 1669)
     }
 }

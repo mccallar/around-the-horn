@@ -100,8 +100,9 @@ public final class GameEngine {
             if state.fuel >= pace.fuel {
                 state.fuel -= pace.fuel
             } else {
+                let share = r.burnsPartLoad ? max(0, state.fuel) / pace.fuel : 0
                 state.fuel = 0
-                sp *= r.noFuelSpeed
+                sp *= r.burnsPartLoad ? share + (1 - share) * r.noFuelSpeed : r.noFuelSpeed
             }
         }
         sp *= rnd(r.speedJitter.lowerBound, r.speedJitter.upperBound)

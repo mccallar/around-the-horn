@@ -33,6 +33,10 @@ enum RailData {
     /// fence posts and sagebrush takes out of the engine on each such turn.
     static let noWoodSpeed = 0.2
     static let noWoodWear = 0.5...1.5
+    /// Tenths of a cord the dash for a siding ahead of the express, and bucking a drift,
+    /// burn; neither is offered without the most it can take aboard.
+    static let dashWood = 12...22
+    static let buckWood = 8...16
 
     enum Season { case spring, summer, autumn, winter }
 

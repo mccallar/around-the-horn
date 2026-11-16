@@ -6,9 +6,9 @@ import Foundation
 
 // A train whose engine or running gear has given out (docs/journeys/rail.md,
 // "Breakdowns"). She stands where she is until she is mended: with fittings or car spares
-// from the train's own stores, by a mechanic somebody walks down the line to fetch, or at
-// the roundhouse if she gave out in a yard. With none of those to be had the run ends,
-// stranded. Time passes only while something is done about it.
+// from the train's own stores, by a mechanic somebody walks down the line to fetch, or, if
+// she gave out in a yard, with spares from its store or at its roundhouse. With none of
+// those to be had the run ends, stranded. Time passes only while something is done about it.
 
 extension Rail {
     /// A meter showing 0%, as the status box rounds it, has given out.
@@ -50,22 +50,6 @@ extension Rail {
         let what = engine && gear ? "The engine and the running gear have both given out."
             : engine ? "The engine has given out." : "The running gear has given out."
 
-        if let yard = Self.inYard(e) {
-            // Every part that is out can be mended here: from the stores, the store or the shop.
-            func fixable(_ out: Bool, _ have: Int, _ key: ItemKey, _ job: Int) -> Bool {
-                !out || have >= 1 || s.money >= yard.price(key) || s.money >= Double(job)
-            }
-            if fixable(engine, s.sailcloth, .sailcloth, e.shipyardSailsCost) && fixable(gear, s.timber, .timber, e.shipyardHullCost) {
-                e.state.atPort = true
-                return [.message("[red]\(what)[/red] The \(ship) will not leave \(yard.name) like this, which is the one piece of luck in it: the roundhouse is across the yard."),
-                        .enterPort]
-            }
-            return stranded(e, what)
-        }
-
-        let canWalk = s.money >= RailData.mechanicFee
-        if !canWalk && ((engine && s.sailcloth < 1) || (gear && s.timber < 1)) { return stranded(e, what) }
-
         var kinds: [String] = [], options: [ChoiceEvent.Option] = []
         if engine {
             kinds.append("engine")
@@ -75,6 +59,23 @@ extension Rail {
             kinds.append("gear")
             options.append(.init("Mend the running gear: 1 crate of car spares [dim](have \(s.timber))[/dim]", enabled: s.timber >= 1))
         }
+
+        if let yard = Self.inYard(e) {
+            // The yard's store sells the spares she lacks (the roundhouse always costs more),
+            // and a spare from the stores is fitted from the question itself.
+            let lacking = (engine && s.sailcloth < 1 ? yard.price(.sailcloth) : 0) + (gear && s.timber < 1 ? yard.price(.timber) : 0)
+            if s.money < lacking { return stranded(e, what, at: yard.name) }
+            kinds.append("yard")
+            options.append(.init("Climb down into the yard: the store and the roundhouse"))
+            return [e.ask("breakdown", ["0"] + kinds,
+                          prompt: "[red]\(what)[/red] The \(ship) will not leave \(yard.name) like this. If she had to give out anywhere, a yard is the place for it: there is a store across the platform and a roundhouse beyond that.",
+                          detail: "Spares from the store can be fitted on the spot; the roundhouse will make her as good as new, for a price.\n[dim]You have $\(Int(s.money)).[/dim]",
+                          options: options)]
+        }
+
+        let canWalk = s.money >= RailData.mechanicFee
+        if !canWalk && ((engine && s.sailcloth < 1) || (gear && s.timber < 1)) { return stranded(e, what) }
+
         let w = Self.walker(s) ?? 0
         let fee = Int(RailData.mechanicFee)
         kinds.append("walk")
@@ -89,11 +90,17 @@ extension Rail {
                       options: options)]
     }
 
-    /// Nothing to mend her with, and no money to send for anyone who has.
-    func stranded(_ e: GameEngine, _ what: String) -> [Interrupt] {
+    /// Nothing to mend her with, and no money to send for anyone who has (or, in a yard, to
+    /// buy the part).
+    func stranded(_ e: GameEngine, _ what: String, at yard: String? = nil) -> [Interrupt] {
         e.state.over = true
+        let ship = "[i]\(TextMarkup.escape(e.state.ship))[/i]"
+        if let yard {
+            return [.gameOver(title: "Stranded at \(yard).",
+                              body: "\(what) There is nothing aboard to mend her with, and not the price of a spare part in your pocket. The freight goes on in somebody else's cars, the \(ship) goes onto a siding, and the road sends you a bill for the siding.")]
+        }
         return [.gameOver(title: "Stranded at mile \(e.state.mile).",
-                          body: "\(what) There is nothing aboard to mend her with and no money to send for a man who has. Two days later a work train tows the [i]\(TextMarkup.escape(e.state.ship))[/i] to the next siding, where the freight is loaded onto somebody else's cars and the road sends you a bill for the towing.")]
+                          body: "\(what) There is nothing aboard to mend her with and no money to send for a man who has. Two days later a work train tows the \(ship) to the next siding, where the freight is loaded onto somebody else's cars and the road sends you a bill for the towing.")]
     }
 
     // MARK: - Answers
@@ -104,6 +111,10 @@ extension Rail {
         case "engine": return e.mendSails()
         case "gear": return e.patchHull()
         case "stock": return [.enterPort]
+        case "yard":
+            guard Self.inYard(e) != nil else { return [] }
+            e.state.atPort = true
+            return [.enterPort]
         case "walk": return walkForAMechanic(e, w)
         default: return []
         }
