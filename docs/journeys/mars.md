@@ -503,6 +503,7 @@ The rules now (`Mars+Trouble.swift`):
   has gone dark.[/red] The drive is dead, the recycler has stopped and the cabin is getting
   colder by the hour. The *Fair Copy* coasts on along the arc at the speed she had, which
   is not much." The offers:
+
   - "Fit a spare array panel (have n)": the repair, +25 (the yard rigger +40), a day.
   - "Rewire what is left of the wings: two days in suits", always open. The two fittest
     hands go out (the captain makes up two, or goes alone); two days pass in the dark;
@@ -512,6 +513,7 @@ The rules now (`Mars+Trouble.swift`):
   - "Coast on in the dark for a day": that day is a coast, and the next is asked about
     again (`mars.coast` holds the day chosen for, so a rest in between asks again).
   - "Take stock first": the menu under way.
+
   The rewire is always open and a coast always makes way, so there is no softlock. Wing
   trouble (the actuator, the coolant line) needs power; the thruster grid and a course
   trimmed on a good tracking fix need the drive running (power and propellant); the pod
