@@ -18,7 +18,9 @@ public enum Interrupt: Codable, Equatable {
     case burial(crewID: UUID, cause: String)
     /// Reached a stop. The controller calls `GameEngine.beginArrival`.
     case arrival(stopID: String)
-    /// Dropped anchor: show the port menu instead of resuming travel.
+    /// Dropped anchor: show the port menu instead of resuming travel. Under way (a journey's
+    /// `stalled` sends it when the player would rather take stock) it is the menu under
+    /// way: the controller shows whichever menu `GameState.atPort` says.
     case enterPort
     case gameOver(title: String, body: String)
     /// Reached the end. The controller calls `GameEngine.finish`.

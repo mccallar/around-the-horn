@@ -19,6 +19,25 @@ enum RailData {
     static let kegs = 60.0
     static let helperFee: [String: Double] = ["sherman": 30, "eastslope": 40]
 
+    // Breakdowns (docs/journeys/rail.md, "Breakdowns")
+    /// What a mechanic fetched from down the line charges for his time and the parts.
+    static let mechanicFee = 45.0
+    /// Turns the walk to a section house and his coming back take.
+    static let mechanicTurns = 3...6
+    /// What he brings a part that had given out back up to.
+    static let mechanicMends = 40.0
+    /// What the walk takes out of whoever walks, and the chance they come back ailing.
+    static let walkWear = 4...10
+    static let walkSickness = 0.3
+    /// Speed on a turn with too little wood (the engine's `noFuelSpeed`), and what burning
+    /// fence posts and sagebrush takes out of the engine on each such turn.
+    static let noWoodSpeed = 0.22
+    static let noWoodWear = 0.5...1.5
+    /// Tenths of a cord the dash for a siding ahead of the express, and bucking a drift,
+    /// burn; neither is offered without the most it can take aboard.
+    static let dashWood = 12...22
+    static let buckWood = 8...16
+
     enum Season { case spring, summer, autumn, winter }
 
     /// `month` is 0-based.

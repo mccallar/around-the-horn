@@ -87,6 +87,7 @@ public final class GameEngine {
         // ignored): no day passes, and the hold is asked again. No journey but the
         // Klondike holds anyone, and asking draws nothing.
         if state.atPort, let hold = journey.holdInPort(self) { return hold }
+        if let stopped = journey.stalled(self) { return stopped }
         state.day += 1
         let reg = state.region
         state.weather = rollWeather(reg)
@@ -103,8 +104,9 @@ public final class GameEngine {
             if state.fuel >= pace.fuel {
                 state.fuel -= pace.fuel
             } else {
+                let share = r.burnsPartLoad ? max(0, state.fuel) / pace.fuel : 0
                 state.fuel = 0
-                sp *= r.noFuelSpeed
+                sp *= r.burnsPartLoad ? share + (1 - share) * r.noFuelSpeed : r.noFuelSpeed
             }
         }
         sp *= rnd(r.speedJitter.lowerBound, r.speedJitter.upperBound)
@@ -355,7 +357,7 @@ public final class GameEngine {
             q.append(.message(text.sailsWarning))
         }
         if state.sails > r.warnRearm { state.flags.sails = false }
-        checkSink(&q)
+        if r.wearWrecks { checkSink(&q) }
     }
 
     func checkSink(_ q: inout [Interrupt]) {

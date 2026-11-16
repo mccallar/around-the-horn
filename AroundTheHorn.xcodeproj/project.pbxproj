@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		017186571EC97881CA9E44A3 /* EngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BF5668C018FEC94F3697835 /* EngineTests.swift */; };
+		02D2F5299E5775C04542E235 /* RailBreakdownTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54B02907AF208D38A2CA9499 /* RailBreakdownTests.swift */; };
 		08C865278BC4907C7264FE4C /* PixelCanvas.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6583B2CF434B20309FC1725C /* PixelCanvas.swift */; };
 		09D0A69C736558BE0A0620B7 /* ShopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85F6CAB7F5FF70223DC5D7FA /* ShopView.swift */; };
 		0A34DE7D4C8455ED52DDD483 /* FishingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0415D1CFDD6856DA2C775137 /* FishingView.swift */; };
@@ -51,6 +52,7 @@
 		699DE27EB99103642E593CE8 /* GameEngine+Actions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFB564D802B4628FB60D9483 /* GameEngine+Actions.swift */; };
 		6BA3FAE3F3280E81120CBC6A /* HornEngine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 509B74C67184498F2681AA80 /* HornEngine.framework */; };
 		6C6541E32F4ABDE351E03AED /* AppInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49B4EF72CA6B988831F49607 /* AppInfo.swift */; };
+		705F8C231B43A27E872D76E3 /* Rail+Breakdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = B31DA9DD14368C9C589EFF3D /* Rail+Breakdown.swift */; };
 		718DAEE8EB751767D8FE3093 /* GameEngine+Choices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F46A30D261341B02D3FFAC1 /* GameEngine+Choices.swift */; };
 		71B65DEDFC0190663F7F671C /* AirshipChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BDBE47B76D8056F1BBB706E /* AirshipChart.swift */; };
 		71E118F1BA3180A2F7AF4028 /* ChartAndFishingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 711BBE96B8E230C92444CFFA /* ChartAndFishingTests.swift */; };
@@ -252,6 +254,7 @@
 		4EA2BC179A8B36BCD1103436 /* Rail+Choices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Rail+Choices.swift"; sourceTree = "<group>"; };
 		509B74C67184498F2681AA80 /* HornEngine.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = HornEngine.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		51157A39DA824544D25246CF /* Mars.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mars.swift; sourceTree = "<group>"; };
+		54B02907AF208D38A2CA9499 /* RailBreakdownTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RailBreakdownTests.swift; sourceTree = "<group>"; };
 		54DABC9533B7FDC2B99A087C /* Airship+Events.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Airship+Events.swift"; sourceTree = "<group>"; };
 		5ACD055B80F355713782997F /* KlondikeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KlondikeTests.swift; sourceTree = "<group>"; };
 		5BDBE47B76D8056F1BBB706E /* AirshipChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirshipChart.swift; sourceTree = "<group>"; };
@@ -298,6 +301,7 @@
 		AEA4BB4660B64DB83BFDAAA1 /* RailScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RailScene.swift; sourceTree = "<group>"; };
 		AEE19A288C55C105821ECC1D /* VT323-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "VT323-Regular.ttf"; sourceTree = "<group>"; };
 		B24C73833E8D0B97DD454423 /* BalloonTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalloonTests.swift; sourceTree = "<group>"; };
+		B31DA9DD14368C9C589EFF3D /* Rail+Breakdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Rail+Breakdown.swift"; sourceTree = "<group>"; };
 		B38C2600574A28700FBAD44B /* ScreenshotWalk.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotWalk.swift; sourceTree = "<group>"; };
 		B406A516BFB1D077B5FBCB58 /* Horn1849+Events.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Horn1849+Events.swift"; sourceTree = "<group>"; };
 		B56A40E3339FFC3006131BB0 /* Mars+Ports.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Mars+Ports.swift"; sourceTree = "<group>"; };
@@ -497,6 +501,7 @@
 			isa = PBXGroup;
 			children = (
 				21B1EA5B3137426DD0F3DF6B /* Rail.swift */,
+				B31DA9DD14368C9C589EFF3D /* Rail+Breakdown.swift */,
 				4EA2BC179A8B36BCD1103436 /* Rail+Choices.swift */,
 				C11589EC5172DE1C71B5748F /* Rail+Depots.swift */,
 				76DD21EFECB1A9AE7B8FAF27 /* Rail+Events.swift */,
@@ -594,6 +599,7 @@
 				10C126C3CFA33EC4DB5092AC /* MarsTests.swift */,
 				90EC46C79B8380AEC8181D5A /* PrototypeParityTests.swift */,
 				19D6AAF10A90207D9CA7180E /* PurityTests.swift */,
+				54B02907AF208D38A2CA9499 /* RailBreakdownTests.swift */,
 				3EA0D1B32A801D8876C460B5 /* RailTests.swift */,
 				030AD9AFB938A4FEEA45CA09 /* RNGTests.swift */,
 				D9A32CC23A2A3A9A97B2F390 /* TestSupport.swift */,
@@ -917,6 +923,7 @@
 				2A6CB23257A89B5C55791DBD /* MarsData.swift in Sources */,
 				A28F39D86174143D740CCA23 /* Model.swift in Sources */,
 				CF56E93632B32369776A9466 /* RNG.swift in Sources */,
+				705F8C231B43A27E872D76E3 /* Rail+Breakdown.swift in Sources */,
 				1625C9B92C371251386673F8 /* Rail+Choices.swift in Sources */,
 				5C12F839C3F9D2C5328FC37D /* Rail+Depots.swift in Sources */,
 				1DE0008AE58F5320CCE67AB5 /* Rail+Events.swift in Sources */,
@@ -986,6 +993,7 @@
 				7C6456E65620A32E434723C4 /* PrototypeParityTests.swift in Sources */,
 				39EA71B06DD3A0F439B54130 /* PurityTests.swift in Sources */,
 				32F008A549271F1E85FAC2EB /* RNGTests.swift in Sources */,
+				02D2F5299E5775C04542E235 /* RailBreakdownTests.swift in Sources */,
 				78175FB4F54B3869C5F51028 /* RailTests.swift in Sources */,
 				CF9A1B4D3EF915D7D41ECB4B /* TestSupport.swift in Sources */,
 			);

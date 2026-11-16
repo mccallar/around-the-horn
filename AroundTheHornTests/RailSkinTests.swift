@@ -91,6 +91,48 @@ final class RailSkinTests: XCTestCase {
         has(skin.words(g).arrival, "7 days and 8 hours out of Omaha")
     }
 
+    /// The report from play: the box gave no sign that the train had given out or run out of wood.
+    func testTheStatusBoxSaysWhenTheTrainIsInTrouble() {
+        var g = nearing("elko")
+        func trouble() -> String? {
+            let t = skin.words(g).trouble
+            if let t { XCTAssertEqual(t.label, "Train") }
+            return t?.value
+        }
+        XCTAssertNil(trouble())
+        g.sails = 0.4
+        XCTAssertTrue(Rail.brokenDown(g), "shows 0%: given out")
+        XCTAssertEqual(trouble(), "Broken down")
+        g.sails = 0.5
+        XCTAssertNil(trouble(), "shows 1%")
+        g.hull = 0
+        XCTAssertEqual(trouble(), "Broken down")
+        g.fuel = 0
+        XCTAssertEqual(trouble(), "Broken down, no wood")
+        g.hull = 30
+        XCTAssertEqual(trouble(), "Out of wood")
+        // Found by review: with less than a turn's wood the box said nothing, though the
+        // turn runs partly on fence posts. The pace decides how much a turn burns.
+        g.pace = .steady
+        g.fuel = 9
+        XCTAssertEqual(trouble(), "Last of the wood")
+        g.fuel = 10
+        XCTAssertNil(trouble())
+        g.pace = .easy
+        g.fuel = 6
+        XCTAssertEqual(trouble(), "Last of the wood")
+        g.fuel = 7
+        XCTAssertNil(trouble(), "the easy pace burns 0.7 cords a turn")
+        // The meters themselves never read below nought, a negative zero included.
+        g.sails = -0.0
+        XCTAssertEqual("\(Int(jsRounded(g.sails)))%", "0%")
+        // 1849 has no such row.
+        var s = Horn1849Skin.skin.debug.start(1, 0)
+        s.sails = 0
+        s.hull = 0
+        XCTAssertNil(Horn1849Skin.skin.words(s).trouble)
+    }
+
     // MARK: Numbers the card states
 
     func testTheCardsNumbersAreTheTables() {

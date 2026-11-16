@@ -125,6 +125,7 @@ enum AirshipSkin {
             distance: { formatNumber(Double($0)) },
             meters: ("Lift", "Engines"),
             clock: nil,
+            trouble: nil,
             cash: "Cash",
             currency: "$",
             storeNames: [.clothes: "Fur suits"],
