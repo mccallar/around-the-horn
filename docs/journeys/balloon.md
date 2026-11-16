@@ -1639,8 +1639,10 @@ so a journey that never meets it never draws.
 
 Engine files: `HornEngine/Journeys/Balloon/` (`Balloon.swift` rules and sentences,
 `BalloonData.swift` tables, `Balloon+Fields.swift` the six fields, `Balloon+Events.swift`
-the region rolls and the seventeen events, `Balloon+Choices.swift` set pieces and answers).
-Tests: `HornEngineTests/BalloonTests.swift` (38 rule tests, 4 balance tests). The title
+the region rolls and the seventeen events, `Balloon+Choices.swift` set pieces and answers,
+`Balloon+Trouble.swift` lift, burners and propane at nothing). Tests:
+`HornEngineTests/BalloonTests.swift` (38 rule tests, 4 balance tests) and
+`BalloonBreakdownTests.swift` (16, D14). The title
 card, setup, outfit, burial, status and chart copy (§2, §3, §12.1's labels, §15's game,
 §16, §19) belong to the skin, which is not built yet.
 
@@ -1660,7 +1662,9 @@ lift leak 0.08 a watch flown; sink-and-dump below 35 lift with food over 20, 5�
 6%; riggers $20 a point of lift and $15 of burners × the field's multiplier; trades $250–700,
 wanted at $250 of a good or $300 cash; 11% event chance; rank cuts 7,000 / 4,000 / 2,000.
 Propane: altitude 12 / 14 / 16 × temperature 0.85 / 0.95 / 1 / 1.1 / 1.2; 10 × temperature
-loitering; nothing on the ground; 25 a launch; dry → 40 nm base and −5 lift a watch.
+loitering; nothing on the ground; 25 a launch; a watch without heat (dry, or the burners
+given out) → 40 nm base and −5 lift, and the last of the propane heats its share of one
+(D14, below).
 
 ### The bot, by departure
 
@@ -1685,11 +1689,17 @@ Thirty flights a role from seed 500 (the test), then 180 a role over six seed se
 
 | Departure | Chocolate maker | Builder | Bush pilot | Median winning flight |
 |---|---|---|---|---|
-| November 1998 | 29/30 · 176/180 | 18/30 · 89/180 | 7/30 · 46/180 | 168 watches |
-| December 1998 | 30/30 · 180/180 | 24/30 · 126/180 | 16/30 · 86/180 | 160 |
-| **January 1999 (tested)** | **30/30 · 180/180 (100%)** | **24/30 · 126/180 (70%)** | **16/30 · 86/180 (48%)** | **160** |
-| February 1999 | 30/30 · 180/180 | 24/30 · 126/180 | 16/30 · 86/180 | 160 |
-| March 1999 | 23/30 · 146/180 | 12/30 · 63/180 | 2/30 · 28/180 | 181 |
+| November 1998 | 28/30 · 175/180 | 18/30 · 90/180 | 7/30 · 46/180 | 168 watches |
+| December 1998 | 30/30 · 180/180 | 24/30 · 126/180 | 17/30 · 87/180 | 160 |
+| **January 1999 (tested)** | **30/30 · 180/180 (100%)** | **24/30 · 126/180 (70%)** | **17/30 · 87/180 (48%)** | **160** |
+| February 1999 | 30/30 · 180/180 | 24/30 · 126/180 | 17/30 · 87/180 | 160 |
+| March 1999 | 23/30 · 144/180 | 11/30 · 62/180 | 2/30 · 27/180 | 181 |
+
+Measured again after D14 (lift, burners and propane at nothing, below): the bush pilot's
+January went from 86 to 87 of 180 (16 to 17 of 30 from seed 500), and every other cell
+moved by two flights or fewer; the bands held and no number was re-tuned. Before D14 the
+table read November 176 / 89 / 46, December to February 180 / 126 / 86, March 146 / 63 /
+28.
 
 Measured again after the 2026-11-13 review fixes (offers cut to fit, no water trades, the
 Azores boat only in calm air, no camera plane at The jet, the Moroccan coast as land);
@@ -1703,19 +1713,24 @@ Choices, January, 180 flights a role (chocolate maker / builder / bush pilot, me
 
 | Flown as | Wins | Median |
 |---|---|---|
-| the bot | 180 / 126 / 86 | 160 |
-| always the northern track | 180 / 138 / 96 | 156 |
-| always the southern track, forecasters by the $1,500 rule | 178 / 127 / 90 | 164 |
-| always the southern track, never the forecasters | 165 / 122 / 80 | 165 |
-| middle air all the way | 180 / 137 / 98 | 164 |
+| the bot | 180 / 126 / 87 | 160 |
+| always the northern track | 179 / 136 / 94 | 156 |
+| always the southern track, forecasters by the $1,500 rule | 179 / 127 / 94 | 164 |
+| always the southern track, never the forecasters | 171 / 123 / 84 | 166 |
+| middle air all the way | 180 / 136 / 97 | 164 |
 | the jet all the way | 180 / 105 / 67 | 140 |
-| low and slow all the way | 175 / 66 / 21 | 217 |
-| never the riggers | 179 / 163 / 157 | 175 |
+| low and slow all the way | 178 / 65 / 21 | 217 |
+| never the riggers | 178 / 163 / 157 | 175 |
 
-How the January losses end (180 a role): builder 42 down in the sea, 12 the pilot's death
-(an infected wound, influenza, hypothermia, frostbite, exhaustion); bush pilot 73 down in
-the sea, 5 down on land, 17 the pilot's death (exhaustion, influenza, an infected wound,
-hypothermia, a fever, altitude sickness).
+(After D14. The southern track without the forecasters gained most, 165 to 171 for the
+chocolate maker: a thunderstorm that takes the last of the lift now asks for a propane
+cylinder instead of ending the flight.)
+
+How the January losses end (180 a role, after D14): builder 43 down in the sea, 11 the
+pilot's death (an infected wound, influenza, hypothermia, frostbite, exhaustion); bush
+pilot 74 down in the sea, 3 down on land, 16 the pilot's death (exhaustion, influenza, an
+infected wound, hypothermia, a fever, altitude sickness). No bot flight is grounded at a
+field: it lands with ballast to buy.
 Coming down in the sea is nearly always the Atlantic with dry tanks and no money left
 at Kitty Hawk, as §18.3 predicted.
 
@@ -1801,6 +1816,93 @@ the pilot's death by different causes.
     set piece holds the jet rather than climbing into it when you are already there; and no
     sentence promises a hundred knots (the fastest watch the tables allow is 308 nm, about
     77 knots).
+
+### Lift, burners and propane at nothing (D14)
+
+Reported from play on the Iron Road ("you can go below 0 for the health of the train ... I
+ran out of cord and it seemed to be still moving just fine"), and checked here
+(`HornEngineTests/BalloonBreakdownTests.swift`). Before this, nothing was stored below 0 or
+shown as "-0" (the Himalaya's cold took health below 0 for an instant, clamped before the
+deaths were counted), and dry tanks were already a crisis (§12.2: a 40-nm drift and −5 lift
+a watch), but:
+
+- the damage reports gave the event's whole number past what the meter had ("Lift −35%"
+  from a storm at 12%, "Burners −18%" with the burners at 3%);
+- burners at 0% drove her at 45% of her speed (the shared floor) and burnt full propane;
+- lift that showed 0% (under half a point) flew on as normal, and lift at nothing brought
+  her down at once with ballast aboard, though the ending says "no lift left";
+- the last gallon of propane flew a whole watch, and cost no lift;
+- a burner could cough and die with the tanks dry or the burners dead, and the climbs over
+  the Himalaya and out of icing cloud could be made on dead burners.
+
+The rules now (`Balloon+Trouble.swift`):
+
+- **A meter that shows 0% has given out**, as the status panel rounds it (`jsRound`), as on
+  the Iron Road and Over the Pole. Every lift and burner loss goes through `knock`: never
+  past nought, and the red note gives the drop the panel will show, or nothing when it
+  shows none.
+- **Burners given out**: no heat for the cone. She drifts and sinks exactly as with dry
+  tanks (40 nm base × the weather, burners, lift and crew; −5 lift a watch, flying or
+  loitering) and burns no propane (`Journey.fuelBurn` answers 0). The crew is told once:
+  "[red]The burners have given out.[/red] Every jet is fouled and every igniter dead. Until
+  a burner kit goes into them, or a field's burner man gets at them, there is no heat for
+  the cone: the balloon drifts on the helium alone, and sinks." The watch's note reads "The
+  burners are dead. The balloon is sinking." A burner kit aloft (+25, the builder +35, one
+  watch) or the field's burner man puts her right for the next watch. A drift makes some
+  way, and the sinking always ends in the question below, so there is no softlock.
+- **The last of the propane** heats its share of the watch (5 gallons of a warm watch's
+  13.3 in the middle air: 0.38 of it) and she drifts and sinks the rest: the speed is that
+  share of a powered watch and the rest of a drift, the lift loss the rest of 5, and the
+  note "The burners sputter out partway through the watch. The balloon is sinking." The
+  engine's `rules.burnsPartLoad` is left false (its blend is of the powered speed and
+  `noFuelSpeed`, and a drift is not a fraction of the powered speed), so `adjustSpeed`
+  blends the two itself. Every other watch that burns goes the same way: loitering, the
+  storm's lost watch, the detour round the thunderheads and the date-line party each cost
+  their unheated share of 5 lift (the storm's watch and the party cost nothing dry before).
+- **Lift gone**: she is going down (`rules.wearWrecks` is false, so the shared wear no
+  longer ends the flight). Before she flies another watch (`Journey.stalled`), or at once
+  when the watch, event or answer that took the last of it is done, she is asked what goes
+  over the side: "Cut away a sack of ballast" (as the repair: +20, the builder +30, one
+  watch) or "Cut away a propane cylinder: 50 gallons" (+10 lift, one watch, dropped over
+  empty sea or empty country; what it costs is three or four watches of propane later).
+  Over a field she has reached and not landed at, a third offer, "Come down on the field at
+  Saga" (or wherever), lands her to its ground team, whose store sells ballast and whose
+  riggers sell helium. With nothing to cut away and no field she comes down for good, as
+  §17 has it (both bodies now begin "With no lift left and nothing more to throw over the
+  side"); over a field without the price of a sack the attempt ends "Grounded at Saga."
+  Nothing else happens on a watch she is going down: no event, no storm. A set piece
+  reached on that watch (the Himalaya, the fork, the date line, the Azores, a mark) comes
+  after the question; a field or the finish comes first. A rest that takes the last of the
+  lift asks once, and the rest of the rest passes as asked (`passDays` cannot stop early
+  without a shared change). On the ground with no lift and no ballast aboard,
+  `Balloon.relaunchRefusal` answers "The launch director won't let you go up with no lift
+  in her. A sack of ballast from the store, or the riggers' helium, first." when she can
+  pay for a sack there; when she cannot, she goes up, is asked, and is grounded.
+- **Burner trouble needs burners**: number two burner coughing needs them lit (not given
+  out, and propane aboard), the lightning-welded valve needs them not given out, and so do
+  the climb over the Himalaya and the climb out of icing cloud, besides their propane.
+- **Crew health**: the Himalaya's cold is floored at 0 as it is taken; nothing else here
+  takes health without a floor (`hurt` leaves 1).
+
+**What the skin must show** (none is built yet; the airship's is the model):
+
+- the red status row, `Words.trouble` = ("Balloon", …): "Going down"
+  (`Balloon.goingDown`); "Burners dead, tanks dry", or "Burners dead, sinking" aloft and
+  "Burners dead" on the ground (`Balloon.burnersOut`); "Tanks dry, sinking" aloft and
+  "Tanks dry" on the ground; "Last of the propane" (`Balloon.lastOfThePropane`: less than
+  `Balloon.watchBurn`, a watch flown at this altitude in this air); nothing before the
+  launch;
+- the supplies note adds "the burners are dead" and "the tanks are dry", and the altitude
+  screen says that with no heat the height makes no difference to how far she drifts (it
+  still sets the cold and the crew's health);
+- the scene draws dead burners as it draws dry tanks, with no flame (§4's blast window,
+  0.6 × burners/60 s, is already nothing at 0%), and the low-lift sag (lift below 40)
+  already covers going down;
+- the learn page says what lift and the burners at nothing do;
+- before relaunching from a field, ask `Balloon.relaunchRefusal` (it now refuses for lift
+  as well as for propane).
+
+Tuning: none was needed; the bands hold untouched (the bot tables above are after D14).
 
 ### Things worth knowing
 

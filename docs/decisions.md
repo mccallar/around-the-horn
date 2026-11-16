@@ -242,6 +242,15 @@ a bar, clamped). They are left to be ruled on, not changed by this decision.
   petrol powers its share of a watch; a watch adrift costs 0.5 lift; damage reports what the
   meter had; a red status row. May's bands hold: 100 / 70 / 50% over 600 flights a role
   (docs/journeys/airship.md, "Lift and engines at nothing (D14)").
+- **The Jet Stream (balloon)**: burners at 0% give the cone no heat, so she drifts and sinks
+  as with dry tanks (40 nm, −5 lift a watch) and burns no propane (`Journey.fuelBurn`); lift
+  at 0% asks what goes over the side before she flies on (a sack of ballast, a 50-gallon
+  propane cylinder for 10%, or, over a field, its ground team) and only then brings her down
+  (`wearWrecks` false, `stalled`), or grounds her at a field she cannot pay at; the last of
+  the propane heats its share of a watch and every watch without heat costs its share of
+  the 5; damage reports what the meter had; burner trouble needs burners. January's bands
+  hold: 100 / 70 / 48% over 180 flights a role; the skin's red row is specified with the
+  rest (docs/journeys/balloon.md, "Lift, burners and propane at nothing (D14)").
 
 ## D15 — A flight saved before it left Rome comes back to the stores (2026-11-15)
 

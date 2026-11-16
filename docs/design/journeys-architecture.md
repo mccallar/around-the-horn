@@ -44,10 +44,10 @@ Three gates prove 1849 is unchanged and are never re-recorded: `PrototypeParityT
 | `weatherWeights(_:_:cursed:)` | the region's | seasons or the journey's state shift the odds (use `bump`) |
 | `crewFactor(_:)` | 1 / 0.85 / 0.65 / 0.45 for 4+ / 3 / 2 / 1 hands | the vehicle needs fewer or more |
 | `adjustSpeed(_:_:_:)` | nothing | grades, currents, head winds, a hired helper |
-| `fuelBurn(_:_:)` | the pace's `fuel` | the drive can stand idle with fuel aboard (the airship's engines, given out, burn none) |
+| `fuelBurn(_:_:)` | the pace's `fuel` | the drive can stand idle with fuel aboard (the airship's engines and the balloon's burners, given out, burn none) |
 | `paceHP(_:)` | the pace's `hp` | the pace costs more in some places (hauling on foot against rowing) |
 | `waterNeed(_:_:)` | `rules.water`, `hotWater` when hot | the need scales with the cold, or stops on some legs (the Klondike's firewood) |
-| `stalled(_:)` | nil: the vehicle can move | it cannot, or has something to meet first (rail: broken down; a set piece held while she was); what is shown instead of the turn, which then takes no time and draws nothing |
+| `stalled(_:)` | nil: the vehicle can move | it cannot, or has something to meet first (rail: broken down; a set piece held while she was; the airship and the balloon: going down); what is shown instead of the turn, which then takes no time and draws nothing |
 | `structureDamage(_:_:)` | creep + rough weather × pace | the structure wears differently |
 | `propulsionWear(_:)` | pace × weather × jitter | the drive rests while moving (an airship adrift) |
 | `wreckedTitle(_:)`, `wreckedBody(_:)`, `leaderDiedBody(_:)` | `text.wrecked`, `text.wreckedBody`, `text.leaderDiedBody` | where it happens, or who is left, changes the ending |
@@ -86,7 +86,8 @@ Three gates prove 1849 is unchanged and are never re-recorded: `PrototypeParityT
    wards off the slow sickness; `meds`; `clothes` = warmth, one per person; `sailcloth` =
    spare for what drives the vehicle (`state.sails`); `timber` = spare for what holds it
    together (`state.hull`, zero ends the game unless the journey sets
-   `rules.wearWrecks = false`, when it breaks down instead: rail); `tackle` = what the foraging game spends,
+   `rules.wearWrecks = false`, when it breaks down instead: rail; or is asked what goes over
+   the side: the airship, the balloon); `tackle` = what the foraging game spends,
    counted in throws; `fuel` = burned per turn by `PaceInfo.fuel`. A journey that doesn't
    carry one leaves it out of `items`. No water: `rules.water = 0; rules.hotWater = 0`.
 6. **Choices** are raised with `e.ask("key", args, prompt:, detail:, options:)` and
