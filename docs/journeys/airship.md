@@ -1077,31 +1077,36 @@ past steamers, put the stowaway off, decline the newspaper, help the castaways, 
 the Circle, climb out of the murk, come down at Barrow; at the Pole go above the fog on an
 even watch and under it on an odd one, buying the forecasts.
 
-Rates from 600 flights a role (seeds 100000 and 200000, 300 each):
+Rates from 600 flights a role (seeds 100000 and 200000, 300 each), with the breakdown
+rules of D14 (below, "Lift and engines at nothing"; the rates before them are in brackets):
 
 | Departure | Financier | Engineer | Meteorologist | Median winning flight |
 |---|---|---|---|---|
-| April | 98% | 50% | 32% | 78 watches |
-| **May (recommended)** | **100%** | **76%** | **52%** | **78 watches** |
-| June | 100% | 62% | 44% | 80 watches |
-| July | 96% | 30% | 19% | 86 watches |
-| May, economical | 100% | 94% | 65% | 94 watches |
-| May, full speed | 88% | 4% | 1% | 70 watches |
+| April | 97% (98) | 44% (50) | 29% (32) | 78 watches |
+| **May (recommended)** | **100% (100)** | **70% (76)** | **50% (52)** | **79 watches (78)** |
+| June | 99% (100) | 59% (62) | 41% (44) | 80 watches |
+| July | 92% (96) | 24% (30) | 19% (19) | 87 watches (86) |
+| May, economical | 99% (100) | 93% (94) | 65% (65) | 94 watches |
+| May, full speed | 80% (88) | 2% (4) | 0% (1) | 73 watches (70) |
 
-May sits in the middle of its bands (85–100 / 60–90 / 35–70%) and a winning flight takes
-about thirteen days. Thirty flights are too few to check a band on: sixteen blocks of thirty
-seeds put the May engineer anywhere from 17 to 27 wins (57–90%), and the meteorologist from
-10 to 21 (33–70%), both edges of their bands. Six blocks of 180 stayed within 69–81% and
-46–53%. Median winning scores in May: financier
-~2,840 (Rigger), engineer ~5,450 (Navigator), meteorologist ~6,750 (Navigator). Losses are
-spread across thirst and hunger after the money runs out, watch fatigue (it kills as
-"exhaustion"), infected wounds, pneumonia, influenza, frostbite and exposure.
+May sits inside its bands (85–100 / 60–90 / 35–70%) and a winning flight takes about
+thirteen days. Thirty flights are too few to check a band on: before D14, sixteen blocks of
+thirty seeds put the May engineer anywhere from 17 to 27 wins (57–90%), and the
+meteorologist from 10 to 21 (33–70%), both edges of their bands, and six blocks of 180
+stayed within 69–81% and 46–53%. Since D14, ten blocks of thirty (seeds 12345, 1, 777,
+4242, 9001, 31337, 55555, 86420, 100000, 200000) give the financier 30 every time, the
+engineer 15 to 25 and the meteorologist 12 to 16; from seed 12345, 30 / 19 / 16 (it was
+30 / 19 / 17). Median winning scores in May: financier ~2,840 (Rigger), engineer ~5,470
+(Navigator), meteorologist ~6,750 (Navigator). Losses are spread across thirst and hunger
+after the money runs out, watch fatigue (it kills as "exhaustion"), infected wounds,
+pneumonia, influenza, frostbite and exposure.
 
-The tests fly 180 flights a role from seed 12345, where May gives 180 / 131 / 93 (100 / 73 /
-52%) and July 169 / 46 / 45 (94 / 26 / 25%). They assert the May bands and a median of
-70–100 watches, that July is at least 15 points harder for the two poorer roles (it is
-about 45 and 30 points harder), that full speed (60 flights a role: 51 / 4 / 1) halves
-their chances, and that losing flights end at least three ways.
+The tests fly 180 flights a role from seed 12345, where May gives 179 / 121 / 88 (99 / 67 /
+49%; before D14 180 / 131 / 93) and July 168 / 35 / 37 (93 / 19 / 21%; before, 169 / 46 /
+45). They assert the May bands and a median of 70–100 watches, that July is at least 15
+points harder for the two poorer roles (it is about 48 and 28 points harder), that full
+speed (60 flights a role: 48 / 4 / 1, before 51 / 4 / 1) halves their chances, and that
+losing flights end at least three ways.
 
 ### Departures from the spec, and why
 
@@ -1116,10 +1121,11 @@ their chances, and that losing flights end at least three ways.
 2. **The bot.** `JourneyBot` flies one pace for every role and shops for the next stop with
    a mast, so it cannot do the spec's "economical when short" or "fill the tanks at Vadsø".
    Its policy is listed above; the departure table is what it gives.
-3. **Drifting** is built from the shared rules: `noFuelSpeed` is 1, so a watch that starts
-   with some petrol is still powered and empties the tanks; a watch that starts with none
-   drifts at `60 × weather × (0.75 + 0.25 × lift)` from `adjustSpeed`, and `propulsionWear`
-   returns 0 (its jitter is still drawn).
+3. **Drifting** is built from the shared rules: `noFuelSpeed` is 1, so the engine leaves
+   the speed to `adjustSpeed`, which drifts a watch with no power at all at `60 × weather ×
+   (0.75 + 0.25 × lift)`, and `propulsionWear` returns 0 (its jitter is still drawn). Since
+   D14 the last of the petrol powers only its share of a watch, engines given out drift too,
+   and a watch adrift costs gas (below, "Lift and engines at nothing").
 4. **Two shared hooks**, both with defaults that leave 1849 and rail byte-identical (the three
    gates and the rail bands are green): `Journey.propulsionWear` (the drive's wear a turn)
    and `Journey.wreckedBody` (the paragraph under the wreck title, so being forced down
@@ -1172,6 +1178,71 @@ their chances, and that losing flights end at least three ways.
     are as the spec. The journey's `blurb` is drawn from the premise, which now reads "Lift is
     precious. Petrol is life." to match it.
 
+### Lift and engines at nothing (D14)
+
+Reported from play on the Iron Road ("you can go below 0 for the health of the train ... I
+ran out of cord and it seemed to be still moving just fine"), and checked here
+(`HornEngineTests/AirshipBreakdownTests.swift`). Before this, nothing was stored below 0 or
+shown as "-0", and the crew's health was always floored, but:
+
+- the damage reports gave the event's whole number at a meter already at nothing
+  ("Engines −18%" with the engines at 0%, "Lift −6%" at 2%);
+- engines at 0% drove her at 45% of her speed (the shared floor) and burnt full petrol;
+- lift at 0% forced her down at once, with ballast aboard, though the ending says "no
+  ballast left to drop"; and lift that showed 0% (under half a point) flew on as normal;
+- the last few kilos of petrol powered a whole watch;
+- adrift, she paid nothing but time, and the status panel said nothing; the stalling-engine,
+  ice-off-the-propellers and engine-car-fire events could still come with the engines stopped.
+
+The rules now (`Airship+Trouble.swift`):
+
+- **A meter that shows 0% has given out**, as the status panel rounds it (`jsRound`), as on
+  the Iron Road. Every lift and engine loss goes through `knock`: never past nought, and the
+  red note gives the drop the panel will show, or nothing when it shows none.
+- **Engines given out**: she is a free balloon. She drifts as with dry tanks, burns no
+  petrol (`Journey.fuelBurn`, a shared hook added for this, whose default is the pace's burn,
+  so 1849 and the Iron Road are byte for byte as they were) and wears no engine. The crew is
+  told once: "[red]The engines have given out.[/red] The mechanics have both of them in
+  pieces on the catwalk, and until a box of spares goes into them, or a mast's mechanics get
+  at them, she is a free balloon, going where the wind goes." The note reads "Engines dead.
+  You are going where the wind goes." A box of spares fitted aloft (+25, the engineer +40)
+  or an overhaul at a mast puts her under power on the next watch. Drifting always makes some
+  way, so there is no softlock: she reaches the next mast, or the crew runs out of food,
+  water or coffee first.
+- **Lift gone**: she is going down (`rules.wearWrecks` is false, so the shared wear no longer
+  ends the flight). Before she flies another watch (`Journey.stalled`), or at once when the
+  watch that took the last of it was flown, she is asked what goes over the side: "Drop a
+  bag of ballast" (as the repair: +20, the engineer +35, one watch) or "Open the dump valves:
+  300 kg of petrol" (+10 lift, one watch; dearer by the point than a bag, and it is range).
+  Over a mast she has reached and not moored to, a third offer lets the ground crew walk her
+  in to the mast, whose store sells ballast and whose gas plant fills her. With nothing to
+  throw over and no mast, she is forced down as before, on the ice, the sea or in a field;
+  over a mast without the price of a bag of ballast, the flight ends "Grounded at Oslo." (or
+  wherever). Nothing else happens on a watch she is going down: no event, no heavy-ship
+  dump. A set piece reached on that watch (the Circle, the Pole, Point Barrow, a landmark)
+  comes after the question; a mast or Nome comes first, since the ground crew has her lines.
+- **The last of the petrol** powers its share of a watch and she drifts the rest (100 kg at
+  cruising is 0.4 of a powered watch and 0.6 of a drift). The engine's `rules.burnsPartLoad`
+  is left false: its blend multiplies the powered speed by `noFuelSpeed`, and a drift is not
+  a fraction of the powered speed, so `adjustSpeed` blends the two itself.
+- **Adrift**: a whole watch without power costs 0.5 more lift (`AirshipData.driftGas`: with
+  no engines to fly her nose-up she is held at her height by valving gas when the sun warms
+  her). The tanks-dry message now ends "going where the wind goes and spending gas to hold
+  her height." The stalling engine, the ice off the propellers and the fire in the engine
+  car need the engines running, as the newspaper and the murk already did.
+- **The status panel** has a red row (`Words.trouble`, "Airship"): "Going down", "Engines
+  dead, adrift", "Engines dead, tanks dry", "Tanks dry, adrift" ("Tanks dry" when moored), or
+  "Last of the petrol" (less than the pace burns in a watch); nothing before she leaves Rome.
+  The supplies note adds "the engines are dead" and the speed screen "With the engines dead,
+  it makes no difference."; the scene draws dead engines as it draws dry tanks, propellers
+  still, and the learn page says what lift and the engines at nothing do.
+
+Tuning: a headwind that held a drifting ship still (no headway at all) was tried and
+dropped. With it and the rest, the May engineer won 115 of 180, and 17 of 30 from seed
+12345, below the band; the drift keeps the spec's `60 × weather.speed`. Half a point of gas
+a watch adrift and the part load together cost the May engineer about six points and the
+meteorologist two (table above); the bands hold untouched.
+
 ### Things worth knowing
 
 - Forced down is a rare ending for the bot because it always carries three bags of ballast
@@ -1213,3 +1284,5 @@ The app's skin (`AroundTheHorn/Journeys/Airship*.swift`, docs/design/journeys-ar
 - The chart is §16's; its Mediterranean coast is crossed at about km 510, while the scene's
   sea (the region) runs to the Rhône stop at 650.
 - Forced down, the scene puts her on the surface; at the end she comes down over Nome's roofs.
+- The status panel's red row, the supplies note, the speed screen and the scene speak of
+  engines given out and lift gone as "Lift and engines at nothing (D14)" above says.

@@ -44,6 +44,7 @@ Three gates prove 1849 is unchanged and are never re-recorded: `PrototypeParityT
 | `weatherWeights(_:_:cursed:)` | the region's | seasons or the journey's state shift the odds (use `bump`) |
 | `crewFactor(_:)` | 1 / 0.85 / 0.65 / 0.45 for 4+ / 3 / 2 / 1 hands | the vehicle needs fewer or more |
 | `adjustSpeed(_:_:_:)` | nothing | grades, currents, head winds, a hired helper |
+| `fuelBurn(_:_:)` | the pace's `fuel` | the drive can stand idle with fuel aboard (the airship's engines, given out, burn none) |
 | `paceHP(_:)` | the pace's `hp` | the pace costs more in some places (hauling on foot against rowing) |
 | `waterNeed(_:_:)` | `rules.water`, `hotWater` when hot | the need scales with the cold, or stops on some legs (the Klondike's firewood) |
 | `stalled(_:)` | nil: the vehicle can move | it cannot, or has something to meet first (rail: broken down; a set piece held while she was); what is shown instead of the turn, which then takes no time and draws nothing |
@@ -371,6 +372,12 @@ Iron Road look, read and play as they did.
   weather, region, mast and stop apart, checks the chart and the winds, and flies seeded
   flights from the title card to an ending; `ResumeTests` resumes at the Pole, its
   forecasts, Kings Bay, Point Barrow and Nome.
+- **Trouble** (decision D14, docs/journeys/airship.md "Lift and engines at nothing"): the
+  airship answers `Words.trouble` with "Airship: Going down", "Engines dead, adrift",
+  "Engines dead, tanks dry", "Tanks dry, adrift" (moored, "Tanks dry") or "Last of the
+  petrol", from the engine's own `Airship.goingDown` and `Airship.enginesOut`; dead engines
+  are drawn and labelled as dry tanks are, drifting. `ResumeTests` resumes a ship going
+  down over the Oslo mast.
 - `AirshipScreenshotUITests` walks it. Its patience leaves out the masts' "Fly on without
   stopping" and the Circle's "No time for speeches" while rolling toward them (they race
   the button it is waiting for), and its setup test is named to run first, so the title

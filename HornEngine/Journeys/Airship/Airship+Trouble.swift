@@ -1,4 +1,8 @@
+#if os(WASI)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 // Lift and the engines at nothing (docs/journeys/airship.md, "As built", D14).
 //

@@ -235,6 +235,14 @@ that day's wear founders her; and lightning reports "Sails −18%" whatever the 
 left. None of these is shown as a negative number (the supplies screen draws health as
 a bar, clamped). They are left to be ruled on, not changed by this decision.
 
+- **Over the Pole (airship)**: engines at 0% drift as with dry tanks and burn no petrol (a
+  new shared hook, `Journey.fuelBurn`, the pace's burn by default); lift at 0% asks what goes
+  over the side before she flies on (a bag of ballast, 300 kg of petrol for 10%, or a mast's
+  ground crew) and only then forces her down (`wearWrecks` false, `stalled`); the last
+  petrol powers its share of a watch; a watch adrift costs 0.5 lift; damage reports what the
+  meter had; a red status row. May's bands hold: 100 / 70 / 50% over 600 flights a role
+  (docs/journeys/airship.md, "Lift and engines at nothing (D14)").
+
 ## D15 — A flight saved before it left Rome comes back to the stores (2026-11-15)
 
 Found in review of the airship skin: the first port's stores save as you leave them,
