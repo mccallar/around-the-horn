@@ -251,6 +251,17 @@ a bar, clamped). They are left to be ruled on, not changed by this decision.
   the 5; damage reports what the meter had; burner trouble needs burners. January's bands
   hold: 100 / 70 / 48% over 180 flights a role; the skin's red row is specified with the
   rest (docs/journeys/balloon.md, "Lift, burners and propane at nothing (D14)").
+- **The Long Transfer (mars)**: power & drive at 0% is dark: she coasts as with dry tanks
+  (0.28 of a powered day) and burns no propellant (`Journey.fuelBurn`), the recycler stops
+  (4 L a head a day, not 2), and before every day in the dark (`stalled`) she is asked: a
+  spare panel, rewiring what is left of the wings (always open: two days for 10 points and
+  some health), a day's coast, or the menu; the cycler, turnover and the approach wait for
+  power; a pressure hull that shows 0% lets go, as the spec has it (`wearWrecks` stays
+  true); dry tanks burn their last share (`burnsPartLoad`) and cost a point of power a day;
+  wing trouble needs power and a course trim the drive; damage reports what the meter had;
+  accidents leave 1 health. October's bands hold: 30 / 22 / 16 of 30, median 155 days (it
+  was 30 / 24 / 19); the skin's red row is specified with the rest (docs/journeys/mars.md,
+  "Power, the hull and propellant at nothing (D14)").
 
 ## D15 — A flight saved before it left Rome comes back to the stores (2026-11-15)
 
