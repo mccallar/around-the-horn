@@ -78,6 +78,7 @@
 		87ED892C305EA05606F8FE9B /* MarkupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B656EEA583D97D6A03EE42FD /* MarkupTests.swift */; };
 		87F0DA05537FCFF0B3BB75A4 /* RailScreenshotUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 746C70F5F36AC967DD5E9C22 /* RailScreenshotUITests.swift */; };
 		88A8FC565B507AACC911B4D1 /* RailData.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0F024DF259F1B20017EB5B4 /* RailData.swift */; };
+		8952705A3B31E1DBEF12B332 /* Klondike+Trouble.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F69454690F8B6D10524A352 /* Klondike+Trouble.swift */; };
 		8B58E7D9FC30938ED4C19381 /* Journey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0248E4120E4AA6712F708B41 /* Journey.swift */; };
 		8C150E8E3A3939744CC39CF6 /* Mars+Ports.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56A40E3339FFC3006131BB0 /* Mars+Ports.swift */; };
 		8D0DA68E807E54449B68EA53 /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = 64F6077D1CB8841972D089E7 /* OFL.txt */; };
@@ -300,6 +301,7 @@
 		8B84815BD850CCD28520377E /* TestJourneys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestJourneys.swift; sourceTree = "<group>"; };
 		8DC4CD2FAA1AAD1D13F6D98C /* Balloon+Trouble.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Balloon+Trouble.swift"; sourceTree = "<group>"; };
 		8F46A30D261341B02D3FFAC1 /* GameEngine+Choices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GameEngine+Choices.swift"; sourceTree = "<group>"; };
+		8F69454690F8B6D10524A352 /* Klondike+Trouble.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Klondike+Trouble.swift"; sourceTree = "<group>"; };
 		90EC46C79B8380AEC8181D5A /* PrototypeParityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrototypeParityTests.swift; sourceTree = "<group>"; };
 		92B379A31EE0B81538B8E6BE /* HornEngineTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = HornEngineTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		93E794034F7F574E3F216E96 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -686,6 +688,7 @@
 				C17D3F1D23210FB2EAB6B1E5 /* Klondike+Choices.swift */,
 				71872D68791ABA1244FB04AD /* Klondike+Events.swift */,
 				396F0F7A3170B9BD4EE739F9 /* Klondike+Towns.swift */,
+				8F69454690F8B6D10524A352 /* Klondike+Trouble.swift */,
 				AC25EE5C61D2A13FD160B361 /* KlondikeData.swift */,
 			);
 			path = Klondike;
@@ -934,6 +937,7 @@
 				C1B99D09E1FFE0CD64E0B38B /* Klondike+Choices.swift in Sources */,
 				4B70AD3EA102F30CF1CF85A0 /* Klondike+Events.swift in Sources */,
 				7CC9C0455419F8BE80B16920 /* Klondike+Towns.swift in Sources */,
+				8952705A3B31E1DBEF12B332 /* Klondike+Trouble.swift in Sources */,
 				CC58F37588B04FB9B33F157D /* Klondike.swift in Sources */,
 				E147656B627739AA876EBFD3 /* KlondikeData.swift in Sources */,
 				76FBCC25DBB3EA0BA5085253 /* Mars+Choices.swift in Sources */,

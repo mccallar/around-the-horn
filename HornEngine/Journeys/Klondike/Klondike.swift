@@ -33,11 +33,11 @@ public final class Klondike: Journey {
         deficiency = KlondikeData.scurvy
         ailments = KlondikeData.mildPool
 
-        roles[.merchant] = RoleInfo(label: "Be a storekeeper from Seattle", title: "storekeeper",
+        roles[.merchant] = RoleInfo(label: "A Seattle storekeeper", title: "storekeeper",
                                     money: 1700, mend: 25, patch: 20, catchLimit: 150, aim: 1.5)
-        roles[.shipwright] = RoleInfo(label: "Be a boatbuilder from Port Townsend", title: "boatbuilder",
+        roles[.shipwright] = RoleInfo(label: "A Port Townsend boatbuilder", title: "boatbuilder",
                                       money: 1000, mend: 40, patch: 35, catchLimit: 150, aim: 1.5)
-        roles[.whaler] = RoleInfo(label: "Be a hard-rock miner from Leadville", title: "miner",
+        roles[.whaler] = RoleInfo(label: "A hard-rock miner out of Leadville", title: "miner",
                                   money: 720, mend: 25, patch: 20, catchLimit: 150, aim: 1.5)
 
         // `speed` is a factor: each leg has its own distance a day (KlondikeData.base). `hp`
@@ -49,11 +49,11 @@ public final class Klondike: Journey {
         paces[.full] = PaceInfo(name: "Hard driving", speed: 1.3, hp: -1, wear: 2,
                                 desc: "Heavy packs, long days, oars always in the water. Fast, but hard on sleds, boats and backs.")
 
-        rationings[.filling] = RationsInfo(name: "Filling", amount: 3, hp: 1,
+        rationings[.filling] = RationsInfo(name: "Square meals", amount: 3, hp: 1,
                                            desc: "3 lbs a day. Flapjacks, bacon and beans, three times over.")
-        rationings[.meager] = RationsInfo(name: "Meager", amount: 2, hp: -0.3,
+        rationings[.meager] = RationsInfo(name: "Short commons", amount: 2, hp: -0.3,
                                           desc: "2 lbs a day. Two small meals and a lot of tea.")
-        rationings[.bare] = RationsInfo(name: "Bare bones", amount: 1, hp: -2.2,
+        rationings[.bare] = RationsInfo(name: "Scraping by", amount: 1, hp: -2.2,
                                         desc: "1 lb a day. A biscuit and a strip of bacon.")
 
         departures = KlondikeData.departures
@@ -305,19 +305,24 @@ public final class Klondike: Journey {
         KlondikeData.leg(e.state.region) == .steamer ? 0 : super.propulsionWear(e)
     }
 
-    /// Blizzards bury caches (worse on the slide slopes), wind tears, ice grinds.
+    /// Blizzards bury caches (worse on the slide slopes), wind tears, ice grinds. Nothing of
+    /// yours wears aboard the steamer. A day that would leave the outfit or the boat showing
+    /// 0% takes the rest (D14).
     override func structureDamage(_ e: GameEngine, _ reg: Region) -> Double {
-        if KlondikeData.leg(reg) == .steamer { return 0 }
-        var hd = rules.hullCreep
-        let w = e.state.weather
-        let full = e.state.pace == .full
-        if w == KlondikeData.blizzard {
-            hd += e.rnd(1, 2.6) * (full ? 1.6 : e.state.pace == .easy ? 0.7 : 1) * (reg.has("slides") ? 1.5 : 1)
-        } else if w == KlondikeData.wind {
-            hd += e.rnd(0, 0.8) * (full ? 1.5 : 1)
-        } else if w == KlondikeData.ice {
-            hd += e.rnd(0, 1.2) * (full ? 1.5 : 1)
+        var hd = 0.0
+        if KlondikeData.leg(reg) != .steamer {
+            hd = rules.hullCreep
+            let w = e.state.weather
+            let full = e.state.pace == .full
+            if w == KlondikeData.blizzard {
+                hd += e.rnd(1, 2.6) * (full ? 1.6 : e.state.pace == .easy ? 0.7 : 1) * (reg.has("slides") ? 1.5 : 1)
+            } else if w == KlondikeData.wind {
+                hd += e.rnd(0, 0.8) * (full ? 1.5 : 1)
+            } else if w == KlondikeData.ice {
+                hd += e.rnd(0, 1.2) * (full ? 1.5 : 1)
+            }
         }
+        if Self.showsNought(e.state.hull - hd) { hd = max(hd, e.state.hull) }
         return hd
     }
 
@@ -409,11 +414,19 @@ public final class Klondike: Journey {
 
     // MARK: - Events, stops and answers (Klondike+Events, Klondike+Towns, Klondike+Choices)
 
-    override func dayEvents(_ e: GameEngine, _ q: inout [Interrupt], _ reg: Region) { trailDay(e, &q, reg) }
+    /// Nothing happens to a party whose sleds or oars have just given out but that.
+    override func dayEvents(_ e: GameEngine, _ q: inout [Interrupt], _ reg: Region) {
+        if Self.givenOut(e.state) { return }
+        trailDay(e, &q, reg)
+    }
 
     override func events(_ e: GameEngine, _ reg: Region) -> [JourneyEvent] { trailEvents(e, reg) }
 
+    /// Sleds or oars given out, an outfit or a boat at nothing (Klondike+Trouble).
+    override func stalled(_ e: GameEngine) -> [Interrupt]? { trouble(e) }
+
     override func arrive(_ e: GameEngine, _ stop: Stop) -> [Interrupt] {
+        if Self.needsASweep.contains(stop.id) && Self.givenOut(e.state) { return hold(e, stop) }
         switch stop.type {
         case .port: return townArrival(e, stop)
         case .mark where stop.id == "lakes": return [.message(lakesNote(e.state))]
@@ -424,7 +437,7 @@ public final class Klondike: Journey {
     override func special(_ e: GameEngine, _ stop: Stop) -> [Interrupt] { setPiece(e, stop) }
 
     override func resolve(_ e: GameEngine, _ key: String, _ args: [String], _ option: Int) -> [Interrupt] {
-        answer(e, key, args, option)
+        key == "givenout" ? answerGivenOut(e, args, option) : answer(e, key, args, option)
     }
 
     public override func port(_ s: GameState, at stopID: String) -> Port? {

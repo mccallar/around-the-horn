@@ -75,6 +75,15 @@ enum KlondikeData {
     static let rumourKey = "klondike.rumour"
     /// Set only while `haulDays` runs: the pace's health is the trail's.
     static let haulingKey = "klondike.hauling"
+    /// Miles Canyon or Five Fingers, reached as the oars gave out: its index in `stops`.
+    static let heldKey = "klondike.held"
+
+    // Sleds or oars given out (Klondike+Trouble).
+    /// What the next party along wants for a coil of rope & rawhide: three times Seattle's.
+    static let coilPrice = 24.0
+    /// Making do without one: two days' hard work for 10 points.
+    static let makeDoDays = 2
+    static let makeDoPoints = 10.0
     static let chilkoot = 1.0
     static let whitePass = 2.0
 

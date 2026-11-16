@@ -17,10 +17,9 @@ extension Klondike {
         if reg.has("snags") {
             let pace = e.state.pace == .easy ? 0.6 : e.state.pace == .full ? 1.6 : 1
             if e.chance(0.025 * pace) {
-                let d = e.ri(8, 20)
-                e.state.hull = max(0, e.state.hull - Double(d))
+                let hurt = knock(e, .structure, e.ri(8, 20))
                 e.state.day += 1
-                q.append(.message("She runs hard onto a gravel bar hidden under the brown water. It takes a full day of wading and prying to get her off. [red](Boat −\(d)%)[/red]"))
+                q.append(.message("She runs hard onto a gravel bar hidden under the brown water. It takes a full day of wading and prying to get her off.\(Self.red([hurt]))"))
                 e.checkSink(&q)
                 return
             }
@@ -32,13 +31,12 @@ extension Klondike {
 
     /// Half the time it buries the cache; half the time somebody, the leader included.
     func snowslide(_ e: GameEngine, _ q: inout [Interrupt]) {
-        let meter = Self.meterNames(e.state).structure
         if e.chance(0.5) {
             let d = e.ri(10, 25)
             let m = min(e.ri(100, 300), Int(e.state.food.rounded(.down)))
-            e.state.hull = max(0, e.state.hull - Double(d))
+            let hurt = knock(e, .structure, d)
             e.state.food -= Double(m)
-            q.append(.message("A slide comes down off the mountain in the night and buries part of your cache. [red](\(meter) −\(d)%, \(m) lbs of provisions lost)[/red]"))
+            q.append(.message("A slide comes down off the mountain in the night and buries part of your cache.\(Self.red([hurt, m > 0 ? "\(m) lbs of provisions lost" : nil]))"))
             e.checkSink(&q)
             return
         }
@@ -102,7 +100,6 @@ extension Klondike {
         let cold = temp == .cold || temp == .freezing
         let rough = w.isRough
         let windOrIce = w == KlondikeData.wind || w == KlondikeData.ice
-        let meters = Self.meterNames(s)
         let healthy = s.crew.indices.filter { s.crew[$0].alive && s.crew[$0].ailment == nil }
         let nextTown = stops[(s.stopIndex + 1)...].first { $0.type == .port }
 
@@ -148,20 +145,18 @@ extension Klondike {
             // E5 A split runner, a snapped sweep, a split sail
             JourneyEvent(6, when: (foot && [KlondikeData.wind, KlondikeData.blizzard, KlondikeData.thaw, KlondikeData.snow].contains(w))
                             || (boat && windOrIce)) { e, q in
-                let n = e.ri(12, 28)
-                e.state.sails = max(0, e.state.sails - Double(n))
-                let line = foot ? "A sled runner splits on a hidden rock, and a pack strap goes with it. [red](Sleds −\(n)%)[/red]"
-                    : w == KlondikeData.ice ? "A cake of ice catches the steering sweep and snaps it like a match. [red](Oars & sail −\(n)%)[/red]"
-                    : "A gust splits the sail from yard to foot with a bang. [red](Oars & sail −\(n)%)[/red]"
-                q.append(.message(line))
+                let hurt = Self.red([self.knock(e, .drive, e.ri(12, 28))])
+                let line = foot ? "A sled runner splits on a hidden rock, and a pack strap goes with it."
+                    : w == KlondikeData.ice ? "A cake of ice catches the steering sweep and snaps it like a match."
+                    : "A gust splits the sail from yard to foot with a bang."
+                q.append(.message(line + hurt))
             },
             // E6 A runaway sled, a swamping squall
             JourneyEvent(4, when: (foot && rough) || (boat && windOrIce)) { e, q in
-                e.state.sails = max(0, e.state.sails - 15)
-                e.state.hull = max(0, e.state.hull - 6)
-                var line = foot
-                    ? "A loaded sled gets away on the steep pitch and runs wild down the slope, spilling sacks the length of the hill. [red](Sleds −15%, Outfit −6%)[/red]"
-                    : "A squall comes down the water and swamps her to the gunwales before you can reach the shore. [red](Oars & sail −15%, Boat −6%)[/red]"
+                let hurt = Self.red([self.knock(e, .drive, 15), self.knock(e, .structure, 6)])
+                var line = (foot
+                    ? "A loaded sled gets away on the steep pitch and runs wild down the slope, spilling sacks the length of the hill."
+                    : "A squall comes down the water and swamps her to the gunwales before you can reach the shore.") + hurt
                 if !healthy.isEmpty && e.chance(0.5) {
                     let idx = e.pick(healthy)!
                     let leg = KlondikeData.brokenLeg
@@ -181,11 +176,10 @@ extension Klondike {
             },
             // E7 Shifted freight, a wet cache, a sprung plank
             JourneyEvent(4) { e, q in
-                let n = e.ri(8, 18)
-                e.state.hull = max(0, e.state.hull - Double(n))
-                q.append(.message(steamer ? "The steamer rolls hard all night and the freight shifts. Crates of your outfit are smashed. [red](Outfit −\(n)%)[/red]"
-                                  : foot ? "Water has gotten under the tarps at your cache. Sacks are splitting and crates coming apart. [red](Outfit −\(n)%)[/red]"
-                                  : "She grinds over a hidden rock and a plank starts. [red](Boat −\(n)%)[/red]"))
+                let hurt = Self.red([self.knock(e, .structure, e.ri(8, 18))])
+                q.append(.message((steamer ? "The steamer rolls hard all night and the freight shifts. Crates of your outfit are smashed."
+                                   : foot ? "Water has gotten under the tarps at your cache. Sacks are splitting and crates coming apart."
+                                   : "She grinds over a hidden rock and a plank starts.") + hurt))
                 e.checkSink(&q)
             },
             // E8 Through the ice, or over the side
@@ -197,8 +191,8 @@ extension Klondike {
             JourneyEvent(1.5, when: s.food > 100 && !steamer) { e, q in
                 let n = min(e.ri(60, 180), Int(e.state.food.rounded(.down)))
                 e.state.food -= Double(n)
-                e.state.hull = max(0, e.state.hull - 4)
-                q.append(.message("The stovepipe sets the tent roof alight! You beat it out, but \(n) lbs of provisions are scorched and ruined. [red](\(meters.structure) −4%)[/red]"))
+                let hurt = Self.red([self.knock(e, .structure, 4)])
+                q.append(.message("The stovepipe sets the tent roof alight! You beat it out, but \(n) lbs of provisions are scorched and ruined.\(hurt)"))
                 e.checkSink(&q)
             },
             // E10 Seasick

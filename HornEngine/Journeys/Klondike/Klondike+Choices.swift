@@ -139,16 +139,14 @@ extension Klondike {
             case 0:
                 e.state.money -= KlondikeData.pilotFee
                 if e.chance(0.06) {
-                    let d = e.ri(5, 15)
-                    return holed(e, d, "Even a pilot can't miss every rock. She shudders, slews round and comes through with a plank stove in. [red](Boat −\(d)%)[/red]")
+                    return holed(e, e.ri(5, 15), "Even a pilot can't miss every rock. She shudders, slews round and comes through with a plank stove in.")
                 }
                 return [.message("A pilot steps aboard, takes the sweep, and says nothing at all for six of the longest minutes of your life. Then you're through, soaked and laughing, in the slack water below the rapids.")]
             case 1:
                 let q = haulDays(e, 4)
                 if e.state.over { return q }
                 if e.chance(0.15 + (e.state.hull < 50 ? 0.10 : 0)) {
-                    let d = e.ri(10, 25)
-                    return q + holed(e, d, "Halfway down, a line parts. She bangs from rock to rock before you catch her in an eddy. [red](Boat −\(d)%)[/red]")
+                    return q + holed(e, e.ri(10, 25), "Halfway down, a line parts. She bangs from rock to rock before you catch her in an eddy.")
                 }
                 return q + [.message("Four days of hauling sacks along the rim and paying out rope from rock to rock. Your hands are raw, but she's down, and so is everything you own.")]
             default:
@@ -162,9 +160,8 @@ extension Klondike {
                 guard e.chance(risk) else {
                     return [.message("You aim for the right-hand gap, the rock slides by close enough to touch, and the standing waves throw spray over everyone. Then the river widens and goes quiet. Rink Rapids, a little below, is nothing after that.")]
                 }
-                let d = e.ri(12, 30)
-                e.state.hull = max(0, e.state.hull - Double(d))
-                var q: [Interrupt] = [.message("The current shoves you at the rock. She strikes hard, swings, and comes off through the gap half full of water. [red](Boat −\(d)%)[/red]")]
+                let hurt = Self.red([knock(e, .structure, e.ri(12, 30))])
+                var q: [Interrupt] = [.message("The current shoves you at the rock. She strikes hard, swings, and comes off through the gap half full of water.\(hurt)")]
                 if e.chance(0.3) { overboard(e, &q, onFoot: false, epitaph: "Taken by the river at Five Fingers.") }
                 e.checkSink(&q)
                 return q
@@ -172,8 +169,7 @@ extension Klondike {
             let q = e.passDays(2, .sea)
             if e.state.over { return q }
             if e.chance(0.05 + (e.state.hull < 50 ? 0.10 : 0)) {
-                let d = e.ri(8, 20)
-                return q + holed(e, d, "A rope slips and she grinds along the rocks before you check her. [red](Boat −\(d)%)[/red]")
+                return q + holed(e, e.ri(8, 20), "A rope slips and she grinds along the rocks before you check her.")
             }
             return q + [.message("Two days of easing her down from rock to rock along the right bank. Slow, wet and safe.")]
 
@@ -225,9 +221,8 @@ extension Klondike {
                 e.health(&q, .sail)
                 if e.state.over { return q }
                 if e.chance(0.1) {
-                    let d = e.ri(4, 10)
-                    e.state.hull = max(0, e.state.hull - Double(d))
-                    q.append(.message("An extra day around by the shore, and a sled overturns on the rocks. [red](Outfit −\(d)%)[/red]"))
+                    let hurt = Self.red([knock(e, .structure, e.ri(4, 10))])
+                    q.append(.message("An extra day around by the shore, and a sled overturns on the rocks.\(hurt)"))
                     e.checkSink(&q)
                     return q
                 }
@@ -237,9 +232,8 @@ extension Klondike {
             guard e.chance(risk) else {
                 return [.message("You spread out and cross fast, listening to the ice tick and groan. Nobody goes through.")]
             }
-            let d = e.ri(5, 15)
-            e.state.hull = max(0, e.state.hull - Double(d))
-            var q: [Interrupt] = [.message("With a crack like a rifle shot, the ice gives way under a loaded sled! [red](Outfit −\(d)%)[/red]")]
+            let hurt = Self.red([knock(e, .structure, e.ri(5, 15))])
+            var q: [Interrupt] = [.message("With a crack like a rifle shot, the ice gives way under a loaded sled!\(hurt)")]
             overboard(e, &q, onFoot: true, onLake: true, epitaph: nil)
             e.checkSink(&q)
             return q
@@ -279,10 +273,9 @@ extension Klondike {
         return q
     }
 
-    /// The boat takes `d` points of damage and says so; she may break up.
+    /// The boat takes `d` points of damage and the line says what shows of it; she may break up.
     func holed(_ e: GameEngine, _ d: Int, _ line: String) -> [Interrupt] {
-        e.state.hull = max(0, e.state.hull - Double(d))
-        var q: [Interrupt] = [.message(line)]
+        var q: [Interrupt] = [.message(line + Self.red([knock(e, .structure, d)]))]
         e.checkSink(&q)
         return q
     }
