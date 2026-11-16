@@ -92,9 +92,9 @@ Sources: [NPS — Ton of Goods](https://home.nps.gov/klgo/learn/historyculture/t
 
 | id | Menu label | Start money | Score × | Perk |
 |---|---|---|---|---|
-| `storekeeper` | Be a storekeeper from Seattle | **$1,700** | ×1 | None. |
-| `boatbuilder` | Be a boatbuilder from Port Townsend | **$1,050** | ×2 | Repairs go further: canvas & pitch **+35** (others +20) and rope & rawhide **+40** (others +25), the same numbers as 1849's shipwright. Builds at Bennett in less time, and the quick boat comes out stouter (§14). |
-| `miner` | Be a hard-rock miner from Leadville | **$720** | ×3 | **A strong back:** on foot legs his party's travel speed is ×**1.15**. This is the only new perk type. |
+| `storekeeper` | A Seattle storekeeper | **$1,700** | ×1 | None. |
+| `boatbuilder` | A Port Townsend boatbuilder | **$1,050** | ×2 | Repairs go further: canvas & pitch **+35** (others +20) and rope & rawhide **+40** (others +25), the same numbers as 1849's shipwright. Builds at Bennett in less time, and the quick boat comes out stouter (§14). |
+| `miner` | A hard-rock miner out of Leadville | **$720** | ×3 | **A strong back:** on foot legs his party's travel speed is ×**1.15**. This is the only new perk type. |
 
 `title` (as in "Bonus for being a ___"): `storekeeper`, `boatbuilder`, `miner`.
 
@@ -107,9 +107,9 @@ padding is 1.5 and the catch cap is 150 lb for **all** roles.
 **Role screen text**
 
 - Heading: `Who are you?`
-- Intro: `Every kind of person caught the fever in 1898. You may:`
-- Extra choice: `Find out the differences`
-- Differences page (heading `The differences`), paragraphs:
+- Intro: `In 1898 the fever took clerks and cooks, preachers and prospectors. Choose who you will be:`
+- Extra choice: `What does each one bring north?`
+- Comparison page (heading `What each one brings north`), paragraphs:
   1. `A Klondike outfit cost more than most people earned in a year.`
   2. `[amber]Storekeeper[/amber] — starts with $1,700.`
   3. `[amber]Boatbuilder[/amber] — starts with $1,050. Gets far more out of every bundle of canvas and coil of rope, and builds a better boat in less time.`
@@ -605,9 +605,9 @@ On the steamer, the pace screen adds
 
 | key | Name | lb/person/day | hp/day | Description |
 |---|---|---|---|---|
-| `filling` (default) | Filling | 3 | +1 | `3 lbs a day. Flapjacks, bacon and beans, three times over.` |
-| `meager` | Meager | 2 | −0.3 | `2 lbs a day. Two small meals and a lot of tea.` |
-| `bare` | Bare bones | 1 | −2.2 | `1 lb a day. A biscuit and a strip of bacon.` |
+| `filling` (default) | Square meals | 3 | +1 | `3 lbs a day. Flapjacks, bacon and beans, three times over.` |
+| `meager` | Short commons | 2 | −0.3 | `2 lbs a day. Two small meals and a lot of tea.` |
+| `bare` | Scraping by | 1 | −2.2 | `1 lb a day. A biscuit and a strip of bacon.` |
 
 Rations screen: `Rations are currently [amber]{name}[/amber]. With {n} in the party, that's {lbs} lbs a day.`
 
@@ -790,7 +790,7 @@ At Bennett before a boat exists, this slot is `See about a boat` (§14).
   - Foot port: `Shoulder your packs and move on`
   - Bennett and Selkirk: `Push off and float on`
 - **Town menu, other choices:** `Check supplies & party` · `Look at the map` · pace ·
-  rations · `Rest in town` · `Attempt to trade` · `Talk to people` · `Buy supplies` ·
+  rations · `Rest in town` · `Look for a trade` · `Talk to people` · `Buy supplies` ·
   the yard label.
 - **Trade:**
   - Intro: `A packer outside the store looks over your goods.`
@@ -1309,7 +1309,7 @@ as `BalanceSimulationTests`.
 This mirrors 1849's bot. Where 1849 had no equivalent, it makes the cautious choice.
 
 - **Departs February or March 1898**, alternating by seed (the game's advice).
-- **Rations:** storekeeper Filling; boatbuilder and miner Meager (as 1849). Pace
+- **Rations:** storekeeper Square meals; boatbuilder and miner Short commons (as 1849's bot). Pace
   always Steady.
 - **Shops** at Seattle and at every port it enters. Each item's target is rounded up to
   the item's step, capped by room, and cut back one step at a time while money is
@@ -1426,20 +1426,20 @@ signature one.
   Bennett (~35–40 days) and the Bennett camp wait (20–55 days) have no town**. Scurvy
   onset is 35 days. The bot buys 4 jugs at the mid-trail store and 2–6 at Bennett, out of
   a cap of 40. The miner, buying them late and dear, is where the sim's scurvy deaths are.
-- **Health:** filling parties reach Bennett at a median of 94 hp. Meager parties reach it
-  at **39–43** (minimum near 1), because trail exertion (−1.4) plus meager (−0.3) cancels
+- **Health:** parties on square meals reach Bennett at a median of 94 hp. On short commons they reach it
+  at **39–43** (minimum near 1), because trail exertion (−1.4) plus short commons (−0.3) cancels
   natural recovery (+1), and freezing adds −1.4 to −2.4. The camp wait at Bennett (+3
   camp, +1, −0.3, about +3.7 a day) heals them. That is why February parties, despite a
   colder trail, survive on longer waits, and why March is safest.
 
 **5. Why the bands are plausible.**
 
-- **Storekeeper ≥ 85% (sim 100%).** Money buys Filling rations (+1.3 hp/day over Meager
+- **Storekeeper ≥ 85% (sim 100%).** Money buys square meals (+1.3 hp/day over short commons
   on a 55-day grind), packers, a bought boat when late, the pilot and every top-up. His
   risks are a captain-killing snowslide or illness, under 2% in the sim. The same is
   true of 1849's merchant.
 - **Boatbuilder 45–85% (sim 64–73%).** He has the same food rule and a small purse, so
-  Meager rations and the trail wear his party down to ~40 hp by Bennett. His losses are
+  Short commons and the trail wear his party down to ~40 hp by Bennett. His losses are
   exhaustion, broken legs and pneumonia on the trail (one crew member dies on average).
   His perk pays off afterwards: a stout boat and cheap repairs make his river leg the
   safest of the three.
@@ -1586,7 +1586,7 @@ results identical: `PrototypeParityTests` and `BalanceSimulationTests` must stay
 - **"Turned back" is the miner's main loss** (21–32%). That is thematic, but if it feels
   like a cliff, the cheapest fix is raising the miner to $760 (sim: about 44% wins,
   turned back about 15%).
-- **The bot keeps 1849's Meager rations for the poor roles.** A human who eats Filling on
+- **The bot keeps 1849's short rations for the poor roles.** A human who eats square meals on
   the trail (it costs only ~250 lb, about $25) does much better than the bot. The learn
   page hints at it.
 - **The Quitters' "Keep going" option is free**, unlike 1849's costly "run". Decide
@@ -1604,7 +1604,9 @@ results identical: `PrototypeParityTests` and `BalanceSimulationTests` must stay
 Engine files: `HornEngine/Journeys/Klondike/` (`Klondike.swift` tables, text and hooks;
 `KlondikeData.swift` the data enum; `Klondike+Towns.swift` the ports, Bennett's boat and
 ice; `Klondike+Events.swift` hazards and events; `Klondike+Choices.swift` set pieces and
-answers). Tests: `HornEngineTests/KlondikeTests.swift` (42 rule tests, 5 balance tests).
+answers; `Klondike+Trouble.swift` sleds, oars, the outfit and the boat at 0%). Tests:
+`HornEngineTests/KlondikeTests.swift` (42 rule tests, 5 balance tests) and
+`HornEngineTests/KlondikeBreakdownTests.swift` (17, D14).
 `Journeys.all` lists it between the balloon and Mars.
 
 ### The numbers as shipped
@@ -1643,28 +1645,28 @@ Everything in §2–§17 is as written, except the departures listed below. In s
 `KlondikeTests.policy()`: the spec's §18 policy as `JourneyBot` runs it. It shops by the
 spec's targets (a year of grub plus the run to the summit, firewood for the bare summit,
 lime juice for the run plus the wait at the lakes, spares kept only while $60 stays in hand
-before the summit); storekeeper Filling, the others Meager; pace Steady; fork at random;
+before the summit); storekeeper Square meals, the others Short commons; pace Steady; fork at random;
 packers with $240 in hand; waits out slides, goes round thin ice, lines Five Fingers, pays
 a pilot when it can; at the police the cheaper remedy; at Bennett builds properly when
 there is time before May 28, else the storekeeper buys, else a scow, else buys, else a
 raft; waits for the ice. It rests three days in town under 70 health, then shops, then
 uses the yard under 70 (never on the outfit at Bennett).
 
-30 runs a role, seed 1898 (seeds `1898 + 1000 × multiplier + i`):
+30 runs a role, seed 1898 (seeds `1898 + 1000 × multiplier + i`), after D14:
 
 | Departure | Storekeeper | Boatbuilder | Miner | Median winning run |
 |---|---|---|---|---|
 | January | 27/30 | 0/30 | 0/30 | 175 days |
-| February | 30/30 | 6/30 | 1/30 | 145 days |
+| February | 30/30 | 6/30 | 0/30 | 144 days |
 | **March** | **30/30** | **24/30** | **15/30** | **119 days** |
-| April | 30/30 | 27/30 | 16/30 | 111 days |
+| April | 30/30 | 27/30 | 15/30 | 111 days |
 | May | 30/30 | 29/30 | 10/30 | 106 days |
 
-March over 100 runs a role (seed 20000): 98 / 80 / 43%, median 119 days. March winners
+March over 100 runs a role (seed 20000): 98 / 80 / 42%, median 118 days. March winners
 reach Dawson around June 24 (storekeeper), June 28 (boatbuilder) and July 16 (miner);
 median scores 3,843 / 7,181 / 7,863.
 
-By choice, March: the Chilkoot 29 / 21 / 10 and the White Pass 30 / 26 / 12 (balanced
+By choice, March: the Chilkoot 29 / 21 / 9 and the White Pass 30 / 26 / 12 (balanced
 within noise; the Chilkoot's losses include more snowslides). Hard driving all the way:
 28 / 5 / 3, nearly all of the difference exhaustion on the trail.
 
@@ -1689,7 +1691,7 @@ losses end at least three ways, the police among them.
    easy for the middle band. At ×1.2 they are 80% and 46%.
 3. **The boatbuilder starts with $1,000, not $1,050.** With $1,050 he leaves Seattle with
    $253 and the bot's "$240 in hand" rule hires the packers, which put him at 86–89%.
-   Fifty dollars less keeps him at the poorer roles' pace. The skin's differences page
+   Fifty dollars less keeps him at the poorer roles' pace. The skin's comparison page
    must say $1,000.
 4. **The valley regions end at 1,133.1 mi**, not 1,133.0 (§20's suggestion): Sheep Camp
    and White Pass City are the last places with trees, so a stay there counts as the
@@ -1751,6 +1753,107 @@ losses end at least three ways, the police among them.
     has lines and an epitaph of its own instead of E8's creek; a ruined outfit past the
     summit no longer mentions the police; waiting out a slide says "you go on" after the
     two days, and not at all if the party did not live.
+21. **The role and ration lines in D11's shape** (text only, no number changed): the roles
+    are "A Seattle storekeeper", "A Port Townsend boatbuilder" and "A hard-rock miner out
+    of Leadville"; the rations are "Square meals", "Short commons" and "Scraping by" (the
+    descriptions are unchanged). The role screen, the comparison page and the trade row in
+    §2 and §12 are reworded to match, for the skin.
+22. **Sleds, oars, the outfit and the boat at 0%** (D14): see the next section.
+
+### Sleds, oars, the outfit and the boat at nothing (D14)
+
+Reported from play on the Iron Road ("you can go below 0 for the health of the train ... I
+ran out of cord and it seemed to be still moving just fine"), and checked here
+(`HornEngineTests/KlondikeBreakdownTests.swift`). Before this nothing was stored below 0 or
+shown as "-0", and accidents already left a crew member at 1 health at least, but:
+
+- sleds at 0%, or afloat oars & sail at 0%, carried the party on at 45% of its pace (the
+  shared floor, `propFloor`), with nothing on the status panel to say so: the March miner's
+  bot did so for 21 days in two runs of 30;
+- an outfit or a boat under half a point showed 0% and went on: the shared wreck waits for
+  nothing at all;
+- the damage reports gave the event's whole number past what the meter had (three times in
+  the miner's 30 March runs).
+
+The rules now (`Klondike+Trouble.swift`):
+
+- **A meter that shows 0% is at nothing**, as the status panel rounds it (`jsRound`), as on
+  the other journeys. Every outfit, boat, sled and oar loss goes through `knock`: never past
+  nought, and the red note gives the drop the panel will show, or nothing when it shows
+  none ("A sled runner splits on a hidden rock, and a pack strap goes with it." with no red
+  note at all on sleds already at 0%).
+- **Sleds or oars at 0% have given out** (`Klondike.givenOut`): there is no moving a ton of
+  outfit along the trail without them, and a boat with no sweep is tied to the bank. On the
+  day they give out nothing else happens (no hazard, no event). Before every day after it
+  (`Journey.stalled`, which takes no time and draws nothing) the party is asked: "[red]Your
+  sleds have given out.[/red] Split runners, knotted straps, harness in pieces: there is no
+  moving a ton of outfit along the trail until they are mended." (afloat: "[red]The oars and
+  sail have given out.[/red] With no sweep to steer by, the *Klondike Belle* goes wherever
+  the water likes, so you work her into the bank and tie up. She stays there until she is
+  re-rigged."). The offers:
+
+  - "Mend the sleds" / "Re-rig the oars & sail: 1 coil of rope & rawhide (have n)": the
+    shared repair, +25 (the boatbuilder +40), a camp day.
+  - "Buy a coil off the next party along ($24)" ("boat" afloat), offered only with no rope
+    aboard: $24, three times the Seattle price, then the same repair. The trail and the
+    river were never empty in 1898.
+  - "Lash up pack boards from empty crates and sacking (2 days)" / "Cut a sweep and oars
+    from a spruce on the bank (2 days)", always open: two days of hard work as the trail
+    counts it (`haulDays`: eaten, no miles, the foot leg's exertion, no rest), then the
+    sleds or the oars at +10.
+  - "Take stock first": the menu under way (rest, repairs, fishing, the supplies).
+
+  The making-do is always open, so there is no softlock. A boat drifting on with the current
+  was considered and not offered: a steerless boat on the lakes goes nowhere, and on the
+  river the gravel bars and the canyon are what the sweep is for.
+- **Miles Canyon and Five Fingers wait for a sweep.** Reached on the day the oars give out,
+  each is held (`klondike.held`): "The *Klondike Belle* comes down to Miles Canyon with no
+  sweep to steer by, and you tie her up to the bank above the fast water. Nobody takes a
+  boat into Miles Canyon without a sweep." (Five Fingers: "Nobody takes a boat through Five
+  Fingers without a sweep."). The question then ends with that line, and the set piece comes,
+  taking no time, once she is re-rigged. The police at the summit weigh grub, not sleds, and
+  are met as usual; towns and Dawson take a party in as usual.
+- **The steamer carries the party whatever its sleds are like**: aboard, nothing is asked
+  (and nothing aboard can wear the sleds in any case).
+- **An outfit or a boat at 0% is lost**, as §4 has always had it ("Your outfit is ruined."
+  or "The *Klondike Belle* has broken up.", with §17's paragraphs). The end now comes at a
+  shown 0%, not only at nothing: a day's wear or an event that would leave less than half a
+  point takes the rest (even aboard the steamer, where nothing wears it), and a save
+  standing at 0% ends before another day. There is no way out to offer: stampeders whose goods
+  were soaked, stolen or buried turned back (§4), and patches go on from the stores long
+  before.
+  `rules.wearWrecks` stays true.
+- **No firewood**: this journey has no vehicle fuel (§5), and firewood is for the people, not
+  the sleds, so a party without it still walks or rows at its pace. It is a crisis all the
+  same, and was before: −12 health a head a day and +0.04 on the chance of illness, death
+  by "exposure", and the red warning "[red]The woodpile is gone![/red] Without a fire, the
+  cold will kill you within days." What it lacked was a row on the status panel
+  (`Klondike.noFire`: no firewood anywhere but aboard the steamer).
+- **Crew health**: snowslides, falls through the ice, the runaway sled's broken leg and the
+  seasick steamer already left a crew member at 1 health at least; what kills is the day
+  that follows, as the shared rules count it. Tested.
+
+**What the skin must show** (none is built yet; the airship's is the model):
+
+- the red status row, `Words.trouble` = ("Party", …): "Sleds given out" on foot and "Oars &
+  sail given out" afloat (`Klondike.givenOut`); "No firewood" (`Klondike.noFire`); both at
+  once, "Sleds given out, no firewood" / "Oars given out, no firewood"; nothing before the
+  party leaves Seattle. The outfit and the boat need no row: at 0% the run is over.
+- the supplies screen's note adds "the sleds have given out" / "the oars & sail have given
+  out" and "no firewood";
+- the scene needs nothing new: §4's holes in the tarp, the slats and the sail are at their
+  worst at 0%;
+- the learn pages ("The outfit", "Pass, lakes, river") say that sleds or oars at 0% stop the party
+  until they are mended, the three ways to mend them, that Miles Canyon and Five Fingers
+  wait for a sweep, that an outfit or a boat at 0% ends the trek, and that a day without
+  firewood costs every one of you 12 health;
+- the role screen, the comparison page, the rations and the trade row in D11's shape (§2,
+  §10, §12; the engine's role and ration lines already are).
+
+Tuning: none was needed. The March bands hold untouched and identical: 30 / 24 / 15 of 30,
+median 119 days, as before; the tables above are after D14 (February's miner 1 → 0, April's
+16 → 15, March over 100 runs 43 → 42%, the Chilkoot's miner 10 → 9). The March miner's bot
+still meets given-out sleds or oars in two runs of 30, for a day each, and mends them.
 
 ### Worth knowing
 
@@ -1766,5 +1869,5 @@ losses end at least three ways, the police among them.
   date.
 - April is a little safer than March for the boatbuilder and no worse for the miner, but
   arrives later; the score's crowd line is what makes March the advice.
-- February is harder than the spec's sim found (6/30 and 1/30 for the poorer roles):
-  February parties spend their trail in deep cold on Meager rations.
+- February is harder than the spec's sim found (6/30 and 0/30 for the poorer roles):
+  February parties spend their trail in deep cold on short commons.

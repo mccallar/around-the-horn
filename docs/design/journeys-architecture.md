@@ -47,7 +47,7 @@ Three gates prove 1849 is unchanged and are never re-recorded: `PrototypeParityT
 | `fuelBurn(_:_:)` | the pace's `fuel` | the drive can stand idle with fuel aboard (the airship's engines and the balloon's burners, given out, and the mars array, dark, burn none) |
 | `paceHP(_:)` | the pace's `hp` | the pace costs more in some places (hauling on foot against rowing) |
 | `waterNeed(_:_:)` | `rules.water`, `hotWater` when hot | the need scales with the cold, or stops on some legs (the Klondike's firewood), or a recycler stops (mars, the array dark) |
-| `stalled(_:)` | nil: the vehicle can move | it cannot, or has something to meet first (rail: broken down; a set piece held while she was; the airship and the balloon: going down; mars: the array dark, a set piece held in the dark, a hull at 0%); what is shown instead of the turn, which then takes no time and draws nothing |
+| `stalled(_:)` | nil: the vehicle can move | it cannot, or has something to meet first (rail: broken down; a set piece held while she was; the airship and the balloon: going down; mars: the array dark, a set piece held in the dark, a hull at 0%; the Klondike: sleds or oars given out, Miles Canyon or Five Fingers held while they were, an outfit or a boat at 0%); what is shown instead of the turn, which then takes no time and draws nothing |
 | `structureDamage(_:_:)` | creep + rough weather × pace | the structure wears differently |
 | `propulsionWear(_:)` | pace × weather × jitter | the drive rests while moving (an airship adrift) |
 | `wreckedTitle(_:)`, `wreckedBody(_:)`, `leaderDiedBody(_:)` | `text.wrecked`, `text.wreckedBody`, `text.leaderDiedBody` | where it happens, or who is left, changes the ending |

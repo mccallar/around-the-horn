@@ -262,6 +262,17 @@ a bar, clamped). They are left to be ruled on, not changed by this decision.
   accidents leave 1 health. October's bands hold: 30 / 22 / 16 of 30, median 155 days (it
   was 30 / 24 / 19); the skin's red row is specified with the rest (docs/journeys/mars.md,
   "Power, the hull and propellant at nothing (D14)").
+- **To the Klondike (klondike)**: sleds, and afloat oars & sail, at 0% off the steamer have
+  given out, and the party stays where it is (`stalled`) until they are mended: a coil of
+  rope & rawhide, a coil bought off the next party along ($24), or two days making do for
+  10 points (always open), or the menu; Miles Canyon and Five Fingers wait for a sweep, the
+  police at the summit do not; an outfit or a boat that shows 0% is ruined or breaks up, as
+  the spec has it (`wearWrecks` stays true), before another day; the steamer carries sleds
+  at 0%. There is no vehicle fuel: no firewood still walks, at 12 health a head a day.
+  Damage reports what the meter had; accidents already left 1 health. March's bands hold
+  untouched: 30 / 24 / 15 of 30, median 119 days, as before; the skin's red row is
+  specified with the rest (docs/journeys/klondike.md, "Sleds, oars, the outfit and the boat
+  at nothing (D14)").
 
 ## D15 — A flight saved before it left Rome comes back to the stores (2026-11-15)
 
