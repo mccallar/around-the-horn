@@ -24,7 +24,7 @@ extension GameEngine {
         state.talkIndex = 0
         let leaving = state.crew.filter { $0.alive && $0.leaveAt == s.id }
         state.crew.removeAll { $0.alive && $0.leaveAt == s.id }
-        var detail = journey.port(s.id)?.arrive ?? ""
+        var detail = journey.port(state, at: s.id)?.arrive ?? ""
         for p in leaving { detail += "\n\n[dim]\(journey.text.wavesGoodbye(TextMarkup.escape(p.name)))[/dim]" }
         return [.choice(portChoice(s, detail: detail))]
     }

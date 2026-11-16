@@ -276,3 +276,195 @@ Three: "The transfer" (what the trip is; a unit of money is a thousand dollars),
 None the engine cannot express: every rule above maps onto a hook rail already uses
 (`adjustSpeed`, `structureDamage`, `tick`, `temperature`, `weatherWeights`, `arrive`,
 `special`, `resolve`, `forageRefusal`, `score`).
+
+## As built
+
+Engine files: `HornEngine/Journeys/Mars/` (`Mars.swift` rules, sentences and hooks,
+`MarsData.swift` tables, `Mars+Ports.swift` the four stations and the cycler's offer,
+`Mars+Events.swift` the 23 events, `Mars+Choices.swift` turnover, capture and every
+answer), one entry in `Journeys.all`. Tests: `HornEngineTests/MarsTests.swift` (30 rule
+tests, 4 balance tests); `JourneyContractTests` runs over it with no special case. The
+title card, setup and outfit copy, learn pages, burial wording, status labels, scene,
+chart and the grapple's drawing (§1's card, §15's canvas, §16, §19) belong to the skin,
+which is not built yet. No shared engine code changed. The test bot `JourneyBot` gained
+one knob, `stockFactorHere` (off by default), described below.
+
+### The numbers as shipped
+
+**Roles.** Charter captain $1,500, mend 25 / patch 20, catch 60 L, aim 1.5. Yard rigger
+$850, mend 40 / patch 32. **Ice hauler $625** (spec $500), mend 25 / patch 20, catch
+100 L, aim 4. Score × 1 / 2 / 3.
+
+**Paces** (per day): Economy burn 310 units, 0.7 t, wear 1.2, +0.5 hp; **Cruise 370**,
+1.0 t, wear 2, 0; Hard burn 430, 1.6 t, wear 3.4, −1 hp. Rations: Full 0.8 kg a head
+(+1), Lean 0.55 (−0.3), Short 0.35 (−2.2).
+
+**Stock** (Gateway price per bought unit, most aboard):
+
+| Key | Name | Unit | Price | Max |
+|---|---|---|---|---|
+| `food` | Rations | kg (step 25) | 0.18 | 450 |
+| `water` | Water | litres (step 50) | 0.23 | 800 |
+| `fuel` | Propellant | tonnes, stored in tenths (step 5) | 0.74 | 100 |
+| `limes` | Supplement packs | packs | 2.3 | 20 |
+| `meds` | Medical kits | kits | 9 | 8 |
+| `clothes` | Thermal suits | suits | 5.5 | 10 |
+| `sailcloth` | Array panels | panels | 13 | 8 |
+| `timber` | Hull patches | patches | 11 | 8 |
+| `tackle` | Tether cartridges | 20 shots | 2.75 | 10 |
+
+**Stations** (multiplier; item mods): Gateway 1; the cycler *Perpetua* 1.1 (rations 1.6,
+water 0.4); Midway 1.4 (propellant 0.4); Phobos 0.8 (rations 0.7, propellant 2.2, water
+1.2). Yards cost 1.2 a point of hull and 1.0 a point of power × the multiplier, so Phobos
+is the cheapest yard and Midway the dearest.
+
+**Rules** (`Rules`): turn 24 h from the 7th of the launch month; speed × (0.7 + 0.3 ×
+power) and the hull never slows the ship (`hullFloor 1`, `hullSpan 0`); no propellant ×
+0.4; water 2 L a head a day, hot or not; a month (30 days) without supplement packs
+before bone loss can start; hull creep 0.05 a day; below 35 hull the freezer can spoil
+10–30 kg; one event on 17% of days; trades wanted at $20 of a good or $40 cash, worth
+$15–45; rank cuts 8,000 / 5,000 / 2,500. Everything else is the shared default.
+
+**Space weather** (speed, power wear, crew harm a day, hull hit up to): Quiet 1, 0.3;
+Good tracking 1.08, 0.25; Solar wind gusts 1, 0.7; Pebble stream 0.95, 0.4, hull 5;
+Radio noise 0.9, 0.3; Proton storm 0.8, 1.4, 1.5 hp, hull 1; Mass ejection 0.6, 1.8, 2
+hp, hull 4. A hull hit is × 1.5 at a hard burn and × 0.7 at economy. Proton storms and
+mass ejections are × (0.6 + months since 1 August 2087 ÷ 9), held between 0.6 and 1.6.
+Skies: clear, still, breeze, dust, fog, storm, gale.
+
+**The arc.** Regions and stops as §7–§8, with the shadow landmark at 37,000 and the
+approach and capture tagged `far` (departures 12 and 13). Power wears 1.3× in `far`
+regions, everything past 240 million km: deep space, the second ice stream, the shadow,
+the approach and the capture. The shadow has no Good tracking weather and nothing from
+Earth: no flare warning, tracking fix, navigation update or mail from home. Earth and the
+Moon show as a double star only between 30 and 240 million km.
+
+**Set pieces.** The cycler: dock for 6 t (disabled under 6 t) and you are aboard with her shop
+open, with no second offer to dock; wave
+and she is not a port at all. Turnover: on schedule, nothing; run on (8 t, disabled
+under 8 t) gains 1,400 units, four days at cruise, with a 30% chance (50% under 50%
+power) of 10–20 points off power. Approach: aerobrake (speed × 1.5 and 4–10 hull a day
+until Phobos, then nothing) or burn into orbit (10 t, speed × 0.75 until Phobos); short
+of 10 t the burn takes what is left and the ship coasts on the shared no-propellant rule.
+
+**Ailments.** Anywhere: bad air (2 a day, 3–6 days), low spirits (1, 5–10), an infection
+(3, 6–12), a fracture (1.2, 12–20; a second chance in the pool after 15 days without
+supplements). Under way in a proton storm or mass ejection, radiation sickness (4, 6–12)
+twice in the pool; in a cold or freezing cabin, hypothermia (3, 4–8) twice. Events give
+decompression injuries (2.5, 4–8), burns (1.5, 10–18), bad air and radiation sickness.
+Bone loss does 2 a day until supplements or a port cure it.
+
+**Contract.** A score line of 25 points a day under 170; a message on day 170; nothing
+forfeit.
+
+### The bot, by departure
+
+`JourneyBot` with `MarsTests.policy()`: shop each leg for the run at three quarters of
+cruise speed (times the window's factor) plus ten days, a fifth extra propellant; two
+each of kits, panels and patches; supplies first, then the yard below 70%; mend under
+45%. The ice hauler eats lean, carries 80 tether shots, buys water only half-way when an
+ice stream lies before the next station (at Gateway and Midway), and grapples whenever
+the tanks have room in an ice stream (hit 55%); the others carry 40 shots and grapple
+only below 25 days of water (hit 35%). It docks with the cycler, shelters from flares,
+runs on at turnover when it holds 8 t plus a fifth over what reaching Midway needs,
+aerobrakes on a hull of 60% or better and burns into orbit below it.
+
+Thirty runs a role from seed 500 (what the tests assert), then 90 a role over seeds 500,
+1999 and 50000:
+
+| Launch | Charter captain | Yard rigger | Ice hauler | Median winning run |
+|---|---|---|---|---|
+| 7 August 2087 | 30/30 · 88/90 | 1/30 · 16/90 | 2/30 · 7/90 | 180 days |
+| 7 September | 28/30 · 88/90 | 14/30 · 47/90 | 11/30 · 29/90 | 164 |
+| **7 October (tested)** | **30/30 · 89/90** | **24/30 · 67/90** | **19/30 · 58/90** | **154–155** |
+| 7 November | 30/30 · 90/90 | 12/30 · 43/90 | 10/30 · 27/90 | 165–166 |
+| 7 December | 29/30 · 88/90 | 1/30 · 7/90 | 1/30 · 2/90 | 181–182 |
+
+October median scores: charter captain 3,353 (Orbit Hand), yard rigger 6,242 (Deep-space
+Hand), ice hauler 7,911 (Deep-space Hand). How October's 90 a role are lost: thirst 25,
+bone loss 7, a fracture 6, hypothermia 5, hunger 4, bad air 3, infection 3, and
+exhaustion, an infected burn and decompression.
+
+Choices and play, October, 60 runs a role (seeds 500 and 1999; captain / rigger /
+hauler, median):
+
+| Played as | Wins | Median |
+|---|---|---|
+| the bot | 60 / 44 / 39 | 155 |
+| always aerobrake | 60 / 46 / 43 (2 hulls lost) | 155 |
+| always burn into orbit | 60 / 44 / 37 | 157 |
+| never run on at turnover | 60 / 40 / 37 | 160 |
+| work through every flare | 60 / 47 / 40 | 153 |
+| hard burn all the way | 59 / 42 / 12 | 139 |
+| economy burn all the way | 59 / 27 / 20 | 181 |
+| full rations for the ice hauler | 60 / 44 / 16 | 154 |
+| no grapple | 60 / 47 / 0 | 153 |
+| wave the cycler by | 0 / 0 / 0 | — |
+
+The tests assert the October bands (85–100 / 60–90 / 35–70%) and a median winning run of
+140–180 days; that August and December are each at least 20 points harder for the two
+poorer roles and at least 10 days longer; that an ice hauler without the grapple wins at
+least 30 points less, and on a hard burn at least 20 points less and faster; and that
+the two poorer roles' losses end at least three ways.
+
+### Departures from the spec, and why
+
+1. **Launch dates.** The engine has one start day per journey (`Rules.startDay`), so all
+   five launches are on the 7th: 7 August, 7 September, 7 October, 7 November,
+   7 December, not 12 Aug / 9 Sep / 7 Oct / 4 Nov / 2 Dec. October is unchanged; the
+   others move by at most five days, which the storm calendar barely notices. The skin's
+   departure screen must use these dates. The window factors are §10's (0.86 / 0.94 /
+   1 / 0.94 / 0.86), keyed on the launch month.
+2. **Pace speeds** 310 / 370 / 430 units a day, not 250 / 300 / 350. At §10's speeds the
+   bot's median winning run was 194 days, past §1's 140–180: power wear, space weather
+   and station days take about a sixth off the table speed. Propellant per day is §10's,
+   so a kilometre at a hard burn still costs more propellant than at cruise.
+3. **Power slows the ship less, and the hull not at all**: speed × (0.7 + 0.3 × power),
+   not 1849's 0.45 + 0.55 and 0.75 + 0.25 for the hull. A leaking cabin does not slow a
+   ship in vacuum; low power still does (and chills the crew, §12).
+4. **The ice hauler's purse is $625, not $500.** The economy is a cliff: a role whose
+   purse covers the legs nearly always arrives, and one a little short dies of thirst.
+   With §2's $850 and $500 no price level put both poorer roles in their bands (at the
+   level where the yard rigger fell under 90%, the ice hauler won 0–5%). Prices were cut
+   until the rigger sat mid-band at $850, and the hauler's purse raised until it did too.
+   During tuning (seeds 500 and 1999, prices within a few percent of these) the hauler won
+   about 37% at $600 and 72% at $650.
+5. **Water is the dear good**, at 0.23 a litre (the cycler sells it at 0.10): the ice
+   hauler's grapple is what makes her trip affordable. Only she grapples whenever there
+   is room.
+6. **Hypothermia** is added: a cold or freezing cabin puts it in the sickness pool, so
+   §18's "cold" is a cause of death of its own and not only "exhaustion".
+7. **Turnover gains 1,400 units**, four days at the new cruise speed, not 1,200.
+8. **Aerobraking and capture** as above: §14 gave the shape but no numbers. The capture
+   region's `dust` tag is kept for the skin but no rule reads it.
+9. **The hitch-hiker** is offered only within 1,500 units (15 million km) after Gateway
+   or Midway, and only if you went aboard there, and is always bound for Midway or
+   Phobos, never the cycler, which the player may wave by. A survey ship in trouble
+   calls only while a station lies ahead, and her grateful transfer ($15–30) is paid when
+   you reach that station, whether you dock or keep going.
+10. **Money** reads "$" in engine text, as the shop shows it; §2's thousand-dollar unit is
+    the learn page's business.
+11. **The spec's sample lines** are used where they fit (the recycler, the window note, the
+    lentil), with the recycler's crew member left unnamed.
+12. **The shadow landmark is at 37,000**, not §7's 38,000: that is where §8's shadow
+    region, and the silence from Earth, begin, and where Midway's keeper says it starts.
+13. **The approach and the capture are `far` too.** §8 tags only deep space and the
+    shadow, but the transfer arc only gets further from the Sun until Mars, and the
+    cycler's engineer says the wings wear faster past 240 million km. The bot's October
+    results stayed in their bands.
+
+### Things worth knowing
+
+- Waving the cycler by is a trap unless planned for: the next station is 145 million km
+  on, past what the water tanks (80 days) and the propellant tanks (100 t) hold without
+  the first ice stream. The bot, which shops one leg at a time, never survives it.
+- August and December are close to a wall for the two poorer roles (a rigger wins one
+  launch in six or fewer, a hauler one in twelve or fewer) while the charter captain barely
+  notices. That is §10's "early is slow, late is slow and stormy", and the advice says
+  so, but it is steep.
+- Thirst is the commonest death: a slow leg, a station short of money, and water at 0.23
+  a litre. A player who watches the tanks and grapples in the streams avoids most of it.
+- Sheltering from a flare and working through it come out about even for the bot: a
+  day's rations and water against a 75% chance of radiation sickness for one or two.
+- Losing the ship is rare for the bot: five runs in 1,350, all November launches, and
+  two in 180 when it aerobrakes whatever the hull.

@@ -22,8 +22,8 @@ listed again in §20.
 Atlantic, but nobody has crossed the top of the world. You have bought a small semi-rigid
 airship from the works outside Rome, signed on a crew of five, and promised your backers you
 will fly her north from mooring mast to mooring mast as far as Spitsbergen, then over the
-North Pole and the unmapped ice beyond it to Nome, Alaska. Every kilo aboard has to be
-lifted. Petrol is life. And between the last mast at Kings Bay and the first roof in Alaska
+North Pole and the unmapped ice beyond it to Nome, Alaska. Lift is precious. Petrol is
+life. And between the last mast at Kings Bay and the first roof in Alaska
 there are four thousand kilometres of ice.
 
 | | |
@@ -60,22 +60,22 @@ calendar advances four hours a turn:
 
 | id | Menu label | Start money | Score × | Perk |
 |---|---|---|---|---|
-| `financier` | Be a financier from New York | **$1,200** | ×1 | — |
-| `engineer` | Be an airship engineer from Rome | **$650** | ×2 | Repairs aloft: a bag of ballast restores **+35** lift (others +20); a box of engine spares restores **+40** engines (others +25) |
-| `meteorologist` | Be a meteorologist from Bergen | **$425** | ×3 | Pilot balloons: hit padding **4** px (others 1.5); can use **900 kg** of winds per session (others 450) |
+| `financier` | A New York financier | **$1,200** | ×1 | — |
+| `engineer` | An engineer from the airship works at Rome | **$580** | ×2 | Repairs aloft: a bag of ballast restores **+35** lift (others +20); a box of engine spares restores **+40** engines (others +25) |
+| `meteorologist` | A meteorologist trained at Bergen | **$470** | ×3 | Pilot balloons: hit padding **4** px (others 1.5); can use **900 kg** of winds per session (others 450) |
 
-`title` (as in “Bonus for being a ___”): `financier`, `engineer`, `meteorologist`.
+`title` (as in “Bonus for being a ___”, “an” before the engineer): `financier`, `engineer`, `meteorologist`.
 
-**Role screen.** Heading “Who are you?”, then:
-“All sorts of people dreamed of flying to the Pole in 1926. You may:” — the three roles, then
-*Find out the differences*:
+**Role screen** (in this journey's own words, D11). Heading “Who are you?”, then:
+“A flight to the Pole in 1926 took money, nerve or know-how, and seldom all three at once. Which
+do you bring?” — the three roles, then *What does each one bring?*:
 
-> **The differences**
-> An airship costs a fortune to fly, and not everyone who flies one is rich.
+> **What each one brings**
+> An airship burns money by the tonne, and only one of these three has much of it.
 > [amber]Financier[/amber] — starts with $1,200.
-> [amber]Airship engineer[/amber] — starts with $650. Gets far more out of every bag of ballast and every box of engine spares.
-> [amber]Meteorologist[/amber] — starts with $425. Reads the winds aloft like a newspaper, and makes every pilot balloon count.
-> The poorer you start, the more your arrival is worth: the engineer scores double, the meteorologist triple.
+> [amber]Airship engineer[/amber] — starts with $580. Gets far more out of every bag of ballast and every box of engine spares.
+> [amber]Meteorologist[/amber] — starts with $470. Reads the winds aloft like a morning paper: a surer eye with a pilot balloon, and twice the petrol's worth of winds from every session.
+> The leaner the purse, the more a landing at Nome is worth: the engineer's counts double, the meteorologist's triple.
 
 Button: *Back*.
 
@@ -185,7 +185,8 @@ furs 18, spares 22, ballast 8, balloons 0.4 (per balloon), fuel 0.025, money 1.
 **`describe` strings:** “120 kg of provisions”, “40 litres of water”, “2 tins of coffee”,
 “1 medicine kit” / “2 medicine kits”, “1 fur suit” / “2 fur suits”, “1 box of engine spares” /
 “2 boxes of engine spares”, “1 bag of ballast” / “3 bags of ballast”, “2 boxes of pilot
-balloons” (balloons ÷ 10, “box” when ≤ 10 balloons), “400 kg of petrol”, “$45”.
+balloons” (balloons ÷ 10, “box” when 10; a count that is not a whole number of boxes is
+given in balloons: “85 pilot balloons”, “1 pilot balloon”), “400 kg of petrol”, “$45”.
 
 **Shop extras.** Away from Rome: “Prices here are N% above Rome, more or less.” Leaving Rome
 needs provisions and petrol aboard (§12).
@@ -214,14 +215,14 @@ mast.[/dim]”
 
 ### Rome — the Ciampino airship station (start; no arrival paragraph)
 Talk:
-1. A rigger coiling a trail rope: “Every kilo you carry is a kilo the gas has to lift. Buy what you need, not what you fancy. But buy the fur suits. Whatever you think the cold is like up there, it's worse.”
+1. A rigger coiling a trail rope: “Nothing north of here is cheaper than it is in Rome, so buy what you can before you go. And buy the fur suits. Whatever you think the cold is like up there, it's worse.”
 2. An old balloonist on a bench outside the shed: “Leave in May. Before that the Arctic is iron-hard; after June the fog comes down on the ice and stays there. In May the sun never sets up north and you can see where you're going.”
 3. The works doctor: “Coffee, Captain. Strong, hot, and every watch. Men who haven't slept in two days start making mistakes, and in an airship a mistake is a long way down.”
 
 ### Pulham, England
 Arrival: “Two enormous sheds rise out of the flat Norfolk fields, and beside them stands a steel mast as tall as a church spire. A ground crew of two hundred men runs out across the grass to catch your ropes.”
 Talk:
-1. A ground-crew sergeant: “Petrol we've got, and cheap. Coffee you'll pay through the nose for. This is tea country, Captain.”
+1. A ground-crew sergeant: “Petrol we've got, at a fair price. Coffee you'll pay through the nose for. This is tea country, Captain.”
 2. A navigator from the station: “Over the North Sea the wind backs and freshens without warning. Watch your drift, and don't trust the coast of Norway to be where the chart says until you can see it.”
 3. A rigger at the mast head: “Mind your gas when the sun's on her. She warms up, the gas swells, the valves let it go — and come evening you're heavy and wondering where it went.”
 
@@ -230,7 +231,7 @@ Arrival: “Half the city has climbed Ekeberg hill to see you. The mast stands o
 Talk:
 1. A ski-maker in the crowd: “Buy your furs here, not in England. We have winter eight months of the year. We know what keeps a person warm.”
 2. An old ice-pilot: “North of the Circle the fog lies on the sea like wool on a sheep. You'll fly blind for hours. Trust your compass and your clock, and nothing else.”
-3. A newspaperman: “Every paper in Europe wants your story. Wire it to us first and we'll pay you. Wire it to the others and we'll print it anyway.”
+3. A newspaperman: “Every paper in Europe wants your story. We'll print it whether you tell it to us or not, so you may as well tell us and get the names right.”
 
 ### Vadsø
 Arrival: “Vadsø is a fishing town of wooden houses on the Varanger Fjord, almost at the top of Norway. The mast stands alone on a bare island across the harbour, and the gulls have already claimed it.”
@@ -244,7 +245,7 @@ Arrival: “A coal-mining settlement at the edge of the world: a pier, a few doz
 Talk:
 1. A mechanic from an aeroplane party: “We'll fly to the Pole and back before your engines are warm. Of course, we have to come back. You don't.”
 2. The camp doctor: “There's influenza in the bunkhouses. Don't let your crew sleep ashore any longer than they have to.”
-3. The mast foreman: “Last mast between here and anywhere. Whatever you leave here, you'll do without. Whatever you take, you'll have to lift.”
+3. The mast foreman: “Last mast between here and anywhere. Whatever you leave here, you'll do without until Alaska.”
 
 ---
 
@@ -253,7 +254,7 @@ Talk:
 | idx | id | type | km | short name | “You have reached ___” |
 |---|---|---|---|---|---|
 | 0 | `rome` | port | 0 | Rome | — |
-| 1 | `rhone` | mark | 800 | Rhône Valley | the Rhône valley |
+| 1 | `rhone` | mark | 650 | Rhône Valley | the Rhône valley |
 | 2 | `pulham` | port | 1,700 | Pulham | the air station at Pulham, England |
 | 3 | `oslo` | port | 2,750 | Oslo | the Ekeberg mast at Oslo |
 | 4 | `circle` | special (`line`) | 3,650 | Arctic Circle | the Arctic Circle |
@@ -274,27 +275,27 @@ help on the way.
 
 By km, `to` exclusive. Weights are **ordered lists** (order is data, as in 1849). Flags:
 `sea` (open water below — the steamer and the fishing boat can appear), `north` (seasonal
-rules apply), `superheat` (extra lift loss per flying watch), `iceMult` (multiplies icing
+rules apply), `pack` (sea ice below, at least when it freezes: the fog-to-the-ice event), `superheat` (extra lift loss per flying watch), `iceMult` (multiplies icing
 damage to lift), `ridges` (the per-watch hazard of §14).
 
 | to | id | name | temp | flags | weights |
 |---|---|---|---|---|---|
-| 700 | `med` | Mediterranean | warm | sea | fair 35, tail 15, head 18, rain 12, fog 6, gale 6, storm 4 |
+| 650 | `med` | Mediterranean | warm | sea | fair 35, tail 15, head 18, rain 12, fog 6, gale 6, storm 4 |
 | 1,700 | `france` | France | cool | — | fair 28, head 22, tail 14, rain 18, fog 10, gale 5, storm 3 |
 | 2,750 | `northSea` | North Sea | cool | sea | fair 20, head 20, tail 14, rain 14, fog 18, gale 14 |
 | 4,200 | `scandinavia` | Scandinavia | cold | north | fair 26, head 16, tail 14, snow 18, fog 10, gale 10, ice 6 |
-| 5,300 | `barents` | Barents Sea | cold | north, sea | fog 24, fair 16, head 14, tail 10, snow 14, gale 12, ice 10 |
-| 6,550 | `polarSea` | The Polar Sea | freezing | north | fair 24, fog 20, tail 12, head 12, snow 12, ice 12, gale 8 |
+| 5,300 | `barents` | Barents Sea | cold | north, sea, pack | fog 24, fair 16, head 14, tail 10, snow 14, gale 12, ice 10 |
+| 6,550 | `polarSea` | The Polar Sea | freezing | north, pack | fair 24, fog 20, tail 12, head 12, snow 12, ice 12, gale 8 |
 | 8,600 | *(the fork's region — below)* | | | | |
-| ∞ | `alaska` | Alaskan Coast | cold | north | fog 20, gale 18, head 16, ice 10, snow 10, fair 16, tail 10 |
+| ∞ | `alaska` | Alaskan Coast | cold | north, pack | fog 20, gale 18, head 16, ice 10, snow 10, fair 16, tail 10 |
 
 **The fork's regions** (6,550 ≤ km < 8,600, chosen at the Pole; 1849's Strait replacement
 generalised to two routes):
 
 | route | id | name | temp | flags | weights |
 |---|---|---|---|---|---|
-| high | `aboveFog` | Above the Fog | freezing | north, superheat 0.6 | fair 26, tail 10, head 26, snow 6, fog 8, ice 4, gale 12 |
-| low | `underFog` | Under the Fog | cold | north, iceMult 1.5, ridges | fog 30, ice 20, fair 12, head 10, snow 10, tail 8, gale 8 |
+| high | `aboveFog` | Above the Fog | freezing | north, pack, superheat 0.6 | fair 26, tail 10, head 26, snow 6, fog 8, ice 4, gale 12 |
+| low | `underFog` | Under the Fog | cold | north, pack, iceMult 1.5, ridges | fog 30, ice 20, fair 12, head 10, snow 10, tail 8, gale 8 |
 
 (Until the fork is resolved, km 6,550 is never flown, so no default is needed; use
 `aboveFog` if one is required.)
@@ -305,7 +306,7 @@ Weather adjustments, applied in this order (a key the region lacks is appended, 
 
 1. **April** (month 3), `north` regions: snow +12, gale +8, fog ×0.5, ice ×0.6.
 2. **June** (month 5), `north` regions: fog +10, ice +6.
-3. **July** (month 6), `north` regions: fog +18, ice +12, fair ×0.6.
+3. **July** (month 6), `north` regions: fog +18, ice +12, fair ×0.6, head +8, tail ×0.5.
 4. **June–July**, Mediterranean and France: storm +4.
 5. Cursed weather does not exist on this journey (no albatross).
 
@@ -500,7 +501,7 @@ Requires provisions > 0 **and** petrol > 0. Refusals:
 - “You can't cast off with no provisions! The storekeeper shakes his head and points you back inside.”
 - “You can't cast off with empty tanks! The storekeeper shakes his head and points you back inside.”
 
-Departure message: “The [i]SHIP[/i] slips the mast at Ciampino on DATE. The ground crew lets go the lines, the engines take up their roar, and Rome shrinks to a smudge of domes and umbrella pines. Ahead lie nine thousand six hundred kilometres, most of them cold.”
+Departure message: “On DATE, the [i]SHIP[/i] slips the mast at Ciampino. The ground crew lets go the lines, the engines take up their roar, and Rome shrinks to a smudge of domes and umbrella pines. Ahead lie nine thousand six hundred kilometres, most of them cold.”
 
 ---
 
@@ -524,11 +525,11 @@ check). Names are escaped. “Healthy” = alive with no ailment.
 | 11 | 2.5 | `sea` region | **Steamer** (choice) | below |
 | 12 | 1.5 | not yet seen, watch < 9 | **Stowaway** (choice) | below |
 | 13 | 2 | `north`, 4,200 ≤ km < 8,600, not yet seen | **Distress flares** (choice; 1849's albatross slot) | below |
-| 14 | 5 | temp freezing, or `north` and 5,300 < km < 8,600 | **Fog to the ice** (choice; 1849's icebergs slot) | below |
-| 15 | 2 | always | flavour | `north`: “A ring of light surrounds the sun, with two bright mock suns burning on either side of it. The crew crowds to the windows.” + meteorologist: “ You fill three pages of your notebook.” · elsewhere: “Far below, a whole village has come out to watch you pass. Children run along the road beneath you, waving, until they are left behind.” |
+| 14 | 5 | engines running (not drifting, petrol > 0), `pack` region, and temp freezing or 5,300 < km < 8,600 | **Fog to the ice** (choice; 1849's icebergs slot) | below |
+| 15 | 2 | always | flavour | `north`: “A ring of light surrounds the sun, with two bright mock suns burning on either side of it. The crew crowds to the windows.” + meteorologist: “ You fill three pages of your notebook.” · `sea`: “Far below, a fishing fleet has stopped work to watch you pass. The crews wave their caps from every deck until you are out of sight.” · elsewhere: “Far below, a whole village has come out to watch you pass. Children run along the road beneath you, waving, until they are left behind.” |
 | 16 | 1.5 | rough | `forceFair = 2` | “The barometer jumps five millibars in an hour. Your navigator grins: the worst of the blow is behind you.” |
 | 17 | 4 | petrol > 500 and temp cold or freezing | petrol −150…400 | “A petrol line cracks in the cold. Petrol sprays along the keel before the mechanic can shut it off. N kg are lost. For once, nobody needs telling not to smoke.” |
-| 18 | 2 | not yet seen | **Newspaper** (choice) | below |
+| 18 | 2 | not yet seen, engines running (not drifting, petrol > 0) | **Newspaper** (choice) | below |
 
 ### Choice events
 
@@ -574,7 +575,7 @@ Options: *Circle for the photographs (2 watches)* / *Decline*.
 
 ## 14. Landmarks & fork
 
-**Rhône valley** (mark, 800):
+**Rhône valley** (mark, 650, where the Mediterranean ends):
 “You cross the coast at the mouth of the Rhône and turn north up its valley. The mistral comes funnelling down between the hills to meet you, and the mechanics frown at their gauges.”
 
 **Arctic Circle** (special, 1849's Equator, 3,650):
@@ -586,11 +587,13 @@ Options: *Hold a celebration (1 watch)* / *No time for speeches*.
 - No time: “The old hands grumble, and fly on.”
 
 **Bear Island** (mark, 4,800):
-“Bear Island slides past to the west: a black wedge of cliffs streaked with snow, with a cloud of seabirds around it. After this there is no more Norway. Next stop, Spitsbergen.”
+“Bear Island slides past to the west: a black wedge of cliffs streaked with snow, with a cloud of seabirds around it. After this there is nothing below but the Barents Sea, all the way to Spitsbergen.”
 
 **The North Pole** (fork, 6,550):
 Prompt: “You are at the North Pole!” + April: “ [red]The cold up here is iron-hard.[/red]” / July: “ [red]The summer fog lies thick on the ice ahead.[/red]”
-Detail: “Every direction is south. The flags go over the side on their weighted staffs and stick upright in the snow. Ahead lie two thousand kilometres of ice that nobody has ever seen. You may [amber]climb above the fog[/amber] into clear, bitter air, or [amber]stay low under it[/amber], where it is warmer but the fog turns to ice on everything it touches.”
+Detail: “Every direction is south. The flags go over the side on their weighted staffs and stick upright in the snow. Ahead lie two thousand kilometres of ice that nobody has ever seen. You may [amber]climb above the fog[/amber] into clear, bitter air, or [amber]stay low under it[/amber], where it is warmer but the fog turns to ice on everything it touches.” In a month when
+the two heights are equally cold (April, July) the last clause reads instead “where it is no
+warmer at this time of year and the fog turns to ice on everything it touches.”
 Options: *Climb above the fog* / *Stay low, under the fog* / *Ask the navigator's advice*.
 - Above → `route = .high` (region `aboveFog`):
   “You climb into clear air. The fog lies below you like a white sea, and the sun circles the sky without setting. Up here the sun warms the gas by day and the cold takes it back by night.”
@@ -601,7 +604,8 @@ Options: *Climb above the fog* / *Stay low, under the fog* / *Ask the navigator'
   - Pay: money −60, `forecasts = true`: “The first report comes through within the hour: fog base one hundred and fifty metres, lowering. Your navigator pins it above the chart table.”
   - Own eyes: “You trust your lookouts and your trail rope. The fog closes over the top of the envelope.”
 - Advice → message, then the fork again:
-  “Your navigator taps the barometer: “Above the fog it's clear and cold, and the sun will cook a little gas out of her every watch — so carry ballast. Under it, it's warmer, but the fog freezes on everything, and there are ridges down there you won't see until you hit them. If you go low, pay for the forecasts.””
+  “Your navigator taps the barometer: “Above the fog it's clear and cold, and the sun will cook a little gas out of her every watch — so carry ballast. Under it, it's warmer, but the fog freezes on everything, and there are ridges down there you won't see until you hit them. If you go low, pay for the forecasts.”” In April and July “Under it, it's warmer, but” reads
+  “Under it, it's no warmer this time of year, and”.
 
 **Ridge strike** (Under the Fog, 4% per flying watch, 1% with forecasts — 1849's aground):
 lift −10…22; watch += 1 (no consume/health, as 1849); check forced down.
@@ -770,7 +774,7 @@ Score table, “Bonus for being a TITLE ×M”, rank, graves. Buttons *Fly again
 **Game over — captain dies:** title “You, Captain NAME, have died of CAUSE.” Body: “The crew brings the ship down at the first place they can and sends word home by wireless. The expedition is over.”
 
 **Game over — forced down (lift 0):** title “The [i]SHIP[/i] has been forced down.” Body,
-`north` region: “With no gas left to hold her and no ballast left to drop, she sank slowly onto the ice and would not rise again. The crew made camp beside the wreck of the gondola, and it was weeks before a ship found them. The expedition is over.” Elsewhere: “With no gas left to hold her and no ballast left to drop, she sank slowly into a field and would not rise again. The crew climbed out of the wreck of the gondola to find a farmer and his dog staring at them. The expedition is over.”
+`north` region: “With no gas left to hold her and no ballast left to drop, she sank slowly onto the ice and would not rise again. The crew made camp beside the wreck of the gondola, and it was weeks before a ship found them. The expedition is over.” Elsewhere: “With no gas left to hold her and no ballast left to drop, she sank slowly into a field and would not rise again. The crew climbed out of the wreck of the gondola to find a farmer and his dog staring at them. The expedition is over.” A `sea` region that is not `north`: “With no gas left to hold her and no ballast left to drop, she sank slowly onto the sea and would not rise again. The crew clung to the wreck of the gondola until a fishing boat came alongside and hauled them aboard, soaked and very quiet. The expedition is over.”
 
 Footer on both: “DATE · N kilometres from Rome.” Button *Try again*.
 
@@ -859,7 +863,9 @@ tins (cap 20). The longest stretch, Kings Bay → Nome at economical (~40 watche
 needs 60 kg of food on full rations, 120 L of water and 4 tins: all fit, so food and water
 only bite if petrol runs out and she drifts (60 km/watch).
 
-**Each role's outfit at Rome** (the bot's actual purchases):
+**Each role's outfit at Rome** (the bot's actual purchases; this check was worked with the
+design's first purses, $650 and $425, and petrol at $0.02 — the shipped numbers are in
+“As built”):
 
 | | financier ($1,200) | engineer ($650) | meteorologist ($425) |
 |---|---|---|---|
@@ -918,7 +924,7 @@ them is Ryan's call (spec §0.5).
 > [amber]Coffee[/amber] keeps the watch awake. [amber]Fur suits[/amber] keep the crew alive in the far north — one each. [amber]Pilot balloons[/amber] find kinder winds aloft and save petrol.
 
 **Page 3 — The Pole**
-> At the North Pole you must choose: climb [amber]above the fog[/amber] into clear, bitter air, where the sun cooks a little gas out of her every watch, or stay [amber]under the fog[/amber], where it is warmer but the fog freezes on everything and hides the ice ridges below.
+> At the North Pole you must choose: climb [amber]above the fog[/amber] into clear, bitter air, where the sun cooks a little gas out of her every watch, or stay [amber]under the fog[/amber], where in May and June it is warmer, but the fog freezes on everything and hides the ice ridges below.
 > Timing matters. In April the Arctic is iron-cold; by July the fog lies thick on the ice. May is best.
 > Speed matters too. Full speed gets you there sooner, if the petrol lasts. It won't last over the Pole.
 
@@ -935,7 +941,7 @@ them is Ryan's call (spec §0.5).
   • **Medicine & pilot balloons**.
   Button *Enter the stores*.
 - **Aloft menu** (1849's sea menu): Continue · Check supplies & crew · Look at the chart · Change speed (now: X) · Change rations (now: X) · Stop the engines and rest · Make repairs aloft · Send up pilot balloons. Travel button: *Stop the engines & take stock*.
-- **Mast menu** (1849's port menu): Cast off · Check supplies & crew · Look at the chart · Change speed · Change rations · Rest at the mast · Attempt to trade · Talk to people · Buy supplies · Visit the gas plant and the mechanics.
+- **Mast menu** (1849's port menu): Cast off · Check supplies & crew · Look at the chart · Change speed · Change rations · Rest at the mast · Barter with the ground crew · Talk to people · Buy supplies · Visit the gas plant and the mechanics.
 - **Trading at a mast:** intro “A ground-crew foreman looks over your stores.”; none left “Nobody else at the mast wants to trade with you today.”; no offer “You walk the field, but nobody wants what you have.”; accepted “Done. Goods change hands.”
 - **Supplies screen:** “Lift” and “Engines” bars; red “Not everyone aboard has a fur suit.” when furs < crew; red “N watches without coffee” when > 6.
 - **Chart heading:** “Chart of the flight”.
@@ -1006,3 +1012,192 @@ bit of 1849 when 1849's values are used.
 - Oslo carried that name from 1925. Millibars were in meteorological use from 1914; pilot
   balloons and theodolites were the standard way to measure winds aloft in the 1920s; the
   Bergen school of meteorology dates from 1917.
+
+---
+
+## As built
+
+Engine files: `HornEngine/Journeys/Airship/` (`Airship.swift` tables, sentences and hooks;
+`AirshipData.swift` the data namespace; `Airship+Masts.swift`; `Airship+Events.swift`;
+`Airship+Choices.swift`). Tests: `HornEngineTests/AirshipTests.swift`. The numbers below are
+the ones in the code, and the tests hold them. Everything not listed here was built as the
+spec says.
+
+### Stock roles
+
+| Engine key | Over the Pole | Unit, base price at Rome |
+|---|---|---|
+| `food` | Provisions | kg, $0.50, holds 300 |
+| `water` | Drinking water | litre, $0.05, holds 300 |
+| `limes` | Coffee & cocoa (wards off watch fatigue) | tin, $4, holds 20 |
+| `meds` | Medicine | kit, $15, holds 10 |
+| `clothes` | Fur flying suits | suit, $18, holds 8 |
+| `sailcloth` | Engine spares (mend `sails` = the engines) | box, $22, holds 10 |
+| `timber` | Water ballast (mends `hull` = lift; lift 0 forces her down) | bag, $8, holds 16 |
+| `tackle` | Pilot balloons, stored as balloons, 10 a box | box, $4, holds 30 boxes |
+| `fuel` | Petrol | kg, **$0.015**, holds 8,000 |
+
+### Numbers as shipped
+
+- **Purses:** financier **$1,200**, engineer **$580**, meteorologist **$470** (the design's
+  first figures were $650 and $425; §2's table and role text now show the shipped ones). Perks as the spec: the engineer's bag of ballast gives +35 lift and a box of spares
+  +40 engines (others +20 / +25); the meteorologist keeps up to 900 kg of winds a session
+  with 4 px of aim (others 450 kg, 1.5 px).
+- **Petrol:** $0.015 a kg at Rome (spec $0.02). At the masts: Pulham $0.0162, Oslo $0.0195,
+  Vadsø $0.0239, Kings Bay $0.0281.
+- A turn is a four-hour watch from 08:00 on the 1st (`tickHours 4`, `startHour 8`). Rest
+  menu 1, 3, 6, 12 watches.
+- Paces 190 / 250 / 310 km a watch, burning 150 / 250 / 420 kg; rations 0.3 / 0.2 / 0.1 kg.
+  Water 0.6 litre a head a watch; rain and thunderstorms catch 6–18 litres.
+- Health: starving −4, thirst −6; freezing −1.4 with a suit, −4.5 without; cold −2.2
+  without a suit. Illness `0.006 + (100 − hp) × 0.0005` a head a watch, plus the 1849
+  extras. Watch fatigue after 12 watches without coffee at `(n − 12) × 0.01` (max 0.12),
+  cured at 0.35 a watch with coffee and 0.6 at a mast.
+- Lift: 0.15 a flying watch, plus snow `rnd(0, 0.5)`, icing `rnd(1, 3) × pace × iceMult`,
+  gale `rnd(0, 0.8) × (1.5 at full speed)`, thunderstorm `rnd(1, 2.6) × pace`, and 0.6
+  above the fog. Pace factor: full 1.6, cruising 1, economical 0.7. Under the fog `iceMult`
+  is 1.5.
+- July in the `north`: fog +18, ice +12, fair ×0.6, headwind +8, following wind ×0.5.
+- Events on 15% of flying watches; under the fog a ridge strike first at 4% (1% with the
+  $60 forecasts). Heavy ship: below 35% lift with more than 300 kg of petrol, 6% a watch
+  to dump 100–250 kg.
+- Gas plant $3 a point of lift, overhaul $2 a point of engines, times the mast's
+  multiplier.
+- Score as §17; ranks Commander 7,000, Navigator 4,000, Rigger 2,000, Ballast.
+
+### Balance
+
+`JourneyBot`, the policy in `AirshipTests.policy()`: cruising throughout; the financier on
+full rations, the others on short; at every mast buy food, water and petrol for the run to
+the next mast at 70% of cruising speed plus four watches, coffee to match, a fur suit each,
+two medicine kits, two boxes of spares and three bags of ballast; balloons to 30
+(financier), 60 (engineer) or 100 (meteorologist), sent up when the tanks hold under 4, 6 or
+15 watches; spares and ballast below 60%; gas plant and overhaul at a mast below 55%; fly on
+past steamers, put the stowaway off, decline the newspaper, help the castaways, celebrate
+the Circle, climb out of the murk, come down at Barrow; at the Pole go above the fog on an
+even watch and under it on an odd one, buying the forecasts.
+
+Rates from 600 flights a role (seeds 100000 and 200000, 300 each):
+
+| Departure | Financier | Engineer | Meteorologist | Median winning flight |
+|---|---|---|---|---|
+| April | 98% | 50% | 32% | 78 watches |
+| **May (recommended)** | **100%** | **76%** | **52%** | **78 watches** |
+| June | 100% | 62% | 44% | 80 watches |
+| July | 96% | 30% | 19% | 86 watches |
+| May, economical | 100% | 94% | 65% | 94 watches |
+| May, full speed | 88% | 4% | 1% | 70 watches |
+
+May sits in the middle of its bands (85–100 / 60–90 / 35–70%) and a winning flight takes
+about thirteen days. Thirty flights are too few to check a band on: sixteen blocks of thirty
+seeds put the May engineer anywhere from 17 to 27 wins (57–90%), and the meteorologist from
+10 to 21 (33–70%), both edges of their bands. Six blocks of 180 stayed within 69–81% and
+46–53%. Median winning scores in May: financier
+~2,840 (Rigger), engineer ~5,450 (Navigator), meteorologist ~6,750 (Navigator). Losses are
+spread across thirst and hunger after the money runs out, watch fatigue (it kills as
+"exhaustion"), infected wounds, pneumonia, influenza, frostbite and exposure.
+
+The tests fly 180 flights a role from seed 12345, where May gives 180 / 131 / 93 (100 / 73 /
+52%) and July 169 / 46 / 45 (94 / 26 / 25%). They assert the May bands and a median of
+70–100 watches, that July is at least 15 points harder for the two poorer roles (it is
+about 45 and 30 points harder), that full speed (60 flights a role: 51 / 4 / 1) halves
+their chances, and that losing flights end at least three ways.
+
+### Departures from the spec, and why
+
+1. **The bands.** This build was asked for 85–100 / 60–90 / 35–70%, not the spec's
+   ≥85 / 45–85 / 15–50%. With the spec's prices and purses an early version of this bot won
+   28 / 11 / 0 of 30 in May: what decides a flight is whether the money lasts to the Kings Bay leap, and the
+   spec's engineer and meteorologist cannot pay for it. Petrol came down a quarter and the
+   two poorer purses were reset to $580 and $470. The win rate is steep in the purse
+   (600 flights a role, May): the engineer wins 72% at $575, 76% at $580 and 82% at $590;
+   the meteorologist 37% at $460, 44% at $465, 52% at $470 and 57% at $475. An earlier
+   tuning ($575 / $490) was read off thirty flights from one lucky seed.
+2. **The bot.** `JourneyBot` flies one pace for every role and shops for the next stop with
+   a mast, so it cannot do the spec's "economical when short" or "fill the tanks at Vadsø".
+   Its policy is listed above; the departure table is what it gives.
+3. **Drifting** is built from the shared rules: `noFuelSpeed` is 1, so a watch that starts
+   with some petrol is still powered and empties the tanks; a watch that starts with none
+   drifts at `60 × weather × (0.75 + 0.25 × lift)` from `adjustSpeed`, and `propulsionWear`
+   returns 0 (its jitter is still drawn).
+4. **Two shared hooks**, both with defaults that leave 1849 and rail byte-identical (the three
+   gates and the rail bands are green): `Journey.propulsionWear` (the drive's wear a turn)
+   and `Journey.wreckedBody` (the paragraph under the wreck title, so being forced down
+   reads "onto the ice" in a `north` region, "onto the sea" in any other `sea` region, and
+   "into a field" over land).
+5. **Heavy ship** is rolled in `tick`, after `wear` has said its warnings, not inside `wear`.
+   The odds and amounts are the spec's.
+6. **The date line** is the shared one for short turns ("May 3, 1926, 4 p.m."), as rail's
+   is, not "May 3, 1926 · 1600". Changing it would change rail's.
+7. **Leaving Rome** needs provisions only: the engine's `depart` has no fuel check, and with
+   empty tanks she simply drifts. If the app wants the spec's second refusal ("You can't
+   cast off with empty tanks!") it can check `fuel` itself.
+8. **The stowaway** is only found before Pulham (as well as before watch 9): put off
+   anywhere later, they could never leave.
+9. **Point Barrow** also adds 2 tins of coffee: the message hands up "a sack of coffee", so
+   it is real.
+10. **The old hulls** seen from the air are named from this journey's own list
+    (`AirshipData.wrecks`), not 1849's ship names.
+11. **Weather skies**: the following wind and the headwind are both `.breeze`, icing fog is
+    `.fog` and the gale `.gale`. The status panel turns red on `.storm` only, so icing fog
+    is not red unless the skin draws it so.
+12. **A fall from the ladder** records the grave directly with its fixed epitaph and shows no
+    burial screen, as 1849's man overboard does. The broken arms from flying ice and the
+    handling lines open no medicine kit, as 1849's Galápagos does not.
+13. **The castaways' fair weather** is `forceFair = 2`, and the watch spent helping uses one
+    of the two.
+14. **The finale's lines** are `Airship.finale(_:)` in the engine, for the skin to show,
+    because they carry the watch and day counts.
+15. **July's winds.** July in the north also brings more headwinds (+8) and half the
+    following winds. Fog and ice alone made July only 15–20 points harder for the poorer
+    roles, which is too close to the line the tests draw; slower flying is what a short purse
+    feels most.
+16. **The bot's financier sends up pilot balloons** (30, below 4 watches of petrol), as a
+    player would. Without them, a slower July left it drifting on the leap.
+17. **Fog to the ice** needs ice below: a new `pack` tag on the Barents Sea, the Polar Sea,
+    both heights beyond the Pole and the Alaskan coast (the Chukchi Sea is frozen in April).
+    The spec's "temp freezing" would have put pressure ridges under the forests of Norway in
+    April. It, and the newspaper, also need the engines running: a drifting ship cannot circle.
+18. **Text that matched no rule:** the Rome rigger, the Kings Bay foreman and the blurb no
+    longer warn that weight costs lift (there is no weight model, §20.11); the Pulham
+    sergeant's petrol is "at a fair price", not cheap (it is 8% dearer than Rome's); the Oslo
+    newspaperman no longer offers to pay for a story; the Pole's choice and the navigator call
+    the low route warmer only in May and June; a sight below at sea is a fishing fleet, not a
+    village; a broken box of pilot balloons is counted in balloons ("85 pilot balloons").
+19. **Places:** the Rhône mark is at 650 km, where the Mediterranean now ends (the chart's
+    coast crossing), not 800; Bear Island no longer says Norway is behind you (Svalbard was
+    Norwegian from 1925).
+20. The stops' "You have reached ___" names and the arrival line ("[dim]DATE · watch N[/dim]")
+    are as the spec. The journey's `blurb` is drawn from the premise, which now reads "Lift is
+    precious. Petrol is life." to match it.
+
+### Things worth knowing
+
+- Forced down is a rare ending for the bot because it always carries three bags of ballast
+  and tops up the gas below 55%. A player who skips ballast and flies under the fog will meet
+  it.
+- Full speed cannot cross the ice on one tank, as the spec says; even the financier loses a
+  few flights to it.
+- The meteorologist's balloons are worth a great deal: a session of 15 at 55% finds ~800 kg
+  of petrol for $6 of balloons. Its high median score is the ×3 on a flight that usually
+  arrives with petrol in hand.
+
+### The skin
+
+The app's skin (`AroundTheHorn/Journeys/Airship*.swift`, docs/design/journeys-architecture.md
+§2 "Airship skin, as built") follows §1–§19 except:
+
+- Leaving Rome with empty tanks is refused by the app (`Words.departRefusal`): “You can't cast
+  off with empty tanks! The storekeeper shakes his head and points you back to the petrol.”
+- The departure sentence reads “On DATE, the [i]SHIP[/i] slips the mast at Ciampino. …”: the
+  date line ends in “a.m.” or “p.m.”, and a full stop after it doubled.
+- The role screen, its labels and the mast menu's trade row are in this journey's own words
+  (D11), as §2 and §19 now show.
+- The weather turns red in the status panel on the thunderstorm only (the shell's rule: the
+  hardest weather by `harsh`), not on icing fog; the scene rimes the airship white instead.
+- The rest menu reads “1 watch”, “3 watches”, “6 watches (1 day)”, “12 watches (2 days)”.
+- The sun: south of the Arctic it crosses the side of the sky away from the airship, and
+  nights are dark; in a `north` region the midnight sun circles low, at (126, 44) at midnight.
+- The chart is §16's; its Mediterranean coast is crossed at about km 510, while the scene's
+  sea (the region) runs to the Rhône stop at 650.
+- Forced down, the scene puts her on the surface; at the end she comes down over Nome's roofs.

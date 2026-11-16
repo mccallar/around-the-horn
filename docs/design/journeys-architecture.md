@@ -44,8 +44,18 @@ Three gates prove 1849 is unchanged and are never re-recorded: `PrototypeParityT
 | `weatherWeights(_:_:cursed:)` | the region's | seasons or the journey's state shift the odds (use `bump`) |
 | `crewFactor(_:)` | 1 / 0.85 / 0.65 / 0.45 for 4+ / 3 / 2 / 1 hands | the vehicle needs fewer or more |
 | `adjustSpeed(_:_:_:)` | nothing | grades, currents, head winds, a hired helper |
+| `paceHP(_:)` | the pace's `hp` | the pace costs more in some places (hauling on foot against rowing) |
+| `waterNeed(_:_:)` | `rules.water`, `hotWater` when hot | the need scales with the cold, or stops on some legs (the Klondike's firewood) |
 | `stalled(_:)` | nil: the vehicle can move | it cannot, or has something to meet first (rail: broken down; a set piece held while she was); what is shown instead of the turn, which then takes no time and draws nothing |
 | `structureDamage(_:_:)` | creep + rough weather × pace | the structure wears differently |
+| `propulsionWear(_:)` | pace × weather × jitter | the drive rests while moving (an airship adrift) |
+| `wreckedTitle(_:)`, `wreckedBody(_:)`, `leaderDiedBody(_:)` | `text.wrecked`, `text.wreckedBody`, `text.leaderDiedBody` | where it happens, or who is left, changes the ending |
+| `mayDepart(_:)` | true | leaving the first port needs more than food (`text.noProvisions` says why) |
+| `leaving(_:)` | nothing | leaving the ground costs something (a balloon's climb) |
+| `holdInPort(_:)` | nil: you leave | leaving a port along the way needs something first (Bennett's boat and ice). `setSail()` then returns what happens instead and you stay ashore until `state.atPort` is cleared; `sailDay()` called while still ashore returns the same hold and passes no day |
+| `port(_:at:)` | the table's port at that stop | a fork changes who keeps the store (Dyea or Skagway) |
+| `repaired(_:_:)` | `text.mended`, `patched`, `yardHull`, `yardSails` | what is mended changes on the way (an outfit, then a boat) |
+| `foraged(_:)` | nothing | a foraging outing does more than stow its catch |
 | `tick(_:_:_:_:)` | nothing | a per-turn rule of its own, in every mode |
 | `dayEvents(_:_:_:)` | `eventChance` → one of `events` | several event tables |
 | `events(_:_:)` | none | always: this is the journey's event list |
@@ -55,6 +65,8 @@ Three gates prove 1849 is unchanged and are never re-recorded: `PrototypeParityT
 | `resolve(_:_:_:_:)` | nothing | always: answers to `GameEngine.ask(key, args, …)` |
 | `forageRefusal(_:)` | no gear; rough weather | foraging needs a place or a state |
 | `tradeValue`, `roundTrade`, `describe` | from the item table | odd units |
+| `tradeKeys` | every stocked item | a good nobody trades (the balloon's water) |
+| `fitOffer(_:_:)` | the offer as drawn | an offer must fit the room left (the balloon cuts it, and its price) |
 | `score(_:)`, `rank(_:)` | five generic lines; `Rules.rankCuts` | a bonus of its own |
 
 ### Rules of authorship
@@ -298,6 +310,52 @@ SIMCTL_CHILD_HORN_SHOTS="$TMPDIR/shots-rail" sh Tools/run_tests.sh AroundTheHorn
 
 Look at every one. A new shell member is the last resort: add it with no default, give
 every existing skin the answer that changes nothing, and say so here.
+
+### Airship skin, as built
+
+Over the Pole (`airship`) is the third skin: `AirshipSkin` (copy, words, debug starts),
+`AirshipScene`, `AirshipChart`, `AirshipForage`, and its entry in `Skins.all`. 1849 and the
+Iron Road look, read and play as they did.
+
+- **One new shell member, `Words.departRefusal`**: why the first port won't let the vessel
+  go beyond the engine's own refusal (nothing to eat). The airship answers "empty tanks"
+  when there is no petrol aboard, as its spec asked and its engine left to the app (As
+  built 7); 1849 and rail answer `nil`. `GameController.depart` asks it first.
+- **One debug launch argument**, `-HornDebugHull <n>` with `-HornDebugStart`: the vessel's
+  structure down to `n`%, so a walk can reach a wreck. Debug builds only; nothing reads it
+  otherwise.
+- **The engine's text, three changes, no numbers**: the role labels in this journey's own
+  words (D11: "A New York financier", "An engineer from the airship works at Rome", "A
+  meteorologist trained at Bergen"), and the departure sentence, which put a full stop
+  after "a.m." ("On May 1, 1926, 8 a.m., the ... slips the mast at Ciampino.").
+- **Two weathers can share a sky.** The following wind and the headwind are both
+  `.breeze`, fog and icing fog both `.fog`; the scene tells them apart by the rules' own
+  figures (`speed > 1` carries her, `harsh > 0` is the icing), never by a name.
+- **At the end the engine leaves her `atPort`** at Nome, which has no mast. The scene asks
+  `journey.port(stop)` before drawing a mast (`AirshipScene.moored`); a stop with none is
+  drawn as the stop.
+- **A curved chart gives its route already projected** (`AirshipChart.route`, with
+  `project` the identity), so the marker moves in straight lines on the page through the
+  Pole, where longitude means nothing. The chart's Mediterranean coast is crossed at about
+  km 510; the scene's sea runs to the Rhône stop at 650.
+- **What the scene shows** for every place: the region's ground under nine skies, a mast
+  and its town at each of the five masts, and every other stop drawn as itself (the
+  Rhône's mouth, a line nobody can see at the Circle, Bear Island's cliffs, flags at the
+  Pole, the village at Point Barrow, two coasts at Cape Prince of Wales, the roofs of
+  Nome). She flies up to ten pixels lower as her lift goes, her fabric creases, her
+  propeller stutters and smokes as the engines fail and stops with the tanks dry, icing
+  fog rimes her; forced down, she lies on the ice beside a camp, on the sea with a boat
+  alongside, or in a field. South of the Arctic the sun crosses the side of the sky she
+  isn't in and nights are dark; in the north the midnight sun circles low.
+- `AirshipSkinTests` holds every figure the card states to the tables, sieves everything
+  the skin and the engine can say for a sailor's or a railroader's word, tells every
+  weather, region, mast and stop apart, checks the chart and the winds, and flies seeded
+  flights from the title card to an ending; `ResumeTests` resumes at the Pole, its
+  forecasts, Kings Bay, Point Barrow and Nome.
+- `AirshipScreenshotUITests` walks it. Its patience leaves out the masts' "Fly on without
+  stopping" and the Circle's "No time for speeches" while rolling toward them (they race
+  the button it is waiting for), and its setup test is named to run first, so the title
+  card has no voyage to resume on a freshly installed app.
 
 ## 3. Adding a journey
 

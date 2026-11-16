@@ -277,6 +277,11 @@ public class Journey {
 
     public func stop(_ id: String) -> Stop? { stops.first { $0.id == id } }
     public func port(_ stopID: String) -> Port? { ports.first { $0.id == stopID } }
+
+    /// The port at `stopID` in this game: who keeps the store, what it charges, what is said
+    /// there. Override when a fork changes it (the Klondike's two passes each have their own
+    /// landing). The engine asks this one; `port(_:)` is the table's.
+    public func port(_ s: GameState, at stopID: String) -> Port? { port(stopID) }
     public func role(_ r: Role) -> RoleInfo { roles[r]! }
     public func pace(_ p: Pace) -> PaceInfo { paces[p]! }
     public func rations(_ r: Rations) -> RationsInfo { rationings[r]! }
@@ -310,6 +315,14 @@ public class Journey {
     /// jitter.
     func adjustSpeed(_ e: GameEngine, _ reg: Region, _ sp: inout Double) {}
 
+    /// Health each person gains or loses from the pace on a turn under way. Override when
+    /// it depends on where you are (hauling on foot is harder work than rowing).
+    public func paceHP(_ s: GameState) -> Double { pace(s.pace).hp }
+
+    /// Water each person needs a turn at `temp`. Override when it scales with the cold
+    /// (the Klondike's firewood) or stops on some legs.
+    public func waterNeed(_ s: GameState, _ temp: Temp) -> Double { temp == .hot ? rules.hotWater : rules.water }
+
     /// The vehicle cannot move, or has something to meet before it does: what to show
     /// instead of a turn under way, which then does not happen (no time passes, no number is
     /// drawn). Nil, the default, while it can go on.
@@ -327,6 +340,23 @@ public class Journey {
         }
         return hd
     }
+
+    /// What the drive (`sails`) loses this turn under way: the pace's wear, the weather's,
+    /// and a jitter. Override when the drive can rest while moving (an airship adrift).
+    func propulsionWear(_ e: GameEngine) -> Double {
+        e.journey.pace(e.state.pace).wear * e.state.weather.wear
+            * e.rnd(rules.wearJitter.lowerBound, rules.wearJitter.upperBound)
+    }
+
+    /// The wreck's title, from `text.wrecked`. Override when where it happens changes it.
+    public func wreckedTitle(_ s: GameState) -> String { text.wrecked(TextMarkup.escape(s.ship)) }
+
+    /// The paragraph under `text.wrecked`. Override when where it happens changes it.
+    public func wreckedBody(_ s: GameState) -> String { text.wreckedBody }
+
+    /// The paragraph under `text.leaderDied`. Override when where it happens, or who is
+    /// left, changes it.
+    public func leaderDiedBody(_ s: GameState) -> String { text.leaderDiedBody }
 
     /// Bookkeeping of the journey's own, once a turn after health and wear, in every mode.
     func tick(_ e: GameEngine, _ q: inout [Interrupt], _ mode: GameEngine.DayMode, _ reg: Region) {}
@@ -362,6 +392,32 @@ public class Journey {
     /// The player answered one of the named choice kinds, which are 1849's.
     func resolveNamed(_ e: GameEngine, _ event: ChoiceEvent, _ option: Int) -> [Interrupt] { [] }
 
+    /// Whether the first port lets you go, beyond having food (`depart`). A refusal reads
+    /// `text.noProvisions`, so a journey that refuses for more says so there.
+    public func mayDepart(_ s: GameState) -> Bool { true }
+
+    /// Leaving the ground: the first departure, or setting off from a port you went ashore
+    /// at. Not called when travel resumes between ports.
+    func leaving(_ e: GameEngine) {}
+
+    /// Setting off from a port along the way: nil lets you go; otherwise you stay ashore and
+    /// this is what happens instead (a choice whose answer may let you go by clearing
+    /// `state.atPort`). The Klondike holds you at Lake Bennett for a boat and the ice.
+    func holdInPort(_ e: GameEngine) -> [Interrupt]? { nil }
+
+    /// The line after a repair, from `text` unless what is being mended changes on the way.
+    public func repaired(_ s: GameState, _ job: RepairJob) -> String {
+        switch job {
+        case .mend: return text.mended(Int(jsRound(s.sails)))
+        case .patch: return text.patched(Int(jsRound(s.hull)))
+        case .yardHull: return text.yardHull
+        case .yardSails: return text.yardSails
+        }
+    }
+
+    /// A foraging outing is over and its catch stowed; the turn it takes has not passed yet.
+    func foraged(_ e: GameEngine) {}
+
     /// Why foraging is off right now, or nil.
     func forageRefusal(_ e: GameEngine) -> String? {
         if e.state.tackle <= 0 { return text.noTackle }
@@ -380,6 +436,11 @@ public class Journey {
             return it.price / Double(it.per)
         }
     }
+
+    /// A drawn offer, last of all and after every draw: as it stands, cut to fit, or nil for
+    /// no offer. The default leaves it as drawn, even when it gives more than there is room
+    /// for (the excess is lost when it is stowed, as in the prototype).
+    func fitOffer(_ e: GameEngine, _ o: Offer) -> Offer? { o }
 
     /// Bulk goods to 10s, boxed goods to whole boxes, money to 5s, the rest to whole units.
     public func roundTrade(_ good: TradeGood, _ v: Double) -> Int {
@@ -437,14 +498,22 @@ public class Journey {
     }
 }
 
+/// The four repairs the menus offer: a spare on the drive or the structure, or the yard on
+/// either.
+public enum RepairJob { case mend, patch, yardHull, yardSails }
+
 // MARK: - The list
 
 public enum Journeys {
     /// Every journey, in the order the picker shows them. Adding one is this line and
     /// its folder.
-    public static let all: [Journey] = [Horn1849(), Rail()]
+    public static let all: [Journey] = [Horn1849(), Rail(), Airship()]
 
-    private static let byID: [String: Journey] = Dictionary(uniqueKeysWithValues: all.map { ($0.id, $0) })
+    /// Built and tested, but not offered yet: their skins are still being drawn. They can
+    /// be looked up by id (their own tests do) but are in no list a player sees.
+    static let unreleased: [Journey] = [Balloon(), Klondike(), Mars()]
+
+    private static let byID: [String: Journey] = Dictionary(uniqueKeysWithValues: (all + unreleased).map { ($0.id, $0) })
 
     /// An id no journey has (a save from a build with more journeys) falls back to 1849.
     /// Check `has` before trusting a save: its stop index is only good for its own journey.

@@ -104,6 +104,7 @@ enum Horn1849Skin {
             fractional: [.limes],
             singular: false,
             lots: [],
+            departRefusal: nil,
             vesselHeading: "The \(g.ship)",
             suppliesNote: "Pace: \(pace.name) · Rations: \(rations.name)"
                 + (g.noCitrus > 20 ? " · [red]\(g.noCitrus) days without citrus[/red]" : ""),
