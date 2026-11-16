@@ -17,10 +17,11 @@ extension Mars {
         let nextPort = stops[(s.stopIndex + 1)...].first { $0.type == .port && $0.id != "cycler" }
         // A promise of money at the next station means something only while one lies ahead.
         let stationAhead = stops[(s.stopIndex + 1)...].contains { $0.type == .port }
-        // Trouble with the wings and the drive needs power to have trouble with, and the
-        // thruster grid needs the drive running.
+        // Trouble with the wings needs power to have trouble with; the thruster grid, and a
+        // course trimmed on a good fix, need the drive running.
         let lit = !Self.dark(s)
-        let thrusting = full && lit && s.fuel > 0
+        let drive = lit && s.fuel > 0
+        let thrusting = full && drive
 
         return [
             // The ship
@@ -136,7 +137,7 @@ extension Mars {
                     ? cache + " There is nothing in it you are short of, so you leave a note to say so."
                     : cache + " You take what you need and leave a note. [green]\(got.joined(separator: ", ")).[/green]"))
             },
-            JourneyEvent(3, when: forecasts && (s.nextStop.map { $0.mile - s.mile > 400 } ?? false)) { e, q in
+            JourneyEvent(3, when: forecasts && drive && (s.nextStop.map { $0.mile - s.mile > 400 } ?? false)) { e, q in
                 let gain = Self.cappedGain(e, e.ri(150, 300))
                 e.state.mile += gain
                 q.append(.message("A perfect tracking fix from Earth. The navigator trims the course by a hair and the whole arc gets shorter. [green]+\(MarsData.km(gain)) along the way.[/green]"))

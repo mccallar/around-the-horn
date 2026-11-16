@@ -13,6 +13,7 @@
 		09D0A69C736558BE0A0620B7 /* ShopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85F6CAB7F5FF70223DC5D7FA /* ShopView.swift */; };
 		0A34DE7D4C8455ED52DDD483 /* FishingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0415D1CFDD6856DA2C775137 /* FishingView.swift */; };
 		0BEBEADD8EB41E93AF101239 /* HornEngine.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 509B74C67184498F2681AA80 /* HornEngine.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		142BC4AE5C815F42BEE94D8F /* MarsBreakdownTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E49DB711602AF97F3E50E1EA /* MarsBreakdownTests.swift */; };
 		1625C9B92C371251386673F8 /* Rail+Choices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EA2BC179A8B36BCD1103436 /* Rail+Choices.swift */; };
 		1759644523B956369870862D /* Horn1849Forage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F4BCE9468DF346093B0A662 /* Horn1849Forage.swift */; };
 		198AABE7E8692852EA939919 /* Audio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F27D7F015ED625BDF69DBC4 /* Audio.swift */; };
@@ -331,6 +332,7 @@
 		E0E192B3F213935447BEC520 /* Horn1849Scene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Horn1849Scene.swift; sourceTree = "<group>"; };
 		E0F024DF259F1B20017EB5B4 /* RailData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RailData.swift; sourceTree = "<group>"; };
 		E0F7DCA44A11DF10978DA6B5 /* Balloon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Balloon.swift; sourceTree = "<group>"; };
+		E49DB711602AF97F3E50E1EA /* MarsBreakdownTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarsBreakdownTests.swift; sourceTree = "<group>"; };
 		E66CCC765DAB15D402E1E5A0 /* GameState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameState.swift; sourceTree = "<group>"; };
 		E6EC279D772A856004EC53F9 /* Score.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Score.swift; sourceTree = "<group>"; };
 		E9E1CCDC256F84383ED7FC1A /* AirshipForage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirshipForage.swift; sourceTree = "<group>"; };
@@ -609,6 +611,7 @@
 				1F6163BE25F6E8B1308A6B29 /* JourneyBot.swift */,
 				3C405D019FE4471301AAEE96 /* JourneyContractTests.swift */,
 				5ACD055B80F355713782997F /* KlondikeTests.swift */,
+				E49DB711602AF97F3E50E1EA /* MarsBreakdownTests.swift */,
 				10C126C3CFA33EC4DB5092AC /* MarsTests.swift */,
 				90EC46C79B8380AEC8181D5A /* PrototypeParityTests.swift */,
 				19D6AAF10A90207D9CA7180E /* PurityTests.swift */,
@@ -1009,6 +1012,7 @@
 				CD1E34844A4047DB7069FBCF /* JourneyBot.swift in Sources */,
 				DB458688AD104888CB603F58 /* JourneyContractTests.swift in Sources */,
 				D8B1738F587F0D16C7B6688E /* KlondikeTests.swift in Sources */,
+				142BC4AE5C815F42BEE94D8F /* MarsBreakdownTests.swift in Sources */,
 				C6D48C65D72EA2838D13C525 /* MarsTests.swift in Sources */,
 				7C6456E65620A32E434723C4 /* PrototypeParityTests.swift in Sources */,
 				39EA71B06DD3A0F439B54130 /* PurityTests.swift in Sources */,
