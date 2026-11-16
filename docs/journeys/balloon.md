@@ -1644,7 +1644,10 @@ the region rolls and the seventeen events, `Balloon+Choices.swift` set pieces an
 `HornEngineTests/BalloonTests.swift` (38 rule tests, 4 balance tests) and
 `BalloonBreakdownTests.swift` (16, D14). The title
 card, setup, outfit, burial, status and chart copy (§2, §3, §12.1's labels, §15's game,
-§16, §19) belong to the skin, which is not built yet.
+§16, §19) belong to the skin: `AroundTheHorn/Journeys/BalloonSkin.swift` and the three files
+beside it (docs/design/journeys-architecture.md §2, "Balloon skin, as built"). The role
+labels are in D11's shape, as 1849's and the other journeys' are: "A Zurich chocolate
+maker", "A Bristol balloon builder", "An Alaska bush pilot" (§2's table; text only).
 
 ### The numbers as shipped
 
@@ -1884,7 +1887,9 @@ The rules now (`Balloon+Trouble.swift`):
 - **Crew health**: the Himalaya's cold is floored at 0 as it is taken; nothing else here
   takes health without a floor (`hurt` leaves 1).
 
-**What the skin must show** (none is built yet; the airship's is the model):
+**What the skin must show** (all of it is built: `BalloonSkin.trouble`, the supplies note
+and the altitude screen, `BalloonScene.flame` and `cold`, the learn page "Propane, lift
+and burners", and `Words.leaveRefusal`, which the port menu's way out asks):
 
 - the red status row, `Words.trouble` = ("Balloon", …): "Going down"
   (`Balloon.goingDown`); "Burners dead, tanks dry", or "Burners dead, sinking" aloft and

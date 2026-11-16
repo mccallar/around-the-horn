@@ -386,6 +386,73 @@ Iron Road look, read and play as they did.
   back to them, and comes down in a field past the Circle. Its reference set is the 25 in
   `docs/reference/shots-airship/`.
 
+### Balloon skin, as built
+
+The Jet Stream (`balloon`) is the fourth skin: `BalloonSkin` (copy, words, debug starts),
+`BalloonScene`, `BalloonChart`, `BalloonForage`, and its entry in `Skins.all`. 1849, the
+Iron Road and Over the Pole look, read and play as they did.
+
+- **Two new shell members**, each answered `nil` by the other three skins:
+  - `Words.place`: what the status box writes after the date instead of the region's
+    name. On the ground at a field the engine's region is the next leg's (Luxor stands
+    where Arabia begins, Albuquerque where the Great Plains do), so the balloon answers
+    the field's short name there, and `nil` aloft.
+  - `Words.leaveRefusal`: why a port after the first won't let her go, asked by the port
+    menu's way out (`GameController.leavePort`, which shows it and stays on the port
+    menu). The balloon answers `Balloon.relaunchRefusal`: short of the climb's 25 gallons
+    with the money for a step of propane, or no lift with a sack of ballast for sale (its
+    engine left the asking to the app, As built 4 and D14). The launch from Marrakech is
+    still the engine's own refusal through `depart`, which names both food and the 25
+    gallons, so `departRefusal` is `nil`; `resumesInFirstShop` is true (D15).
+- **One debug launch argument**, `-HornDebugFuel <n>` with `-HornDebugStart`: that much
+  fuel aboard, so a walk can show dry tanks and a field's refusal. Debug builds only.
+- **The engine's text**: the three role labels in D11's shape ("A Zurich chocolate maker",
+  "A Bristol balloon builder", "An Alaska bush pilot"). No number changed.
+- **Night falls by the local sun.** The log keeps GMT, and local time along the route runs
+  from GMT − 7 to GMT + 9, so the scene reads the longitude under her off the chart's
+  route (`BalloonScene.longitude`) and darkens from about half past six in the evening to
+  half past six in the morning, local time. The finish is always the next sunrise, as the
+  finale says. Debug starts and gallery cells pick a watch that falls in the morning where
+  they are, so walks are mostly by day.
+- **Two weathers share a sky**: the steady and the light wind are both `.clear`, told apart
+  by the rules' own figure (`speed` under 0.8 is the light wind's paler sky).
+- **What the scene shows**: §16.1's three states. Aloft (horizon 46) the region's ground
+  slides by at the weather's speed, hidden by a cloud deck in cloud, snow and storms;
+  loitering low (horizon 40) the nearer rows go faster; on a field she stands on the ground
+  with the hangar, windsock, fuel truck and crowd, under the weather the status box names,
+  and each field has its own horizon (the Atlas at Marrakech, a temple across the Nile at
+  Luxor, the fort at Jodhpur, Saga's hills and river, Albuquerque's mountain, the pylon on
+  its dune at Kitty Hawk). Over a field she has not landed at, the field is below her,
+  its crowd waving; climbing away from Marrakech, the field she leaves. The other stops
+  are drawn as themselves: the High Atlas's snowfields, the Himalaya's wall with Everest's
+  plume, Japan's coast behind her at the fork, the date line on the sea, the landfall's
+  surf over the ocean she is leaving (redwoods, or San Diego's brown hills on the southern
+  track), the Azores and the boat from Ponta Delgada, and the village outside Marrakech at
+  sunrise. Down for good she lies in the sea with a freighter coming, on open ground in
+  the dust, or flat on a field she could not pay at, as the engine's endings say. The
+  flame follows §4 (blasting flying, blipping loitering, shorter and orange as the burners
+  wear, soot below 40%); with the tanks dry or the burners dead there is none and she
+  "drifts"; the crown sags below 40% lift.
+- **The chart** is §16.2's polar map, the route given already projected (`project` is the
+  identity), the southern track dotted as a way still open until the fork is behind her.
+  Land along the 12° N rim follows the rim's arc rather than a chord. The coasts are a
+  sketch at this scale: the route crosses the Red Sea and grazes the Gulf by Qatar inside
+  the engine's Arabia, meets the sea about 300 miles before the engine's East China Sea
+  begins, and grazes Honshu's south coast after the edge of the Pacific.
+  `BalloonSkinTests` holds land and sea to the regions everywhere else, both tracks.
+- `BalloonSkinTests` holds every figure the card states to the tables (the crossing's
+  "some 600 gallons" is worked from the Pacific regions' own weather), sieves everything
+  the skin and the engine can say for a sailor's, a railroader's or an airship's word,
+  tells every weather, region, field and stop apart, checks the night, the flame, the
+  wear, the chart and the fishing, refuses a relaunch at a field, and flies seeded flights
+  from the title card to an ending; `ResumeTests` resumes at the Himalaya, the fork and its
+  forecasters, the date line, the Azores, Saga, the finish line, and going down over Luxor.
+- `BalloonScreenshotUITests` walks it: the setup, the hangar and its refusal, five places
+  in three months and the gallery, a field and its refusal, the set pieces, the chart and
+  the line, dry tanks, going down a sack at a time into the sea, and the finish line.
+- The web version does not offer the balloon: its skin is not ported (D13), and neither
+  are the airship's shell members.
+
 ## 3. Adding a journey
 
 1. Spec in `docs/journeys/<id>.md` (the brief's 20-section template, or compact).
