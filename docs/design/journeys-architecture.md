@@ -463,7 +463,8 @@ Iron Road and Over the Pole look, read and play as they did.
   forecasters, the date line, the Azores, Saga, the finish line, and going down over Luxor.
 - `BalloonScreenshotUITests` walks it: the setup, the hangar and its refusal, five places
   in three months and the gallery, a field and its refusal, the set pieces, the chart and
-  the line, dry tanks, going down a sack at a time into the sea, and the finish line.
+  the line, dry tanks, going down a sack at a time into the sea, and the finish line. Its
+  reference set is the 25 in `docs/reference/shots-balloon/`.
 - The web version does not offer the balloon: its skin is not ported (D13), and neither
   are the airship's shell members.
 
