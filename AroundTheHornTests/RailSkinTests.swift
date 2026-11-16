@@ -91,7 +91,7 @@ final class RailSkinTests: XCTestCase {
         has(skin.words(g).arrival, "7 days and 8 hours out of Omaha")
     }
 
-    /// Ryan's report: the box gave no sign that the train had given out or run out of wood.
+    /// The report from play: the box gave no sign that the train had given out or run out of wood.
     func testTheStatusBoxSaysWhenTheTrainIsInTrouble() {
         var g = nearing("elko")
         func trouble() -> String? {

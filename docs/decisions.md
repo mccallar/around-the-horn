@@ -190,8 +190,9 @@ number or sentence of the game changed.
 
 ## D14 — On the Iron Road a train at 0% breaks down, and no wood is a crisis (2026-11-15)
 
-Ryan, playing the Iron Road: the train's health went below 0, and with no cord left she
-still moved just fine. Reproduced (`RailBreakdownTests`, and the web flow in `rail.mjs`):
+Reported from play on the Iron Road: the train's health went below 0, and with no cord
+left she still moved just fine. Reproduced (`RailBreakdownTests`, and the web flow in
+`rail.mjs`):
 nothing was ever stored below 0 or shown as "-0" (Swift's `Int(...)` and JavaScript's
 template strings both write a negative zero as "0", and no meter could hold one), but the
 road kept reporting damage at a meter already at 0% ("Engine −13%" with the engine at
@@ -222,5 +223,5 @@ her sails at 0% still drive her at 45%; a split topsail or a lost topmast can re
 (Horn1849+Events: the topmast's broken arm and the privateers') take 10 and 20 health
 without a floor, so a crew member's health can stand below
 0 until the next day's health clamps it and buries them. None of these is shown as a
-negative number (the supplies screen draws health as a bar, clamped). They are for Ryan
-to rule on, not for this decision.
+negative number (the supplies screen draws health as a bar, clamped). They are left
+to be ruled on, not changed by this decision.

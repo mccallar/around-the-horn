@@ -443,7 +443,7 @@ async function trainAt(set, seed = '9', storage = new MemoryStorage()) {
 const statusRows = (p) => Object.fromEntries((p.look().blocks.find((b) => b.type === 'status')?.rows ?? [])
   .map((r) => [plain(r.label), { value: r.value, color: r.color }]));
 
-await test('Ryan\'s report: an engine run down to nothing, no wood, nothing to mend with', async () => {
+await test('the report from play: an engine run down to nothing, no wood, nothing to mend with', async () => {
   const p = await trainAt((s) => Object.assign(s, { sails: 3, fuel: 0, sailcloth: 0, timber: 0, money: 0 }));
   p.press('Continue down the line');
   const meters = [], troubles = [], movedAtZero = [];

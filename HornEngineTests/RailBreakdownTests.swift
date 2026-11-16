@@ -82,7 +82,7 @@ final class RailBreakdownTests: XCTestCase {
         return t
     }
 
-    /// Ryan's report: the train's health went below 0, and with no wood she ran on just
+    /// The report from play: the train's health went below 0, and with no wood she ran on just
     /// fine. Before the fix: no meter was ever stored below 0 or as -0, but the damage
     /// reports kept coming at a meter already at 0% ("Engine −13%" with the engine at 0%),
     /// a train whose engine showed 0% ran on at 45% speed with wood and at a quarter of that
