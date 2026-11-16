@@ -34,11 +34,11 @@ public final class Mars: Journey {
         deficiency = MarsData.boneLoss
         ailments = [MarsData.badAir, MarsData.lowSpirits, MarsData.infection, MarsData.fracture]
 
-        roles[.merchant] = RoleInfo(label: "Be a charter captain backed by a freight consortium", title: "charter captain",
+        roles[.merchant] = RoleInfo(label: "A charter captain backed by a freight consortium", title: "charter captain",
                                     money: 1500, mend: 25, patch: 20, catchLimit: 60, aim: 1.5)
-        roles[.shipwright] = RoleInfo(label: "Be a yard rigger who bought the ship she used to fix", title: "yard rigger",
+        roles[.shipwright] = RoleInfo(label: "A yard rigger who bought the ship she used to fix", title: "yard rigger",
                                       money: 850, mend: 40, patch: 32, catchLimit: 60, aim: 1.5)
-        roles[.whaler] = RoleInfo(label: "Be an ice hauler from the lunar tugs", title: "ice hauler",
+        roles[.whaler] = RoleInfo(label: "An ice hauler off the lunar tugs", title: "ice hauler",
                                   money: 625, mend: 25, patch: 20, catchLimit: 100, aim: 4)
 
         paces[.easy] = PaceInfo(name: "Economy burn", speed: 310, hp: 0.5, wear: 1.2, fuel: 7,
