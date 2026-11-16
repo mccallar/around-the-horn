@@ -374,7 +374,9 @@ Iron Road look, read and play as they did.
 - `AirshipScreenshotUITests` walks it. Its patience leaves out the masts' "Fly on without
   stopping" and the Circle's "No time for speeches" while rolling toward them (they race
   the button it is waiting for), and its setup test is named to run first, so the title
-  card has no voyage to resume on a freshly installed app.
+  card has no voyage to resume on a freshly installed app. It quits in the stores and comes
+  back to them, and comes down in a field past the Circle. Its reference set is the 25 in
+  `docs/reference/shots-airship/`.
 
 ## 3. Adding a journey
 
