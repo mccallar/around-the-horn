@@ -275,12 +275,13 @@ enum BalloonSkin {
             ("Down on land", false, { fly(&$0, 4800); $0.hull = 0; $0.over = true }),
         ])
 
-    /// A watch that falls in the morning where she is, about eight by the sun, at or a
-    /// little after the day her miles suggest: so a debug start or a gallery cell is by
-    /// day, and stays so for the watch or two a walk flies on.
+    /// A watch that falls in the morning where she is, between about half past six and
+    /// half past ten by the sun, at or a little after the day her miles suggest: so a
+    /// debug start or a gallery cell is by day, and stays so for the watch or two a walk
+    /// flies on.
     static func daytime(_ s: inout GameState) {
         let start = journey.rules.startHour, each = journey.rules.tickHours
-        let target = (8 - BalloonScene.longitude(s) / 15).truncatingRemainder(dividingBy: 24)
+        let target = (8.5 - BalloonScene.longitude(s) / 15).truncatingRemainder(dividingBy: 24)
         func off(_ d: Int) -> Double {
             let x = abs(Double((start + each * d) % 24) - (target < 0 ? target + 24 : target))
             return min(x, 24 - x)

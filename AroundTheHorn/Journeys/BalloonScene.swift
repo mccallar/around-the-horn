@@ -587,7 +587,8 @@ enum BalloonScene {
     /// running out to see what has fallen out of the sky.
     static func homeGround(_ px: PixelCanvas, t: Double) {
         let hz = aloftHorizon
-        px.sun(x: 136, y: hz - 7, Color(hex: 0xFFD27A))
+        // The sun rising in the east, the bottom of it still behind the hills.
+        px.sun(x: 122, y: hz - 13, Color(hex: 0xFFD27A))
         px.hills(0..<160, base: hz, Color(hex: 0x8A7A68)) { max(0, 6 + 3 * sin($0 * 0.05) + 1.5 * sin($0 * 0.17)) }
         px.rect(0, hz, px.w, px.h - hz, Color(hex: 0xC49A62))
         for i in 0..<22 {

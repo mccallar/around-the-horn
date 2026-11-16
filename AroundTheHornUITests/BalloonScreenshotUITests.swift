@@ -103,8 +103,10 @@ final class BalloonScreenshotUITests: ScreenshotWalk {
         tap("Climb away")
         let halt = app.buttons["Hold & take stock"]
         XCTAssertTrue(halt.waitForExistence(timeout: 5))
-        shot("15-aloft", settle: false)
+        // A watch flown, so the menus are over the Sahara and not the launch field.
+        sleep(7)
         settleAloft()
+        shot("15-aloft", settle: false)
         halt.tap()
         shot("16-menu")
         tap("Check supplies & crew")
