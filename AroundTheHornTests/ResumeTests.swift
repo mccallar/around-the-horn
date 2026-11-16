@@ -241,6 +241,45 @@ final class ResumeTests: XCTestCase {
         XCTAssertGreaterThan(d.game!.mile, mile)
     }
 
+    /// Found by review: a train that gave out in a yard went back to the yard every time she
+    /// was sent on, and the yard's menu has no repairs row. Now she is asked; the yard's
+    /// store sells the part, and the question, resumed, fits it.
+    func testABreakdownInAYardIsMendedFromTheStore() {
+        let c = controller(Rail.id)
+        var s = Skins.skin(Rail.id)!.debug.start(2, 9)
+        s.mile = 291
+        s.stopIndex = Journeys.journey(Rail.id).stops.firstIndex { $0.id == "northplatte" }!
+        s.atPort = true
+        s.sails = 0
+        s.sailcloth = 0
+        s.money = 20
+        c.loadForDebug(s)
+        guard case .portMenu = c.screen else { return XCTFail("\(c.screen)") }
+        c.startTravel()
+        c.tick()
+        guard case .choice(let ask) = c.screen, case .custom("breakdown", _) = ask.kind else { return XCTFail("\(c.screen)") }
+        XCTAssertEqual(ask.options.map(\.enabled), [false, true])
+        c.choose(ask, option: 1)
+        guard case .portMenu = c.screen else { return XCTFail("down into the yard: \(c.screen)") }
+        XCTAssertTrue(c.run { $0.buy([.sailcloth: 1]) })
+        c.startTravel()
+        c.tick()
+        guard case .choice(let again) = c.screen else { return XCTFail("asked again: \(c.screen)") }
+        let d = quitAndResume(Rail.id)
+        guard case .choice(let resumed) = d.screen else { return XCTFail("resumed: \(d.screen)") }
+        XCTAssertEqual(resumed, again)
+        XCTAssertTrue(resumed.options[0].enabled)
+        d.choose(resumed, option: 0)
+        XCTAssertEqual(answerMessages(d).last?.hasSuffix("[green](Engine now 25%)[/green]"), true)
+        // A resumed voyage lands on a menu after what was waiting: the one under way, where
+        // she stands, at the yard's mile.
+        guard case .seaMenu = d.screen else { return XCTFail("a menu after resuming: \(d.screen)") }
+        XCTAssertEqual(d.game!.mile, 291)
+        d.startTravel()
+        d.tick()
+        XCTAssertGreaterThan(d.game!.mile, 291)
+    }
+
     func testNothingToMendWithAndNoMoneyEndsTheRun() {
         let c = controller(Rail.id)
         brokenDown(c, fittings: 0, money: 0)
