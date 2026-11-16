@@ -336,6 +336,106 @@ final class ResumeTests: XCTestCase {
         XCTAssertFalse(d.game!.over)
     }
 
+    // MARK: The Long Transfer
+
+    func testTheTransferEndsAfterAResumeAtJezero() { endsAfterAResume(Mars.id) }
+
+    func testAnOldTransferSaveAtJezeroStillArrives() { arrivesFromAnOldSaveAtTheEnd(Mars.id) }
+
+    /// The cycler's offer survives a quit; docking is paid for and goes aboard.
+    func testTheCyclersOfferIsStillMadeAfterAResume() {
+        let c = asksAfterAResume(Mars.id, at: "cycler", custom("cycler"))
+        guard case .choice(let e) = c.screen else { return }
+        let fuel = c.game!.fuel
+        c.choose(e, option: 0)
+        answerMessages(c)
+        guard case .portMenu = c.screen else { return XCTFail("aboard the Perpetua: \(c.screen)") }
+        XCTAssertTrue(c.game!.atPort)
+        XCTAssertEqual(c.game!.fuel, fuel - MarsData.dockBurn, accuracy: 1e-9)
+        XCTAssertEqual(MarsSkin.skin.words(c.game!).place, "Docked at Perpetua")
+    }
+
+    func testTurnoverIsStillAskedAfterAResume() {
+        let c = asksAfterAResume(Mars.id, at: "turnover", custom("turnover"))
+        guard case .choice(let e) = c.screen else { return }
+        let mile = c.game!.mile
+        c.choose(e, option: 1)
+        XCTAssertEqual(c.game!.mile, mile + MarsData.turnoverGain, "four days run on")
+        XCTAssertEqual(MarsScene.facing(ScenePicture.frame(c.journey, c.game!, moving: true, t: 0)), .astern)
+    }
+
+    func testMarsCaptureIsStillAskedAfterAResume() {
+        let c = asksAfterAResume(Mars.id, at: "approach", custom("capture"))
+        guard case .choice(let e) = c.screen else { return }
+        let fuel = c.game!.fuel
+        c.choose(e, option: 1)
+        XCTAssertEqual(c.game!.fuel, fuel - MarsData.captureBurn, accuracy: 1e-9)
+        XCTAssertEqual(c.game!.vars[MarsData.captureKey], 2)
+    }
+
+    func testMidwayIsStillOfferedAfterAResume() {
+        let c = asksAfterAResume(Mars.id, at: "midway") {
+            if case .portArrival("midway") = $0.kind { true } else { false }
+        }
+        guard case .choice(let e) = c.screen else { return }
+        c.choose(e, option: 0)
+        answerMessages(c)
+        guard case .portMenu = c.screen else { return XCTFail("\(c.screen)") }
+        XCTAssertEqual(MarsSkin.skin.words(c.game!).place, "Docked at Midway")
+    }
+
+    /// D14 on the transfer: the array gone dark as she reaches Turnover. Turnover waits;
+    /// the dark question, without its coast, survives a quit; a panel puts the power back,
+    /// and Turnover is met on the next day.
+    func testTurnoverReachedDarkWaitsForPowerAcrossAResume() {
+        let j = Journeys.journey(Mars.id)
+        let c = controller(Mars.id)
+        var s = Skins.skin(Mars.id)!.debug.start(j.stops.firstIndex { $0.id == "turnover" }!, 9)
+        s.mile = j.stop("turnover")!.mile - 1
+        s.sails = 0
+        s.sailcloth = 1
+        c.loadForDebug(s)
+        c.startTravel()
+        c.tick()
+        guard case .choice(let first) = c.screen, case .custom("dark", _) = first.kind else {
+            return XCTFail("the dark question: \(c.screen)")
+        }
+        // A day's coast, which reaches Turnover in the dark.
+        c.choose(first, option: first.options.firstIndex { $0.label.hasPrefix("Coast") }!)
+        var said: [String] = []
+        var asked: ChoiceEvent?
+        for _ in 0..<12 {
+            said += answerMessages(c)
+            if case .choice(let e) = c.screen {
+                if case .custom("dark", _) = e.kind { asked = e; break }
+                c.choose(e, option: e.options.firstIndex(where: \.enabled)!)
+                continue
+            }
+            if case .travel = c.screen {} else { c.startTravel() }
+            c.tick()
+        }
+        guard let ask = asked else { return XCTFail("asked again in the dark: \(c.screen) after \(said)") }
+        XCTAssertGreaterThanOrEqual(c.game!.mile, j.stop("turnover")!.mile)
+        XCTAssertNotNil(c.game!.vars[MarsData.heldKey], "Turnover is waiting")
+        XCTAssertTrue(said.contains { $0.contains("nobody turns a ship end for end without a drive") }, "\(said)")
+        XCTAssertFalse(ask.options.contains { $0.label.contains("Coast") }, "no coasting past a set piece")
+        XCTAssertEqual(MarsSkin.skin.words(c.game!).trouble?.value, "Array dark, coasting")
+        XCTAssertEqual(MarsScene.facing(ScenePicture.frame(j, c.game!, moving: true, t: 0)), .ahead, "not yet turned")
+
+        let d = quitAndResume(Mars.id)
+        guard case .choice(let resumed) = d.screen else { return XCTFail("resumed: \(d.screen)") }
+        XCTAssertEqual(resumed, ask)
+        d.choose(resumed, option: 0)
+        answerMessages(d)
+        XCTAssertGreaterThan(d.game!.sails, 0.5)
+        if case .travel = d.screen {} else { d.startTravel() }
+        d.tick()
+        answerMessages(d)
+        guard case .choice(let turn) = d.screen, case .custom("turnover", _) = turn.kind else {
+            return XCTFail("then Turnover: \(d.screen)")
+        }
+    }
+
     // MARK: The file
 
     /// A voyage with nothing waiting is written exactly as it always was, so any build

@@ -132,11 +132,14 @@ enum MarsScene {
         return coasting(f) && g.fuel <= 0
     }
 
+    /// Turnover reached in the dark, and still waiting for power.
+    static func turnoverWaits(_ g: GameState) -> Bool { g.vars[heldKey].map { Int($0) } == index("turnover") }
+
     /// Turned end for end: past Turnover, unless she reached it dark and it is still
     /// waiting for power.
     static func turned(_ g: GameState) -> Bool {
         let i = index("turnover")
-        if g.vars[heldKey].map({ Int($0) }) == i { return false }
+        if turnoverWaits(g) { return false }
         return g.stopIndex > i || (g.stopIndex == i && g.mile > g.currentStop.mile)
     }
 
@@ -150,7 +153,7 @@ enum MarsScene {
         guard let g = f.state else { return .ahead }
         if dockedAt(f) != nil { return .ahead }
         if tumbling(f) { return Facing(rawValue: Int((f.t / 1.6).rounded(.down)) % 4) ?? .ahead }
-        if atStop(f)?.id == "turnover" { return .up }
+        if atStop(f)?.id == "turnover" && !turnoverWaits(g) { return .up }
         return turned(g) ? .astern : .ahead
     }
 
@@ -194,7 +197,7 @@ enum MarsScene {
         let face = facing(f)
         if let g, aerobraking(g), station == nil { plasma(px, t: t) }
         freighter(px, f, at: centre, facing: face)
-        if stop?.id == "turnover" { puffs(px, centre, t: t) }
+        if stop?.id == "turnover" && face == .up { puffs(px, centre, t: t) }
         weather(px, f, ship: (centre, face))
     }
 
@@ -799,7 +802,7 @@ enum MarsScene {
         "stream2": "in the second ice stream",
         "shadow": "in the conjunction shadow, the Sun between her and Earth",
         "approach": "on the approach to Mars",
-        "capture": "closing on Mars",
+        "capture": "close to Mars",
     ]
 
     static func phrase(_ region: Region?) -> String {
@@ -838,11 +841,13 @@ enum MarsScene {
             case "lunar": return "\(lead) passing the Moon, close enough to see its craters. \(weather)"
             case "hill": return "\(lead) crossing the edge of Earth's reach, Earth and the Moon behind her. \(weather)"
             case "cycler": return "\(lead) coming up on the cycler Perpetua, lit like a town at night. \(weather)"
-            case "turnover": return "\(lead) standing on end at Turnover, halfway through turning round. \(weather)"
+            case "turnover":
+                return turnoverWaits(g) ? "\(lead) at Turnover, waiting for the power to turn round. \(weather)"
+                    : "\(lead) standing on end at Turnover, halfway through turning round. \(weather)"
             case "midway": return "\(lead) coming up on Midway Depot's three tanks. \(weather)"
             case "shadow": return "\(lead) entering the conjunction shadow, Earth sliding behind the Sun. \(weather)"
             case "approach": return "\(lead) on the approach, Mars and its two moons ahead. \(weather)"
-            case "phobos": return "\(lead) closing on Phobos, Mars filling half the sky. \(weather)"
+            case "phobos": return "\(lead) coming up on Phobos, Mars filling half the sky. \(weather)"
             default: return "\(lead) at \(stop.name). \(weather)"
             }
         }
