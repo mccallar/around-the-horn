@@ -36,11 +36,11 @@ public final class Balloon: Journey {
         deficiency = BalloonData.staleAir
         ailments = BalloonData.mildPool
 
-        roles[.merchant] = RoleInfo(label: "Be a chocolate maker from Zurich", title: "chocolate maker",
+        roles[.merchant] = RoleInfo(label: "A Zurich chocolate maker", title: "chocolate maker",
                                     money: 15000, mend: 25, patch: 20, catchLimit: 40, aim: 1.5)
-        roles[.shipwright] = RoleInfo(label: "Be a balloon builder from Bristol", title: "balloon builder",
+        roles[.shipwright] = RoleInfo(label: "A Bristol balloon builder", title: "balloon builder",
                                       money: 7250, mend: 35, patch: 30, catchLimit: 40, aim: 1.5)
-        roles[.whaler] = RoleInfo(label: "Be a bush pilot from Alaska", title: "bush pilot",
+        roles[.whaler] = RoleInfo(label: "An Alaska bush pilot", title: "bush pilot",
                                   money: 6500, mend: 25, patch: 20, catchLimit: 60, aim: 4)
 
         paces[.easy] = PaceInfo(name: "Low & slow", speed: 110, hp: 0.5, wear: 0.6, fuel: 12,

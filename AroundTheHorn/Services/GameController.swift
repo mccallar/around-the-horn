@@ -288,6 +288,15 @@ final class GameController {
 
     // MARK: - Travel (spec §2: one turn every 0.7 s)
 
+    /// The port menu's way out: under way, unless the skin says why not yet
+    /// (`Words.leaveRefusal`), and then back to the port menu.
+    func leavePort() {
+        if let g = game, let why = skin.words(g).leaveRefusal {
+            return message(why) { [weak self] in self?.backToMenu() }
+        }
+        startTravel()
+    }
+
     func startTravel() {
         run { $0.setSail() }
         traveling = true

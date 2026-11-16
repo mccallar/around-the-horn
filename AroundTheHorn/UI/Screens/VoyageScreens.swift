@@ -68,7 +68,7 @@ struct PortMenuView: View {
             StatusPanel(game: g)
             Heading(journey.port(g.currentStop.id)?.name ?? g.currentStop.name)
             ChoiceList(choices: [
-                Choice(label: words.leavePort, primary: true) { c.startTravel() },
+                Choice(label: words.leavePort, primary: true) { c.leavePort() },
                 Choice(label: words.supplies) { c.show(.supplies) },
                 Choice(label: words.chart) { c.show(.chart) },
                 Choice(label: "\(words.changePace) [dim](\(journey.pace(g.pace).name))[/dim]") { c.show(.pace) },

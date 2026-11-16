@@ -36,6 +36,7 @@
 		39EA71B06DD3A0F439B54130 /* PurityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19D6AAF10A90207D9CA7180E /* PurityTests.swift */; };
 		3AC6EAAB7BA864F5DEA4EEF3 /* Interrupt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C1E473EA548B3DBF4DFD8A4 /* Interrupt.swift */; };
 		3B7CFED363F6AEA10E20470F /* JourneySkin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47BB62B96C70BDD09D81D40B /* JourneySkin.swift */; };
+		3CB61DA0EFDB9A72AD8F7A3F /* BalloonSkin.swift in Sources */ = {isa = PBXBuildFile; fileRef = E167A7501D30311BC18CC4F2 /* BalloonSkin.swift */; };
 		3DEF544B8261130989774BDD /* ScreenshotUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B4F1F2713DA564D6DD82B2C /* ScreenshotUITests.swift */; };
 		412A28E202A86BE6B8F7B9F9 /* GameData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4108B95E6294D296CE33783C /* GameData.swift */; };
 		42A00B72C6A0E3290224E8B0 /* ChoiceList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 338B3382DF5DB3F0A539995D /* ChoiceList.swift */; };
@@ -84,6 +85,8 @@
 		8C150E8E3A3939744CC39CF6 /* Mars+Ports.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56A40E3339FFC3006131BB0 /* Mars+Ports.swift */; };
 		8D0DA68E807E54449B68EA53 /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = 64F6077D1CB8841972D089E7 /* OFL.txt */; };
 		8D8363540E8D192BE9EF06B7 /* golden-voyages.txt in Resources */ = {isa = PBXBuildFile; fileRef = 131A9C46BDD44C73CA391B2B /* golden-voyages.txt */; };
+		8E71E05CF9005BF09D58ED6A /* BalloonScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ECBE652D24ABA93858713B7 /* BalloonScene.swift */; };
+		90489E698A12DF357B344E2E /* BalloonForage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EAE98C542A129CA8603A2A9 /* BalloonForage.swift */; };
 		92DBC0287E064A6096A4FE4D /* Mars.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51157A39DA824544D25246CF /* Mars.swift */; };
 		93CB0B6F54D0BA402B156D93 /* prototype-traces.json in Resources */ = {isa = PBXBuildFile; fileRef = 7B60571B9AA8419DCF959008 /* prototype-traces.json */; };
 		97E74D42385F1BC3E3FED5B8 /* Airship+Events.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54DABC9533B7FDC2B99A087C /* Airship+Events.swift */; };
@@ -134,6 +137,7 @@
 		F5F2A6A3B9B99EDB3509B063 /* StoresTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D5EC138C0C4B40C49F14A1 /* StoresTests.swift */; };
 		F640EF8B61FB386C908CC54D /* RailScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEA4BB4660B64DB83BFDAAA1 /* RailScene.swift */; };
 		F6AEB5DDB2548D95AB5EC0A1 /* SetupScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A22ACA5F76BDCA3C8B0CD82 /* SetupScreens.swift */; };
+		F974A531F2445FAC747E76C3 /* BalloonChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F039E386CFFA44A265499EA /* BalloonChart.swift */; };
 		FAB32703ECE78E76C92E63B8 /* VT323-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = AEE19A288C55C105821ECC1D /* VT323-Regular.ttf */; };
 		FD2EC67CB412F9259AAC3F00 /* RailChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 618BD1BAD6D9CAA85D62C34A /* RailChart.swift */; };
 		FD588199CBD7935181554E17 /* Balloon+Events.swift in Sources */ = {isa = PBXBuildFile; fileRef = 270A0ADEF8689846C48FA238 /* Balloon+Events.swift */; };
@@ -233,7 +237,9 @@
 		163849807C7C5D91D306EC75 /* ScenePicture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScenePicture.swift; sourceTree = "<group>"; };
 		19D6AAF10A90207D9CA7180E /* PurityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurityTests.swift; sourceTree = "<group>"; };
 		19E4471C6A4A4D51FC75BB5F /* AroundTheHornTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = AroundTheHornTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		1ECBE652D24ABA93858713B7 /* BalloonScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalloonScene.swift; sourceTree = "<group>"; };
 		1EFE7D352E191E20D2322B5D /* LegacySaveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacySaveTests.swift; sourceTree = "<group>"; };
+		1F039E386CFFA44A265499EA /* BalloonChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalloonChart.swift; sourceTree = "<group>"; };
 		1F6163BE25F6E8B1308A6B29 /* JourneyBot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JourneyBot.swift; sourceTree = "<group>"; };
 		21B1EA5B3137426DD0F3DF6B /* Rail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rail.swift; sourceTree = "<group>"; };
 		26132E5082F8F671AED50D84 /* GoldenVoyageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoldenVoyageTests.swift; sourceTree = "<group>"; };
@@ -270,6 +276,7 @@
 		5BDBE47B76D8056F1BBB706E /* AirshipChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirshipChart.swift; sourceTree = "<group>"; };
 		5C1E473EA548B3DBF4DFD8A4 /* Interrupt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Interrupt.swift; sourceTree = "<group>"; };
 		5DA561648AB9D0C1EB86799D /* Text.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Text.swift; sourceTree = "<group>"; };
+		5EAE98C542A129CA8603A2A9 /* BalloonForage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalloonForage.swift; sourceTree = "<group>"; };
 		5F2549B7433A37309EAE108D /* Horn1849.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Horn1849.swift; sourceTree = "<group>"; };
 		6099B49B31492A6F9190EE30 /* Airship+Masts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Airship+Masts.swift"; sourceTree = "<group>"; };
 		618BD1BAD6D9CAA85D62C34A /* RailChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RailChart.swift; sourceTree = "<group>"; };
@@ -336,6 +343,7 @@
 		E0E192B3F213935447BEC520 /* Horn1849Scene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Horn1849Scene.swift; sourceTree = "<group>"; };
 		E0F024DF259F1B20017EB5B4 /* RailData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RailData.swift; sourceTree = "<group>"; };
 		E0F7DCA44A11DF10978DA6B5 /* Balloon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Balloon.swift; sourceTree = "<group>"; };
+		E167A7501D30311BC18CC4F2 /* BalloonSkin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalloonSkin.swift; sourceTree = "<group>"; };
 		E49DB711602AF97F3E50E1EA /* MarsBreakdownTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarsBreakdownTests.swift; sourceTree = "<group>"; };
 		E66CCC765DAB15D402E1E5A0 /* GameState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameState.swift; sourceTree = "<group>"; };
 		E6EC279D772A856004EC53F9 /* Score.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Score.swift; sourceTree = "<group>"; };
@@ -588,6 +596,10 @@
 				E9E1CCDC256F84383ED7FC1A /* AirshipForage.swift */,
 				7C802F0633CB47BCA69931C7 /* AirshipScene.swift */,
 				368CBB1228FD754F316AAACE /* AirshipSkin.swift */,
+				1F039E386CFFA44A265499EA /* BalloonChart.swift */,
+				5EAE98C542A129CA8603A2A9 /* BalloonForage.swift */,
+				1ECBE652D24ABA93858713B7 /* BalloonScene.swift */,
+				E167A7501D30311BC18CC4F2 /* BalloonSkin.swift */,
 				F657FF3127206CB698A0ADC6 /* Horn1849Chart.swift */,
 				7F4BCE9468DF346093B0A662 /* Horn1849Forage.swift */,
 				0E8BDAD01ECB86B9276E0EB3 /* Horn1849LegacySave.swift */,
@@ -974,6 +986,10 @@
 				6C6541E32F4ABDE351E03AED /* AppInfo.swift in Sources */,
 				EB06357C27D073F3370D9C42 /* AroundTheHornApp.swift in Sources */,
 				198AABE7E8692852EA939919 /* Audio.swift in Sources */,
+				F974A531F2445FAC747E76C3 /* BalloonChart.swift in Sources */,
+				90489E698A12DF357B344E2E /* BalloonForage.swift in Sources */,
+				8E71E05CF9005BF09D58ED6A /* BalloonScene.swift in Sources */,
+				3CB61DA0EFDB9A72AD8F7A3F /* BalloonSkin.swift in Sources */,
 				7E94EBF4A679D14B70BA855E /* ChartView.swift in Sources */,
 				42A00B72C6A0E3290224E8B0 /* ChoiceList.swift in Sources */,
 				7ECE44A5CCDF318BEBFE8B0F /* Feedback.swift in Sources */,

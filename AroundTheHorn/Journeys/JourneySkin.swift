@@ -22,7 +22,7 @@ struct JourneySkin {
 
 /// Every skin. Adding a journey's skin is this line and its file.
 enum Skins {
-    static let all: [JourneySkin] = [Horn1849Skin.skin, RailSkin.skin, AirshipSkin.skin]
+    static let all: [JourneySkin] = [Horn1849Skin.skin, RailSkin.skin, AirshipSkin.skin, BalloonSkin.skin]
 
     static func skin(_ id: String) -> JourneySkin? { all.first { $0.id == id } }
 }
@@ -101,6 +101,10 @@ struct Words {
     let yard: String
 
     // The status panel.
+    /// What the box writes after the date in place of the region's name: a balloon on the
+    /// ground at a field is at that field, not over the next leg's country. Nil: the
+    /// region, as 1849 writes it even in port.
+    let place: String?
     /// Short names for its rows where the shop's is too long.
     let statusNames: [ItemKey: String]
     let travelled: String
@@ -147,6 +151,11 @@ struct Words {
     /// departure and both refusals. False: it comes back to the port menu, whose way out
     /// sets off with neither, as 1849's prototype does (decision D15).
     let resumesInFirstShop: Bool
+    /// Why a port after the first won't let the vessel go yet: a balloon on the ground
+    /// without the propane to climb away, which the field sells. Asked by the port menu's
+    /// way out (`GameController.leavePort`), which then stays in port. Nil when nothing
+    /// stops it.
+    let leaveRefusal: String?
     let vesselHeading: String
     /// The line under the meters: pace, rations and anything worth a warning.
     let suppliesNote: String

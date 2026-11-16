@@ -14,7 +14,7 @@ struct StatusPanel: View {
         let health = game.healthLabel
         PanelBox(padding: 8) {
             (Text(game.dateText).foregroundColor(Theme.amber)
-                + Text(" · \(game.region.name)").foregroundColor(Theme.dim).font(.custom(Theme.bodyFont, size: 18)))
+                + Text(" · \(words.place ?? game.region.name)").foregroundColor(Theme.dim).font(.custom(Theme.bodyFont, size: 18)))
                 .bodyFont()
             Row(label: "Weather") {
                 Text(game.weather.name).foregroundStyle(Self.isWorst(game.weather, of: journey) ? Theme.red : Theme.ink)

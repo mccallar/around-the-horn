@@ -133,6 +133,7 @@ enum AirshipSkin {
             talk: "Talk to people",
             buy: "Buy supplies",
             yard: "Visit the gas plant and the mechanics",
+            place: nil,
             statusNames: [.water: "Water"],
             travelled: "Flown",
             distanceUnit: "km",
@@ -152,6 +153,7 @@ enum AirshipSkin {
                 ? "You can't cast off with empty tanks! The storekeeper shakes his head and points you back to the petrol."
                 : nil,
             resumesInFirstShop: true,
+            leaveRefusal: nil,
             vesselHeading: "The \(g.ship)",
             suppliesNote: "Speed: \(pace.name) · Rations: \(rations.name)"
                 + (g.noCitrus > 6 ? " · [red]\(watches(g.noCitrus)) without coffee[/red]" : "")

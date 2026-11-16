@@ -85,9 +85,9 @@ anywhere or not.
 
 | id | Menu label | Start money | Score × | Perk |
 |---|---|---|---|---|
-| `chocolatier` | Be a chocolate maker from Zurich | $15,000 | ×1 | none |
-| `builder` | Be a balloon builder from Bristol | $6,250 | ×2 | Repairs aloft: a sack of ballast gives **+30%** lift (others +20); a burner kit gives **+35%** burners (others +25) |
-| `pilot` | Be a bush pilot from Alaska | $5,000 | ×3 | Fishing: hit padding **4** (others 1.5); you can stow up to **60 lb** per outing (others 40) |
+| `chocolatier` | A Zurich chocolate maker | $15,000 | ×1 | none |
+| `builder` | A Bristol balloon builder | $6,250 | ×2 | Repairs aloft: a sack of ballast gives **+30%** lift (others +20); a burner kit gives **+35%** burners (others +25) |
+| `pilot` | An Alaska bush pilot | $5,000 | ×3 | Fishing: hit padding **4** (others 1.5); you can stow up to **60 lb** per outing (others 40) |
 
 Role titles (for "Bonus for being a ___"): `chocolate maker`, `balloon builder`, `bush pilot`.
 

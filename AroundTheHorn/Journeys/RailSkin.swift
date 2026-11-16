@@ -117,6 +117,7 @@ enum RailSkin {
             talk: "Talk to people",
             buy: "Buy supplies",
             yard: "Visit the roundhouse",
+            place: nil,
             statusNames: [.water: "Tank car"],
             travelled: "Covered",
             distanceUnit: "miles",
@@ -135,6 +136,7 @@ enum RailSkin {
             lots: [.water],
             departRefusal: nil,
             resumesInFirstShop: false,
+            leaveRefusal: nil,
             vesselHeading: "The \(g.ship)",
             suppliesNote: "Pace: \(pace.name) · Rations: \(rations.name) · "
                 + (left > 0 ? "\(span(left)) left on the contract" : "[red]the freight is late[/red]"),

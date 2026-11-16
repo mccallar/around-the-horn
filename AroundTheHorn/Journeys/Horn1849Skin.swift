@@ -90,6 +90,7 @@ enum Horn1849Skin {
             talk: "Talk to people",
             buy: "Buy supplies",
             yard: "Visit the shipyard",
+            place: nil,
             statusNames: [.water: "Water"],
             travelled: "Sailed",
             distanceUnit: "nm",
@@ -107,6 +108,7 @@ enum Horn1849Skin {
             lots: [],
             departRefusal: nil,
             resumesInFirstShop: false,
+            leaveRefusal: nil,
             vesselHeading: "The \(g.ship)",
             suppliesNote: "Pace: \(pace.name) · Rations: \(rations.name)"
                 + (g.noCitrus > 20 ? " · [red]\(g.noCitrus) days without citrus[/red]" : ""),
