@@ -39,6 +39,7 @@
 		412A28E202A86BE6B8F7B9F9 /* GameData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4108B95E6294D296CE33783C /* GameData.swift */; };
 		42A00B72C6A0E3290224E8B0 /* ChoiceList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 338B3382DF5DB3F0A539995D /* ChoiceList.swift */; };
 		457D26E80866FFA534E4D020 /* SkinContractTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30041FBF2E158954803C5ED6 /* SkinContractTests.swift */; };
+		4786C570374C5706BCD82268 /* BalloonBreakdownTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 565F02D176ED1C0648D6A86A /* BalloonBreakdownTests.swift */; };
 		47AD7D91637B665461598327 /* Horn1849Scene.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0E192B3F213935447BEC520 /* Horn1849Scene.swift */; };
 		48D1CFE2742A32C1FC482AE2 /* AirshipScreenshotUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B9958CF117F65D96C1227 /* AirshipScreenshotUITests.swift */; };
 		4B70AD3EA102F30CF1CF85A0 /* Klondike+Events.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71872D68791ABA1244FB04AD /* Klondike+Events.swift */; };
@@ -259,6 +260,7 @@
 		51157A39DA824544D25246CF /* Mars.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mars.swift; sourceTree = "<group>"; };
 		54B02907AF208D38A2CA9499 /* RailBreakdownTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RailBreakdownTests.swift; sourceTree = "<group>"; };
 		54DABC9533B7FDC2B99A087C /* Airship+Events.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Airship+Events.swift"; sourceTree = "<group>"; };
+		565F02D176ED1C0648D6A86A /* BalloonBreakdownTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalloonBreakdownTests.swift; sourceTree = "<group>"; };
 		5ACD055B80F355713782997F /* KlondikeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KlondikeTests.swift; sourceTree = "<group>"; };
 		5BDBE47B76D8056F1BBB706E /* AirshipChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirshipChart.swift; sourceTree = "<group>"; };
 		5C1E473EA548B3DBF4DFD8A4 /* Interrupt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Interrupt.swift; sourceTree = "<group>"; };
@@ -598,6 +600,7 @@
 				98BB5DCEEE3D3145B021881D /* AirshipBreakdownTests.swift */,
 				A66D6438C48E4B0580994D21 /* AirshipTests.swift */,
 				066E1756FBD97DB90F4CC624 /* BalanceSimulationTests.swift */,
+				565F02D176ED1C0648D6A86A /* BalloonBreakdownTests.swift */,
 				B24C73833E8D0B97DD454423 /* BalloonTests.swift */,
 				0BF5668C018FEC94F3697835 /* EngineTests.swift */,
 				26132E5082F8F671AED50D84 /* GoldenVoyageTests.swift */,
@@ -995,6 +998,7 @@
 				4C52C0F5CF2219983697691C /* AirshipBreakdownTests.swift in Sources */,
 				DCA2AC7D2DDCD28C8B82A296 /* AirshipTests.swift in Sources */,
 				570ED1A0299CA1D70CC7DA90 /* BalanceSimulationTests.swift in Sources */,
+				4786C570374C5706BCD82268 /* BalloonBreakdownTests.swift in Sources */,
 				A7AB9B118B3F8AD2574268BF /* BalloonTests.swift in Sources */,
 				017186571EC97881CA9E44A3 /* EngineTests.swift in Sources */,
 				7DA5ECED083824A1458BACF6 /* GoldenVoyageTests.swift in Sources */,
