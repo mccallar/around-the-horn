@@ -362,8 +362,8 @@ export function describe(c) {
     case 'repairs':
       blocks = [scene(), heading(words.repairsHeading), conditionBox(g, words.meters), para(words.repairsNote, 18, 'dim')];
       choices = [
-        choice(words.mend, () => c.mendSails(), { enabled: v.canMendSails }),
         choice(words.patch, () => c.patchHull(), { enabled: v.canPatchHull }),
+        choice(words.mend, () => c.mendSails(), { enabled: v.canMendSails }),
         choice('Done', () => c.backToMenu()),
       ];
       break;

@@ -234,3 +234,12 @@ back up from there, and otherwise sails one more day at the hull's speed floor b
 that day's wear founders her; and lightning reports "Sails −18%" whatever the sails had
 left. None of these is shown as a negative number (the supplies screen draws health as
 a bar, clamped). They are left to be ruled on, not changed by this decision.
+
+## D15 — Repairs are offered in the order the condition box lists them (2026-11-15)
+
+The repairs screen showed the hull above the sails (rail: the running gear above the
+engine; the airship: lift above the engines), then offered to mend the sails first and
+the hull second, as the prototype does. Ryan found it backwards. Every journey's repairs
+now come in the box's order, hull-role first, matching the shipyard and the status
+panel; rail's breakdown question lists the running gear before the engine for the same
+reason. Order only: no repair, cost or number changed.

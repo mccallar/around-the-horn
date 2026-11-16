@@ -50,14 +50,15 @@ extension Rail {
         let what = engine && gear ? "The engine and the running gear have both given out."
             : engine ? "The engine has given out." : "The running gear has given out."
 
+        // In the order the condition box lists them: the running gear, then the engine.
         var kinds: [String] = [], options: [ChoiceEvent.Option] = []
-        if engine {
-            kinds.append("engine")
-            options.append(.init("Work on the engine: 1 set of boiler fittings [dim](have \(s.sailcloth))[/dim]", enabled: s.sailcloth >= 1))
-        }
         if gear {
             kinds.append("gear")
             options.append(.init("Mend the running gear: 1 crate of car spares [dim](have \(s.timber))[/dim]", enabled: s.timber >= 1))
+        }
+        if engine {
+            kinds.append("engine")
+            options.append(.init("Work on the engine: 1 set of boiler fittings [dim](have \(s.sailcloth))[/dim]", enabled: s.sailcloth >= 1))
         }
 
         if let yard = Self.inYard(e) {
