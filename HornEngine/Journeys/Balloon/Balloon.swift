@@ -283,6 +283,11 @@ public final class Balloon: Journey {
         return d
     }
 
+    /// Mission Control keeps the log in GMT, and so does the date: "January 8, 1999, 0800
+    /// GMT", as the launch and the finale write the hour. Local time along the route runs
+    /// from GMT − 7 to GMT + 9, so a bare "8 a.m." would read as the time where she is.
+    public override func hourText(_ hour: Int) -> String { "\(BalloonData.clock(hour)) GMT" }
+
     public override func wreckedTitle(_ s: GameState) -> String {
         let title = super.wreckedTitle(s)
         guard s.region.has("sea") else { return title }
@@ -315,7 +320,10 @@ public final class Balloon: Journey {
             if let r = e.state.vars[BalloonData.relaunchKey] {
                 e.state.vars[BalloonData.relaunchKey] = nil
                 let relaunched = "Relaunched. The climb back to cruising height burned \(Int(BalloonData.launchBurn)) gallons."
-                if r == 2 {
+                if r == 3 {
+                    // First: it is how the watch began, before the wear's warnings.
+                    q.insert(.message(Self.relaunchedCold(e.state)), at: 0)
+                } else if r == 2 {
                     let n = BalloonData.gallons(e.state.vars[BalloonData.toppedUpKey] ?? 0)
                     q.append(.message("The ground-team chief looks at your gauges, then at your wallet, and waves the fuel truck over. “On the sponsor's account,” he says. “Just enough to get you off the ground. After that you're drifting.” [dim](+\(n).)[/dim]"))
                     q.append(.message(relaunched))
@@ -339,8 +347,14 @@ public final class Balloon: Journey {
     }
 
     /// The climb away from the ground. A field's ground team will not strand you: short of
-    /// 25 gallons, they put in what the climb needs and you leave with an empty tank.
+    /// 25 gallons, they put in what the climb needs and you leave with an empty tank. With
+    /// the burners given out there is no climb: she goes up on the helium alone, burns
+    /// nothing, and is told so on the first watch (`relaunchedCold`).
     override func leaving(_ e: GameEngine) {
+        if Self.burnersOut(e.state) {
+            if e.state.stopIndex > 0 { e.state.vars[BalloonData.relaunchKey] = 3 }
+            return
+        }
         let burnt = BalloonData.launchBurn
         if e.state.fuel < burnt {
             e.state.vars[BalloonData.toppedUpKey] = burnt - e.state.fuel
@@ -357,13 +371,20 @@ public final class Balloon: Journey {
 
     /// What the app should say instead of relaunching, or nil: you are on the ground with
     /// no lift, no ballast aboard and the price of a sack here (with neither, she goes up to
-    /// be asked what goes over the side, and is grounded); or short of the climb's propane,
-    /// and could buy a step of it here. With no money for that, the ground team pays. Aloft
-    /// (resuming between fields) it is always nil.
+    /// be asked what goes over the side, and is grounded); with the burners given out and
+    /// the price of the riggers' overhaul (without it, she goes up on the helium alone,
+    /// burning nothing, and a burner kit can go in aloft); or short of the climb's propane,
+    /// and could buy a step of it here. With no money for that, the ground team pays. Lift
+    /// before burners, as the condition box lists them (D15). Aloft (resuming between
+    /// fields) it is always nil.
     public static func relaunchRefusal(_ e: GameEngine) -> String? {
         guard e.state.atPort, let port = e.currentPort else { return nil }
         if goingDown(e.state) && e.state.timber < 1 && e.state.money >= port.price(.timber) {
             return "The launch director won't let you go up with no lift in her. A sack of ballast from the store, or the riggers' helium, first."
+        }
+        if burnersOut(e.state) {
+            guard e.canRecutSailsAtYard else { return nil }
+            return "The launch director won't let you go up on dead burners. The riggers' burner man can overhaul them first."
         }
         guard e.state.fuel < BalloonData.launchBurn else { return nil }
         let step = Double(BalloonData.items.first { $0.key == .fuel }!.step)

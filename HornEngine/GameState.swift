@@ -244,14 +244,14 @@ public struct GameState: Codable, Equatable {
     /// Hour of the day, 0–23. Always 0 on a journey whose turns are whole days.
     public var hour: Int { moment.hour! }
 
-    /// "March 4, 1849"; with the hour ("March 4, 1849, 6 p.m.") on a journey whose turns
-    /// are shorter than a day.
+    /// "March 4, 1849"; with the hour ("March 4, 1849, 6 p.m.", `Journey.hourText`) on a
+    /// journey whose turns are shorter than a day.
     public var dateText: String {
         let parts = moment
         let text = "\(monthNames[parts.month! - 1]) \(parts.day!), \(parts.year!)"
-        if Journeys.journey(journey).rules.tickHours >= 24 { return text }
-        let h = parts.hour!
-        return "\(text), \(h % 12 == 0 ? 12 : h % 12) \(h < 12 ? "a.m." : "p.m.")"
+        let j = Journeys.journey(journey)
+        if j.rules.tickHours >= 24 { return text }
+        return "\(text), \(j.hourText(parts.hour!))"
     }
 
     /// 1849. May–September: winter at the bottom of the world.

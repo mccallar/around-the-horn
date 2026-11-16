@@ -189,6 +189,51 @@ final class BalloonBreakdownTests: XCTestCase {
         XCTAssertNil(e.state.vars[BalloonData.burnersOutKey], "the warning is ready for next time")
     }
 
+    /// On the ground at Luxor with the burners at 0%: the launch director wants them
+    /// overhauled when the riggers' price is in the purse. Without it she may go, but the
+    /// relaunch is no climb: she goes up on the helium alone, burns none of the 25 gallons
+    /// (nor has the ground team put any in), and the first watch says so, ahead of its note.
+    func testARelaunchOnDeadBurnersBurnsNothingAndSaysSo() {
+        func onTheField(fuel: Double, money: Double, spares: Int = 0, hull: Double = 100) -> GameEngine {
+            var s = flying(mile: balloon.stop("lux")!.mile, sails: 0, hull: hull, fuel: fuel, spares: spares, money: money)
+            s.stopIndex = balloon.stops.firstIndex { $0.id == "lux" }!
+            s.atPort = true
+            s.day = 30
+            return engine(s)
+        }
+        let rich = onTheField(fuel: 300, money: 3000)
+        XCTAssertEqual(rich.shipyardSailsCost, Int((100 * balloon.rules.yardSails * balloon.port("lux")!.mult).rounded(.up)))
+        XCTAssertEqual(rich.shipyardSailsCost, 1950)
+        XCTAssertEqual(Balloon.relaunchRefusal(rich), "The launch director won't let you go up on dead burners. The riggers' burner man can overhaul them first.")
+        // With no lift as well, lift comes first, as the condition box lists them (D15).
+        XCTAssertEqual(Balloon.relaunchRefusal(onTheField(fuel: 300, money: 3000, hull: 0)),
+                       "The launch director won't let you go up with no lift in her. A sack of ballast from the store, or the riggers' helium, first.")
+        // Overhauled, she climbs as ever.
+        _ = rich.recutSailsAtYard()
+        XCTAssertNil(Balloon.relaunchRefusal(rich))
+        rich.setSail()
+        XCTAssertEqual(rich.state.fuel, 275)
+
+        for (fuel, spares) in [(300.0, 1), (10, 0)] {
+            let e = onTheField(fuel: fuel, money: 1000, spares: spares)
+            XCTAssertNil(Balloon.relaunchRefusal(e), "the overhaul is out of reach, and no propane is wanted for a climb")
+            e.setSail()
+            XCTAssertEqual(e.state.fuel, fuel, "no climb, and nothing put in for one")
+            XCTAssertNil(e.state.vars[BalloonData.toppedUpKey])
+            let q = e.sailDay()
+            let said = messages(q)
+            XCTAssertEqual(said.first, Balloon.relaunchedCold(e.state), "\(said)")
+            XCTAssertTrue(said[0].hasPrefix("[red]She goes up on dead burners.[/red]"), said[0])
+            XCTAssertTrue(said[0].contains("burning nothing"), said[0])
+            XCTAssertEqual(said[0].contains("The crew can fit a burner kit now that she is up."), spares > 0, said[0])
+            XCTAssertFalse(said.contains { $0.contains("On the sponsor's account") || $0.contains("burned 25 gallons") }, "\(said)")
+            XCTAssertEqual(e.state.fuel, fuel, "and the watch burns none")
+            XCTAssertEqual(e.state.note, "The burners are dead. The balloon is sinking.")
+            XCTAssertNil(e.state.vars[BalloonData.relaunchKey])
+            XCTAssertFalse(e.state.atPort)
+        }
+    }
+
     func testBurnersWornToNoughtUnderWaySaySo() {
         // 0.6 shows 1%: a fair watch's wear takes it to nothing.
         let e = engine(flying(sails: 0.6))
@@ -299,6 +344,17 @@ final class BalloonBreakdownTests: XCTestCase {
         XCTAssertFalse(Balloon.goingDown(e.state))
         _ = e.sailDay()
         XCTAssertGreaterThan(e.state.mile, 1000, "and she flies on")
+    }
+
+    /// The cylinder's offer writes what is aboard as the panel would: one gallon is one
+    /// gallon, and a part of one is not counted.
+    func testTheCylinderOfferCountsTheGallonsAboard() {
+        for (fuel, have) in [(1.6, "have 1 gallon"), (1.0, "have 1 gallon"), (0.4, "have 0 gallons"),
+                             (2.0, "have 2 gallons"), (120.4, "have 120 gallons"), (1250.0, "have 1,250 gallons")] {
+            let e = engine(flying(hull: 0, fuel: fuel, ballast: 1))
+            guard let ask = choice(e.sailDay()) else { return XCTFail("\(fuel): not asked") }
+            XCTAssertEqual(ask.options[1].label, "Cut away a propane cylinder: 50 gallons [dim](\(have))[/dim]", "\(fuel)")
+        }
     }
 
     /// Worn to nothing in a watch, she is asked in that watch, and nothing else happens to

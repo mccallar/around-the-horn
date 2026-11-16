@@ -214,6 +214,28 @@ final class BalloonTests: XCTestCase {
         XCTAssertEqual(balloon.sickPool(e, .warm, nil), BalloonData.mildPool)
     }
 
+    /// The date is Mission Control's, in GMT, written as the launch and the finale write the
+    /// hour: local time along the route runs from GMT − 7 to GMT + 9, so a bare "8 a.m." at
+    /// Albuquerque would be read as morning there, where it is the middle of the night.
+    func testTheLogKeepsGreenwichTime() {
+        var s = landed("abq")
+        for (day, text) in [(0, "January 1, 1999, 0800 GMT"), (2, "January 1, 1999, 1600 GMT"),
+                            (4, "January 2, 1999, 0000 GMT"), (7, "January 2, 1999, 1200 GMT")] {
+            s.day = day
+            XCTAssertEqual(s.dateText, text)
+        }
+        s.day = 42
+        XCTAssertTrue(balloon.text.reached(balloon.stop("abq")!, s).contains("January 8, 1999, 0800 GMT · day 8 of the flight"),
+                      balloon.text.reached(balloon.stop("abq")!, s))
+        XCTAssertTrue(Balloon.shortfall(s).hasPrefix("January 8, 1999, 0800 GMT · "), Balloon.shortfall(s))
+        // The other journeys whose turns are shorter than a day keep the shared clock.
+        for j in Journeys.all where j.id != Balloon.id && j.rules.tickHours < 24 {
+            XCTAssertEqual(j.hourText(8), "8 a.m.", j.id)
+            XCTAssertEqual(j.hourText(0), "12 a.m.", j.id)
+            XCTAssertEqual(j.hourText(16), "4 p.m.", j.id)
+        }
+    }
+
     func testTheSeasonMovesTheJetAndTheCold() {
         let himalaya = region("himalaya")
         XCTAssertEqual(balloon.temperature(flying(month: 0), in: himalaya), .freezing)

@@ -78,9 +78,10 @@ enum BalloonData {
     }
 
     /// "1600", the watch's GMT time.
-    static func clock(_ s: GameState) -> String {
-        (s.hour < 10 ? "0" : "") + String(s.hour) + "00"
-    }
+    static func clock(_ s: GameState) -> String { clock(s.hour) }
+
+    /// "0800", an hour of the log's GMT.
+    static func clock(_ hour: Int) -> String { (hour < 10 ? "0" : "") + String(hour) + "00" }
 
     // MARK: - Stock
 

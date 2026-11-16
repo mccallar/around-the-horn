@@ -303,6 +303,12 @@ public class Journey {
     /// The season that makes freezing weather worse (1849: the southern winter).
     public func harshSeason(_ s: GameState) -> Bool { false }
 
+    /// The hour as `GameState.dateText` writes it on a journey whose turns are shorter than
+    /// a day: "6 p.m.", unless the journey keeps its log by another clock.
+    public func hourText(_ hour: Int) -> String {
+        "\(hour % 12 == 0 ? 12 : hour % 12) \(hour < 12 ? "a.m." : "p.m.")"
+    }
+
     /// The turn's weather odds in `reg`. `cursed` is `GameState.badLuck` running.
     func weatherWeights(_ e: GameEngine, _ reg: Region, cursed: Bool) -> WeatherOdds { reg.weights }
 

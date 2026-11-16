@@ -64,6 +64,13 @@ extension Balloon {
             : "The burners are cold. The balloon is sinking."
     }
 
+    /// The first watch after leaving a field with the burners given out (`leaving`): no
+    /// climb, and no propane burned for one.
+    static func relaunchedCold(_ s: GameState) -> String {
+        "[red]She goes up on dead burners.[/red] The ground team walks her into the wind and lets go, and she rises off the field on the helium alone, burning nothing. She will climb no higher than that, and she is already sinking."
+            + (s.sailcloth >= 1 ? " The crew can fit a burner kit now that she is up." : "")
+    }
+
     /// The crew is told, once, when the burners give out (`adjustSpeed` forgets it once they
     /// burn again).
     func sayBurnersOut(_ e: GameEngine, _ q: inout [Interrupt]) {
@@ -118,10 +125,11 @@ extension Balloon {
         guard canDrop || canCut || canLand else { return downForGood(e, at: field) }
 
         let ship = "[i]\(TextMarkup.escape(s.ship))[/i]"
+        let have = s.fuel.rounded(.down)
         var kinds = ["ballast", "propane"]
         var options: [ChoiceEvent.Option] = [
             .init("Cut away a sack of ballast [dim](have \(s.timber))[/dim]", enabled: canDrop),
-            .init("Cut away a propane cylinder: \(Int(BalloonData.cylinder)) gallons [dim](have \(formatNumber(s.fuel.rounded(.down))) gallons)[/dim]",
+            .init("Cut away a propane cylinder: \(Int(BalloonData.cylinder)) gallons [dim](have \(formatNumber(have)) \(have == 1 ? "gallon" : "gallons"))[/dim]",
                   enabled: canCut),
         ]
         if let field {
