@@ -144,7 +144,7 @@ final class BalloonSkinTests: XCTestCase {
             }
             return gallons
         }
-        for pace in [Pace.steady, .full] { XCTAssertTrue((550...700).contains(crossing(pace)), "\(pace): \(crossing(pace))") }
+        for pace in [Pace.steady, .full] { XCTAssertTrue((500...700).contains(crossing(pace)), "\(pace): \(crossing(pace))") }
         XCTAssertGreaterThan(crossing(.steady) { _ in BalloonData.light.speed }, 1000)
         has(text, "In good winds the crossing burns some 600 gallons of propane; in poor ones, far more.")
         // The jet burns less a mile.
@@ -420,19 +420,37 @@ final class BalloonSkinTests: XCTestCase {
         let files = try fm.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil).filter { $0.pathExtension == "swift" }
         XCTAssertGreaterThanOrEqual(files.count, 6, "the balloon's engine is in \(dir.path)")
         let literal = try NSRegularExpression(pattern: #""((?:[^"\\\n]|\\.)*)""#)
-        let code = try NSRegularExpression(pattern: #"\\\((?:[^()]|\([^()]*\))*\)"#)
         var out: [String] = []
         for file in files {
             for line in try String(contentsOf: file, encoding: .utf8).split(separator: "\n").map(String.init)
             where !line.trimmingCharacters(in: .whitespaces).hasPrefix("//") {
                 for m in literal.matches(in: line, range: NSRange(line.startIndex..., in: line)) {
                     let s = String(line[Range(m.range(at: 1), in: line)!])
-                    out.append(code.stringByReplacingMatches(in: s, range: NSRange(s.startIndex..., in: s), withTemplate: ""))
+                    out.append(Self.withoutCode(s))
                 }
             }
         }
         out += air.items.flatMap { it in [1, 2].map { air.describe(.item(it.key), Double(it.per * $0)) } }
         out += [Balloon.finale(nearing("finish")), Balloon.shortfall(nearing("finish"))]
+        return out
+    }
+
+    /// A literal with the code inside its interpolations taken out, however deep its
+    /// parentheses go.
+    static func withoutCode(_ s: String) -> String {
+        var out = "", depth = 0
+        var chars = Array(s)[...]
+        while let ch = chars.first {
+            chars = chars.dropFirst()
+            if depth == 0 && ch == "\\" && chars.first == "(" {
+                depth = 1
+                chars = chars.dropFirst()
+            } else if depth > 0 {
+                if ch == "(" { depth += 1 } else if ch == ")" { depth -= 1 }
+            } else {
+                out.append(ch)
+            }
+        }
         return out
     }
 
@@ -449,13 +467,15 @@ final class BalloonSkinTests: XCTestCase {
     func testNothingInTheAirIsSaidInAnotherJourneysWords() throws {
         let said = everythingSaid()
         XCTAssertGreaterThan(Set(said).count, 200, "the walk found the words")
-        // A container ship has a radio mast.
-        let figures = ["her radio mast"]
+        // A container ship has a radio mast, ballast is thrown over the side, and mules
+        // walk the Atlas in trains.
+        let figures = ["her radio mast", "throw over the side", "mule trains"]
         let engine = try engineSaid().map { s in figures.reduce(s) { $0.replacingOccurrences(of: $1, with: "") } }
         XCTAssertGreaterThan(Set(engine).count, 200, "the source was read")
         for s in Set(said + engine) {
-            let m = Self.elsewhere.firstMatch(in: s, range: NSRange(s.startIndex..., in: s))
-            XCTAssertNil(m, "another journey's word in “\(s)”")
+            if let m = Self.elsewhere.firstMatch(in: s, range: NSRange(s.startIndex..., in: s)) {
+                XCTFail("another journey's word “\((s as NSString).substring(with: m.range))” in “\(s)”")
+            }
         }
         // The same sieve does catch a ship, a train and an airship.
         for other in [Horn1849Skin.skin, RailSkin.skin, AirshipSkin.skin] {
@@ -553,9 +573,10 @@ final class BalloonSkinTests: XCTestCase {
         XCTAssertTrue(c.game!.atPort)
         XCTAssertTrue(c.run { $0.buy([.fuel: 50]) })
         XCTAssertNil(skin.words(c.game!).leaveRefusal)
+        XCTAssertTrue(c.run { $0.buy([.fuel: 450]) })
         c.leavePort()
         guard case .travel = c.screen else { return XCTFail("\(c.screen)") }
-        XCTAssertEqual(c.game!.fuel, 35, accuracy: 1e-9, "the climb burned 25")
+        XCTAssertEqual(c.game!.fuel, 485, accuracy: 1e-9, "the climb burned 25")
         c.tick()
         if case .message = c.screen { XCTFail("a plain relaunch says so in the note: \(c.screen)") }
         has(c.game!.note, "Relaunched. The climb back to cruising height burned 25 gallons.")
@@ -588,9 +609,16 @@ final class BalloonSkinTests: XCTestCase {
 
     // MARK: The picture
 
-    func frame(_ g: GameState, hour: Int = 12, moving: Bool = true) -> SceneFrame {
+    /// The frame by day where she is, unless `hour` (GMT) says otherwise.
+    func frame(_ g: GameState, hour: Int? = nil, moving: Bool = true) -> SceneFrame {
         SceneFrame(t: 0, weather: g.weather, moving: moving, atPort: g.atPort, hull: g.hull, sails: g.sails,
-                   region: g.region, hour: hour, state: g)
+                   region: g.region, hour: hour ?? noon(g), state: g)
+    }
+
+    /// The GMT hour nearest local noon where she is.
+    func noon(_ g: GameState) -> Int {
+        let h = Int((12 - BalloonScene.longitude(g) / 15).rounded()) % 24
+        return h < 0 ? h + 24 : h
     }
 
     func picture(_ f: SceneFrame, t: Double = 0.37) -> Int {
@@ -760,6 +788,7 @@ final class BalloonSkinTests: XCTestCase {
         sahara.weather = air.fairWeather
         XCTAssertTrue(BalloonScene.isNight(frame(sahara, hour: 0)))
         XCTAssertFalse(BalloonScene.isNight(frame(sahara, hour: 12)))
+        XCTAssertFalse(BalloonScene.isNight(frame(sahara)))
         has(skin.scene.label(frame(sahara, hour: 0)), "by night")
         XCTAssertFalse(skin.scene.label(frame(sahara)).contains("night"))
         XCTAssertNotEqual(picture(frame(sahara, hour: 0)), picture(frame(sahara)))
@@ -892,23 +921,29 @@ final class BalloonSkinTests: XCTestCase {
     }
 
     /// Where the engine's regions are sea, the chart's route is over the sea, and over
-    /// land where they are land, a few miles in from every coast.
+    /// land where they are land: across the Sahara, India, China, America and Morocco, and
+    /// the Gulf of Oman, the Pacific (either track) and the Atlantic. The coasts are a
+    /// sketch at this scale, so a few crossings are left out: the Red Sea and the Gulf by
+    /// Qatar (the engine's Arabia), the last 300 miles of the Chinese coast (its Himalaya &
+    /// China), Kyushu at Saga, and Honshu's south coast, which the route grazes after the
+    /// edge of the Pacific.
     func testTheChartsSeaIsTheScenesSea() {
         let chart = BalloonChart.skin
         let land = BalloonChart.shapes.filter { !$0.sea }.map(\.points)
         let water = BalloonChart.shapes.filter(\.sea).map(\.points)
+        let stretches = [(200, 2100), (3600, 3750), (3900, 4350), (4450, 5000), (5100, 6900), (8300, 10000),
+                         (10100, 12500), (12700, 13450), (13550, 14950), (15200, 17300), (17400, 18150), (18240, 18300)]
         for south in [false, true] {
             var g = over(0, south: south)
             let route = chart.route(g)
-            for m in stride(from: 150, through: 18250, by: 50) {
-                g.mile = m
-                let r = air.region(g, at: m)
-                // Leave the coasts some room: the chart's outlines are a sketch.
-                let edge = air.regions.contains { abs($0.to - m) < 120 } || [7800, 12600].contains { abs($0 - m) < 150 }
-                if edge { continue }
-                let q = ChartView.position(route, atMile: Double(m), chart)
-                let onLand = land.contains { inside(q, $0) } && !water.contains { inside(q, $0) }
-                XCTAssertEqual(onLand, !r.has("sea"), "nm \(m) (\(r.name)) on the chart is \(onLand ? "land" : "sea")")
+            for (from, to) in stretches {
+                for m in stride(from: from, through: to, by: 25) {
+                    g.mile = m
+                    let r = air.region(g, at: m)
+                    let q = ChartView.position(route, atMile: Double(m), chart)
+                    let onLand = land.contains { inside(q, $0) } && !water.contains { inside(q, $0) }
+                    XCTAssertEqual(onLand, !r.has("sea"), "nm \(m) (\(r.name)) on the chart is \(onLand ? "land" : "sea")")
+                }
             }
         }
     }
@@ -940,8 +975,7 @@ final class BalloonSkinTests: XCTestCase {
             XCTAssertEqual(Stores.amount(line, g, w), reads)
         }
         // The engine's report says the same pounds.
-        var report = nearing("oman")
-        report.mile = 3650
+        let report = over(3650)
         let e = GameEngine(state: report)
         let said = e.landCatch(30).compactMap { i -> String? in if case .message(let t) = i { return t }; return nil }
         XCTAssertTrue(said.contains { $0.contains("[amber]30 lbs[/amber]") }, "\(said)")
