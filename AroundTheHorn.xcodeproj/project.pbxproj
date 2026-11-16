@@ -42,6 +42,7 @@
 		47AD7D91637B665461598327 /* Horn1849Scene.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0E192B3F213935447BEC520 /* Horn1849Scene.swift */; };
 		48D1CFE2742A32C1FC482AE2 /* AirshipScreenshotUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D44B9958CF117F65D96C1227 /* AirshipScreenshotUITests.swift */; };
 		4B70AD3EA102F30CF1CF85A0 /* Klondike+Events.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71872D68791ABA1244FB04AD /* Klondike+Events.swift */; };
+		4C52C0F5CF2219983697691C /* AirshipBreakdownTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98BB5DCEEE3D3145B021881D /* AirshipBreakdownTests.swift */; };
 		4F8C5D5FB80B7B3F2BD16CBA /* Airship+Masts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6099B49B31492A6F9190EE30 /* Airship+Masts.swift */; };
 		54E22ECBF4E88BF7A4608CA0 /* AirshipScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C802F0633CB47BCA69931C7 /* AirshipScene.swift */; };
 		54F28ECDCAE78E4D847624EE /* LegacySaveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EFE7D352E191E20D2322B5D /* LegacySaveTests.swift */; };
@@ -296,6 +297,7 @@
 		92B379A31EE0B81538B8E6BE /* HornEngineTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = HornEngineTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		93E794034F7F574E3F216E96 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		96D694A616F343447C631102 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		98BB5DCEEE3D3145B021881D /* AirshipBreakdownTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirshipBreakdownTests.swift; sourceTree = "<group>"; };
 		A1E073E4A5604BCE3938DDFE /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		A66D6438C48E4B0580994D21 /* AirshipTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirshipTests.swift; sourceTree = "<group>"; };
 		AC25EE5C61D2A13FD160B361 /* KlondikeData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KlondikeData.swift; sourceTree = "<group>"; };
@@ -591,6 +593,7 @@
 		C15417AFB765A3BB179D92FC /* HornEngineTests */ = {
 			isa = PBXGroup;
 			children = (
+				98BB5DCEEE3D3145B021881D /* AirshipBreakdownTests.swift */,
 				A66D6438C48E4B0580994D21 /* AirshipTests.swift */,
 				066E1756FBD97DB90F4CC624 /* BalanceSimulationTests.swift */,
 				B24C73833E8D0B97DD454423 /* BalloonTests.swift */,
@@ -985,6 +988,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4C52C0F5CF2219983697691C /* AirshipBreakdownTests.swift in Sources */,
 				DCA2AC7D2DDCD28C8B82A296 /* AirshipTests.swift in Sources */,
 				570ED1A0299CA1D70CC7DA90 /* BalanceSimulationTests.swift in Sources */,
 				A7AB9B118B3F8AD2574268BF /* BalloonTests.swift in Sources */,
