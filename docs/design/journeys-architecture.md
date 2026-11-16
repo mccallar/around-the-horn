@@ -317,10 +317,20 @@ Over the Pole (`airship`) is the third skin: `AirshipSkin` (copy, words, debug s
 `AirshipScene`, `AirshipChart`, `AirshipForage`, and its entry in `Skins.all`. 1849 and the
 Iron Road look, read and play as they did.
 
-- **One new shell member, `Words.departRefusal`**: why the first port won't let the vessel
-  go beyond the engine's own refusal (nothing to eat). The airship answers "empty tanks"
-  when there is no petrol aboard, as its spec asked and its engine left to the app (As
-  built 7); 1849 and rail answer `nil`. `GameController.depart` asks it first.
+- **Four new shell members**, each with an answer that leaves 1849 and rail as they were:
+  - `Words.departRefusal`: why the first port won't let the vessel go beyond the engine's
+    own refusal (nothing to eat). The airship answers "empty tanks" when there is no
+    petrol aboard, as its spec asked and its engine left to the app (As built 7); 1849
+    and rail answer `nil`. `GameController.depart` asks it first.
+  - `Words.resumesInFirstShop`: a voyage saved at the first port before it left (the
+    stores save as you leave them) comes back to those stores, so it still leaves through
+    `depart` and both refusals (decision D15). The airship answers true; 1849 and rail
+    false, and come back to the port menu as before.
+  - `Words.looseOne`: what one of a loose thing is called, "1 balloon". 1849 and rail
+    answer `[:]` and still write "1 throws" and "1 casts".
+  - `ForageSkin.grouped`: the tally and the hint write thousands with a comma, "Found:
+    1,350 kg", as the airship's catch report does. 1849's prototype wrote "Caught: 1050
+    lbs", so 1849 answers false; rail counts in tenths of a cord and answers false.
 - **One debug launch argument**, `-HornDebugHull <n>` with `-HornDebugStart`: the vessel's
   structure down to `n`%, so a walk can reach a wreck. Debug builds only; nothing reads it
   otherwise.
@@ -339,14 +349,23 @@ Iron Road look, read and play as they did.
   Pole, where longitude means nothing. The chart's Mediterranean coast is crossed at about
   km 510; the scene's sea runs to the Rhône stop at 650.
 - **What the scene shows** for every place: the region's ground under nine skies, a mast
-  and its town at each of the five masts, and every other stop drawn as itself (the
+  and its town at each of the five masts (moored or not: with its arrival's question on
+  screen, or flying on past it, she flies by the mast and the ground crew waits at its
+  foot), and every other stop drawn as itself (the
   Rhône's mouth, a line nobody can see at the Circle, Bear Island's cliffs, flags at the
   Pole, the village at Point Barrow, two coasts at Cape Prince of Wales, the roofs of
   Nome). She flies up to ten pixels lower as her lift goes, her fabric creases, her
   propeller stutters and smokes as the engines fail and stops with the tanks dry, icing
-  fog rimes her; forced down, she lies on the ice beside a camp, on the sea with a boat
-  alongside, or in a field. South of the Arctic the sun crosses the side of the sky she
-  isn't in and nights are dark; in the north the midnight sun circles low.
+  fog rimes her; forced down, she lies on the ice beside a camp where there is sea ice
+  below (`pack`, as the engine's ending says), on the sea with a boat alongside, or in a
+  field, Scandinavia's included. The sun crosses the side of the sky she isn't in and
+  nights are dark, except where and when it does not set: the midnight sun circles low
+  when the sun's declination on the day exceeds 90° less her latitude (less 0.83° for
+  refraction), the latitude read along the chart's own flight (`AirshipChart.latitude`).
+  So never at Oslo, Pulham or Nome; at the Circle a month round midsummer; Vadsø from
+  about May 16, Kings Bay from about April 17, the Pole all spring.
+- **Places in sentences** come from `AirshipScene.whereabouts`, not the engine's region
+  names, which are headings: "above the fog", "over the North Sea", "over France".
 - `AirshipSkinTests` holds every figure the card states to the tables, sieves everything
   the skin and the engine can say for a sailor's or a railroader's word, tells every
   weather, region, mast and stop apart, checks the chart and the winds, and flies seeded

@@ -234,3 +234,21 @@ back up from there, and otherwise sails one more day at the hull's speed floor b
 that day's wear founders her; and lightning reports "Sails −18%" whatever the sails had
 left. None of these is shown as a negative number (the supplies screen draws health as
 a bar, clamped). They are left to be ruled on, not changed by this decision.
+
+## D15 — A flight saved before it left Rome comes back to the stores (2026-11-15)
+
+Found in review of the airship skin: the first port's stores save as you leave them,
+as the prototype's do, and the app saves whenever it goes to the background,
+from the outfitting screen on. Continued, such a save found nothing waiting and opened the
+port menu at the first port, whose way out (`startTravel`) never calls `depart`: so the
+engine's refusal (no provisions), the airship's own (`Words.departRefusal`, empty tanks) and
+the departure sentence were all skipped, and she drifted out of Rome with dry tanks.
+
+The airship now comes back to Rome's stores instead (`Words.resumesInFirstShop`, asked
+by `GameController.continueSavedVoyage` of a voyage still at its first port with no turn
+taken), so she can only leave through `depart`. Nothing else about the save changes.
+
+1849 and the Iron Road answer false and are exactly as they were: continued before they
+left, they come back to the port menu and can set out with no food and no departure
+sentence, as 1849's prototype does. That is left to be ruled on, not changed by this
+decision; answering true in their skins is the whole change.

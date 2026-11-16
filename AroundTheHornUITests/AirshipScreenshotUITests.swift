@@ -91,7 +91,14 @@ final class AirshipScreenshotUITests: ScreenshotWalk {
         // No petrol yet: Rome won't let her go.
         button(startingWith: "Pay $").tap()
         shot("12-no-petrol")
-        tap("Continue")
+        // Paying saved the flight: quit now and it comes back to the stores, not a mast
+        // menu that would let her go with dry tanks.
+        relaunch(["-HornTickSeconds", "6"])
+        let resume = button(startingWith: "Continue the flight of")
+        XCTAssertTrue(resume.waitForExistence(timeout: 10))
+        resume.tap()
+        XCTAssertTrue(app.buttons["More Petrol"].waitForExistence(timeout: 10), "not back in the stores")
+        shot("12-resumed-in-the-stores")
         app.swipeUp()
         app.swipeUp()
         for _ in 0..<30 { app.buttons["More Petrol"].tap() }
@@ -251,6 +258,16 @@ final class AirshipScreenshotUITests: ScreenshotWalk {
         tap("Try again")
         XCTAssertTrue(app.buttons["Fly for the Pole"].waitForExistence(timeout: 5))
         XCTAssertFalse(button(startingWith: "Continue the flight of").exists, "no save survives a forced landing")
+
+        // Over Lapland, past the Circle, it is a field: Scandinavia is north, but land.
+        relaunch(["-HornDebugStart", "circle", "-HornDebugHull", "0.2", "-HornTickSeconds", "2"])
+        tap("Continue the flight")
+        let over = app.buttons["Try again"]
+        for _ in 0..<40 where !over.exists {
+            if onward.waitForExistence(timeout: 3) && !over.exists { onward.tap() }
+        }
+        XCTAssertTrue(over.waitForExistence(timeout: 10), "never forced down")
+        shot("56-forced-down-in-a-field")
     }
 
     /// Accessibility text sizes: the longer labels still fit.
