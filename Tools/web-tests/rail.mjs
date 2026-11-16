@@ -428,8 +428,8 @@ await test('left at Donner Summit, the descent is there to come back to', async 
 // MARK: - Breakdowns
 
 /** A train on the Platte from the debug start (stop 2), with `set` applied to it. */
-async function trainAt(set, seed = '9') {
-  const p = await railPlayer({ engine: e1, seeds: ['31'], random: lcg(31) });
+async function trainAt(set, seed = '9', storage = new MemoryStorage()) {
+  const p = await railPlayer({ engine: e1, storage, seeds: ['31'], random: lcg(31) });
   e1.start({ journey: 'rail', role: 'merchant', ship: 'Prairie Queen', captain: 'Amos', crew: ['Hattie', 'Lars', 'Clara', 'Otto'],
     year: 1869, month: 9, seed });
   const s = e1.save([]);
@@ -463,6 +463,95 @@ await test('Ryan\'s report: an engine run down to nothing, no wood, nothing to m
   check(troubles.some((t) => t === 'Out of wood/red'), `the status box says the wood is gone (${[...new Set(troubles)]})`);
   check(movedAtZero.every((d) => d === 0), `a train at 0% does not move (${movedAtZero.join(',')})`);
   check(p.screen === 'gameOver', `with nothing to mend her and no money the run ends (${p.screen})`);
+  noProblems(p);
+});
+
+const breakdownKey = (p) => p.screen === 'choice' && p.f.screen.event.kind?.custom?.key === 'breakdown';
+
+await test('given out: she stands, the box says so, and fittings or a mechanic get her rolling', async () => {
+  const storage = new MemoryStorage();
+  const p = await trainAt((s) => Object.assign(s, { sails: 0, sailcloth: 1, money: 100 }), '9', storage);
+  check(statusRows(p).Train?.value === 'Broken down' && statusRows(p).Train.color === 'red', 'the box says broken down, in red');
+  const mile = p.f.game.mile, day = p.f.game.day;
+  p.press('Continue down the line');
+  p.timers.fire();
+  check(breakdownKey(p), `the breakdown is asked (${p.screen})`);
+  const d = p.look();
+  check(wordsOn(d).startsWith('The engine has given out. The Prairie Queen stands dead on the line at mile 281'), `in red, plainly (${wordsOn(d).slice(0, 90)})`);
+  check(d.blocks.some((b) => b.markup?.startsWith('[red]The engine has given out.[/red]')), 'the first words in red');
+  check(p.labels().join('/') === 'Work on the engine: 1 set of boiler fittings (have 1)/Send Hattie walking for a mechanic ($45)/Climb down and take stock first',
+    `what can be done (${p.labels().join('/')})`);
+  check(p.f.game.mile === mile && p.f.game.day === day, 'no mile and no hour for asking');
+
+  // Left on the question, it is there to come back to.
+  const q = await railPlayer({ engine: e2, storage, seeds: ['99'], random: lcg(99) });
+  q.press('Climb back aboard');
+  check(screenWords(q.f) === screenWords(p.f), 'the breakdown comes back as it was');
+  q.press('Climb down and take stock first');
+  check(q.screen === 'seaMenu' && q.f.game.mile === mile, `taking stock, on the menu, where she stands (${q.screen})`);
+  check(statusRows(q).Train?.value === 'Broken down', 'still broken down');
+  q.press('Continue down the line');
+  q.timers.fire();
+  check(breakdownKey(q), 'and asked again on the way out');
+  q.press('Work on the engine');
+  check(q.screen === 'message' && q.f.screen.text.endsWith('[green](Engine now 25%)[/green]'), `mended (${q.f.screen.text})`);
+  q.press('Continue');
+  check(q.screen === 'travel' && !statusRows(q).Train, `rolling, with nothing wrong in the box (${q.screen})`);
+  q.timers.fire();
+  check(q.f.game.mile > mile, 'and moving');
+  noProblems(p);
+  noProblems(q);
+});
+
+await test('with no fittings, somebody walks for a mechanic; with no money either, stranded', async () => {
+  const p = await trainAt((s) => Object.assign(s, { hull: 0, sails: 0, sailcloth: 0, timber: 0, money: 100 }));
+  p.press('Continue down the line');
+  p.timers.fire();
+  check(breakdownKey(p) && wordsOn(p.look()).startsWith('The engine and the running gear have both given out.'), 'both');
+  check(p.look().choices.map((c) => c.enabled).join() === 'false,false,true,true', 'nothing to mend with: walk or take stock');
+  const day = p.f.game.day;
+  p.press('Send Hattie walking');
+  check(p.f.screen.text.startsWith('Hattie sets off down the ties'), `off she goes (${p.f.screen.text})`);
+  let said = '';
+  while (p.screen === 'message') {
+    said += p.f.screen.text;
+    p.press(1);
+  }
+  check(said.includes('A handcar comes clacking up the line') && said.includes('[green](Engine 40%, Running gear 40%)[/green]'), 'the mechanic comes');
+  check(p.f.game.money === 55 && p.f.game.day >= day + 3 && p.f.game.day <= day + 6, `$45 and twelve hours to a day (${p.f.game.money}, ${p.f.game.day - day})`);
+  check(p.screen === 'travel', `and on down the line (${p.screen})`);
+  noProblems(p);
+
+  const r = await trainAt((s) => Object.assign(s, { hull: 0, sailcloth: 3, timber: 0, money: 44 }));
+  r.press('Continue down the line');
+  r.timers.fire();
+  check(r.screen === 'gameOver' && r.f.screen.title === 'Stranded at mile 281.', `stranded (${r.screen}: ${r.f.screen.title})`);
+  check(wordsOn(r.look()).includes('There is nothing aboard to mend her with'), 'and why');
+  noProblems(r);
+});
+
+await test('out of wood she crawls, the box says so, and wood puts her right', async () => {
+  const p = await trainAt((s) => Object.assign(s, { fuel: 0 }));
+  check(statusRows(p).Train?.value === 'Out of wood' && statusRows(p).Train.color === 'red', 'the box says out of wood');
+  const mile = p.f.game.mile, sails = p.f.game.sails;
+  p.press('Continue down the line');
+  p.timers.fire();
+  check(p.screen === 'message' && p.f.screen.text.includes('You are barely moving'), `the woodpile is gone (${p.f.screen.text})`);
+  const crawl = p.f.game.mile - mile;
+  check(crawl > 0 && crawl <= 10, `crawling (${crawl} miles in four hours)`);
+  check(p.f.game.sails < sails - 0.4, 'and the fence posts wear the engine');
+  p.press('Continue');
+  p.press('Stop the train');
+  // Wood again, as a yard or the river would give it, and North Platte not yet in sight.
+  const s = e1.save([]);
+  s.fuel = 50;
+  s.mile = 200;
+  p.f.loadForDebug(s);
+  check(p.screen === 'seaMenu' && !statusRows(p).Train, `wood again, and nothing wrong in the box (${p.f.game.fuel})`);
+  const m2 = p.f.game.mile;
+  p.press('Continue down the line');
+  p.timers.fire();
+  check(p.f.game.mile - m2 > 20, `and full speed (${p.f.game.mile - m2} miles)`);
   noProblems(p);
 });
 

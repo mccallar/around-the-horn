@@ -112,7 +112,7 @@ extension Rail {
     /// Somebody walks to the nearest section house; a mechanic comes back on the handcar.
     func walkForAMechanic(_ e: GameEngine, _ w: Int) -> [Interrupt] {
         let fee = RailData.mechanicFee
-        guard e.state.money >= fee else { return [] }
+        guard e.state.money >= fee, Self.brokenDown(e.state) else { return [] }
         e.state.money -= fee
         let you = e.state.crew[w].isCaptain
         let name = TextMarkup.escape(e.state.crew[w].name)
