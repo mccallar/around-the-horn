@@ -100,11 +100,12 @@ public final class GameEngine {
         sp *= r.hullFloor + r.hullSpan * (state.hull / 100)
         sp *= journey.crewFactor(n)
         journey.adjustSpeed(self, reg, &sp)
-        if pace.fuel > 0 {
-            if state.fuel >= pace.fuel {
-                state.fuel -= pace.fuel
+        let burn = journey.fuelBurn(self, pace)
+        if burn > 0 {
+            if state.fuel >= burn {
+                state.fuel -= burn
             } else {
-                let share = r.burnsPartLoad ? max(0, state.fuel) / pace.fuel : 0
+                let share = r.burnsPartLoad ? max(0, state.fuel) / burn : 0
                 state.fuel = 0
                 sp *= r.burnsPartLoad ? share + (1 - share) * r.noFuelSpeed : r.noFuelSpeed
             }
@@ -119,7 +120,7 @@ public final class GameEngine {
         state.mile += d
         if !w.note.isEmpty { state.note = w.note }
         consume(&q, .sail)
-        if pace.fuel > 0 { fuelWarnings(&q, pace) }
+        if burn > 0 { fuelWarnings(&q, pace) }
         health(&q, .sail)
         if state.over { return q }
         wear(&q, reg)

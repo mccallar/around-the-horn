@@ -4,13 +4,14 @@ import Foundation
 // mast to mooring mast as far as Spitsbergen, then over the North Pole and 4,300 km of ice
 // with no mast at all.
 //
-// A turn is a four-hour watch. What it is about: petrol (dry tanks and she drifts at the
-// wind's pace), lift (leaks, ice and the sun take it; ballast and fresh gas give it back,
-// and at nothing she is forced down), coffee against watch fatigue, furs against the polar
-// cold, and one choice at the Pole: above the fog or under it. Tables are in
-// AirshipData.swift; masts in Airship+Masts.swift; events in Airship+Events.swift; set
-// pieces and answers in Airship+Choices.swift. Spec and the bot's numbers:
-// docs/journeys/airship.md.
+// A turn is a four-hour watch. What it is about: petrol (dry tanks, or engines worn to
+// nothing, and she drifts at the wind's pace), lift (leaks, ice and the sun take it; ballast
+// and fresh gas give it back, and at nothing she goes down unless something heavy goes over
+// the side), coffee against watch fatigue, furs against the polar cold, and one choice at the
+// Pole: above the fog or under it. Tables are in AirshipData.swift; masts in
+// Airship+Masts.swift; events in Airship+Events.swift; set pieces and answers in
+// Airship+Choices.swift; lift and engines at nothing in Airship+Trouble.swift. Spec and the
+// bot's numbers: docs/journeys/airship.md.
 //
 // Stock roles: `hull` is lift, `sails` the engines; `timber` is water ballast (a bag mends
 // lift), `sailcloth` engine spares, `limes` coffee & cocoa (against watch fatigue),
@@ -66,6 +67,7 @@ public final class Airship: Journey {
         rules.tickHours = 4
         rules.startHour = 8
         rules.noFuelSpeed = 1  // a dry watch drifts: `adjustSpeed` sets the pace
+        rules.wearWrecks = false  // lift at 0% goes down in `tick`, where ballast can still save her
         rules.water = 0.6
         rules.hotWater = 0.9
         rules.rainCatch = 6...18
@@ -92,7 +94,7 @@ public final class Airship: Journey {
         outOfWater: "[red]The water cans are dry![/red] Without water, the crew will not last long.",
         lowWater: "The water cans are nearly empty — a few watches left.",
         preventiveGone: "The last of the coffee is gone. Within a couple of days the crew will be asleep on their feet.",
-        outOfFuel: "[red]The tanks are dry![/red] The engines cough and stop. She is a free balloon now, going where the wind goes.",
+        outOfFuel: "[red]The tanks are dry![/red] The engines cough and stop. She is a free balloon now, going where the wind goes and spending gas to hold her height.",
         lowFuel: "[amber]The engineer chalks a number on the tank: petrol for about five more watches.[/amber]",
         deficiencyCured: { "\($0) is wide awake again." },
         wellAgain: { "\($0) is well again." },
@@ -213,18 +215,33 @@ public final class Airship: Journey {
 
     // MARK: - A watch in the air
 
+    /// The watch under way had no power at all: the tanks dry or the engines given out.
     static func drifting(_ s: GameState) -> Bool { s.vars[AirshipData.driftingKey] == 1 }
 
-    /// With the tanks dry at the start of a watch she drifts: no pace, no engines, no crew,
-    /// only the wind and what lift she has left.
+    /// The share of a watch the engines can drive her: none once they have given out, the
+    /// petrol's share of the watch's burn when there is less than that, otherwise all of it.
+    func powered(_ s: GameState) -> Double {
+        if Self.enginesOut(s) { return 0 }
+        return min(1, max(0, s.fuel) / pace(s.pace).fuel)
+    }
+
+    /// With no power she drifts: no pace, no engines, no crew, only the wind and what lift
+    /// she has left. The last of the petrol drives her for its share of the watch and she
+    /// drifts the rest (`rules.noFuelSpeed` is 1, so the engine leaves this alone).
     override func adjustSpeed(_ e: GameEngine, _ reg: Region, _ sp: inout Double) {
-        if e.state.fuel <= 0 {
-            e.state.vars[AirshipData.driftingKey] = 1
-            let r = rules
-            sp = AirshipData.driftSpeed * e.state.weather.speed * (r.hullFloor + r.hullSpan * (e.state.hull / 100))
-        } else {
-            e.state.vars[AirshipData.driftingKey] = nil
-        }
+        let s = e.state
+        if !Self.enginesOut(s) { e.state.vars[AirshipData.enginesOutKey] = nil }
+        let power = powered(s)
+        e.state.vars[AirshipData.driftingKey] = power > 0 ? nil : 1
+        guard power < 1 else { return }
+        let r = rules
+        let drift = AirshipData.driftSpeed * s.weather.speed * (r.hullFloor + r.hullSpan * (s.hull / 100))
+        sp = power * sp + (1 - power) * drift
+    }
+
+    /// Engines that have given out burn nothing.
+    override func fuelBurn(_ e: GameEngine, _ pace: PaceInfo) -> Double {
+        Self.enginesOut(e.state) ? 0 : pace.fuel
     }
 
     /// Engines that are not turning do not wear. The jitter is drawn either way.
@@ -235,7 +252,8 @@ public final class Airship: Journey {
 
     static func paceFactor(_ p: Pace) -> Double { p == .full ? 1.6 : p == .easy ? 0.7 : 1 }
 
-    /// Gas seeps every watch; snow, ice, gales, storms and the sun above the fog take more.
+    /// Gas seeps every watch; snow, ice, gales, storms and the sun above the fog take more,
+    /// and so does a watch adrift.
     override func structureDamage(_ e: GameEngine, _ reg: Region) -> Double {
         let w = e.state.weather
         let pace = e.state.pace
@@ -245,6 +263,7 @@ public final class Airship: Journey {
         if w == AirshipData.gale { d += e.rnd(0, 0.8) * (pace == .full ? 1.5 : 1) }
         if w == AirshipData.storm { d += e.rnd(1, 2.6) * Self.paceFactor(pace) }
         d += reg.num("superheat", or: 0)
+        if Self.drifting(e.state) { d += AirshipData.driftGas }
         return d
     }
 
@@ -257,8 +276,17 @@ public final class Airship: Journey {
     override func tick(_ e: GameEngine, _ q: inout [Interrupt], _ mode: GameEngine.DayMode, _ reg: Region) {
         guard mode == .sail else { return }
         // Drifting says so, unless the rain had something to say.
-        if Self.drifting(e.state) && (e.state.note.isEmpty || e.state.note == e.state.weather.note) {
-            e.state.note = "Engines silent. You are going where the wind goes."
+        let s = e.state
+        if Self.drifting(s) && (s.note.isEmpty || s.note == s.weather.note) {
+            e.state.note = "\(Self.enginesOut(s) ? "Engines dead" : "Engines silent"). You are going where the wind goes."
+        }
+        sayEnginesOut(e, &q)
+        // Lift worn to nothing: something goes over the side, or she comes down. Arriving at
+        // a mast or at Nome, the ground crew has her lines first.
+        if Self.goingDown(e.state) {
+            if let ns = e.state.nextStop, ns.mile == e.state.mile, ns.type == .port || ns.type == .end { return }
+            q += sinking(e)
+            return
         }
         // Too heavy to hold her height: petrol goes over the side.
         if e.state.hull < AirshipData.heavyBelow && e.state.fuel > AirshipData.heavyPetrol
@@ -270,13 +298,16 @@ public final class Airship: Journey {
     }
 
     /// Under the fog, the ridges come first; otherwise one event on about one watch in seven.
+    /// Nothing else happens to a ship going down.
     override func dayEvents(_ e: GameEngine, _ q: inout [Interrupt], _ reg: Region) {
+        if Self.goingDown(e.state) { return }
         let forecasts = e.state.vars[AirshipData.forecastKey] == 1
         if reg.has("ridges") && e.chance(forecasts ? AirshipData.ridgeChanceForecast : AirshipData.ridgeChance) {
             ridgeStrike(e, &q)
         } else if e.chance(rules.eventChance) {
             e.runEvent(events(e, reg), &q)
         }
+        sayEnginesOut(e, &q)
     }
 
     override func sickPool(_ e: GameEngine, _ temp: Temp, _ port: Port?) -> [Ailment] {
@@ -300,7 +331,13 @@ public final class Airship: Journey {
     override func special(_ e: GameEngine, _ stop: Stop) -> [Interrupt] { setPiece(e, stop) }
 
     override func resolve(_ e: GameEngine, _ key: String, _ args: [String], _ option: Int) -> [Interrupt] {
-        answer(e, key, args, option)
+        key == "sinking" ? answerSinking(e, args, option) : answer(e, key, args, option)
+    }
+
+    /// Going down, she is asked what goes over the side before another watch is flown
+    /// (Airship+Trouble).
+    override func stalled(_ e: GameEngine) -> [Interrupt]? {
+        Self.goingDown(e.state) ? sinking(e) : nil
     }
 
     // MARK: - Trade and score

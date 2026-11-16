@@ -53,17 +53,15 @@ extension Airship {
                     q.append(.message("Far below, the hulk of an old ship \(lies), her name still on her stern: [i]\(name)[/i]. Nobody says much for the rest of the watch."))
                 }
             },
-            // 5. An engine stops.
-            JourneyEvent(6, when: rough || w == AirshipData.head) { e, q in
-                let d = e.ri(12, 28)
-                e.state.sails = max(0, e.state.sails - Double(d))
-                q.append(.message("The port engine coughs, backfires and stops. A mechanic climbs out along the strut into the slipstream to coax it back to life. [red](Engines −\(d)%)[/red]"))
+            // 5. An engine stops: one that was running.
+            JourneyEvent(6, when: engines && (rough || w == AirshipData.head)) { e, q in
+                let hit = self.knock(e, [(.engines, e.ri(12, 28))])
+                q.append(.message("The port engine coughs, backfires and stops. A mechanic climbs out along the strut into the slipstream to coax it back to life.\(hit)"))
             },
-            // 6. Ice off the propellers.
-            JourneyEvent(4, when: rough || icing) { e, q in
-                e.state.sails = max(0, e.state.sails - 15)
-                e.state.hull = max(0, e.state.hull - 6)
-                var t = "Ice builds on the propellers and flies off like shrapnel. A chunk rips through the envelope and into the gas cell behind it. [red](Engines −15%, Lift −6%)[/red]"
+            // 6. Ice off the propellers, while they turn.
+            JourneyEvent(4, when: engines && (rough || icing)) { e, q in
+                let hit = self.knock(e, [(.engines, 15), (.lift, 6)])
+                var t = "Ice builds on the propellers and flies off like shrapnel. A chunk rips through the envelope and into the gas cell behind it.\(hit)"
                 if e.chance(0.5) {
                     let c = e.state.crew.indices.filter { e.state.crew[$0].alive && e.state.crew[$0].ailment == nil }
                     if let idx = e.pick(c) {
@@ -75,14 +73,13 @@ extension Airship {
                     }
                 }
                 q.append(.message(t))
-                e.checkSink(&q)
+                self.checkLift(e, &q)
             },
             // 7. A stuck valve.
             JourneyEvent(4) { e, q in
-                let d = e.ri(8, 18)
-                e.state.hull = max(0, e.state.hull - Double(d))
-                q.append(.message("A gas valve has stuck half open. By the time the rigger has climbed up inside the envelope and freed it, a great deal of gas has gone. [red](Lift −\(d)%)[/red]"))
-                e.checkSink(&q)
+                let hit = self.knock(e, [(.lift, e.ri(8, 18))])
+                q.append(.message("A gas valve has stuck half open. By the time the rigger has climbed up inside the envelope and freed it, a great deal of gas has gone.\(hit)"))
+                self.checkLift(e, &q)
             },
             // 8. A slip on the ladder.
             JourneyEvent(3, when: rough || w == AirshipData.snow || icing) { e, q in
@@ -100,17 +97,16 @@ extension Airship {
                     q.append(.message("In the gusts, \(name) loses footing on the ladder to the engine car. [red]The safety line parts, and \(name) is gone.[/red] There was no going back for them."))
                 }
             },
-            // 9. Fire in the engine car.
-            JourneyEvent(1.5) { e, q in
-                e.state.hull = max(0, e.state.hull - 4)
-                e.state.sails = max(0, e.state.sails - 6)
-                q.append(.message("Fire! A backfire sets oily rags alight in the engine car. The mechanic smothers it with a coat — and this close to the hydrogen, nobody breathes until it is out. [red](Lift −4%, Engines −6%)[/red]"))
-                e.checkSink(&q)
+            // 9. Fire in the engine car, from an engine that is running.
+            JourneyEvent(1.5, when: engines) { e, q in
+                let hit = self.knock(e, [(.lift, 4), (.engines, 6)])
+                q.append(.message("Fire! A backfire sets oily rags alight in the engine car. The mechanic smothers it with a coat — and this close to the hydrogen, nobody breathes until it is out.\(hit)"))
+                self.checkLift(e, &q)
             },
             // 10. Lightning.
             JourneyEvent(2, when: w == AirshipData.rain || w == AirshipData.storm) { e, q in
-                e.state.sails = max(0, e.state.sails - 18)
-                q.append(.message("A flash and a bang: lightning has struck the ship. By some mercy the hydrogen does not catch, but the magnetos on both engines are scorched. [red](Engines −18%)[/red]"))
+                let hit = self.knock(e, [(.engines, 18)])
+                q.append(.message("A flash and a bang: lightning has struck the ship. By some mercy the hydrogen does not catch, but the magnetos on both engines are scorched.\(hit)"))
             },
             // 11. A steamer that wants to trade.
             JourneyEvent(2.5, when: sea) { e, q in
@@ -178,10 +174,9 @@ extension Airship {
 
     /// Under the fog, a pressure ridge out of nowhere.
     func ridgeStrike(_ e: GameEngine, _ q: inout [Interrupt]) {
-        let d = e.ri(10, 22)
-        e.state.hull = max(0, e.state.hull - Double(d))
+        let hit = knock(e, [(.lift, e.ri(10, 22))])
         e.state.day += 1
-        q.append(.message("Out of the fog a pressure ridge rears up under the bow. The trail rope snags, the gondola thumps across the ice, and it takes a whole watch to get her trimmed and aloft again. [red](Lift −\(d)%)[/red]"))
-        e.checkSink(&q)
+        q.append(.message("Out of the fog a pressure ridge rears up under the bow. The trail rope snags, the gondola thumps across the ice, and it takes a whole watch to get her trimmed and aloft again.\(hit)"))
+        checkLift(e, &q)
     }
 }

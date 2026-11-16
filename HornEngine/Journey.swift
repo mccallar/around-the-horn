@@ -315,6 +315,10 @@ public class Journey {
     /// jitter.
     func adjustSpeed(_ e: GameEngine, _ reg: Region, _ sp: inout Double) {}
 
+    /// What a turn under way burns: the pace's `fuel`. Override when the drive can stand
+    /// idle with fuel aboard (the airship's engines, given out, burn none).
+    func fuelBurn(_ e: GameEngine, _ pace: PaceInfo) -> Double { pace.fuel }
+
     /// Health each person gains or loses from the pace on a turn under way. Override when
     /// it depends on where you are (hauling on foot is harder work than rowing).
     public func paceHP(_ s: GameState) -> Double { pace(s.pace).hp }

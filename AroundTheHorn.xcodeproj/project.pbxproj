@@ -46,6 +46,7 @@
 		54E22ECBF4E88BF7A4608CA0 /* AirshipScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C802F0633CB47BCA69931C7 /* AirshipScene.swift */; };
 		54F28ECDCAE78E4D847624EE /* LegacySaveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EFE7D352E191E20D2322B5D /* LegacySaveTests.swift */; };
 		570ED1A0299CA1D70CC7DA90 /* BalanceSimulationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 066E1756FBD97DB90F4CC624 /* BalanceSimulationTests.swift */; };
+		5B6D7AE3ED26A431939F6D13 /* Airship+Trouble.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8680208DD32657F232D32061 /* Airship+Trouble.swift */; };
 		5BE5B2EEB1577D6BDBFC6DA1 /* HornEngine.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 509B74C67184498F2681AA80 /* HornEngine.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		5C12F839C3F9D2C5328FC37D /* Rail+Depots.swift in Sources */ = {isa = PBXBuildFile; fileRef = C11589EC5172DE1C71B5748F /* Rail+Depots.swift */; };
 		64108882F3E72EFB40A02171 /* Horn1849.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F2549B7433A37309EAE108D /* Horn1849.swift */; };
@@ -285,6 +286,7 @@
 		85F6CAB7F5FF70223DC5D7FA /* ShopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopView.swift; sourceTree = "<group>"; };
 		8658F512FD1FBFAEBFF786B6 /* Markup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Markup.swift; sourceTree = "<group>"; };
 		866BA73A1522E7813F5F2CBB /* Airship.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Airship.swift; sourceTree = "<group>"; };
+		8680208DD32657F232D32061 /* Airship+Trouble.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Airship+Trouble.swift"; sourceTree = "<group>"; };
 		88B72F9134210D32E1C7AC26 /* AroundTheHornUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = AroundTheHornUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		895669FFCD02D59A23D0444B /* Horn1849Skin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Horn1849Skin.swift; sourceTree = "<group>"; };
 		8B5DB0322C897F9F163CD5FF /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
@@ -467,6 +469,7 @@
 				C1656331BFB11ED1B672DCD6 /* Airship+Choices.swift */,
 				54DABC9533B7FDC2B99A087C /* Airship+Events.swift */,
 				6099B49B31492A6F9190EE30 /* Airship+Masts.swift */,
+				8680208DD32657F232D32061 /* Airship+Trouble.swift */,
 				7555C62CF312931CF4BEC721 /* AirshipData.swift */,
 			);
 			path = Airship;
@@ -895,6 +898,7 @@
 				389B011F732E839F49FCA871 /* Airship+Choices.swift in Sources */,
 				97E74D42385F1BC3E3FED5B8 /* Airship+Events.swift in Sources */,
 				4F8C5D5FB80B7B3F2BD16CBA /* Airship+Masts.swift in Sources */,
+				5B6D7AE3ED26A431939F6D13 /* Airship+Trouble.swift in Sources */,
 				BD171FCFC9A30310717AB16D /* Airship.swift in Sources */,
 				2453C1B199547AFE0D73C4C4 /* AirshipData.swift in Sources */,
 				F1054CA224A77A86FF2984D9 /* Balloon+Choices.swift in Sources */,

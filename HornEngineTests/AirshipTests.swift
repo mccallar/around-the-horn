@@ -58,15 +58,21 @@ final class AirshipTests: XCTestCase {
         }
     }
 
-    func testTheLastOfThePetrolStillPowersAWatch() {
+    /// The last of the petrol powers its share of a watch, and she drifts the rest (D14: it
+    /// used to power the whole watch, however little there was).
+    func testTheLastOfThePetrolPowersItsShareOfAWatch() {
         var s = flying()
         s.fuel = 100
         s.forceFair = 1
         let e = engine(s)
-        _ = e.sailDay()
+        let q = e.sailDay()
         XCTAssertEqual(e.state.fuel, 0)
-        XCTAssertGreaterThan(e.state.mile - 1000, 200)
-        XCTAssertFalse(Airship.drifting(e.state))
+        // 100 of the 250 kg a cruising watch burns: 0.4 of 250 km, 0.6 of the 60 km drift,
+        // at the top of the jitter.
+        XCTAssertEqual(e.state.mile - 1000, Int(jsRound((0.4 * 250 + 0.6 * 60) * 1.15)))
+        XCTAssertFalse(Airship.drifting(e.state), "the engines ran, for a while")
+        XCTAssertLessThan(e.state.sails, 100)
+        XCTAssertTrue(messages(q).contains(airship.text.outOfFuel))
     }
 
     func testDryTanksDriftWithTheWindAndSpareTheEngines() {

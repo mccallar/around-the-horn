@@ -9,6 +9,13 @@ enum AirshipData {
 
     /// Kilometres a watch she drifts with the tanks dry, before weather and lift.
     static let driftSpeed = 60.0
+    /// Lift a whole watch adrift costs: with no engines to fly her nose-up, she is held at
+    /// her height by valving gas when the sun warms her (docs/journeys/airship.md, D14).
+    static let driftGas = 0.5
+    /// Lift at 0%, with no ballast to drop: the petrol the dump valves let go, and the lift
+    /// it buys back. Dearer by the point than a bag of ballast, and it is range besides.
+    static let dumpPetrol = 300.0
+    static let dumpLift = 10.0
     /// What seeps through the gas cells every flying watch.
     static let seep = 0.15
     /// The two ends of the unmapped ice, where the Pole's choice of height applies.
@@ -35,6 +42,8 @@ enum AirshipData {
     static let flaresKey = "airship.flares"
     static let newsKey = "airship.news"
     static let driftingKey = "airship.drifting"
+    /// Set once the crew has been told the engines have given out; cleared once they run.
+    static let enginesOutKey = "airship.enginesOut"
     static let routeHigh = 1.0
     static let routeLow = 2.0
 

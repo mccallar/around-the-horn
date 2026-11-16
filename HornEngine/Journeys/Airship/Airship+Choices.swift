@@ -101,10 +101,9 @@ extension Airship {
                 }
                 return [.choice(e.tradeChoice(o, intro: "Her master sends up a list of what he'll swap."))]
             }
-            let d = e.ri(6, 14)
-            e.state.hull = max(0, e.state.hull - Double(d))
-            var q: [Interrupt] = [.message("You drop too low. Hot air from her funnel throws the ship about, and the gondola dips into a wave top before you claw back up. [red](Lift −\(d)%)[/red]")]
-            e.checkSink(&q)
+            let hit = knock(e, [(.lift, e.ri(6, 14))])
+            var q: [Interrupt] = [.message("You drop too low. Hot air from her funnel throws the ship about, and the gondola dips into a wave top before you claw back up.\(hit)")]
+            checkLift(e, &q)
             return q
 
         case "stowaway":
@@ -112,9 +111,9 @@ extension Airship {
             let name = TextMarkup.escape(args[0])
             if option == 0 {
                 e.state.crew.append(CrewMember(name: args[0], hp: 85))
-                e.state.hull = max(0, e.state.hull - 3)
-                var q: [Interrupt] = [.message("\(name) grins and gets to work. One more hand — and seventy kilos more to lift. [red](Lift −3%)[/red]")]
-                e.checkSink(&q)
+                let hit = knock(e, [(.lift, 3)])
+                var q: [Interrupt] = [.message("\(name) grins and gets to work. One more hand — and seventy kilos more to lift.\(hit)")]
+                checkLift(e, &q)
                 return q
             }
             e.state.crew.append(CrewMember(name: args[0], hp: 85, leaveAt: AirshipData.stowawayLeaves))
@@ -136,11 +135,13 @@ extension Airship {
                 e.state.forceFair = 2
                 q = [.message("\(gave) The castaways cheer, and their skipper chalks a message on a board and holds it up: GLASS RISING. CLEAR WEATHER AHEAD. Your crew climbs away grinning. [green](Crew spirits rise.)[/green]")]
             } else {
-                e.state.hull = max(0, e.state.hull - 8)
-                q = [.message("\(gave) But hovering so low, a gust slams the ship down and the gondola bounces across a pressure ridge before you can climb. [red](Lift −8%)[/red] The castaways are still waving as you go.")]
-                e.checkSink(&q)
+                let hit = knock(e, [(.lift, 8)])
+                q = [.message("\(gave) But hovering so low, a gust slams the ship down and the gondola bounces across a pressure ridge before you can climb.\(hit) The castaways are still waving as you go.")]
             }
-            return q + e.passDays(1, .sea)
+            // The watch spent hovering, then, if the lift is gone, what goes over the side.
+            q += e.passDays(1, .sea)
+            checkLift(e, &q)
+            return q
 
         case "murk":
             if option == 0 {
@@ -150,22 +151,20 @@ extension Airship {
                 e.consume(&q, .sail)
                 e.health(&q, .sail)
                 if e.chance(0.1) {
-                    let d = e.ri(6, 12)
-                    e.state.hull = max(0, e.state.hull - Double(d))
-                    q.insert(.message("You lose a watch circling above the murk, and climbing in the cold has cost you gas. [red](Lift −\(d)%)[/red]"), at: 0)
+                    let hit = knock(e, [(.lift, e.ri(6, 12))])
+                    q.insert(.message("You lose a watch circling above the murk, and climbing in the cold has cost you gas.\(hit)"), at: 0)
                 } else {
                     q.insert(.message("You lose a watch circling above the murk, but find a clear patch and come down safely beyond it."), at: 0)
                 }
-                e.checkSink(&q)
+                checkLift(e, &q)
                 return q
             }
             let thick = args.first == "fog"
             let risk = (thick ? 0.25 : 0.12) + (e.state.pace == .full ? 0.15 : 0)
             if e.chance(risk) {
-                let d = e.ri(18, 35)
-                e.state.hull = max(0, e.state.hull - Double(d))
-                var q: [Interrupt] = [.message("A jolt runs through the whole ship — the gondola has struck a pressure ridge! [red](Lift −\(d)%)[/red]")]
-                e.checkSink(&q)
+                let hit = knock(e, [(.lift, e.ri(18, 35))])
+                var q: [Interrupt] = [.message("A jolt runs through the whole ship — the gondola has struck a pressure ridge!\(hit)")]
+                checkLift(e, &q)
                 return q
             }
             return [.message("You hold on with your heart in your mouth. Grey shapes of ice slide past below, close enough to touch.")]
