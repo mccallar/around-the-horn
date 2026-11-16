@@ -77,7 +77,7 @@ final class FishingModel {
         let flip = random() < 0.5
         let dir: Double = field.oneWay || flip ? 1 : -1
         var s = Swimmer(kind: kind, x: dir > 0 ? -kind.width : field.w + kind.width,
-                        y0: rnd(field.lanes.lowerBound, field.lanes.upperBound), y: 0,
+                        y0: field.lane(rnd(field.lanes.lowerBound, field.lanes.upperBound)), y: 0,
                         vx: dir * rnd(kind.speed.lowerBound, kind.speed.upperBound),
                         t: rnd(0, 6), wf: rnd(1.5, 3), wa: rnd(1, 4))
         // The prototype sets y on the first frame, before anything can be tapped.

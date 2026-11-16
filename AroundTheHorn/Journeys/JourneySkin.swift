@@ -22,7 +22,7 @@ struct JourneySkin {
 
 /// Every skin. Adding a journey's skin is this line and its file.
 enum Skins {
-    static let all: [JourneySkin] = [Horn1849Skin.skin, RailSkin.skin, AirshipSkin.skin, BalloonSkin.skin]
+    static let all: [JourneySkin] = [Horn1849Skin.skin, RailSkin.skin, AirshipSkin.skin, BalloonSkin.skin, MarsSkin.skin]
 
     static func skin(_ id: String) -> JourneySkin? { all.first { $0.id == id } }
 }
@@ -275,8 +275,20 @@ struct ForageField {
     let speed: Double
     /// The quarry all crosses the same way, left to right: wood on a river's current.
     let oneWay: Bool
+    /// The quarry keeps to this many lanes across `lanes`, each at the middle of its share
+    /// of it: ice drifting in the filaments of a comet's stream. 0, the default every other
+    /// skin keeps: anywhere in `lanes`, as the prototype has it.
+    var bands = 0
 
     func inReach(_ y: Double) -> Bool { upward ? y <= line : y >= line }
+
+    /// Where quarry drawn at `y` in `lanes` runs: `y` itself, or the middle of its lane.
+    func lane(_ y: Double) -> Double {
+        guard bands > 0 else { return y }
+        let span = lanes.upperBound - lanes.lowerBound, each = span / Double(bands)
+        let k = min(bands - 1, max(0, Int(((y - lanes.lowerBound) / max(each, 1e-9)).rounded(.down))))
+        return lanes.lowerBound + each * (Double(k) + 0.5)
+    }
 }
 
 struct ForageSkin {

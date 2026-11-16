@@ -12,7 +12,10 @@
 		08C865278BC4907C7264FE4C /* PixelCanvas.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6583B2CF434B20309FC1725C /* PixelCanvas.swift */; };
 		09D0A69C736558BE0A0620B7 /* ShopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85F6CAB7F5FF70223DC5D7FA /* ShopView.swift */; };
 		0A34DE7D4C8455ED52DDD483 /* FishingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0415D1CFDD6856DA2C775137 /* FishingView.swift */; };
+		0B8A8A6B88CA666BDED8A525 /* MarsScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE68EE2BFEFB68EFF995D9E8 /* MarsScene.swift */; };
+		0BAB4B0FD125F635903091D5 /* MarsForage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A969455C1686D051B1926FAB /* MarsForage.swift */; };
 		0BEBEADD8EB41E93AF101239 /* HornEngine.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 509B74C67184498F2681AA80 /* HornEngine.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		0FD8FD9BBB35BF74F454CBD3 /* MarsChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = E39F7CEA870CF698C4CBC586 /* MarsChart.swift */; };
 		142BC4AE5C815F42BEE94D8F /* MarsBreakdownTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E49DB711602AF97F3E50E1EA /* MarsBreakdownTests.swift */; };
 		1625C9B92C371251386673F8 /* Rail+Choices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EA2BC179A8B36BCD1103436 /* Rail+Choices.swift */; };
 		1759644523B956369870862D /* Horn1849Forage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F4BCE9468DF346093B0A662 /* Horn1849Forage.swift */; };
@@ -90,6 +93,7 @@
 		90489E698A12DF357B344E2E /* BalloonForage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EAE98C542A129CA8603A2A9 /* BalloonForage.swift */; };
 		92DBC0287E064A6096A4FE4D /* Mars.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51157A39DA824544D25246CF /* Mars.swift */; };
 		93CB0B6F54D0BA402B156D93 /* prototype-traces.json in Resources */ = {isa = PBXBuildFile; fileRef = 7B60571B9AA8419DCF959008 /* prototype-traces.json */; };
+		9516C2EC15FD06468A1757F6 /* MarsSkin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6015F1E534ED304CFEEB9B00 /* MarsSkin.swift */; };
 		97E74D42385F1BC3E3FED5B8 /* Airship+Events.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54DABC9533B7FDC2B99A087C /* Airship+Events.swift */; };
 		9A6FB20D8345F2FF8CD3E4FC /* BalloonSkinTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C4ECD5723857A5B9C3025EE /* BalloonSkinTests.swift */; };
 		9CA9737D5D41C2573DA9DC47 /* GameController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A67AF0DC361810C5ED75471 /* GameController.swift */; };
@@ -281,6 +285,7 @@
 		5DA561648AB9D0C1EB86799D /* Text.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Text.swift; sourceTree = "<group>"; };
 		5EAE98C542A129CA8603A2A9 /* BalloonForage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalloonForage.swift; sourceTree = "<group>"; };
 		5F2549B7433A37309EAE108D /* Horn1849.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Horn1849.swift; sourceTree = "<group>"; };
+		6015F1E534ED304CFEEB9B00 /* MarsSkin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarsSkin.swift; sourceTree = "<group>"; };
 		6099B49B31492A6F9190EE30 /* Airship+Masts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Airship+Masts.swift"; sourceTree = "<group>"; };
 		618BD1BAD6D9CAA85D62C34A /* RailChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RailChart.swift; sourceTree = "<group>"; };
 		6308324207F0B19AB2C51161 /* GameControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameControllerTests.swift; sourceTree = "<group>"; };
@@ -321,6 +326,7 @@
 		98BB5DCEEE3D3145B021881D /* AirshipBreakdownTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirshipBreakdownTests.swift; sourceTree = "<group>"; };
 		A1E073E4A5604BCE3938DDFE /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		A66D6438C48E4B0580994D21 /* AirshipTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirshipTests.swift; sourceTree = "<group>"; };
+		A969455C1686D051B1926FAB /* MarsForage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarsForage.swift; sourceTree = "<group>"; };
 		AC25EE5C61D2A13FD160B361 /* KlondikeData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KlondikeData.swift; sourceTree = "<group>"; };
 		AC2642DC2A9FECC612FFD593 /* Mars+Choices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Mars+Choices.swift"; sourceTree = "<group>"; };
 		AEA4BB4660B64DB83BFDAAA1 /* RailScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RailScene.swift; sourceTree = "<group>"; };
@@ -338,6 +344,7 @@
 		C17D3F1D23210FB2EAB6B1E5 /* Klondike+Choices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Klondike+Choices.swift"; sourceTree = "<group>"; };
 		C75ACC56221506F21CF03D24 /* BalloonData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalloonData.swift; sourceTree = "<group>"; };
 		C7BBEE9C984E82C11E2A8805 /* Balloon+Choices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Balloon+Choices.swift"; sourceTree = "<group>"; };
+		CE68EE2BFEFB68EFF995D9E8 /* MarsScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarsScene.swift; sourceTree = "<group>"; };
 		D3D5EC138C0C4B40C49F14A1 /* StoresTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoresTests.swift; sourceTree = "<group>"; };
 		D44B9958CF117F65D96C1227 /* AirshipScreenshotUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirshipScreenshotUITests.swift; sourceTree = "<group>"; };
 		D78D4D01109F06BE35F45A3F /* VoyageScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoyageScreens.swift; sourceTree = "<group>"; };
@@ -348,6 +355,7 @@
 		E0F024DF259F1B20017EB5B4 /* RailData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RailData.swift; sourceTree = "<group>"; };
 		E0F7DCA44A11DF10978DA6B5 /* Balloon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Balloon.swift; sourceTree = "<group>"; };
 		E167A7501D30311BC18CC4F2 /* BalloonSkin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalloonSkin.swift; sourceTree = "<group>"; };
+		E39F7CEA870CF698C4CBC586 /* MarsChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarsChart.swift; sourceTree = "<group>"; };
 		E49DB711602AF97F3E50E1EA /* MarsBreakdownTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarsBreakdownTests.swift; sourceTree = "<group>"; };
 		E66CCC765DAB15D402E1E5A0 /* GameState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameState.swift; sourceTree = "<group>"; };
 		E6EC279D772A856004EC53F9 /* Score.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Score.swift; sourceTree = "<group>"; };
@@ -612,6 +620,10 @@
 				E0E192B3F213935447BEC520 /* Horn1849Scene.swift */,
 				895669FFCD02D59A23D0444B /* Horn1849Skin.swift */,
 				47BB62B96C70BDD09D81D40B /* JourneySkin.swift */,
+				E39F7CEA870CF698C4CBC586 /* MarsChart.swift */,
+				A969455C1686D051B1926FAB /* MarsForage.swift */,
+				CE68EE2BFEFB68EFF995D9E8 /* MarsScene.swift */,
+				6015F1E534ED304CFEEB9B00 /* MarsSkin.swift */,
 				618BD1BAD6D9CAA85D62C34A /* RailChart.swift */,
 				0CE3341E0B7B3F8DB390A723 /* RailForage.swift */,
 				AEA4BB4660B64DB83BFDAAA1 /* RailScene.swift */,
@@ -1012,6 +1024,10 @@
 				E72382E2B63886F3E3198974 /* Horn1849Skin.swift in Sources */,
 				3B7CFED363F6AEA10E20470F /* JourneySkin.swift in Sources */,
 				1E5F10CB543A419B52A9AC4E /* Markup.swift in Sources */,
+				0FD8FD9BBB35BF74F454CBD3 /* MarsChart.swift in Sources */,
+				0BAB4B0FD125F635903091D5 /* MarsForage.swift in Sources */,
+				0B8A8A6B88CA666BDED8A525 /* MarsScene.swift in Sources */,
+				9516C2EC15FD06468A1757F6 /* MarsSkin.swift in Sources */,
 				2AAA4A67ACDAA3B8FC9AC69F /* Persistence.swift in Sources */,
 				08C865278BC4907C7264FE4C /* PixelCanvas.swift in Sources */,
 				FD2EC67CB412F9259AAC3F00 /* RailChart.swift in Sources */,
