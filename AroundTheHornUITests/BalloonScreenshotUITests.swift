@@ -240,7 +240,7 @@ final class BalloonScreenshotUITests: ScreenshotWalk {
         let over = app.buttons["Try again"]
         for _ in 0..<80 where !over.exists {
             if sack.exists && sack.isEnabled { sack.tap(); continue }
-            if next.waitForExistence(timeout: 2) && !over.exists { next.tap() }
+            if onward.waitForExistence(timeout: 2) && !over.exists { onward.tap() }
         }
         XCTAssertTrue(over.waitForExistence(timeout: 10), "never came down")
         shot("62-down-in-the-sea")

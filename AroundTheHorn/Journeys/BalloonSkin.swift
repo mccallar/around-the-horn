@@ -216,7 +216,7 @@ enum BalloonSkin {
                               crew: ["Hugo", "Yuki", "Conor", "Rosa"], startYear: d.year, startMonth: d.month)
             s.stopIndex = stop - 1
             s.mile = journey.stops[stop].mile - 10
-            s.day = s.mile / 115
+            daytime(&s)
             s.fuel = 900
             s.water = 150
             s.food = 200
@@ -233,8 +233,9 @@ enum BalloonSkin {
             return s
         },
         gallery: [
-            ("By night over the Sahara", true, { $0.mile = 1200; $0.day = 9 }),
+            ("By night over the Sahara", true, { fly(&$0, 1200); $0.day = 3 }),
             ("Marrakech", false, { $0.atPort = true }),
+            ("Climbing away", false, { $0.fuel = 900 }),
             ("Luxor", false, { at(&$0, "lux", port: true) }),
             ("Jodhpur", false, { at(&$0, "jod", port: true) }),
             ("Saga", false, { at(&$0, "saga", port: true) }),
@@ -246,33 +247,55 @@ enum BalloonSkin {
             ("Off Japan", false, { at(&$0, "pacific") }),
             ("Date line", false, { at(&$0, "dateline") }),
             ("Landfall, north", false, { at(&$0, "landfall") }),
-            ("Landfall, south", false, { at(&$0, "landfall"); $0.vars["balloon.south"] = 1 }),
+            ("Landfall, south", false, { $0.vars["balloon.south"] = 1; at(&$0, "landfall") }),
             ("Azores", false, { at(&$0, "azores") }),
-            ("Finish line", false, { at(&$0, "finish") }),
-            ("Sahara", true, { $0.mile = 1200 }),
-            ("Arabia", true, { $0.mile = 3000 }),
-            ("Gulf of Oman", true, { $0.mile = 3650 }),
-            ("Indus & Thar", true, { $0.mile = 4200 }),
-            ("Northern India", true, { $0.mile = 4800 }),
-            ("Himalaya & China", true, { $0.mile = 6200 }),
-            ("East China Sea", true, { $0.mile = 7700 }),
-            ("North Pacific", true, { $0.mile = 9000 }),
-            ("Northeast Pacific", true, { $0.mile = 11500 }),
-            ("Southern track", true, { $0.mile = 9000; $0.vars["balloon.south"] = 1 }),
-            ("Subtropical Pacific", true, { $0.mile = 11500; $0.vars["balloon.south"] = 1 }),
-            ("American Southwest", true, { $0.mile = 13000 }),
-            ("Great Plains, January", true, { $0.mile = 14300 }),
-            ("North Atlantic", true, { $0.mile = 16300 }),
-            ("Past the Azores", true, { $0.mile = 17800 }),
-            ("Morocco", true, { $0.mile = 18260 }),
-            ("Loitering", false, { $0.mile = 9000 }),
-            ("Tanks dry", true, { $0.mile = 9000; $0.fuel = 0 }),
-            ("Burners 10%", true, { $0.mile = 9000; $0.sails = 10 }),
-            ("Lift 10%", true, { $0.mile = 9000; $0.hull = 10 }),
-            ("Going down", true, { $0.mile = 9000; $0.hull = 0 }),
-            ("Down in the sea", false, { $0.mile = 9000; $0.hull = 0; $0.over = true }),
-            ("Down on land", false, { $0.mile = 4800; $0.hull = 0; $0.over = true }),
+            ("Finish line", false, { at(&$0, "finish"); $0.atPort = true; $0.over = true }),
+            ("Sahara", true, { fly(&$0, 1200) }),
+            ("Arabia", true, { fly(&$0, 3000) }),
+            ("Gulf of Oman", true, { fly(&$0, 3650) }),
+            ("Indus & Thar", true, { fly(&$0, 4200) }),
+            ("Northern India", true, { fly(&$0, 4800) }),
+            ("Himalaya & China", true, { fly(&$0, 6200) }),
+            ("East China Sea", true, { fly(&$0, 7700) }),
+            ("North Pacific", true, { fly(&$0, 9000) }),
+            ("Northeast Pacific", true, { fly(&$0, 11500) }),
+            ("Southern track", true, { $0.vars["balloon.south"] = 1; fly(&$0, 9000) }),
+            ("Subtropical Pacific", true, { $0.vars["balloon.south"] = 1; fly(&$0, 11500) }),
+            ("American Southwest", true, { fly(&$0, 13000) }),
+            ("Great Plains, January", true, { $0.startYear = 1999; $0.startMonth = 0; fly(&$0, 14300) }),
+            ("North Atlantic", true, { fly(&$0, 16300) }),
+            ("Past the Azores", true, { fly(&$0, 17800) }),
+            ("Morocco", true, { fly(&$0, 18260) }),
+            ("Loitering", false, { fly(&$0, 9000) }),
+            ("Tanks dry", true, { fly(&$0, 9000); $0.fuel = 0 }),
+            ("Burners 10%", true, { fly(&$0, 9000); $0.sails = 10 }),
+            ("Lift 10%", true, { fly(&$0, 9000); $0.hull = 10 }),
+            ("Going down", false, { fly(&$0, 9000); $0.hull = 0 }),
+            ("Down in the sea", false, { fly(&$0, 9000); $0.hull = 0; $0.over = true }),
+            ("Down on land", false, { fly(&$0, 4800); $0.hull = 0; $0.over = true }),
         ])
+
+    /// A watch that falls in the morning where she is, about eight by the sun, at or a
+    /// little after the day her miles suggest: so a debug start or a gallery cell is by
+    /// day, and stays so for the watch or two a walk flies on.
+    static func daytime(_ s: inout GameState) {
+        let start = journey.rules.startHour, each = journey.rules.tickHours
+        let target = (8 - BalloonScene.longitude(s) / 15).truncatingRemainder(dividingBy: 24)
+        func off(_ d: Int) -> Double {
+            let x = abs(Double((start + each * d) % 24) - (target < 0 ? target + 24 : target))
+            return min(x, 24 - x)
+        }
+        let base = max(1, s.mile / 115)
+        s.day = (base..<base + 24 / max(1, each)).min { off($0) < off($1) } ?? base
+    }
+
+    /// Flying at `mile`, past the stops behind it, with propane aboard, by day.
+    static func fly(_ s: inout GameState, _ mile: Int) {
+        s.mile = mile
+        s.stopIndex = journey.stops.lastIndex { $0.mile < mile } ?? 0
+        s.fuel = 900
+        daytime(&s)
+    }
 
     /// Standing at a stop, its arrival told: on the ground, if it is a field and `port`
     /// says so.
@@ -280,7 +303,8 @@ enum BalloonSkin {
         guard let i = journey.stops.firstIndex(where: { $0.id == id }) else { return }
         s.stopIndex = i
         s.mile = journey.stops[i].mile
-        s.day = max(1, s.mile / 115)
+        if s.fuel <= 0 { s.fuel = 900 }
+        daytime(&s)
         s.atPort = port
     }
 }

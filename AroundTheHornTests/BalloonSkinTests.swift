@@ -548,6 +548,13 @@ final class BalloonSkinTests: XCTestCase {
         pay()
         guard case .depart(let text) = again.screen else { return XCTFail("\(again.screen)") }
         has(text, "lifts off from the launch field outside Marrakech at 0800 GMT")
+        // The picture is the launch: the field below, the crowd waving, the burners roaring.
+        let launch = ScenePicture.frame(air, again.game!, moving: false, t: 0.3)
+        XCTAssertTrue(BalloonScene.launching(launch))
+        XCTAssertFalse(BalloonScene.loitering(launch))
+        XCTAssertTrue(BalloonScene.flame(launch))
+        has(skin.scene.label(launch), "climbing away from the launch field at Marrakech")
+        XCTAssertFalse(BalloonScene.launching(ScenePicture.frame(air, again.game!, moving: true, t: 0.3)), "flying is flying")
         XCTAssertEqual(again.game!.fuel, 25, accuracy: 1e-9, "the climb burned 25")
         XCTAssertFalse(again.game!.atPort)
         XCTAssertEqual(skin.words(again.game!).setOut, "Climb away")
@@ -715,13 +722,20 @@ final class BalloonSkinTests: XCTestCase {
         has(skin.scene.label(frame(south, moving: false)), "San Diego")
         has(skin.scene.label(frame(at("landfall"), moving: false)), "California")
         XCTAssertNotEqual(picture(frame(south, moving: false)), picture(frame(at("landfall"), moving: false)))
-        // On the field: no flame, no bob, the sky fair whatever the air was doing.
+        // On the field: no flame and no bob, under whatever sky the status box names.
         var stormy = at("saga", port: true)
         stormy.weather = BalloonData.storm
         var fair = stormy
         fair.weather = air.fairWeather
         XCTAssertFalse(BalloonScene.flame(frame(fair, moving: false)))
-        XCTAssertEqual(picture(frame(stormy, moving: false)), picture(frame(fair, moving: false)))
+        XCTAssertNotEqual(picture(frame(stormy, moving: false)), picture(frame(fair, moving: false)))
+        XCTAssertEqual(BalloonScene.position(frame(stormy, moving: false).at(1.1), BalloonScene.palette(BalloonData.storm), hz: 46).y,
+                       BalloonScene.groundY)
+        // The finish is the next sunrise, whatever the hour she crossed the line.
+        var finish = at("finish")
+        finish.over = true
+        finish.atPort = true
+        for hour in [0, 4, 8, 12, 16, 20] { XCTAssertFalse(BalloonScene.isNight(frame(finish, hour: hour, moving: false))) }
     }
 
     /// Over a field she has not landed at (its question on screen, or flying on past), the

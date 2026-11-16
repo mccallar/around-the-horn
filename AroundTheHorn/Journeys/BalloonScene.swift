@@ -133,6 +133,12 @@ enum BalloonScene {
         return stop
     }
 
+    /// Climbing away from Marrakech: the launch said, no watch flown yet.
+    static func launching(_ f: SceneFrame) -> Bool {
+        guard let g = f.state, !f.moving, !g.atPort, !g.over else { return false }
+        return g.stopIndex == 0 && g.mile == 0 && g.day == 0
+    }
+
     /// No heat for the cone, once the flight is under way: the tanks dry or the burners
     /// given out. A flight not yet launched has bought nothing.
     static func cold(_ f: SceneFrame) -> Bool {
@@ -142,7 +148,7 @@ enum BalloonScene {
 
     /// Whether she is low, loitering: aloft, not flying a watch.
     static func loitering(_ f: SceneFrame) -> Bool {
-        guard f.state != nil, field(f) == nil, !down(f), landmark(f)?.type != .end else { return false }
+        guard f.state != nil, field(f) == nil, !down(f), !launching(f), landmark(f)?.type != .end else { return false }
         return !f.moving
     }
 
@@ -168,7 +174,7 @@ enum BalloonScene {
     /// A winter night between about half past six in the evening and half past six in the
     /// morning, local time. The title card is always by day.
     static func isNight(_ f: SceneFrame) -> Bool {
-        guard f.state != nil else { return false }
+        guard f.state != nil, landmark(f)?.type != .end else { return false }
         let h = localHour(f)
         return h >= 18.5 || h < 6.5
     }
@@ -183,21 +189,22 @@ enum BalloonScene {
     static func draw(_ px: PixelCanvas, _ f: SceneFrame) {
         let onField = field(f)
         let over = overField(f)
+        let launch = launching(f)
         let isDown = down(f)
         let stop = landmark(f)
         let finish = stop?.type == .end
-        // On the ground the sky is the field's own fair one; the engine says so too.
-        let s = onField != nil || finish ? palette(BalloonSkin.journey.fairWeather) : palette(f.weather)
+        // The finish is the next sunrise; everywhere else the sky is the weather's.
+        let s = finish ? sunrise : palette(f.weather)
         let low = loitering(f) && over == nil
         let hz = low ? lowHorizon : aloftHorizon
         let t = f.t
         let night = isNight(f)
-        let region = f.region?.id.rawValue ?? "sahara"
+        let region = groundRegion(f)
         let still = s.still || isDown || finish || onField != nil
         let heat = !cold(f)
         // How fast the ground slides by, row by row.
         let v: (Int) -> Double = { r in
-            if still { return 0 }
+            if still || launch { return 0 }
             if f.moving { return 4 * f.weather.speed * (heat ? 1 : 0.3) + 1 }
             return 0.5 + 0.25 * Double(r)
         }
@@ -208,8 +215,9 @@ enum BalloonScene {
         if s.clouds > 0 { px.clouds(s.clouds * 2, Color(hex: s.cloud), t: t, drift: drift) }
         if s.cirrus { cirrus(px, t: t, drift: drift) }
 
-        let deck = f.moving && onField == nil && over == nil && !isDown && stop == nil ? s.deck : nil
-        if let id = onField ?? over {
+        let fieldID = onField ?? over ?? (launch ? BalloonSkin.journey.stops.first?.id : nil)
+        let deck = f.moving && fieldID == nil && !isDown && stop == nil ? s.deck : nil
+        if let id = fieldID {
             fieldGround(px, id, hz: aloftHorizon)
         } else if finish {
             homeGround(px, t: t)
@@ -217,7 +225,7 @@ enum BalloonScene {
             px.rect(0, hz, px.w, px.h - hz, Color(hex: deck))
             dashes(px, hz: hz, rows: 8, color: s.bot, v: v, t: t, shimmer: false)
         } else {
-            if region == "himalaya" { peaks(px, hz: hz, scroll: t * v(0) / 4) }
+            if region == "himalaya" { range(px, hz: hz, scroll: t * v(0) / 4) }
             far(px, region, hz: hz, scroll: t * v(0) / 6)
             var (fill, dash) = ground(region, month: f.state?.month ?? 0)
             if s.dust {
@@ -228,21 +236,21 @@ enum BalloonScene {
             dashes(px, hz: hz, rows: low ? 9 : 8, color: dash, v: v, t: t, shimmer: s.shimmer)
             if let stop { landmark(px, stop.id, f, hz: hz, t: t) }
         }
-        if let id = onField ?? over { props(px, id, t: t, flown: onField == nil) }
+        if let id = fieldID { props(px, id, t: t, flown: onField == nil) }
         if isDown, let g = f.state {
             wreck(px, f, g, t: t)
         } else {
-            let at = position(f, s, hz: hz)
-            sprite(px, f, at: at, night: false)
+            sprite(px, f, at: position(f, s, hz: hz), night: false)
         }
 
-        // The weather's own layers, in 1849's order; a field and the finish are fair.
-        let open = onField == nil && !finish
-        if open && f.weather.sky == .storm { px.rain(t: t) }
-        if open && f.weather.sky == .snow { px.snow(t: t) }
-        if s.dust { dust(px, t: t, moving: f.moving) }
-        if open && f.weather.sky == .fog { px.fog() }
-        if open && f.weather.sky == .storm { px.lightning(t: t) }
+        // The weather's own layers, in 1849's order. The finish is a fair morning.
+        if !finish {
+            if f.weather.sky == .storm { px.rain(t: t) }
+            if f.weather.sky == .snow { px.snow(t: t) }
+            if s.dust { dust(px, t: t, moving: f.moving) }
+            if f.weather.sky == .fog { px.fog() }
+            if f.weather.sky == .storm { px.lightning(t: t) }
+        }
 
         if night {
             px.rect(0, 0, px.w, px.h, Color(hex: 0x070B1C).opacity(0.6))
@@ -251,8 +259,21 @@ enum BalloonScene {
                 // The burner's light on the cone and the capsule's lit portholes.
                 sprite(px, f, at: position(f, s, hz: hz), night: true)
             }
-            if let id = onField ?? over { hangarLight(px, id) }
+            if let id = fieldID { hangarLight(px, id) }
         }
+    }
+
+    /// The sky she comes down in at the finish: the next sunrise, gold low in the east.
+    static let sunrise = Palette(top: 0x2D5F9A, bot: 0xF6C98B, clouds: 1, cloud: 0xF6E3C0)
+
+    /// The country under her: the region's, except at the landfall, where the coast is
+    /// drawn over the ocean she is leaving.
+    static func groundRegion(_ f: SceneFrame) -> String {
+        guard let g = f.state else { return "sahara" }
+        if let stop = landmark(f), stop.id == "landfall" {
+            return BalloonSkin.journey.region(g, at: stop.mile - 1).id.rawValue
+        }
+        return f.region?.id.rawValue ?? "sahara"
     }
 
     /// 1849's sun, high on the right; in a hot sun one pixel bigger all round.
@@ -337,20 +358,30 @@ enum BalloonScene {
         (8, 6, 5), (26, 8, 8), (41, 5, 4), (59, 9, 9), (77, 6, 6), (92, 7, 7), (110, 8, 9), (128, 5, 3), (146, 7, 6),
     ]
 
-    static func peaks(_ px: PixelCanvas, hz: Double, scroll: Double, big: Double = 1) {
+    /// A band of peaks standing on the horizon, a third of each snow, wrapping round as
+    /// she flies: the Himalaya's by default, or another range's table and colours.
+    static func range(_ px: PixelCanvas, hz: Double, scroll: Double, big: Double = 1,
+                      table: [(c: Double, w: Double, h: Double)] = peakTable, rock: UInt32 = 0x6E7480,
+                      snow: UInt32 = 0xEEF3F7, wraps: Bool = true)
+    {
         let shift = wrap(scroll, 160)
-        for p in peakTable {
+        for p in table {
             let h = (p.h * big).rounded(), w = (p.w * big).rounded()
-            for copy in [0.0, 160] {
+            for copy in wraps ? [0.0, 160] : [0.0] {
                 let c = p.c - shift + copy
                 for j in 0..<Int(h) {
                     let half = (w * Double(j + 1) / h).rounded(.down)
-                    let snow = Double(j) < (h / 3).rounded(.up)
-                    px.rect(c - half, hz - h + Double(j), 2 * half + 1, 1, Color(hex: snow ? 0xEEF3F7 : 0x6E7480))
+                    let white = Double(j) < (h / 3).rounded(.up)
+                    px.rect(c - half, hz - h + Double(j), 2 * half + 1, 1, Color(hex: white ? snow : rock))
                 }
             }
         }
     }
+
+    /// The High Atlas, south of Marrakech: lower than the Himalaya, and browner.
+    static let atlasTable: [(c: Double, w: Double, h: Double)] = [
+        (6, 9, 6), (22, 10, 9), (38, 7, 5), (55, 11, 8), (74, 8, 6), (90, 12, 10), (110, 8, 5), (126, 10, 8), (146, 9, 6),
+    ]
 
     /// What stands on the far horizon of some of the country: dunes, the Atlas, mesas.
     static func far(_ px: PixelCanvas, _ id: String, hz: Double, scroll: Double) {
@@ -370,12 +401,7 @@ enum BalloonScene {
         case "morocco", "thar":
             if id == "morocco" {
                 // The Atlas, white along the top, far off to the south.
-                px.hills(0..<160, base: hz, Color(hex: 0x8A7A68)) { x in max(0, 5 + 3 * sin((x + scroll) * 0.05) + 1.5 * sin((x + scroll) * 0.17)) }
-                for i in stride(from: 0, to: 160, by: 1) {
-                    let u = Double(i) + scroll
-                    let hh = jsRounded(max(0, 5 + 3 * sin(u * 0.05) + 1.5 * sin(u * 0.17)))
-                    if hh > 5 { px.rect(Double(i), hz - hh, 1, min(2, hh - 5), Color(hex: 0xEEF3F7)) }
-                }
+                range(px, hz: hz, scroll: scroll, big: 0.7, table: atlasTable, rock: 0x8A7A68)
             } else {
                 // Scrub, in tufts.
                 for i in 0..<9 {
@@ -402,8 +428,7 @@ enum BalloonScene {
         case "atlas":
             // Snowfields close below and the white range across the horizon, mule tracks
             // running along the slopes.
-            px.hills(0..<160, base: hz, Color(hex: 0x8A7A68)) { max(0, 9 + 5 * sin($0 * 0.07) + 2 * sin($0 * 0.21)) }
-            px.hills(0..<160, base: hz, Color(hex: 0xEEF3F7)) { max(0, 9 + 5 * sin($0 * 0.07) + 2 * sin($0 * 0.21) - 4) }
+            range(px, hz: hz, scroll: 0, big: 1.4, table: atlasTable, rock: 0x8A7A68)
             px.rect(0, hz, w, 14, Color(hex: 0xE6EDF2))
             for i in 0..<14 {
                 let x = Double(i * 11 + (i % 3) * 3)
@@ -412,7 +437,7 @@ enum BalloonScene {
         case "him":
             // The whole range, a white wall standing up out of the haze, and Everest with
             // snow streaming east off its summit.
-            peaks(px, hz: hz, scroll: 0, big: 1.8)
+            range(px, hz: hz, scroll: 0, big: 1.8)
             let ex = 96.0
             for j in 0..<20 {
                 let half = (Double(j + 1) * 10 / 20).rounded(.down)
@@ -491,8 +516,7 @@ enum BalloonScene {
         switch id {
         case "mar":
             // The Atlas, white to the south.
-            px.hills(0..<48, base: hz, Color(hex: 0x8A7A68)) { max(0, 8 + 3 * sin($0 * 0.15) - abs($0 - 22) * 0.2) }
-            px.hills(0..<48, base: hz - 4, Color(hex: 0xEEF3F7)) { max(0, 4 + 3 * sin($0 * 0.15) - abs($0 - 22) * 0.2) }
+            range(px, hz: hz, scroll: 0, table: [(8, 8, 6), (22, 10, 9), (37, 8, 6)], rock: 0x8A7A68, wraps: false)
         case "lux":
             // Temple columns across the river.
             px.rect(6, hz - 3, 34, 3, Color(hex: 0xC9A36B))
@@ -550,6 +574,7 @@ enum BalloonScene {
             let x = 70 + (30 * Double(i) / 11).rounded(.down)
             let wave = flown && Int((t * 3).rounded(.down) + Double(i)) % 3 == 0 ? 1.0 : 0
             px.rect(x, 50 - wave, 1, 2 + wave, Color(hex: crowd[i % 3]))
+            px.rect(x, 49 - wave, 1, 1, Color(hex: 0xEFD6B0))
         }
     }
 
@@ -562,6 +587,7 @@ enum BalloonScene {
     /// running out to see what has fallen out of the sky.
     static func homeGround(_ px: PixelCanvas, t: Double) {
         let hz = aloftHorizon
+        px.sun(x: 136, y: hz - 7, Color(hex: 0xFFD27A))
         px.hills(0..<160, base: hz, Color(hex: 0x8A7A68)) { max(0, 6 + 3 * sin($0 * 0.05) + 1.5 * sin($0 * 0.17)) }
         px.rect(0, hz, px.w, px.h - hz, Color(hex: 0xC49A62))
         for i in 0..<22 {
@@ -588,6 +614,7 @@ enum BalloonScene {
     /// or at the finish, still.
     static func position(_ f: SceneFrame, _ s: Palette, hz: Double) -> (x: Double, y: Double) {
         if field(f) != nil || landmark(f)?.type == .end { return (x0, groundY) }
+        if launching(f) { return (x0, 20) }
         let base = loitering(f) ? loiterY : aloftY
         let sag = f.hull < 40 ? 3.0 : 0
         guard !s.still else { return (x0, base + sag) }
@@ -601,7 +628,7 @@ enum BalloonScene {
     /// never.
     static func flame(_ f: SceneFrame) -> Bool {
         guard field(f) == nil, landmark(f)?.type != .end, !cold(f) else { return false }
-        if f.moving {
+        if f.moving || launching(f) {
             let window = f.sails < 60 ? 0.6 * max(0, f.sails) / 60 : 0.6
             return wrap(f.t, 1.5) < window
         }
@@ -730,6 +757,9 @@ enum BalloonScene {
                 : "The balloon down on open ground, its envelope torn and spread out in the dust"
         }
         let weather = f.weather.name.lowercased()
+        if launching(f) {
+            return "Balloon climbing away from the launch field at Marrakech, the crowd waving. Weather: \(weather)"
+        }
         let burners = Balloon.burnersOut(g) ? "burners dead" : "burners cold"
         if let id = overField(f) {
             let name = BalloonSkin.journey.port(id)?.name ?? g.currentStop.short
