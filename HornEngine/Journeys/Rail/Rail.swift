@@ -83,6 +83,9 @@ public final class Rail: Journey {
         rules.eventChance = 0.2
         rules.yardHull = 1.5
         rules.yardSails = 1.5
+        rules.wearWrecks = false
+        rules.noFuelSpeed = RailData.noWoodSpeed
+        rules.burnsPartLoad = true
     }
 
     // MARK: - Sentences
@@ -94,7 +97,7 @@ public final class Rail: Journey {
         outOfWater: "[red]The kegs are dry and so is the tank car.[/red] The crew cannot go long like this.",
         lowWater: "There is barely a day of drinking water left aboard.",
         preventiveGone: "",
-        outOfFuel: "[red]The woodpile is gone.[/red] The crew is feeding the firebox sagebrush, fence posts and bad language. You are barely moving.",
+        outOfFuel: "[red]The woodpile is gone.[/red] From here the firebox gets sagebrush, fence posts and bad language, which will barely move her and are hard on the engine.",
         lowFuel: "The fireman can see the floor of the tender: about twelve hours of wood left.",
         deficiencyCured: { _ in "" },
         wellAgain: { "\($0) is fit for duty again." },
@@ -222,7 +225,12 @@ public final class Rail: Journey {
     static func boilerWater(_ s: GameState) -> Double { max(0, s.water - RailData.kegs) }
 
     /// Grades, unless a helper is coupled on; a dry boiler; a descent taken on the retainers.
+    /// A turn with too little wood for the pace burns what there is and crawls the rest on
+    /// the engine's `noFuelSpeed` (`rules.burnsPartLoad`), which is applied next; the share
+    /// run without wood is noted here for `tick`, which charges the engine for it.
     override func adjustSpeed(_ e: GameEngine, _ reg: Region, _ sp: inout Double) {
+        let burn = e.journey.pace(e.state.pace).fuel
+        e.state.vars[Self.noWoodKey] = e.state.fuel < burn ? 1 - max(0, e.state.fuel) / burn : nil
         let grade = reg.num("grade")
         if grade < 1 && e.state.vars[Self.helperKey(reg)] != 1 { sp *= grade }
         let dry = reg.num("dry", or: 0)
@@ -241,7 +249,16 @@ public final class Rail: Journey {
         return hd
     }
 
+    static let noWoodKey = "rail.noWood"
+
     override func tick(_ e: GameEngine, _ q: inout [Interrupt], _ mode: GameEngine.DayMode, _ reg: Region) {
+        // A turn run, all or partly, on fence posts and sagebrush.
+        if mode == .sail, let unfed = e.state.vars.removeValue(forKey: Self.noWoodKey) {
+            e.state.sails = max(0, e.state.sails - unfed * e.rnd(RailData.noWoodWear.lowerBound, RailData.noWoodWear.upperBound))
+            e.state.note = unfed < 1 ? "The wood gives out partway, and the fireman finishes the run on fence posts."
+                : "No wood. The firebox is getting fence posts, sagebrush and anything else that will burn."
+        }
+
         // The boiler's share, in the deserts.
         let dry = reg.num("dry", or: 0)
         if mode == .sail && dry > 0 {
@@ -304,14 +321,36 @@ public final class Rail: Journey {
 
     override func events(_ e: GameEngine, _ reg: Region) -> [JourneyEvent] { roadEvents(e, reg) }
 
+    /// Nothing happens to a train that has just given out but the breakdown itself.
+    override func dayEvents(_ e: GameEngine, _ q: inout [Interrupt], _ reg: Region) {
+        if Self.brokenDown(e.state) { return }
+        super.dayEvents(e, &q, reg)
+    }
+
+    /// Given out, she stands (Rail+Breakdown); mended, she meets the set piece she reached as
+    /// she gave out before she turns another wheel.
+    override func stalled(_ e: GameEngine) -> [Interrupt]? {
+        if let stuck = breakdown(e) { return stuck }
+        guard let i = e.state.vars.removeValue(forKey: Self.heldKey).map({ Int($0) }), stops.indices.contains(i) else { return nil }
+        let q = setPiece(e, stops[i])
+        return q.isEmpty ? nil : q
+    }
+
+    /// The set piece a train reached on the turn she gave out, held until she is mended.
+    static let heldKey = "rail.heldSetPiece"
+
     override func arrive(_ e: GameEngine, _ stop: Stop) -> [Interrupt] {
-        helperOffer(e, stop) ?? super.arrive(e, stop)
+        if stop.type == .line && Self.brokenDown(e.state), let i = stops.firstIndex(where: { $0.id == stop.id }) {
+            e.state.vars[Self.heldKey] = Double(i)
+            return [.message("The [i]\(TextMarkup.escape(e.state.ship))[/i] gets as far as \(stop.name), and not a foot further.")]
+        }
+        return helperOffer(e, stop) ?? super.arrive(e, stop)
     }
 
     override func special(_ e: GameEngine, _ stop: Stop) -> [Interrupt] { setPiece(e, stop) }
 
     override func resolve(_ e: GameEngine, _ key: String, _ args: [String], _ option: Int) -> [Interrupt] {
-        answer(e, key, args, option)
+        key == "breakdown" ? answerBreakdown(e, args, option) : answer(e, key, args, option)
     }
 
     // MARK: - Score

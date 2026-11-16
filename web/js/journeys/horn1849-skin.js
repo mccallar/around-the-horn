@@ -113,6 +113,7 @@ export function words(J, v) {
     distance: (m) => formatNumber(m),
     meters: ['Hull', 'Sails'],
     clock: null,
+    trouble: null,
     cash: 'Cash',
     currency: '$',
     storeNames: { clothes: 'Woolens', sailcloth: 'Sailcloth', timber: 'Timber' },

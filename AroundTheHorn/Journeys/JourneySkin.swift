@@ -112,6 +112,10 @@ struct Words {
     /// A row of the journey's own under the meters, for a count the rules keep that the
     /// date does not show: the days left on a contract. Nil when there is none.
     let clock: (label: String, value: String)?
+    /// A row in red under those, while the vehicle is in trouble the meters alone don't
+    /// say: broken down, out of fuel. Nil while it is not, and always for a journey without
+    /// such a rule.
+    let trouble: (label: String, value: String)?
 
     // Supplies.
     /// What the money is called, and the sign written before an amount of it.

@@ -24,39 +24,40 @@ extension Rail {
             // The train
             JourneyEvent(full ? 8 : 5) { e, q in
                 let d = e.ri(5, 11)
-                e.state.hull = max(0, e.state.hull - Double(d))
-                q.append(.message("Smoke from under the third car: a hot box. The crew stops, packs the journal with fresh waste and oil, and stands around it looking stern. [red](Running gear −\(d)%)[/red]"))
+                let hurt = self.knock(e, engine: false, d)
+                q.append(.message("Smoke from under the third car: a hot box. The crew stops, packs the journal with fresh waste and oil, and stands around it looking stern.\(hurt)"))
             },
             JourneyEvent(5) { e, q in
                 let d = e.ri(6, 13)
-                e.state.sails = max(0, e.state.sails - Double(d))
-                q.append(.message("A flue has started to weep into the firebox. The fireman says a word he will have to apologize for later. [red](Engine −\(d)%)[/red]"))
+                let hurt = self.knock(e, engine: true, d)
+                q.append(.message("A flue has started to weep into the firebox. The fireman says a word he will have to apologize for later.\(hurt)"))
             },
             JourneyEvent(6, when: s.sails < 70) { e, q in
                 let d = e.ri(10, 18)
-                e.state.sails = max(0, e.state.sails - Double(d))
-                q.append(.message("With a bang and a roar of steam, a tired flue lets go. The cab empties in a hurry. [red](Engine −\(d)%)[/red]"))
+                let hurt = self.knock(e, engine: true, d)
+                q.append(.message("With a bang and a roar of steam, a tired flue lets go. The cab empties in a hurry.\(hurt)"))
                 let c = e.state.crew.indices.filter { e.state.crew[$0].alive && e.state.crew[$0].ailment == nil }
                 if !c.isEmpty && e.chance(0.4) {
                     let idx = e.pick(c)!
-                    e.state.crew[idx].hp -= 8
+                    e.state.crew[idx].hp = max(1, e.state.crew[idx].hp - 8)
                     e.sicken(idx, &q, e.state.temperature(in: reg), nil, RailData.scald)
                 }
             },
             JourneyEvent(5, when: dry || reg.id == "humboldt") { e, q in
                 let d = e.ri(4, 8)
                 let gal = e.ri(40, 90)
-                e.state.sails = max(0, e.state.sails - Double(d))
+                let hurt = self.knock(e, engine: true, d)
                 e.state.water = max(0, e.state.water - Double(gal))
-                q.append(.message("The last water you took on was full of alkali, and the boiler is foaming like a washtub. You blow her down and lose \(gal) gallons doing it. [red](Engine −\(d)%)[/red]"))
+                q.append(.message("The last water you took on was full of alkali, and the boiler is foaming like a washtub. You blow her down and lose \(gal) gallons doing it.\(hurt)"))
             },
             JourneyEvent(full ? 5 : 2.5) { e, q in
                 let d = full ? e.ri(6, 14) : e.ri(3, 7)
-                e.state.hull = max(0, e.state.hull - Double(d))
-                q.append(.message("A rail has cracked clean through in the cold of the night, and you find it the way trains do. The whole train steps over the gap one wheel at a time. [red](Running gear −\(d)%)[/red]"))
+                let hurt = self.knock(e, engine: false, d)
+                q.append(.message("A rail has cracked clean through in the cold of the night, and you find it the way trains do. The whole train steps over the gap one wheel at a time.\(hurt)"))
             },
-            JourneyEvent(5, when: climbing) { e, q in
-                let n = e.ri(8, 16)
+            // With no wood she is barely turning a wheel, never mind spinning one.
+            JourneyEvent(5, when: climbing && s.fuel >= 1) { e, q in
+                let n = min(e.ri(8, 16), Int(e.state.fuel))
                 e.state.fuel = max(0, e.state.fuel - Double(n))
                 q.append(.message("The drivers lose their feet on the grade and spin. It takes sand, patience and \(RailData.cords(n)) of wood to get the train moving again."))
             },
@@ -69,7 +70,7 @@ extension Rail {
                 let c = e.state.crew.indices.filter { e.state.crew[$0].alive && e.state.crew[$0].ailment == nil }
                 if c.isEmpty { return }
                 let idx = e.pick(c)!
-                e.state.crew[idx].hp -= 8
+                e.state.crew[idx].hp = max(1, e.state.crew[idx].hp - 8)
                 q.append(.message("Coupling the cars after a water stop, \(TextMarkup.escape(e.state.crew[idx].name)) is a half second slow getting a hand clear of the link."))
                 e.sicken(idx, &q, e.state.temperature(in: reg), nil, RailData.crushedHand)
             },
@@ -90,7 +91,7 @@ extension Rail {
                 q.append(e.ask("express", prompt: "A flagman at a water tank waves you down. The westbound express is forty minutes behind you and wants the main line.",
                                detail: "The next station with a siding long enough is nine miles on.",
                                options: [.init("Back into the spur here and let her by"),
-                                         .init("Run for the next station, wide open")]))
+                                         Self.onWood("Run for the next station, wide open", e.state, RailData.dashWood.upperBound)]))
             },
             JourneyEvent(3, when: plains && !w.wet && (season == .summer || season == .autumn)) { e, q in
                 q.append(e.ask("fire", prompt: "A line of smoke on the horizon becomes a prairie fire, coming down on the track faster than a horse can run.",
@@ -99,7 +100,8 @@ extension Rail {
             },
             JourneyEvent(9, when: snowing || (mountain && season == .winter)) { e, q in
                 q.append(e.ask("drift", prompt: "A cut ahead has drifted full of snow, level with the top of the smokestack.",
-                               options: [.init("Dig it out by hand"), .init("Back up, open the throttle and buck it")]))
+                               options: [.init("Dig it out by hand"),
+                                         Self.onWood("Back up, open the throttle and buck it", e.state, RailData.buckWood.upperBound)]))
             },
             JourneyEvent(3, when: !s.stowawaySeen && nextYard != nil && s.living.count < 6) { e, q in
                 e.state.stowawaySeen = true

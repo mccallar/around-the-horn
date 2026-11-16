@@ -73,6 +73,7 @@ export function status(c) {
     row(`${words.meters[0]} · ${words.meters[1]}`, `${percent(g.hull)} · ${percent(g.sails)}`),
   ];
   if (words.clock) rows.push(row(words.clock.label, words.clock.value));
+  if (words.trouble) rows.push(row(words.trouble.label, words.trouble.value, 'red'));
   return { type: 'status', date: v.dateText, region: v.region.name, rows, note: g.note };
 }
 

@@ -83,6 +83,7 @@ public final class GameEngine {
         var q: [Interrupt] = []
         state.note = ""
         guard let ns = state.nextStop, !state.over else { return q }
+        if let stopped = journey.stalled(self) { return stopped }
         state.day += 1
         let reg = state.region
         state.weather = rollWeather(reg)
@@ -99,8 +100,9 @@ public final class GameEngine {
             if state.fuel >= pace.fuel {
                 state.fuel -= pace.fuel
             } else {
+                let share = r.burnsPartLoad ? max(0, state.fuel) / pace.fuel : 0
                 state.fuel = 0
-                sp *= r.noFuelSpeed
+                sp *= r.burnsPartLoad ? share + (1 - share) * r.noFuelSpeed : r.noFuelSpeed
             }
         }
         sp *= rnd(r.speedJitter.lowerBound, r.speedJitter.upperBound)
@@ -353,7 +355,7 @@ public final class GameEngine {
             q.append(.message(text.sailsWarning))
         }
         if state.sails > r.warnRearm { state.flags.sails = false }
-        checkSink(&q)
+        if r.wearWrecks { checkSink(&q) }
     }
 
     func checkSink(_ q: inout [Interrupt]) {

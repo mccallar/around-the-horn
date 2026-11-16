@@ -35,6 +35,9 @@ struct StatusPanel: View {
             if let clock = words.clock {
                 Row(label: clock.label) { Text(clock.value) }
             }
+            if let trouble = words.trouble {
+                Row(label: trouble.label) { Text(trouble.value).foregroundStyle(Theme.red) }
+            }
             Text(game.note)
                 .bodyFont(19)
                 .foregroundStyle(Theme.teal)
