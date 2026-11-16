@@ -300,3 +300,23 @@ taken), so she can only leave through `depart`. Nothing else about the save chan
 left, they come back to the port menu and can set out with no food and no departure
 sentence, as 1849's prototype does. That is left to be ruled on, not changed by this
 decision; answering true in their skins is the whole change.
+
+## D17 — The balloon's relaunch needs burners, and its date keeps GMT (2026-11-16)
+
+Found in review of the balloon skin. On the ground at a field with the burners at 0%, the
+relaunch met no refusal and burned the climb's 25 gallons through burners the rules say
+burn nothing (D14); the first watch's note saying so was overwritten by the sinking note,
+so the player was never told. Now the climb needs burners, as the Himalaya's and the
+icing climb's already did: while the riggers' overhaul is in the purse,
+`Balloon.relaunchRefusal` sends her to them (after the lift's refusal, in the condition
+box's order, D15); without it she goes up on the helium alone, burning nothing, and the
+first watch begins by saying so. Burner kits stay a repair made aloft, so a crew with a
+kit fits it on that first watch. No number or random draw changed, and the bot's flights
+are as they were.
+
+The status box showed the log's GMT hour as "8 a.m.", which reads as the time where she
+is, while the scene darkens by the local sun (at Albuquerque, "8 a.m." over a night sky);
+the launch and the finale already wrote the hour as "0800 GMT". The balloon's date is
+now "January 8, 1999, 0800 GMT" in the box, the arrivals, the graves and the game-over
+footer, through a new engine hook, `Journey.hourText`, whose default ("8 a.m.") rail and
+the airship keep. 1849's date has no hour, so the three gates are untouched.

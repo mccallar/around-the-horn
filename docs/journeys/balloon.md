@@ -1778,6 +1778,11 @@ the pilot's death by different causes.
    `setSail` cannot refuse, so the relaunch refusal is `Balloon.relaunchRefusal(_:)`,
    for the app to ask before relaunching; without it the ground team's top-up applies.
    The relaunch note and the ground team's words are said on the first watch after.
+   On dead burners there is no climb (D17): `leaving` burns nothing and puts nothing in,
+   and the first watch begins with "[red]She goes up on dead burners.[/red] The ground team
+   walks her into the wind and lets go, and she rises off the field on the helium alone,
+   burning nothing. She will climb no higher than that, and she is already sinking." (and,
+   with a burner kit aboard, "The crew can fit a burner kit now that she is up.").
 5. **Coming down** has its title by place through a new hook, `Journey.wreckedTitle`
    ("…has come down in the sea." / "…has come down."), and the pilot's death its body by
    place and company through `Journey.leaderDiedBody`. Both default to the old text.
@@ -1785,8 +1790,12 @@ the pilot's death by different causes.
    catch is stowed and before the watch passes.
 7. **The freighter's offer** uses `makeOffer(excluding:)`, the shared offer with goods left
    out before the draws (§20.25); an empty list is the old offer.
-8. **The date line** in the status panel is the shared one for short turns ("January 5,
-   1999, 4 p.m."), as rail's and the airship's are, not "January 5, 1999 · 1600 GMT". The
+8. **The date line** keeps the log's GMT: "January 5, 1999, 1600 GMT" (the shared date
+   with a comma, not §12.1's "·"), through the shared hook `Journey.hourText`, whose
+   default ("4 p.m.") rail and the airship keep. It was first built with the shared
+   "4 p.m.", which read as the time where she was while the scene darkens by the local
+   sun (at Albuquerque, "8 a.m." over a night sky); D17. The status box, the arrivals
+   ("You have reached …"), the graves and the game-over footer all write it so. The
    launch and the finale print the hour themselves, "0800 GMT" and "HHMM GMT", as written.
    The finale's lines and the game-over footer are `Balloon.finale(_:)` and
    `Balloon.shortfall(_:)`, for the skin.
@@ -1886,6 +1895,17 @@ The rules now (`Balloon+Trouble.swift`):
 - **Burner trouble needs burners**: number two burner coughing needs them lit (not given
   out, and propane aboard), the lightning-welded valve needs them not given out, and so do
   the climb over the Himalaya and the climb out of icing cloud, besides their propane.
+- **The relaunch needs burners too** (D17): on the ground with the burners given out,
+  `Balloon.relaunchRefusal` answers "The launch director won't let you go up on dead
+  burners. The riggers' burner man can overhaul them first." when she can pay the riggers'
+  overhaul there (lift comes first, as the condition box lists it, D15). When she cannot,
+  she goes up on the helium alone: `leaving` burns none of the 25 gallons and the ground
+  team puts none in, and the first watch begins by saying so, before the drift's note
+  ("The burners are dead. The balloon is sinking."). Burner kits stay a repair made aloft,
+  as the outfitting list says, so a crew with a kit and short of the overhaul fits it on
+  the first watch up. Before this, the relaunch burned its 25 gallons through dead burners
+  and the note saying so was overwritten by the sinking note. The bot's flights are as
+  they were (the tables above).
 - **Crew health**: the Himalaya's cold is floored at 0 as it is taken; nothing else here
   takes health without a floor (`hurt` leaves 1).
 
@@ -1893,21 +1913,26 @@ The rules now (`Balloon+Trouble.swift`):
 and the altitude screen, `BalloonScene.flame` and `cold`, the learn page "Propane, lift
 and burners", and `Words.leaveRefusal`, which the port menu's way out asks):
 
-- the red status row, `Words.trouble` = ("Balloon", …): "Going down"
-  (`Balloon.goingDown`); "Burners dead, tanks dry", or "Burners dead, sinking" aloft and
+- the red status row, `Words.trouble` = ("Balloon", …): "Going down" aloft and "No lift"
+  on the ground, where she has come down to a field's ground team (`Balloon.goingDown`);
+  "Burners dead, tanks dry", or "Burners dead, sinking" aloft and
   "Burners dead" on the ground (`Balloon.burnersOut`); "Tanks dry, sinking" aloft and
   "Tanks dry" on the ground; "Last of the propane" (`Balloon.lastOfThePropane`: less than
   `Balloon.watchBurn`, a watch flown at this altitude in this air); nothing before the
   launch;
 - the supplies note adds "the burners are dead" and "the tanks are dry", and the altitude
-  screen says that with no heat the height makes no difference to how far she drifts (it
-  still sets the cold and the crew's health);
+  screen, aloft, says that with no heat the height makes no difference to how far she
+  drifts (it still sets the cold and the crew's health). On the ground it says what she
+  will climb to, and on dead burners that she cannot ("She is on the ground. When she goes
+  up, she will climb to Middle air. Not on dead burners: she can only go up on the helium,
+  and drift."); the relaunch row reads "Relaunch (on the helium alone)" then, not "(25
+  gallons)";
 - the scene draws dead burners as it draws dry tanks, with no flame (§4's blast window,
   0.6 × burners/60 s, is already nothing at 0%), and the low-lift sag (lift below 40)
   already covers going down;
 - the learn page says what lift and the burners at nothing do;
 - before relaunching from a field, ask `Balloon.relaunchRefusal` (it now refuses for lift
-  as well as for propane).
+  and for dead burners as well as for propane).
 
 Tuning: none was needed; the bands hold untouched (the bot tables above are after D14).
 

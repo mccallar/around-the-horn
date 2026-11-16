@@ -41,6 +41,7 @@ Three gates prove 1849 is unchanged and are never re-recorded: `PrototypeParityT
 | `region(_:at:)` | first region whose `to` is past the mile | a fork changes the country you cross |
 | `temperature(_:in:)` | the region's | seasons change it |
 | `harshSeason(_:)` | false | freezing is worse in a season |
+| `hourText(_:)` | "6 p.m." | the log keeps another clock (the balloon's "1800 GMT", D17); `GameState.dateText` writes the hour with it when a turn is shorter than a day |
 | `weatherWeights(_:_:cursed:)` | the region's | seasons or the journey's state shift the odds (use `bump`) |
 | `crewFactor(_:)` | 1 / 0.85 / 0.65 / 0.45 for 4+ / 3 / 2 / 1 hands | the vehicle needs fewer or more |
 | `adjustSpeed(_:_:_:)` | nothing | grades, currents, head winds, a hired helper |
@@ -399,9 +400,11 @@ Iron Road and Over the Pole look, read and play as they did.
     the field's short name there, and `nil` aloft.
   - `Words.leaveRefusal`: why a port after the first won't let her go, asked by the port
     menu's way out (`GameController.leavePort`, which shows it and stays on the port
-    menu). The balloon answers `Balloon.relaunchRefusal`: short of the climb's 25 gallons
-    with the money for a step of propane, or no lift with a sack of ballast for sale (its
-    engine left the asking to the app, As built 4 and D14). The launch from Marrakech is
+    menu). The balloon answers `Balloon.relaunchRefusal`: no lift with a sack of ballast
+    for sale, dead burners with the riggers' overhaul in the purse (D17), or short of the
+    climb's 25 gallons with the money for a step of propane (its engine left the asking
+    to the app, As built 4 and D14). Short of the overhaul she goes up on dead burners on
+    the helium alone, burning nothing, and the relaunch row says so. The launch from Marrakech is
     still the engine's own refusal through `depart`, which names both food and the 25
     gallons, so `departRefusal` is `nil`; `resumesInFirstShop` is true (D16).
 - **One debug launch argument**, `-HornDebugFuel <n>` with `-HornDebugStart`: that much
@@ -409,9 +412,17 @@ Iron Road and Over the Pole look, read and play as they did.
 - **The engine's text**: the three role labels in D11's shape ("A Zurich chocolate maker",
   "A Bristol balloon builder", "An Alaska bush pilot"); the five fields' arrivals, which
   told of a landing the question under them had not yet asked for ("You come down on the
-  West Bank ... Land at the field?"), now describe the field below her; and the catch
-  report writes "1 lb", not "1 lbs". No number changed.
-- **Night falls by the local sun.** The log keeps GMT, and local time along the route runs
+  West Bank ... Land at the field?"), now describe the field below her; the catch report
+  writes "1 lb", not "1 lbs", and the going-down question "have 1 gallon"; the date keeps
+  the log's GMT ("January 8, 1999, 0800 GMT"), as the launch and the finale write the
+  hour, through a new engine hook, `Journey.hourText`, whose default ("8 a.m.") the other
+  journeys keep (D17); and a relaunch on dead burners says it burned nothing. No number
+  changed.
+- **The status box's trouble row** is "Going down" aloft and "No lift" on a field she came
+  down to, "Burners dead" or "Tanks dry" on the ground and "…, sinking" aloft, "Burners
+  dead, tanks dry", and "Last of the propane" (docs/journeys/balloon.md, D14).
+- **Night falls by the local sun.** The log keeps GMT, and so does the status box's date,
+  which says so; local time along the route runs
   from GMT − 7 to GMT + 9, so the scene reads the longitude under her off the chart's
   route (`BalloonScene.longitude`) and darkens from about half past six in the evening to
   half past six in the morning, local time. The finish is always the next sunrise, as the
