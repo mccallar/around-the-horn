@@ -177,7 +177,7 @@ final class BalloonSkinTests: XCTestCase {
         let bullets = card.outfitBullets.joined(separator: "\n").lowercased()
         for it in air.items {
             let name = it.key == .food ? "food" : it.key == .water ? "water" : it.name.lowercased()
-            has(bullets, name.replacingOccurrences(of: "burner spares", with: "burner spares"))
+            has(bullets, name)
         }
     }
 
@@ -263,6 +263,23 @@ final class BalloonSkinTests: XCTestCase {
         XCTAssertNil(skin.words(at("lux")).place, "over the field, not on it")
         XCTAssertEqual(skin.words(at("abq", port: true)).place, "Albuquerque")
         XCTAssertEqual(skin.words(at("saga", port: true)).place, "Saga")
+
+        // The box's date is Mission Control's log, in GMT, as the launch and the finale write
+        // the hour; the picture is by the sun where she is. At Albuquerque 0800 GMT is before
+        // one in the morning, and the scene is dark: the box says GMT, not "8 a.m.".
+        var abq = at("abq", port: true)
+        abq.day = 42
+        XCTAssertEqual(abq.dateText, "January 8, 1999, 0800 GMT")
+        XCTAssertTrue(BalloonScene.isNight(ScenePicture.frame(air, abq, moving: false, t: 0)))
+        has(skin.scene.label(ScenePicture.frame(air, abq, moving: false, t: 0)), "by night")
+        var saga = at("saga", port: true)
+        saga.day = 43
+        XCTAssertEqual(saga.dateText, "January 8, 1999, 1200 GMT")
+        XCTAssertTrue(BalloonScene.isNight(ScenePicture.frame(air, saga, moving: false, t: 0)), "after eight in the evening at Saga")
+        for g in [nearing("lux"), at("jod", port: true), over(9000)] {
+            XCTAssertTrue(g.dateText.hasSuffix(" GMT"), g.dateText)
+            XCTAssertFalse(g.dateText.contains(".m."), g.dateText)
+        }
         // The other journeys write the region, as they always have.
         for other in [Horn1849Skin.skin, RailSkin.skin, AirshipSkin.skin] {
             var g = other.debug.start(2, 4)
@@ -287,8 +304,72 @@ final class BalloonSkinTests: XCTestCase {
         XCTAssertEqual(skin.words(g).clothesWarning, "[red]Only 3 of 5 aboard have a down suit.[/red]")
         g.clothes = 5
         XCTAssertNil(skin.words(g).clothesWarning)
-        // With no heat the drift is the same at every height: the engine's own figure.
-        XCTAssertEqual(BalloonData.driftSpeed, 40)
+    }
+
+    /// The altitude screen says the height makes no difference to the drift only when that
+    /// is so: the same watch, flown with no heat at each height, makes the same miles, and
+    /// with heat it does not.
+    func testWithNoHeatTheHeightMakesNoDifferenceToTheDrift() {
+        func miles(_ pace: Pace, fuel: Double = 900, sails: Double = 64) -> Int {
+            var g = over(1000)
+            g.pace = pace
+            g.fuel = fuel
+            g.sails = sails
+            g.forceFair = 1
+            let e = GameEngine(state: g, rng: SeededRNG(seed: 7))
+            _ = e.sailDay()
+            return e.state.mile - 1000
+        }
+        for (fuel, sails) in [(0.0, 64.0), (900, 0)] {
+            var g = over(1000)
+            g.fuel = fuel
+            g.sails = sails
+            has(skin.words(g).paceNow, "the height makes no difference to how far she drifts")
+            let drift = Pace.allCases.map { miles($0, fuel: fuel, sails: sails) }
+            XCTAssertEqual(Set(drift).count, 1, "fuel \(fuel), burners \(sails): \(drift)")
+            XCTAssertGreaterThan(drift[0], 0, "she drifts")
+        }
+        let flown = Pace.allCases.map { miles($0) }
+        XCTAssertEqual(Set(flown).count, 3, "with heat each height has its own speed: \(flown)")
+        XCTAssertFalse(skin.words(over(1000)).paceNow.contains("drifts"))
+    }
+
+    /// On the ground she is not flying, and does not drift: the screen says what she will
+    /// climb to, and, on dead burners, that she cannot.
+    func testOnTheGroundTheAltitudeScreenIsNotAboutFlying() {
+        var g = at("kh", port: true)
+        g.pace = .steady
+        XCTAssertEqual(skin.words(g).paceNow, "She is on the ground. When she goes up, she will climb to [amber]Middle air[/amber].")
+        g.fuel = 0
+        XCTAssertEqual(skin.words(g).trouble?.value, "Tanks dry")
+        XCTAssertEqual(skin.words(g).paceNow, "She is on the ground. When she goes up, she will climb to [amber]Middle air[/amber].",
+                       "the ground team puts in the climb's propane")
+        g.fuel = 300
+        g.sails = 0
+        let dead = skin.words(g).paceNow
+        has(dead, "Not on dead burners: she can only go up on the helium, and drift.")
+        for line in [dead, skin.words(g).leavePort] {
+            XCTAssertFalse(line.contains("flying"), line)
+            XCTAssertFalse(line.contains("25 gallons"), line)
+        }
+        XCTAssertEqual(skin.words(g).leavePort, "Relaunch [dim](on the helium alone)[/dim]")
+    }
+
+    /// Rations a watch, in pounds, and one pound is one.
+    func testTheRationsScreenCountsPounds() {
+        var g = nearing("lux")
+        let n = g.living.count
+        XCTAssertEqual(n, 5)
+        for (r, said) in [(Rations.filling, "2.5 lbs"), (.meager, "1.5 lbs"), (.bare, "1 lb")] {
+            g.rations = r
+            has(skin.words(g).rationsNow, "With 5 aboard, that's \(said) a watch.")
+        }
+        // Two aboard on hot meals is a pound too.
+        for i in 2..<g.crew.count { g.crew[i].alive = false }
+        g.rations = .filling
+        has(skin.words(g).rationsNow, "With 2 aboard, that's 1 lb a watch.")
+        XCTAssertEqual(BalloonSkin.pounds(0.5), "0.5 lbs")
+        XCTAssertEqual(BalloonSkin.pounds(0.96), "1 lb")
     }
 
     /// D14, for the balloon: the box says when she is going down, has no heat, or is on
@@ -612,6 +693,44 @@ final class BalloonSkinTests: XCTestCase {
         XCTAssertNil(skin.words(flat).leaveRefusal)
         // Aloft there is never a refusal: the app also resumes between fields.
         XCTAssertNil(skin.words(nearing("lux")).leaveRefusal)
+    }
+
+    /// Burners dead on the ground at Luxor (the review's case: 300 gallons and $3,000, the
+    /// overhaul $1,950): the way out sends her to the riggers. Short of their price she may
+    /// go, up on the helium alone: none of the 300 gallons burned, and the first watch says
+    /// so before anything else.
+    func testAFieldWontLetHerGoOnDeadBurnersWhileTheRiggersCanMendThem() {
+        var g = at("lux", port: true)
+        g.sails = 0
+        g.fuel = 300
+        g.money = 3000
+        g.sailcloth = 2
+        let c = controller()
+        c.loadForDebug(g)
+        XCTAssertEqual(c.read { $0.shipyardSailsCost }, 1950)
+        XCTAssertEqual(skin.words(c.game!).trouble?.value, "Burners dead")
+        c.leavePort()
+        guard case .message(let said, _, let back) = c.screen else { return XCTFail("\(c.screen)") }
+        XCTAssertEqual(said, "The launch director won't let you go up on dead burners. The riggers' burner man can overhaul them first.")
+        back()
+        guard case .portMenu = c.screen else { return XCTFail("still on the field, not \(c.screen)") }
+        XCTAssertEqual(c.game!.fuel, 300)
+
+        // Not the price of the overhaul: up on the helium alone, burning nothing.
+        g.money = 1000
+        let d = controller()
+        d.loadForDebug(g)
+        XCTAssertNil(skin.words(d.game!).leaveRefusal)
+        d.leavePort()
+        guard case .travel = d.screen else { return XCTFail("\(d.screen)") }
+        XCTAssertEqual(d.game!.fuel, 300, "no climb on dead burners")
+        d.tick()
+        guard case .message(let first, _, _) = d.screen else { return XCTFail("\(d.screen)") }
+        has(first, "She goes up on dead burners.")
+        has(first, "burning nothing")
+        has(first, "The crew can fit a burner kit now that she is up.")
+        XCTAssertEqual(d.game!.fuel, 300)
+        XCTAssertEqual(skin.words(d.game!).trouble?.value, "Burners dead, sinking")
     }
 
     // MARK: The picture
@@ -1027,9 +1146,12 @@ final class BalloonSkinTests: XCTestCase {
 
     /// Answers whatever the flight raises, first open option each time, until it ends,
     /// with a little care: propane, food, water and scrubbers at every field it can
-    /// afford, the riggers when she is worn, and repairs aloft when she is failing.
+    /// afford, the riggers when she is worn, and repairs aloft when she is failing. A field
+    /// leaves only by its way out (`leavePort`), as a player's would: after a refusal it
+    /// buys what the refusal asked for, and a field that still refuses after that is a
+    /// flight nobody could finish, which fails the test.
     func playOut(_ c: GameController, maxSteps: Int = 30_000) -> String {
-        var refused = 0
+        var refused: (field: Int, times: Int) = (-1, 0)
         for _ in 0..<maxSteps {
             switch c.screen {
             case .travel:
@@ -1065,8 +1187,22 @@ final class BalloonSkinTests: XCTestCase {
                     c.recutSailsAtYard()
                     continue
                 }
-                if skin.words(g).leaveRefusal != nil { refused += 1 }
-                if refused > 3 { c.startTravel() } else { c.leavePort() }
+                if let why = skin.words(g).leaveRefusal {
+                    refused = refused.field == g.stopIndex ? (g.stopIndex, refused.times + 1) : (g.stopIndex, 1)
+                    if refused.times > 2 {
+                        XCTFail("the field at \(g.currentStop.name) will not let her go: \(why)")
+                        return "stuck"
+                    }
+                    // What a refusal asks for: a sack of ballast, the climb's propane. (Dead
+                    // burners are refused only when the riggers' price is in hand, and
+                    // they have been to the riggers above.)
+                    c.run { e in
+                        if Balloon.goingDown(e.state) && e.state.timber < 1 { _ = e.buy([.timber: 1]) }
+                        if e.state.fuel < BalloonData.launchBurn { _ = e.buy([.fuel: 50]) }
+                    }
+                }
+                c.leavePort()
+                if case .travel = c.screen { refused = (-1, 0) }
             case .seaMenu: c.startTravel()
             case .finale: return "finale"
             case .gameOver: return "gameover"

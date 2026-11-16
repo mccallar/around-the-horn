@@ -33,6 +33,26 @@ enum BalloonSkin {
         return r == r.rounded() ? String(Int(r)) : String(r)
     }
 
+    /// Pounds to a tenth: "2.5 lbs", "1 lb".
+    static func pounds(_ x: Double) -> String {
+        let n = tenth(x)
+        return "\(n) \(n == "1" ? "lb" : "lbs")"
+    }
+
+    /// The altitude screen's first lines. Aloft: the height she flies at, and with no heat
+    /// that it changes nothing about the drift. On the ground: the height she will climb
+    /// to, unless the burners are dead and there is no climb (`Balloon.leaving`).
+    static func paceNow(_ g: GameState, _ name: String, dead: Bool, dry: Bool) -> String {
+        if g.atPort {
+            return "She is on the ground. When she goes up, she will climb to [amber]\(name)[/amber]."
+                + (dead ? " [red]Not on dead burners: she can only go up on the helium, and drift.[/red]" : "")
+        }
+        return "You are flying at [amber]\(name)[/amber]."
+            + (dead || dry
+                ? " [red]With no heat for the cone, the height makes no difference to how far she drifts.[/red] It still sets how hard the air is on the crew."
+                : "")
+    }
+
     static let card = TitleCard(
         banner: "THE JET STREAM · 1999",
         title: "THE JET\nSTREAM",
@@ -139,7 +159,8 @@ enum BalloonSkin {
             rest: "Loiter low and rest",
             repairs: "Make repairs",
             forage: "Trail a fishing line",
-            leavePort: "Relaunch [dim](25 gallons)[/dim]",
+            // On dead burners there is no climb to burn propane on (`Balloon.leaving`).
+            leavePort: "Relaunch [dim](\(dead ? "on the helium alone" : "25 gallons"))[/dim]",
             restInPort: "Rest on the ground",
             trade: "See who'll trade",
             talk: "Ask around the field",
@@ -174,12 +195,9 @@ enum BalloonSkin {
             clothesWarning: g.clothes < n ? "[red]Only \(g.clothes) of \(n) aboard have a down suit.[/red]" : nil,
             lostHeading: "Lost on the flight",
             paceHeading: "Altitude",
-            paceNow: "You are flying at [amber]\(pace.name)[/amber]."
-                + (dead || dry
-                    ? " [red]With no heat for the cone, the height makes no difference to how far she drifts.[/red] It still sets how hard the air is on the crew."
-                    : ""),
+            paceNow: paceNow(g, pace.name, dead: dead, dry: dry),
             rationsHeading: "Rations",
-            rationsNow: "The crew is on [amber]\(rations.name)[/amber]. With \(n) aboard, that's \(tenth(Double(n) * rations.amount)) lbs a watch.",
+            rationsNow: "The crew is on [amber]\(rations.name)[/amber]. With \(n) aboard, that's \(pounds(Double(n) * rations.amount)) a watch.",
             restPrompt: g.atPort
                 ? "The ground team pitches tents beside the field, and everyone sleeps on ground that keeps still. How long will you stay?"
                 : "You drop into slow, low air and let the crew sleep in turns. You make no headway east, and the burners still want about 10 gallons a watch. How long will you loiter?",
