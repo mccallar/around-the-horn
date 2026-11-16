@@ -71,6 +71,7 @@
 		7E94EBF4A679D14B70BA855E /* ChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E8E7F89E9868BA9D521DCD7 /* ChartView.swift */; };
 		7ECE44A5CCDF318BEBFE8B0F /* Feedback.swift in Sources */ = {isa = PBXBuildFile; fileRef = 771DF7A9C743BD52E884EC30 /* Feedback.swift */; };
 		8507B9626335D0733F75E858 /* TestJourneys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B84815BD850CCD28520377E /* TestJourneys.swift */; };
+		857722942DA1A18E9E64BEEF /* Mars+Trouble.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CAA93F080CF2043FFA558D9 /* Mars+Trouble.swift */; };
 		85A1CC3CDBEDA5BC33586B0B /* ResumeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6AFAF1AEC528687A069F091 /* ResumeTests.swift */; };
 		86570A81184F274E60797E88 /* VoyageScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78D4D01109F06BE35F45A3F /* VoyageScreens.swift */; };
 		87ED892C305EA05606F8FE9B /* MarkupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B656EEA583D97D6A03EE42FD /* MarkupTests.swift */; };
@@ -248,6 +249,7 @@
 		396F0F7A3170B9BD4EE739F9 /* Klondike+Towns.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Klondike+Towns.swift"; sourceTree = "<group>"; };
 		3B27DC1AC875A1705C5B8A22 /* SceneGallery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneGallery.swift; sourceTree = "<group>"; };
 		3C405D019FE4471301AAEE96 /* JourneyContractTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JourneyContractTests.swift; sourceTree = "<group>"; };
+		3CAA93F080CF2043FFA558D9 /* Mars+Trouble.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Mars+Trouble.swift"; sourceTree = "<group>"; };
 		3EA0D1B32A801D8876C460B5 /* RailTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RailTests.swift; sourceTree = "<group>"; };
 		4108B95E6294D296CE33783C /* GameData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameData.swift; sourceTree = "<group>"; };
 		47BB62B96C70BDD09D81D40B /* JourneySkin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JourneySkin.swift; sourceTree = "<group>"; };
@@ -636,6 +638,7 @@
 				AC2642DC2A9FECC612FFD593 /* Mars+Choices.swift */,
 				797CE7F576E9F694AA35ECB0 /* Mars+Events.swift */,
 				B56A40E3339FFC3006131BB0 /* Mars+Ports.swift */,
+				3CAA93F080CF2043FFA558D9 /* Mars+Trouble.swift */,
 				280D897DE9C88C1A14FA96A1 /* MarsData.swift */,
 			);
 			path = Mars;
@@ -933,6 +936,7 @@
 				76FBCC25DBB3EA0BA5085253 /* Mars+Choices.swift in Sources */,
 				38DA4834AAE8CDC1CCA57E22 /* Mars+Events.swift in Sources */,
 				8C150E8E3A3939744CC39CF6 /* Mars+Ports.swift in Sources */,
+				857722942DA1A18E9E64BEEF /* Mars+Trouble.swift in Sources */,
 				92DBC0287E064A6096A4FE4D /* Mars.swift in Sources */,
 				2A6CB23257A89B5C55791DBD /* MarsData.swift in Sources */,
 				A28F39D86174143D740CCA23 /* Model.swift in Sources */,
