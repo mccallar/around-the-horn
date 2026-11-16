@@ -11,7 +11,7 @@ enum RailForage {
     static let skin = ForageSkin(
         field: ForageField(w: 160, h: 200, origin: hand, upward: true, line: 156, lanes: 26...146, speed: 150, oneWay: true),
         heading: "Driftwood",
-        throwsLabel: "Casts", caughtLabel: "Hauled", timeLabel: "Time",
+        throwsLabel: "Casts", caughtLabel: "Hauled", timeLabel: "Time", grouped: false,
         hint: { "Tap the river to cast the grapnel. Each cast uses up line. The crew can cut and stack up to \($0) at one stop." },
         label: { "The river from the bank, with \($0) pieces of driftwood going by" },
         actionHint: "Double-tap to cast the grapnel at the nearest driftwood",

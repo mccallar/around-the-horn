@@ -13,9 +13,9 @@ enum AirshipForage {
     static let skin = ForageSkin(
         field: ForageField(w: 160, h: 200, origin: hand, upward: true, line: 170, lanes: 12...155, speed: 150, oneWay: false),
         heading: "Reading the winds",
-        throwsLabel: "Balloons", caughtLabel: "Found", timeLabel: "Time",
+        throwsLabel: "Balloons", caughtLabel: "Found", timeLabel: "Time", grouped: true,
         hint: { "Tap the sky to send up a pilot balloon and follow it through the theodolite. Each one goes for good. The navigator can plan around winds worth up to \($0) of petrol in one session." },
-        label: { "The sky above the control car, with \($0) winds crossing it" },
+        label: { "The sky above the control car, with \($0) \($0 == 1 ? "wind" : "winds") crossing it" },
         actionHint: "Double-tap to send a balloon up at the nearest wind",
         leave: "Back to the chart table",
         pop: { n, wind in

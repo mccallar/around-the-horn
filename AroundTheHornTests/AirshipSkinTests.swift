@@ -431,6 +431,71 @@ final class AirshipSkinTests: XCTestCase {
         has(text, "slips the mast at Ciampino.")
     }
 
+    /// The stores save as you leave them, and the app saves whenever it goes to the
+    /// background. A flight saved at Rome before she left comes back to the stores, not
+    /// to a mast menu whose "Cast off" would skip the refusals and the departure.
+    func testAFlightSavedBeforeSheLeftComesBackToTheStores() {
+        let c = controller()
+        newFlight(c)
+        c.enterFirstShop()
+        guard case .shop(let done) = c.screen else { return XCTFail("\(c.screen)") }
+        // What the shop's "Pay and leave" does: buy, save, then leave.
+        c.run { $0.buy([.food: 60]) }
+        c.save()
+        done()
+        guard case .message(let why, _, _) = c.screen else { return XCTFail("\(c.screen)") }
+        has(why, "empty tanks")
+
+        // Force-quit and relaunch.
+        let again = controller()
+        again.chooseJourney(air.id)
+        XCTAssertEqual(again.savedVoyage?.food, 60)
+        again.continueSavedVoyage()
+        guard case .shop(let leave) = again.screen else { return XCTFail("back to the stores, not \(again.screen)") }
+        XCTAssertTrue(again.game!.atPort)
+        leave()
+        guard case .message(let still, _, let back) = again.screen else { return XCTFail("\(again.screen)") }
+        has(still, "empty tanks")
+        back()
+        guard case .shop(let pay) = again.screen else { return XCTFail("\(again.screen)") }
+        again.run { $0.buy([.fuel: 30]) }
+        again.save()
+        pay()
+        guard case .depart(let text) = again.screen else { return XCTFail("\(again.screen)") }
+        has(text, "slips the mast at Ciampino.")
+        XCTAssertFalse(again.game!.atPort)
+
+        // Sent to the background on the outfitting screen, before the stores: the same.
+        let fresh = controller()
+        newFlight(fresh)
+        guard case .outfit = fresh.screen else { return XCTFail("\(fresh.screen)") }
+        fresh.scenePhaseChanged(.background)
+        let back2 = controller()
+        back2.chooseJourney(air.id)
+        back2.continueSavedVoyage()
+        guard case .shop = back2.screen else { return XCTFail("back to the stores, not \(back2.screen)") }
+
+        // Once she has left, a save comes back to a menu as before.
+        var away = state(month: 4)
+        away.food = 60
+        away.fuel = 3000
+        away.atPort = false
+        XCTAssertFalse(GameController.notYetLeft(away))
+        p.save(away, pending: [])
+        let resumed = controller()
+        resumed.chooseJourney(air.id)
+        resumed.continueSavedVoyage()
+        guard case .seaMenu = resumed.screen else { return XCTFail("\(resumed.screen)") }
+
+        // 1849 and the Iron Road answer false and come back to the port menu, as they
+        // always have (decision D15).
+        for other in [Horn1849Skin.skin, RailSkin.skin] {
+            let g = GameState(journey: other.id, role: .merchant, ship: "Wren", captain: "Ada", crew: ["Bo", "Cy", "Di", "Ed"],
+                              startYear: 1869, startMonth: 9)
+            XCTAssertFalse(other.words(g).resumesInFirstShop, other.id)
+        }
+    }
+
     // MARK: The picture
 
     func frame(_ g: GameState, hour: Int = 12, moving: Bool = true) -> SceneFrame {
@@ -529,9 +594,11 @@ final class AirshipSkinTests: XCTestCase {
         has(skin.scene.label(frame(landed, moving: false)), "roofs of Nome")
     }
 
-    /// Forced down: on the ice with a camp beside her in the north, on the sea, in a field.
+    /// Forced down: on the ice with a camp beside her where there is sea ice, on the sea,
+    /// in a field, Scandinavia's included.
     func testForcedDownIsDrawnWhereSheCameDown() {
-        for (stop, words) in [("kingsbay", "down on the ice"), ("pulham", "down in a field"), ("rhone", "down on the sea")] {
+        for (stop, words) in [("kingsbay", "down on the ice"), ("pulham", "down in a field"), ("rhone", "down on the sea"),
+                              ("vadso", "down in a field")] {
             var g = nearing(stop)
             g.weather = air.fairWeather
             g.hull = 0
@@ -543,6 +610,19 @@ final class AirshipSkinTests: XCTestCase {
             XCTAssertNotEqual(picture(f), failing, stop)
             has(skin.scene.label(f), words)
             XCTAssertEqual(AirshipScene.position(f, AirshipScene.palette(g.weather)).y, AirshipScene.horizon - 10)
+        }
+        // The picture and the engine's ending agree, everywhere she can come down.
+        for region in air.regions + [AirshipData.underFog] {
+            var g = nearing("bear")
+            g.mile = region.to - 5
+            if region.id == AirshipData.underFog.id { g.vars[AirshipData.routeKey] = AirshipData.routeLow }
+            XCTAssertEqual(g.region.id, region.id)
+            g.hull = 0
+            g.over = true
+            let said = skin.scene.label(frame(g, moving: false)), body = air.wreckedBody(g)
+            XCTAssertEqual(said.contains("on the ice"), body.contains("onto the ice"), region.name)
+            XCTAssertEqual(said.contains("on the sea"), body.contains("onto the sea"), region.name)
+            XCTAssertEqual(said.contains("in a field"), body.contains("into a field"), region.name)
         }
     }
 
@@ -560,7 +640,7 @@ final class AirshipSkinTests: XCTestCase {
         north.weather = air.fairWeather
         XCTAssertTrue(north.region.has("north"))
         XCTAssertNotEqual(picture(frame(north, hour: 0)), picture(frame(north)))
-        has(skin.scene.label(frame(north, hour: 0)), "under the midnight sun")
+        has(skin.scene.label(frame(north, hour: 0)), "in the midnight sun")
         XCTAssertFalse(skin.scene.label(frame(north, hour: 0)).contains("by night"))
 
         // Wear: each meter shows on its own, and worse shows more.
@@ -591,6 +671,130 @@ final class AirshipSkinTests: XCTestCase {
         // Engines stopped is not flying.
         XCTAssertNotEqual(picture(frame(g, moving: false)), plain)
         has(skin.scene.label(frame(g, moving: false)), "engines stopped")
+    }
+
+    /// The midnight sun only where and when the sun does not set: north of the Circle, and
+    /// later in the spring the nearer the Circle. South of it, and before the season, the
+    /// nights are dark.
+    func testTheMidnightSunIsWhereAndWhenTheSunDoesNotSet() {
+        func night(_ g: GameState) -> SceneFrame {
+            var g = g
+            g.weather = air.fairWeather
+            return frame(g, hour: 0)
+        }
+        // Ten km short of the Circle in May: Scandinavia, but the sun sets.
+        let circle = nearing("circle")
+        XCTAssertTrue(circle.region.has("north"))
+        XCTAssertFalse(AirshipScene.midnightSun(night(circle)))
+        has(skin.scene.label(night(circle)), "by night")
+        XCTAssertFalse(skin.scene.label(night(circle)).contains("midnight sun"))
+        // The same place at midsummer: the sun stays up, and the picture shows it.
+        var midsummer = circle
+        midsummer.startMonth = 5
+        midsummer.day = 20 * 6
+        XCTAssertEqual(midsummer.date.month, 5)
+        XCTAssertTrue(AirshipScene.midnightSun(night(midsummer)), "\(midsummer.dateText)")
+        has(skin.scene.label(night(midsummer)), "in the midnight sun")
+        XCTAssertNotEqual(picture(night(circle)), picture(night(midsummer)))
+
+        // Moored at Oslo, sixty degrees north, never; nor at Pulham, nor at Nome.
+        for (stop, port) in [("oslo", true), ("pulham", true), ("nome", false)] {
+            for month in air.departures.map(\.month) {
+                var g = at(stop, port: port)
+                g.startMonth = month
+                XCTAssertFalse(AirshipScene.midnightSun(night(g)), "\(stop) \(g.dateText)")
+            }
+        }
+        // Near Vadsø on April 5, 1926: dark. Kings Bay early in April too; in May it is light.
+        let april = skin.debug.start(stopIndex("vadso"), 3)
+        XCTAssertEqual(april.date.month, 3)
+        has(skin.scene.label(night(april)), "by night")
+        XCTAssertFalse(AirshipScene.midnightSun(night(skin.debug.start(stopIndex("kingsbay"), 3))))
+        XCTAssertTrue(AirshipScene.midnightSun(night(nearing("kingsbay"))))
+        XCTAssertTrue(AirshipScene.midnightSun(night(at("pole"))))
+
+        // The dates the comment gives: the first night it stays up at Kings Bay and at Vadsø.
+        func firstNight(at stop: String) -> (month: Int, day: Int)? {
+            var g = at(stop)
+            g.startMonth = 3
+            for d in 0..<120 {
+                g.day = d * 6
+                if AirshipScene.midnightSun(night(g)) { return (g.date.month, g.date.day) }
+            }
+            return nil
+        }
+        let kingsBay = firstNight(at: "kingsbay"), vadso = firstNight(at: "vadso")
+        XCTAssertEqual(kingsBay?.month, 3)
+        XCTAssertEqual(Double(kingsBay?.day ?? 0), 17, accuracy: 1)
+        XCTAssertEqual(vadso?.month, 4)
+        XCTAssertEqual(Double(vadso?.day ?? 0), 16, accuracy: 1)
+    }
+
+    /// Every place reads as a sentence says it: "over the North Sea", "above the fog",
+    /// never "over Above the Fog".
+    func testEveryPlaceIsSaidAsASentenceSaysIt() throws {
+        let said = ["med": "over the Mediterranean", "france": "over France", "northSea": "over the North Sea",
+                    "scandinavia": "over Scandinavia", "barents": "over the Barents Sea", "polarSea": "over the Polar Sea",
+                    "aboveFog": "above the fog", "underFog": "under the fog", "alaska": "over the Alaskan coast"]
+        for region in air.regions + [AirshipData.underFog] {
+            var g = nearing("bear")
+            g.mile = region.to - 5
+            if region.id == AirshipData.underFog.id { g.vars[AirshipData.routeKey] = AirshipData.routeLow }
+            g.weather = air.fairWeather
+            g.fuel = 3000
+            XCTAssertEqual(g.region.id, region.id)
+            let phrase = try XCTUnwrap(said[region.id.rawValue], region.name)
+            var dry = g
+            dry.fuel = 0
+            let labels = [skin.scene.label(frame(g)), skin.scene.label(frame(g, moving: false)),
+                          skin.scene.label(frame(g, hour: 0)), skin.scene.label(frame(dry)), skin.chart.label(g)]
+            has(labels[0], "Airship flying \(phrase). Weather: fair & clear")
+            has(labels[1], "Airship \(phrase), engines stopped.")
+            has(labels[2], "Airship flying \(phrase) ")
+            has(labels[3], "Airship drifting \(phrase), engines stopped.")
+            has(labels[4], "You are \(phrase).")
+            for label in labels {
+                for heading in ["over Above", "over Under", "over Mediterranean", "over North Sea", "over Barents",
+                                "over Alaskan", "over The "] {
+                    XCTAssertFalse(label.contains(heading), label)
+                }
+            }
+        }
+        XCTAssertEqual(Set(said.keys).count, air.regions.count + 1)
+    }
+
+    /// At a mast she has reached and not moored to (its arrival's question on screen, or
+    /// flying on past it), the picture is the mast and its town, not the country around.
+    func testAMastSheHasNotMooredToIsStillDrawn() {
+        for port in air.ports where port.id != "rome" {
+            var g = at(port.id)
+            g.weather = air.fairWeather
+            let asked = frame(g, moving: false), flying = frame(g)
+            XCTAssertEqual(AirshipScene.passing(asked), port.id)
+            XCTAssertNil(AirshipScene.moored(asked))
+            has(skin.scene.label(asked), "over the mast at \(port.name), the ground crew waiting below")
+            has(skin.scene.label(flying), "flying past the mast at \(port.name)")
+            XCTAssertFalse(skin.scene.label(asked).contains(AirshipScene.whereabouts(g.region)), port.id)
+            // Not moored: she flies where she always does, and the lines are slack.
+            var moored = g
+            moored.atPort = true
+            XCTAssertNotEqual(picture(asked), picture(frame(moored, moving: false)), port.id)
+            XCTAssertEqual(AirshipScene.position(asked.at(0), AirshipScene.palette(g.weather)).x, AirshipScene.flyingX)
+            // And not the country she flies on into.
+            var on = g
+            on.mile += 10
+            XCTAssertNil(AirshipScene.passing(frame(on)))
+            XCTAssertNotEqual(picture(flying), picture(frame(on)), port.id)
+        }
+        // Pulham stands where France ends and the North Sea begins: the station, not the sea.
+        let pulham = frame(at("pulham"), moving: false)
+        XCTAssertEqual(pulham.region?.id.rawValue, "northSea")
+        XCTAssertFalse(skin.scene.label(pulham).contains("North Sea"))
+        // Rome's is behind her as soon as she leaves.
+        var leaving = state(month: 4)
+        leaving.fuel = 3000
+        leaving.atPort = false
+        XCTAssertNil(AirshipScene.passing(frame(leaving, moving: false)))
     }
 
     // MARK: The chart
@@ -679,8 +883,25 @@ final class AirshipSkinTests: XCTestCase {
         XCTAssertGreaterThan(forage.field.origin.y, forage.field.h * 0.75)
         XCTAssertEqual(forage.throwsLabel, "Balloons")
         XCTAssertEqual(forage.caughtLabel, "Found")
-        // The tally counts balloons, as the supplies list does.
+        // The tally counts balloons, as the supplies list does, and one is a balloon.
         XCTAssertEqual(w.looseUnits[.tackle], "balloons")
+        let balloons = air.item(.tackle)
+        var g = nearing("oslo")
+        for (n, reads) in [(0, "0 balloons"), (1, "1 balloon"), (2, "2 balloons"), (11, "11 balloons")] {
+            g.tackle = n
+            XCTAssertEqual(Stores.amount(balloons, g, w), reads)
+        }
+        has(forage.label(1), "with 1 wind crossing it")
+        has(forage.label(3), "with 3 winds crossing it")
+        // The tally writes thousands as the engine's report does: "1,350 kg".
+        let found = FishingView.reward(air, w, grouped: forage.grouped)
+        XCTAssertEqual(found.measure(1350), "1,350 kg")
+        XCTAssertEqual(found.measure(450), "450 kg")
+        var report = nearing("oslo")
+        report.fuel = 0
+        let e = GameEngine(state: report)
+        let said = e.landCatch(1350).compactMap { i -> String? in if case .message(let t) = i { return t }; return nil }
+        XCTAssertTrue(said.contains { $0.contains("1,350 kg") }, "\(said)")
 
         // The longest a pop can be stays on the field, wherever the hit.
         let px = PixelCanvas(w: forage.field.w, h: forage.field.h)
@@ -710,7 +931,8 @@ final class AirshipSkinTests: XCTestCase {
     func testThePickerOffersTheAirship() {
         let c = controller()
         guard case .picker = c.screen else { return XCTFail("\(c.screen)") }
-        XCTAssertTrue(c.journeys.map(\.id).contains(air.id))
+        // The journeys with a skin, in order, and no other.
+        XCTAssertEqual(c.journeys.map(\.id), [Horn1849.id, Rail.id, Airship.id])
         c.chooseJourney(air.id)
         guard case .title = c.screen else { return XCTFail("\(c.screen)") }
         XCTAssertEqual(c.skin.id, air.id)

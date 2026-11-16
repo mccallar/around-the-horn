@@ -231,9 +231,15 @@ final class GameController {
             }
         }
         if s.nextStop == nil && !ends { waiting.append(.arrival(stopID: s.currentStop.id)) }
+        // Saved in the first port's stores, or beside them, before it set out: back to
+        // them, if the skin says so, so that it can only leave through `depart`.
+        if waiting.isEmpty && Self.notYetLeft(s) && skin.words(s).resumesInFirstShop { return enterFirstShop() }
         if waiting.isEmpty { return backToMenu() }
         present(waiting, then: s.atPort ? .portMenu : .seaMenu)
     }
+
+    /// Still at the first port with no turn taken: `depart` has not let it go.
+    static func notYetLeft(_ s: GameState) -> Bool { s.atPort && s.stopIndex == 0 && s.day == 0 }
 
     func chooseRole(_ r: Role) {
         draftRole = r

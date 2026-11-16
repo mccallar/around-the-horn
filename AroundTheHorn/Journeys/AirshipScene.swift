@@ -88,6 +88,21 @@ enum AirshipScene {
 
     static func isNight(_ hour: Int) -> Bool { hour >= 20 || hour < 5 }
 
+    /// Days in 1926 before the first of each month.
+    static let daysBefore = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334]
+
+    /// Whether the sun stays up all night where she is on this date: when the sun's
+    /// declination is more than 90° less her latitude, less 0.83° for refraction and its
+    /// half-width. North of the Circle, and later in the spring the nearer the Circle:
+    /// Kings Bay from about April 17, Vadsø from about May 16, the Circle itself only for
+    /// a month round midsummer. Oslo, Pulham and Nome never.
+    static func midnightSun(_ f: SceneFrame) -> Bool {
+        guard let g = f.state else { return false }
+        let d = g.date
+        let declination = 23.44 * sin(2 * .pi * (Double(daysBefore[d.month] + d.day) - 80) / 365.24)
+        return AirshipChart.latitude(atKm: Double(g.mile)) + declination > 89.17
+    }
+
     /// The mast she is moored to, if she is: in port at a stop that has one. (At the end
     /// of the flight she is "in port" at Nome, which has no mast.)
     static func moored(_ f: SceneFrame) -> String? {
@@ -105,6 +120,15 @@ enum AirshipScene {
     static func down(_ f: SceneFrame) -> Bool {
         guard let g = f.state else { return false }
         return g.over && g.hull <= 0
+    }
+
+    /// The mast at the stop she has reached and is not moored to: its arrival's question
+    /// on screen, or flying on past it, or just cast off. (Rome's is behind her as soon as
+    /// she leaves.)
+    static func passing(_ f: SceneFrame) -> String? {
+        guard let g = f.state, moored(f) == nil, !down(f), g.stopIndex > 0 else { return nil }
+        let stop = g.currentStop
+        return g.mile == stop.mile && AirshipSkin.journey.port(stop.id) != nil ? stop.id : nil
     }
 
     /// The stop she is standing at, its arrival told, when it isn't a mast she is moored to.
@@ -125,27 +149,28 @@ enum AirshipScene {
         let s = palette(f.weather)
         let t = f.t, w = px.w, h = px.h, hz = horizon
         let region = f.region?.id.rawValue ?? "med"
-        let north = f.region?.has("north") ?? false
+        let sunUp = midnightSun(f)
         let dark = isNight(f.hour)
-        let night = dark && !north
+        let night = dark && !sunUp
         let dry = drifting(f)
         let stop = landmark(f)
         let port = moored(f)
+        let atMast = port ?? passing(f)
         let tint: (UInt32) -> Color = { PixelCanvas.mix($0, 0x000000, 1 - s.ground) }
         // How fast the nearest country slides by, in pixels a second.
         let pace = f.moving ? 14 * (dry ? 0.25 : f.weather.speed) + 2 : 1.5
 
         px.sky(top: s.top, bottom: s.bot, horizon: hz)
-        if s.sun && !night { sun(px, f, north: north, moored: port != nil) }
+        if s.sun && !night { sun(px, f, circling: sunUp, moored: port != nil) }
         let drift = f.moving ? (f.weather.sky == .breeze && !following(f.weather) ? 3.2 : 1.6) : 0.4
         px.clouds(s.clouds * 2, Color(hex: s.cloud), t: t, drift: drift)
 
         // The country: a mast's own ground, a stop's, or the region's.
-        let country = port.map { "mast-" + $0 } ?? stop.map { ground(forStop: $0.id) } ?? region
+        let country = atMast.map { "mast-" + $0 } ?? stop.map { ground(forStop: $0.id) } ?? region
         far(px, country, scroll: f.moving ? t * pace * 0.08 : 0, tint)
         px.rect(0, hz, w, h - hz, tint(base(country)))
         detail(px, country, t: t, pace: pace, rough: s.rough, tint)
-        if let port { mast(px, port, t: t, tint) }
+        if let atMast { mast(px, atMast, t: t, lines: port != nil, tint) }
         if let stop { landmark(px, stop.id, t: t, tint) }
         if down(f) { camp(px, f.region, t: t, tint) }
 
@@ -165,11 +190,11 @@ enum AirshipScene {
         }
     }
 
-    /// In the south, climbing and sinking across whichever side of the sky she isn't in;
-    /// in the north the midnight sun, circling low and never setting.
-    static func sun(_ px: PixelCanvas, _ f: SceneFrame, north: Bool, moored: Bool) {
+    /// Climbing and sinking across whichever side of the sky she isn't in; where it does
+    /// not set, the midnight sun, circling low.
+    static func sun(_ px: PixelCanvas, _ f: SceneFrame, circling: Bool, moored: Bool) {
         let color = Color(hex: 0xFFE27A)
-        if north {
+        if circling {
             let a = Double(f.hour) / 24 * 2 * .pi
             // Round the far side of her: at (126, 44) at midnight, highest and nearest at noon.
             px.sun(x: (96 + 30 * cos(a)).rounded(.down), y: (40 + 4 * cos(a)).rounded(.down), color)
@@ -318,8 +343,9 @@ enum AirshipScene {
 
     // MARK: Masts
 
-    /// The town beside each mast, the lattice mast itself, and the ground crew on her lines.
-    static func mast(_ px: PixelCanvas, _ id: String, t: Double, _ tint: (UInt32) -> Color) {
+    /// The town beside each mast, the lattice mast itself, and the ground crew: on her
+    /// handling lines when she is moored (`lines`), waiting at the foot of the mast when not.
+    static func mast(_ px: PixelCanvas, _ id: String, t: Double, lines: Bool, _ tint: (UInt32) -> Color) {
         let hz = horizon
         let roof = tint(0x9A3B2E)
         switch id {
@@ -381,7 +407,7 @@ enum AirshipScene {
         // The ground crew, on her handling lines.
         let rope = Color(hex: 0xD8C8A0).opacity(0.8)
         for (from, to) in [((mooredX + 19.0, mooredY + 12), (108.0, hz - 2)), ((mooredX + 25.0, mooredY + 12), (119.0, hz - 2))] {
-            px.line(from: from, to: to, rope)
+            if lines { px.line(from: from, to: to, rope) }
             let sway = jsRounded(sin(t * 1.3 + to.0))
             px.rect(to.0 + sway, hz - 3, 1, 3, Color(hex: 0x2A2A30))
             px.rect(to.0 + sway, hz - 4, 1, 1, Color(hex: 0xEFD6B0))
@@ -476,12 +502,13 @@ enum AirshipScene {
 
     // MARK: Forced down
 
-    /// Beside her where she came down: a camp on the ice, a fishing boat at sea, or a
-    /// farmer and his dog in a field.
+    /// Beside her where she came down, as the engine tells it (`Airship.wreckedBody`): a
+    /// camp on the ice where there is sea ice below, a fishing boat on open sea, or a
+    /// farmer and his dog in a field, Scandinavia's included.
     static func camp(_ px: PixelCanvas, _ region: Region?, t: Double, _ tint: (UInt32) -> Color) {
         let hz = horizon
         let ink = Color(hex: 0x2A2A30), face = Color(hex: 0xEFD6B0)
-        if region?.has("north") == true {
+        if region?.has("pack") == true {
             // The floe she came down on, and the camp beside the gondola.
             px.polygon([(40, hz + 1), (146, hz + 1), (152, hz + 6), (142, hz + 10), (48, hz + 9), (36, hz + 5)], tint(0xE6EDF2))
             px.rect(48, hz + 9, 94, 1, tint(0x9FB0BF))
@@ -582,7 +609,18 @@ enum AirshipScene {
 
     // MARK: VoiceOver
 
-    static func place(_ name: String) -> String { name.hasPrefix("The ") ? "the " + name.dropFirst(4) : name }
+    /// Where she is, as a sentence says it after a verb: "over the North Sea", "above the
+    /// fog". The engine's names are headings ("Mediterranean", "Under the Fog").
+    static let whereabouts: [String: String] = [
+        "med": "over the Mediterranean", "france": "over France", "northSea": "over the North Sea",
+        "scandinavia": "over Scandinavia", "barents": "over the Barents Sea", "polarSea": "over the Polar Sea",
+        "aboveFog": "above the fog", "underFog": "under the fog", "alaska": "over the Alaskan coast",
+    ]
+
+    static func whereabouts(_ region: Region?) -> String {
+        guard let region else { return "over open country" }
+        return whereabouts[region.id.rawValue] ?? "over \(region.name)"
+    }
 
     static func label(_ f: SceneFrame) -> String {
         guard let g = f.state else { return "An airship flying north in clear weather" }
@@ -591,11 +629,17 @@ enum AirshipScene {
         }
         if down(f) {
             let r = f.region
-            return r?.has("north") == true ? "The airship down on the ice, her crew camped beside the gondola"
+            return r?.has("pack") == true ? "The airship down on the ice, her crew camped beside the gondola"
                 : r?.has("sea") == true ? "The airship down on the sea, a fishing boat coming alongside"
                 : "The airship down in a field, a farmer and his dog looking her over"
         }
         let weather = f.weather.name.lowercased()
+        if let id = passing(f) {
+            let name = AirshipSkin.journey.port(id)?.name ?? g.currentStop.short
+            if drifting(f) { return "Airship drifting past the mast at \(name), engines stopped. Weather: \(weather)" }
+            return f.moving ? "Airship flying past the mast at \(name). Weather: \(weather)"
+                            : "Airship over the mast at \(name), the ground crew waiting below. Weather: \(weather)"
+        }
         if let stop = landmark(f) {
             switch stop.id {
             case "rhone": return "Airship over the mouth of the Rhône, the coast behind her. Weather: \(weather)"
@@ -608,11 +652,10 @@ enum AirshipScene {
             default: return "Airship over \(stop.name). Weather: \(weather)"
             }
         }
-        let over = place(f.region?.name ?? "open country")
-        if drifting(f) { return "Airship drifting over \(over), engines stopped. Weather: \(weather)" }
-        let north = f.region?.has("north") ?? false
-        let time = isNight(f.hour) ? (north ? " under the midnight sun" : " by night") : ""
-        return f.moving ? "Airship flying over \(over)\(time). Weather: \(weather)"
-                        : "Airship over \(over)\(time), engines stopped. Weather: \(weather)"
+        let over = whereabouts(f.region)
+        if drifting(f) { return "Airship drifting \(over), engines stopped. Weather: \(weather)" }
+        let time = isNight(f.hour) ? (midnightSun(f) ? " in the midnight sun" : " by night") : ""
+        return f.moving ? "Airship flying \(over)\(time). Weather: \(weather)"
+                        : "Airship \(over)\(time), engines stopped. Weather: \(weather)"
     }
 }

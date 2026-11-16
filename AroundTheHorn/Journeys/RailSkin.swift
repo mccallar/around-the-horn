@@ -129,10 +129,12 @@ enum RailSkin {
             currency: "$",
             storeNames: [.clothes: "Blankets"],
             looseUnits: [.tackle: "casts"],
+            looseOne: [:],
             fractional: [],
             singular: true,
             lots: [.water],
             departRefusal: nil,
+            resumesInFirstShop: false,
             vesselHeading: "The \(g.ship)",
             suppliesNote: "Pace: \(pace.name) · Rations: \(rations.name) · "
                 + (left > 0 ? "\(span(left)) left on the contract" : "[red]the freight is late[/red]"),

@@ -162,6 +162,17 @@ final class AirshipTests: XCTestCase {
             XCTAssertTrue(sea.contains("onto the sea"), "\(km)")
             XCTAssertFalse(sea.contains("farmer"), "\(km)")
         }
+
+        // Scandinavia is north, but land: a field, not the ice. Everywhere with sea ice
+        // below, and only there, is the ice.
+        for region in airship.regions + [AirshipData.underFog] {
+            s = flying(km: region.to - 5)
+            if region.id == AirshipData.underFog.id { s.vars[AirshipData.routeKey] = AirshipData.routeLow }
+            XCTAssertEqual(s.region.id, region.id)
+            let body = airship.wreckedBody(s)
+            XCTAssertEqual(body.contains("onto the ice"), region.has("pack"), region.name)
+            if region.id.rawValue == "scandinavia" { XCTAssertTrue(body.contains("farmer"), body) }
+        }
     }
 
     /// The sights below match the country: mock suns in the north, a fishing fleet at sea,

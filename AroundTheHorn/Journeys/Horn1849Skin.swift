@@ -101,10 +101,12 @@ enum Horn1849Skin {
             currency: "$",
             storeNames: [.clothes: "Woolens", .sailcloth: "Sailcloth", .timber: "Timber"],
             looseUnits: [.tackle: "throws"],
+            looseOne: [:],
             fractional: [.limes],
             singular: false,
             lots: [],
             departRefusal: nil,
+            resumesInFirstShop: false,
             vesselHeading: "The \(g.ship)",
             suppliesNote: "Pace: \(pace.name) · Rations: \(rations.name)"
                 + (g.noCitrus > 20 ? " · [red]\(g.noCitrus) days without citrus[/red]" : ""),

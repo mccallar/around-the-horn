@@ -248,8 +248,10 @@ public final class Airship: Journey {
         return d
     }
 
+    /// On the ice where there is sea ice below ("pack"), on open sea, or in a field:
+    /// Scandinavia is north, but land.
     public override func wreckedBody(_ s: GameState) -> String {
-        s.region.has("north") ? Self.forcedDownOnIce : s.region.has("sea") ? Self.forcedDownAtSea : Self.forcedDownInAField
+        s.region.has("pack") ? Self.forcedDownOnIce : s.region.has("sea") ? Self.forcedDownAtSea : Self.forcedDownInAField
     }
 
     override func tick(_ e: GameEngine, _ q: inout [Interrupt], _ mode: GameEngine.DayMode, _ reg: Region) {

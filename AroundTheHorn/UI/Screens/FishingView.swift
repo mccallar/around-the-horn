@@ -146,7 +146,7 @@ struct FishingView: View {
         let g = c.game!
         let journey = c.journey, skin = c.skin.forage
         let field = skin.field
-        let reward = Self.reward(journey, c.skin.words(g))
+        let reward = Self.reward(journey, c.skin.words(g), grouped: skin.grouped)
         VStack(alignment: .leading, spacing: 0) {
             Heading(skin.heading)
             if let m = model {
@@ -192,7 +192,7 @@ struct FishingView: View {
 
     private func run(_ g: GameState) async {
         let journey = c.journey, skin = c.skin.forage
-        let reward = Self.reward(journey, c.skin.words(g))
+        let reward = Self.reward(journey, c.skin.words(g), grouped: skin.grouped)
         let m = FishingModel(field: skin.field, quarry: journey.quarry, seconds: journey.forageSeconds,
                              padding: journey.role(g.role).aim, pop: Self.pop(skin, reward),
                              useTackle: { [c] in
@@ -230,16 +230,18 @@ struct FishingView: View {
     struct Reward {
         let item: Item
         let how: Stores.Counting
+        /// Commas in the thousands (`ForageSkin.grouped`).
+        var grouped = false
 
-        /// With its unit: "12 lbs", "1.4 cords".
-        func measure(_ stored: Int) -> String { Stores.measure(Double(stored), item, how) }
+        /// With its unit: "12 lbs", "1.4 cords", "1,350 kg".
+        func measure(_ stored: Int) -> String { Stores.measure(Double(stored), item, how, grouped: grouped) }
         /// The bare number: "12", "1.4".
-        func count(_ stored: Int) -> String { Stores.count(Double(stored), item, how) }
+        func count(_ stored: Int) -> String { Stores.count(Double(stored), item, how, grouped: grouped) }
     }
 
-    static func reward(_ journey: Journey, _ words: Words) -> Reward {
+    static func reward(_ journey: Journey, _ words: Words, grouped: Bool = false) -> Reward {
         let item = journey.item(journey.forageReward)
-        return Reward(item: item, how: Stores.counting(item, words))
+        return Reward(item: item, how: Stores.counting(item, words), grouped: grouped)
     }
 
     /// What floats up from a hit: the skin's words round the shell's number.

@@ -76,6 +76,8 @@ enum Stores {
     struct Counting: Equatable {
         /// What one stored unit is called when the item is counted loose aboard.
         var loose: String?
+        /// And exactly one of them, if that is not `loose`.
+        var looseOne: String?
         /// Counted to a tenth of its unit, not in whole ones.
         var tenths = false
         /// Exactly one is written with `Item.one`.
@@ -87,7 +89,8 @@ enum Stores {
     /// it is still something aboard, and has to read as something.
     static func counting(_ it: Item, _ words: Words) -> Counting {
         let loose = words.looseUnits[it.key]
-        return Counting(loose: loose, tenths: words.fractional.contains(it.key) || (it.per > 1 && loose == nil),
+        return Counting(loose: loose, looseOne: words.looseOne[it.key],
+                        tenths: words.fractional.contains(it.key) || (it.per > 1 && loose == nil),
                         singular: words.singular)
     }
 
@@ -124,10 +127,11 @@ enum Stores {
     }
 
     /// `stored` with what it is counted in: "1,500 lbs", "9.5 crates", "1.4 cords", and
-    /// what is loose aboard counted singly and written plain, "60 throws".
+    /// what is loose aboard counted singly and written plain, "60 throws", "1 balloon".
     static func measure(_ stored: Double, _ it: Item, _ how: Counting, grouped: Bool = false) -> String {
         let n = count(stored, it, how, grouped: grouped)
-        return "\(n) \(how.loose ?? unit(it, count: n, how))"
+        let loose = n == "1" ? how.looseOne ?? how.loose : how.loose
+        return "\(n) \(loose ?? unit(it, count: n, how))"
     }
 
     /// With its unit, for the supplies list and the status box.

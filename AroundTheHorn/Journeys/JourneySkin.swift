@@ -125,6 +125,10 @@ struct Words {
     let storeNames: [ItemKey: String]
     /// What one of a boxed item is called once aboard: a box of tackle is 20 throws.
     let looseUnits: [ItemKey: String]
+    /// What a single one of those is called, where the loose name won't do for one: "1
+    /// balloon". An item not listed reads the same at any count, as rail's "1 casts" and
+    /// 1849's "1 throws" always have.
+    let looseOne: [ItemKey: String]
     /// Items counted to a tenth of their unit though they are stored whole: crates of
     /// citrus. Anything stored in parts of its unit (`Item.per` above one) is counted
     /// that way without being listed, unless it is in `looseUnits`.
@@ -138,6 +142,11 @@ struct Words {
     /// Why the first port won't let the vessel go yet, beyond the engine's own refusal
     /// (nothing to eat): an airship with empty tanks. Nil when nothing else stops it.
     let departRefusal: String?
+    /// Whether a voyage saved at the first port before it left (the stores save as you
+    /// leave them) comes back to those stores, so that it still leaves through the
+    /// departure and both refusals. False: it comes back to the port menu, whose way out
+    /// sets off with neither, as 1849's prototype does (decision D15).
+    let resumesInFirstShop: Bool
     let vesselHeading: String
     /// The line under the meters: pace, rations and anything worth a warning.
     let suppliesNote: String
@@ -271,6 +280,9 @@ struct ForageSkin {
     let throwsLabel: String
     let caughtLabel: String
     let timeLabel: String
+    /// Whether the tally and the hint put commas in the thousands ("Found: 1,350 kg"), as
+    /// the journey's own catch report does. 1849's prototype wrote "Caught: 1050 lbs".
+    let grouped: Bool
     /// `limit` is the most the role can keep, written out with its unit: "200 lbs".
     let hint: (_ limit: String) -> String
     let label: (_ quarry: Int) -> String

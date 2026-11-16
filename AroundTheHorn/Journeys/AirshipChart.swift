@@ -32,6 +32,14 @@ enum AirshipChart {
         (-165.41, 64.5, 9600),
     ]
 
+    /// The latitude `km` along the flight, straight between the points above.
+    static func latitude(atKm km: Double) -> Double {
+        for (a, b) in zip(flight, flight.dropFirst()) where km <= b.2 {
+            return km <= a.2 || b.2 == a.2 ? a.1 : a.1 + (b.1 - a.1) * (km - a.2) / (b.2 - a.2)
+        }
+        return flight.last?.1 ?? 0
+    }
+
     static let route: [ChartSkin.Point] = flight.map { p in
         let q = project((p.0, p.1))
         return (x: q.x, y: q.y, mile: p.2)
@@ -40,7 +48,7 @@ enum AirshipChart {
     static let skin = ChartSkin(
         w: w, h: h,
         title: "Chart of the flight",
-        label: { "Polar chart of the flight from Rome over the North Pole to Nome. You are over \(place($0))." },
+        label: { "Polar chart of the flight from Rome over the North Pole to Nome. You are \(AirshipScene.whereabouts($0.region))." },
         footer: {
             let total = AirshipSkin.journey.totalMiles
             return "\(formatNumber(Double($0.mile))) of \(formatNumber(Double(total))) kilometres flown. "
@@ -52,8 +60,6 @@ enum AirshipChart {
         project: { ($0, $1) },
         routeStep: 60, travelledStep: 20, routeColor: Color(hex: 0x6D7F92),
         overlay: { px, _, _ in names(px) })
-
-    static func place(_ g: GameState) -> String { AirshipScene.place(g.region.name) }
 
     // MARK: The top of the world
 

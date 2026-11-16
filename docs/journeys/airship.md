@@ -1123,8 +1123,9 @@ their chances, and that losing flights end at least three ways.
 4. **Two shared hooks**, both with defaults that leave 1849 and rail byte-identical (the three
    gates and the rail bands are green): `Journey.propulsionWear` (the drive's wear a turn)
    and `Journey.wreckedBody` (the paragraph under the wreck title, so being forced down
-   reads "onto the ice" in a `north` region, "onto the sea" in any other `sea` region, and
-   "into a field" over land).
+   reads "onto the ice" in a `pack` region (sea ice below), "onto the sea" in any other
+   `sea` region, and "into a field" over land, Scandinavia's included: it is `north` but
+   land).
 5. **Heavy ship** is rolled in `tick`, after `wear` has said its warnings, not inside `wear`.
    The odds and amounts are the spec's.
 6. **The date line** is the shared one for short turns ("May 3, 1926, 4 p.m."), as rail's
