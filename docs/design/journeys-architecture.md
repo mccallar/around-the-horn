@@ -44,7 +44,7 @@ Three gates prove 1849 is unchanged and are never re-recorded: `PrototypeParityT
 | `weatherWeights(_:_:cursed:)` | the region's | seasons or the journey's state shift the odds (use `bump`) |
 | `crewFactor(_:)` | 1 / 0.85 / 0.65 / 0.45 for 4+ / 3 / 2 / 1 hands | the vehicle needs fewer or more |
 | `adjustSpeed(_:_:_:)` | nothing | grades, currents, head winds, a hired helper |
-| `stalled(_:)` | nil: the vehicle can move | it cannot (rail: broken down); what is shown instead of the turn, which then takes no time and draws nothing |
+| `stalled(_:)` | nil: the vehicle can move | it cannot, or has something to meet first (rail: broken down; a set piece held while she was); what is shown instead of the turn, which then takes no time and draws nothing |
 | `structureDamage(_:_:)` | creep + rough weather × pace | the structure wears differently |
 | `tick(_:_:_:_:)` | nothing | a per-turn rule of its own, in every mode |
 | `dayEvents(_:_:_:)` | `eventChance` → one of `events` | several event tables |
@@ -259,7 +259,7 @@ numbers and text are untouched, and so is everything 1849 shows.
   `ForageField.oneWay` (all the quarry crosses the same way, wood on a current; 1849
   answers `false`). Nothing else in the shared views changed. Later, `Words.trouble` (a
   red row under those for a plight the meters don't say: "Train: Broken down", "Out of
-  wood"; 1849 answers `nil`), decision D14.
+  wood", "Last of the wood"; 1849 answers `nil`), decision D14.
 - A turn need not be a day. Rail's is four hours, so the skin has one function, `span`,
   that turns a count of turns into "8 hours" or "7 days and 4 hours", and uses it for the
   rest menu, the contract row and the endings. The date with its hour is the engine's.

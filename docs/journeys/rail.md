@@ -109,10 +109,22 @@ on, the road asks, in red, what to do:
 | Climb down and take stock first | always | the menu under way; nothing changes |
 
 The conductor walks when nobody else is left. With no spare for a part that is out and
-less than $45, the run ends there: **Stranded at mile N**. A train that gives out standing
-in a yard (she gave out on the turn she reached it, or took the main line through) is put
-back in the yard for its roundhouse and its store; if she can pay for none of them and
-has no spare, she is stranded there too.
+less than $45, the run ends there: **Stranded at mile N**.
+
+A train that gives out standing in a yard (she gave out on the turn she reached it) is
+asked the same question with the yard in place of the walk: fit a spare from the stores,
+or **Climb down into the yard: the store and the roundhouse**, which puts her back in the
+yard's menu to buy a spare (fitted when she is next sent on) or pay the roundhouse. The
+question comes back every time she is sent on until she is mended. Only with no spare
+aboard for a part that is out and not the price of one at the yard's store is she
+stranded: **Stranded at North Platte**. (The yard's menu has no repairs row of its own,
+so before review a train with a spare, or the money for one but not for the roundhouse,
+was sent back to the yard every time she left, with nothing there to mend her.)
+
+A set piece (the Dale Creek trestle, Donner Summit) reached on the turn she gave out
+waits: "The *Prairie Queen* gets as far as Donner Summit, and not a foot further." Once
+she is mended, the set piece is asked before she turns another wheel, and asking takes no
+time (`rail.heldSetPiece` keeps it across a save).
 
 Worn-out running gear no longer wrecks the train (`rules.wearWrecks = false`): it is a
 breakdown like the engine's. The three violent moments still can put her in the ditch:
@@ -124,15 +136,24 @@ at 1 health or more; the next turn's health can still kill.
 
 ## Out of wood
 
-A turn begun with less wood than the pace burns runs at a fifth of the speed
-(`rules.noFuelSpeed` 0.2: about 7 miles in four hours at timetable speed, instead of 42)
-and takes 0.5–1.5 points off the engine for what goes into the firebox. The status box
-says **Train: Out of wood** (or **Broken down, no wood**), the note under it says what the
-fireman is burning, and the warning when the woodpile goes says "You are barely moving".
-The ways out: driftwood wherever there is a river, the next yard's woodpile, the culled
-ties beside the track. Burning the last cord is a turn at full speed; only a turn begun
-short of wood crawls. Left long enough, the fence posts wear the engine to nothing and she
-breaks down as well.
+A turn begun with no wood runs at a little over a fifth of the speed (`rules.noFuelSpeed`
+0.22: about 9 miles in four hours at timetable speed, instead of 42) and takes 0.5–1.5
+points off the engine for what goes into the firebox. A turn begun with some wood, but
+less than the pace burns, burns what there is for its share of the turn and crawls the
+rest (`rules.burnsPartLoad`): six tenths of a cord at timetable speed is 0.6 of the turn
+at full speed and 0.4 at the crawl, and 0.4 of the wear. The status box says **Train: Out
+of wood** (or **Broken down, no wood**), or **Train: Last of the wood** with less than the
+pace burns in a turn; the note under it says what the fireman is burning. The warning when
+the woodpile goes looks ahead: "From here the firebox gets sagebrush, fence posts and bad
+language, which will barely move her and are hard on the engine." The ways out: driftwood
+wherever there is a river, the next yard's woodpile, the culled ties beside the track.
+Burning the last cord is a turn at full speed. Left long enough, the fence posts wear the
+engine to nothing and she breaks down as well.
+
+Nothing on the road burns wood that is not there: the drivers spinning on a grade happen
+only with wood aboard and take no more than there is, and the dash for a siding ahead of
+the express (1.2–2.2 cords) and bucking a drift (0.8–1.6) are offered only with the most
+they can burn aboard, "(not on the wood aboard)" otherwise.
 
 ## Balance, as built
 
@@ -142,17 +163,29 @@ runs low, hire a helper only with $100 to spare beyond the fee.
 
 | Departure | Contractor | Boilermaker | River hand | Median winning run |
 |---|---|---|---|---|
-| June | 30/30 | 25/30 | 11/30 | 74 turns |
-| August | 30/30 | 27/30 | 18/30 | 72 turns |
-| **October** | **30/30** | **24/30** | **13/30** | **76 turns** |
-| December | 30/30 | 7/30 | 1/30 | 77 turns |
-| February | 30/30 | 10/30 | 6/30 | 73 turns |
+| June | 30/30 | 25/30 | 13/30 | 73 turns |
+| August | 30/30 | 27/30 | 19/30 | 72 turns |
+| **October** | **30/30** | **26/30** | **15/30** | **74 turns** |
+| December | 30/30 | 9/30 | 2/30 | 76 turns |
+| February | 30/30 | 13/30 | 8/30 | 74 turns |
 
 Before breakdowns and the crawl on no wood (D14) the same runs read June 30/26/14, August
 30/28/18, October 30/27/15, December 30/12/1 and February 30/13/6. Of the new numbers,
 only the crawl moves the table: the mechanic's fee, time and repair made no difference to
-the bot in a sweep from $0 to $45, and the speed on no wood was chosen from 0.12, 0.15 and
-0.2 as the one that keeps every month nearest where it was.
+the bot in a sweep from $0 to $45. The crawl's speed was chosen by surveying October at
+ten seed bases (500, 10000, 20000 … 90000), since one seed can sit high or low:
+
+| Crawl | Boilermaker, mean of 10 | River hand, mean of 10 | Bases outside the bands |
+|---|---|---|---|
+| before D14 (0.25, no breakdowns) | 25.7 | 15.4 | 2 (boilermaker 28 and 29, over 27) |
+| 0.2 | 22.0 | 13.9 | 1 (boilermaker 17) |
+| **0.22** | **24.5** | **14.2** | **none** (boilermaker 19–27, river hand 11–19) |
+| 0.25 | 26.2 | 14.9 | 3 (boilermaker over 27) |
+
+The rows after the first are with a part cord burnt for its share. The contractor wins
+30 of 30 at every base. At 0.2, as first chosen, three of the ten bases fell outside the
+bands while a part cord was still thrown away, and one once it was burnt; 0.22 keeps
+every base inside.
 
 October is inside the bands (85–100 / 60–90 / 35–70%), and a winning run takes about the
 twelve days of the contract, so the bonus is in doubt to the end. Losing runs are spread
@@ -167,7 +200,7 @@ Things worth knowing:
 - A river hand leaving in December now usually loses in the Salt Desert: the tank car
   runs dry, the boiler scorches the engine to nothing, and there is no money left for a
   mechanic. Before D14 she limped through at 45% speed with a dead engine.
-- A river hand leaving in December wins one run in thirty. That is the intent ("leave in
+- A river hand leaving in December wins two runs in thirty. That is the intent ("leave in
   midwinter and pay for it"), and the title card says so, but it is close to a wall.
 - The economy is steep around purse size: a few dollars either way moves the poorer
   roles a long way. Difficulty was tuned with wear and season, not prices.

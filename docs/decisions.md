@@ -203,25 +203,34 @@ and a road accident could leave a crew member's health at −6 until the next tu
 Ruled for rail only (docs/journeys/rail.md, "Breakdowns" and "Out of wood"): a train whose
 engine or running gear shows 0% has given out and stands where she is until she is
 mended (fittings, car spares, a mechanic someone walks down the line for at $45 and
-twelve hours to a day, or the roundhouse in a yard); with nothing to mend her and no
-money she is stranded, which ends the run. Worn running gear breaks down rather than
-wrecks; the trestle, the culvert and the runaway still wreck. With too little wood she
-crawls at a fifth of her speed and the fence posts wear the engine. Damage is reported as
+twelve hours to a day, or, in a yard, a spare from its store or its roundhouse); with
+nothing to mend her and no money she is stranded, which ends the run. A set piece she
+reached as she gave out waits until she is mended. Worn running gear breaks down rather
+than wrecks; the trestle, the culvert and the runaway still wreck. With no wood she
+crawls at 0.22 of her speed and the fence posts wear the engine; a part cord burns for
+its share of the turn, and nothing on the road burns wood that is not aboard. Damage is reported as
 the status box will show it, and road accidents leave a crew member at 1 health at least.
 The status box gets a red row for it (`Words.trouble`, in the app and on the web).
 
 Shared, with defaults that leave 1849 byte for byte as it was (the three gates are
 unedited and green): `Journey.stalled`, nil unless a journey says its vehicle cannot move,
 called before a turn draws anything; `Rules.wearWrecks`, true, under which wear that
-takes the hull to nothing founders the ship as before. `.enterPort` under way, as rail's
-"take stock" sends it, is the menu under way. The October bands hold without being
-touched: 30/24/13 of 30, median 76 turns (it was 30/27/15, 75).
+takes the hull to nothing founders the ship as before; `Rules.burnsPartLoad`, false, under
+which a part load is thrown away and the whole turn runs on `noFuelSpeed` (1849 burns
+nothing, so never reaches it). `.enterPort` under way, as rail's "take stock" sends it,
+is the menu under way. The October bands hold without being touched: 30/26/15 of 30,
+median 74 turns (it was 30/27/15, 75), and inside them at all ten seed bases surveyed
+(docs/journeys/rail.md, "Balance, as built").
 
 1849 has the same three things, and they are the prototype's rules, so nothing changed:
 her sails at 0% still drive her at 45%; a split topsail or a lost topmast can report
 "Sails −28%" or "Sails −15%" with the sails at 2%; and two of her events
 (Horn1849+Events: the topmast's broken arm and the privateers') take 10 and 20 health
 without a floor, so a crew member's health can stand below
-0 until the next day's health clamps it and buries them. None of these is shown as a
-negative number (the supplies screen draws health as a bar, clamped). They are left
-to be ruled on, not changed by this decision.
+0 until the next day's health clamps it and buries them. Two more were found in review:
+the galley fire takes 4 from the hull and, unlike the leak and the topmast, never asks
+whether she sinks, so a ship at 4% or less is left at 0% (not over), can be patched
+back up from there, and otherwise sails one more day at the hull's speed floor before
+that day's wear founders her; and lightning reports "Sails −18%" whatever the sails had
+left. None of these is shown as a negative number (the supplies screen draws health as
+a bar, clamped). They are left to be ruled on, not changed by this decision.
