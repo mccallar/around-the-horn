@@ -282,8 +282,9 @@ None the engine cannot express: every rule above maps onto a hook rail already u
 Engine files: `HornEngine/Journeys/Mars/` (`Mars.swift` rules, sentences and hooks,
 `MarsData.swift` tables, `Mars+Ports.swift` the four stations and the cycler's offer,
 `Mars+Events.swift` the 23 events, `Mars+Choices.swift` turnover, capture and every
-answer), one entry in `Journeys.all`. Tests: `HornEngineTests/MarsTests.swift` (30 rule
-tests, 4 balance tests); `JourneyContractTests` runs over it with no special case. The
+answer, `Mars+Trouble.swift` the array dark, the hull at 0% and the tanks dry, D14), one
+entry in `Journeys.all`. Tests: `HornEngineTests/MarsTests.swift` (30 rule tests, 4 balance
+tests) and `HornEngineTests/MarsBreakdownTests.swift` (18, D14); `JourneyContractTests` runs over it with no special case. The
 title card, setup and outfit copy, learn pages, burial wording, status labels, scene,
 chart and the grapple's drawing (§1's card, §15's canvas, §16, §19) belong to the skin,
 which is not built yet. No shared engine code changed. The test bot `JourneyBot` gained
@@ -320,7 +321,7 @@ is the cheapest yard and Midway the dearest.
 
 **Rules** (`Rules`): turn 24 h from the 7th of the launch month; speed × (0.7 + 0.3 ×
 power) and the hull never slows the ship (`hullFloor 1`, `hullSpan 0`); no propellant ×
-0.4; water 2 L a head a day, hot or not; a month (30 days) without supplement packs
+0.4, the last of it driving its share of the day (`burnsPartLoad`, D14); water 2 L a head a day, hot or not; a month (30 days) without supplement packs
 before bone loss can start; hull creep 0.05 a day; below 35 hull the freezer can spoil
 10–30 kg; one event on 17% of days; trades wanted at $20 of a good or $40 cash, worth
 $15–45; rank cuts 8,000 / 5,000 / 2,500. Everything else is the shared default.
@@ -374,31 +375,36 @@ Thirty runs a role from seed 500 (what the tests assert), then 90 a role over se
 
 | Launch | Charter captain | Yard rigger | Ice hauler | Median winning run |
 |---|---|---|---|---|
-| 7 August 2087 | 30/30 · 88/90 | 1/30 · 16/90 | 2/30 · 7/90 | 180 days |
-| 7 September | 28/30 · 88/90 | 14/30 · 47/90 | 11/30 · 29/90 | 164 |
-| **7 October (tested)** | **30/30 · 89/90** | **24/30 · 67/90** | **19/30 · 58/90** | **154–155** |
-| 7 November | 30/30 · 90/90 | 12/30 · 43/90 | 10/30 · 27/90 | 165–166 |
-| 7 December | 29/30 · 88/90 | 1/30 · 7/90 | 1/30 · 2/90 | 181–182 |
+| 7 August 2087 | 30/30 · 88/90 | 1/30 · 15/90 | 1/30 · 6/90 | 180 days |
+| 7 September | 28/30 · 88/90 | 14/30 · 46/90 | 9/30 · 19/90 | 163–164 |
+| **7 October (tested)** | **30/30 · 89/90** | **22/30 · 63/90** | **16/30 · 52/90** | **155** |
+| 7 November | 30/30 · 90/90 | 10/30 · 38/90 | 10/30 · 23/90 | 165–166 |
+| 7 December | 29/30 · 88/90 | 0/30 · 5/90 | 1/30 · 1/90 | 181 |
 
-October median scores: charter captain 3,353 (Orbit Hand), yard rigger 6,242 (Deep-space
-Hand), ice hauler 7,911 (Deep-space Hand). How October's 90 a role are lost: thirst 25,
-bone loss 7, a fracture 6, hypothermia 5, hunger 4, bad air 3, infection 3, and
-exhaustion, an infected burn and decompression.
+These are after D14 (power, the hull and propellant at nothing, below). Before it the
+October row was 30/30 · 89/90, 24/30 · 67/90, 19/30 · 58/90, and September's ice hauler
+won 29 of 90: the poorer roles' arrays run down late in the trip, and a dead array no
+longer drives the ship at 70%.
+
+October median scores: charter captain 3,353 (Orbit Hand), yard rigger 6,272 (Deep-space
+Hand), ice hauler 7,920 (Deep-space Hand). How October's 90 a role are lost: thirst 28,
+bone loss 13, a fracture 10, infection 5, hypothermia 3, bad air 2, hunger 2, a long
+decline 2, and a decompression injury.
 
 Choices and play, October, 60 runs a role (seeds 500 and 1999; captain / rigger /
 hauler, median):
 
 | Played as | Wins | Median |
 |---|---|---|
-| the bot | 60 / 44 / 39 | 155 |
-| always aerobrake | 60 / 46 / 43 (2 hulls lost) | 155 |
-| always burn into orbit | 60 / 44 / 37 | 157 |
-| never run on at turnover | 60 / 40 / 37 | 160 |
-| work through every flare | 60 / 47 / 40 | 153 |
-| hard burn all the way | 59 / 42 / 12 | 139 |
-| economy burn all the way | 59 / 27 / 20 | 181 |
-| full rations for the ice hauler | 60 / 44 / 16 | 154 |
-| no grapple | 60 / 47 / 0 | 153 |
+| the bot | 60 / 41 / 35 | 155 |
+| always aerobrake | 60 / 44 / 40 (5 hulls lost) | 154 |
+| always burn into orbit | 60 / 40 / 32 | 156 |
+| never run on at turnover | 60 / 38 / 34 | 159 |
+| work through every flare | 60 / 47 / 35 (1 hull lost) | 153 |
+| hard burn all the way | 59 / 39 / 6 | 139 |
+| economy burn all the way | 59 / 24 / 22 | 181 |
+| full rations for the ice hauler | 60 / 41 / 12 | 154 |
+| no grapple | 60 / 46 / 0 | 153 |
 | wave the cycler by | 0 / 0 / 0 | — |
 
 The tests assert the October bands (85–100 / 60–90 / 35–70%) and a median winning run of
@@ -452,6 +458,106 @@ the two poorer roles' losses end at least three ways.
     shadow, but the transfer arc only gets further from the Sun until Mars, and the
     cycler's engineer says the wings wear faster past 240 million km. The bot's October
     results stayed in their bands.
+14. **The role lines** read "A charter captain backed by a freight consortium", "A yard
+    rigger who bought the ship she used to fix" and "An ice hauler off the lunar tugs",
+    not §2's "Be a …" (D11: no journey's roles are offered in that shape). Text only.
+
+### Power, the hull and propellant at nothing (D14)
+
+Reported from play on the Iron Road ("you can go below 0 for the health of the train ... I
+ran out of cord and it seemed to be still moving just fine"), and checked here
+(`HornEngineTests/MarsBreakdownTests.swift`). Before this nothing showed "-0" and the
+meters were never stored below 0, but:
+
+- power & drive at 0% drove the ship at 70% of her speed (the power floor, `propFloor`
+  0.7) on a full day's propellant, with only the cold cabin to show for it; the bot's
+  poorer roles flew like that for days at a time;
+- a pressure hull under half a point showed 0% and flew on: the shared wreck waits for
+  nothing at all;
+- the damage reports gave the event's whole number past what the meter had ("Power &
+  drive −9%" with 3% left, "Pressure hull −12%" from 4%);
+- three accidents (the pebble's decompression, the coolant line's burn, working through a
+  flare) took 6, 5 or 8 health with no floor, so a crew member could stand at −5 until the
+  next day buried them;
+- the last of the propellant, less than a day's burn, was thrown away for nothing, and a
+  dry ship coasted at 0.4 with nothing else to pay and nothing on the status panel;
+- with power at 0% a good tracking fix still trimmed up to 3 million km off the arc.
+
+The rules now (`Mars+Trouble.swift`):
+
+- **A meter that shows 0% has given out**, as the status panel rounds it (`jsRound`), as on
+  the other journeys. Every hull and power loss goes through `knock`: never past nought,
+  and the red note gives the drop the panel will show, or nothing when it shows none.
+- **The pressure hull at 0% lets go**, as §4 has always had it, and the run ends ("The
+  hull of the *Fair Copy* lets go.", or the aerobrake's ending in the Martian sky). The
+  wreck now comes at a shown 0%, not only at nothing: a day's wear or an event that would
+  leave less than half a point takes the rest, and a save standing at 0% lets go before
+  another day. There is no way out to offer: nobody out there can help, and patches go on
+  from the stores long before. `rules.wearWrecks` stays true.
+- **Power & drive at 0% is dark.** The drive has nothing to run on, so she coasts along the
+  arc as she does with the tanks dry (the shared `noFuelSpeed`, 0.4, on top of the power
+  floor's 0.7: 0.28 of a day at full power) and burns no propellant (`Journey.fuelBurn`
+  answers 0). The recycler stops, so the water lost each day is 4 litres a head, not 2
+  (`waterNeed`; docked, the station's recycler does the work). The cabin is freezing, as
+  under 20%. Before every day in the dark (`Journey.stalled`) she is asked: "[red]The array
+  has gone dark.[/red] The drive is dead, the recycler has stopped and the cabin is getting
+  colder by the hour. The *Fair Copy* coasts on along the arc at the speed she had, which
+  is not much." The offers:
+  - "Fit a spare array panel (have n)": the repair, +25 (the yard rigger +40), a day.
+  - "Rewire what is left of the wings: two days in suits", always open. The two fittest
+    hands go out (the captain makes up two, or goes alone); two days pass in the dark;
+    power comes back by 10 points; each who went out loses 3 to 8 health (never below 1)
+    and has a 15% chance of a decompression injury. Ten points run the drive and the
+    recycler but not the heating: the cabin is freezing until 20.
+  - "Coast on in the dark for a day": that day is a coast, and the next is asked about
+    again (`mars.coast` holds the day chosen for, so a rest in between asks again).
+  - "Take stock first": the menu under way.
+  The rewire is always open and a coast always makes way, so there is no softlock. Wing
+  trouble (the actuator, the coolant line) needs power; the thruster grid and a course
+  trimmed on a good tracking fix need the drive running (power and propellant); the pod
+  cannot be matched in the dark.
+- **A set piece that needs the drive waits for power.** Reaching the cycler, turnover or
+  the Mars approach dark (on the day the array went, or on a day's coast), it is held
+  (`mars.held`): "The *Fair Copy* reaches Turnover with her array dark. Turnover is due,
+  and nobody turns a ship end for end without a drive." (the cycler: "The Perpetua is
+  holding her docking window open, and there is no meeting her without a drive."; the
+  approach: "Mars is coming up, and nobody meets a planet without a drive."). The dark
+  question is then asked without the coast, and the set piece comes, taking no time, once
+  there is power. The cycler still pays what a grateful ship wired on arrival. Midway and
+  Phobos take a dark ship in as usual: they have tugs.
+- **Dry tanks**: she coasts at the shared 0.4, and the last of the propellant now drives its
+  share of the day (`rules.burnsPartLoad`: 0.4 t of cruise's tonne makes 0.64 of a powered
+  day). With nothing for the thrusters that keep her pointed she tumbles, and power & drive
+  loses 1 point a day dry (`tumbleWear`, for the dry share of a day), so a long coast ends
+  with the array dark as well. The warning says so: "[red]The propellant tanks are
+  dry.[/red] The drive coughs once and goes quiet, and so do the thrusters that keep her
+  pointed. She coasts on along the arc at the speed she had, turning slowly, and the wings
+  wear themselves out chasing the Sun." Dry tanks alone ask nothing: she is coasting, not
+  stuck, and a station's propellant is the cure.
+- **The travel note** says so, unless the weather has a note of its own: "The array is dark.
+  She is coasting.", "The tanks are dry. She is coasting.", "The drive sputters out partway
+  through the day. She is coasting."
+- **Crew health**: accidents leave a crew member at 1 health at least (`hurt`); what kills
+  is the day that follows, as the shared rules count it.
+
+**What the skin must show** (none is built yet; the airship's is the model):
+
+- the red status row, `Words.trouble` = ("Ship", …): "Array dark, tanks dry"; "Array dark,
+  coasting" under way and "Array dark" docked (`Mars.dark`); "Tanks dry, coasting" under
+  way and "Tanks dry" docked; "Last of the propellant" (`Mars.lastOfThePropellant`: less
+  than a day at this burn); nothing before she leaves Gateway. The hull needs no row: at 0%
+  the run is over.
+- the supplies note adds "the array is dark" and "the tanks are dry";
+- the scene draws a dark array as wings with every panel dark (§16 already drops panels as
+  power falls) and a coasting ship (`Mars.coasting`) with no drive glow, whatever the pace;
+- the learn pages ("Supplies", "Turnover and capture") say what a dark array and dry tanks
+  do, that a rewire is always there, and that the cycler, turnover and the capture wait for
+  power.
+
+Tuning: none was needed. The bands hold untouched: October 30 / 22 / 16 of 30 (it was
+30 / 24 / 19), median 155 days, and the tables above are after D14. With the tumble taken
+out the October row would be 30 / 24 / 17 of 30 (89 / 66 / 54 of 90): the dark array is
+most of what moved.
 
 ### Things worth knowing
 
@@ -466,5 +572,12 @@ the two poorer roles' losses end at least three ways.
   a litre. A player who watches the tanks and grapples in the streams avoids most of it.
 - Sheltering from a flare and working through it come out about even for the bot: a
   day's rations and water against a 75% chance of radiation sickness for one or two.
-- Losing the ship is rare for the bot: five runs in 1,350, all November launches, and
-  two in 180 when it aerobrakes whatever the hull.
+- Losing the ship is rare for the bot: three runs in 1,350, and five in 180 when it
+  aerobrakes whatever the hull.
+- The poorer roles' arrays run down: in October 19 of the yard rigger's 90 runs and 42 of
+  the ice hauler's go dark at least once (29 and 84 rewirings), and 32 and 37 run the
+  tanks dry; the charter captain, who can pay the yards, never does.
+- On a coast (tanks dry or the array dark) the thrust setting still counts in the shared
+  rules: a hard burn coasts at 430 × 0.4 a day and still wears the drive and the crew as
+  a hard burn does. Nothing in the game says so; the bot never coasts long enough for it to
+  matter.
