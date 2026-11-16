@@ -122,7 +122,8 @@ extension Airship {
         e.state.hull = min(100, e.state.hull + AirshipData.dumpLift)
         var q = e.passDays(1, .sea)
         if !e.state.over {
-            q.append(.message("The engineer opens the dump valves, and \(Int(AirshipData.dumpPetrol)) kg of petrol go over the side in a long glittering spray. Lighter by that much, she checks her fall and climbs. [green](Lift now \(Int(jsRound(e.state.hull)))%)[/green]"))
+            let kg = Int(AirshipData.dumpPetrol), lift = Int(jsRound(e.state.hull))
+            q.append(.message("The engineer opens the dump valves, and \(kg) kg of petrol go over the side in a long glittering spray. Lighter by that much, she checks her fall and climbs. [green](Lift now \(lift)%)[/green]"))
         }
         return q
     }

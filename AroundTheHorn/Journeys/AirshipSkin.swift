@@ -48,9 +48,9 @@ enum AirshipSkin {
                 "Time passes in [amber]watches[/amber] of four hours, six to a day.",
             ]),
             TitleCard.Page(heading: "Petrol, lift and engines", paragraphs: [
-                "[amber]Petrol[/amber] turns the engines. When the tanks run dry she becomes a free balloon and goes wherever the wind is going, which is seldom where you are.",
-                "[amber]Lift[/amber] keeps her up. Gas seeps away every watch, and snow, ice and storms take more. When it is gone she comes down for good. Drop a bag of [amber]water ballast[/amber] and she rises at once, or top up the gas at a mast.",
-                "[amber]Engines[/amber] wear, worst of all at full speed and in foul weather. Fit [amber]engine spares[/amber] aloft, or have the mechanics at a mast overhaul them.",
+                "[amber]Petrol[/amber] turns the engines. When the tanks run dry she becomes a free balloon and goes wherever the wind is going, which is seldom where you are, spending gas every watch to hold her height.",
+                "[amber]Lift[/amber] keeps her up. Gas seeps away every watch, and snow, ice and storms take more. Drop a bag of [amber]water ballast[/amber] and she rises at once, or top up the gas at a mast. When the lift is gone she starts down, and something heavy must go over the side: ballast, or petrol at a ruinous rate. With neither, she comes down for good.",
+                "[amber]Engines[/amber] wear, worst of all at full speed and in foul weather. Fit [amber]engine spares[/amber] aloft, or have the mechanics at a mast overhaul them. Worn to nothing, they stop, and she drifts like a free balloon until they are mended.",
                 "[amber]Coffee & cocoa[/amber] keeps the watch awake: two days without it and the crew is asleep on its feet. [amber]Fur flying suits[/amber], one each, keep them alive in the far north. [amber]Pilot balloons[/amber] find kinder winds aloft, and kinder winds save petrol.",
             ]),
             TitleCard.Page(heading: "The Pole", paragraphs: [
@@ -93,6 +93,19 @@ enum AirshipSkin {
         enterShop: "Enter the stores",
         rankLegend: "Commander 7,000+ · Navigator 4,000+ · Rigger 2,000+ · Ballast")
 
+    /// The airship's plight, for the status box: going down (the engine's own rule), adrift
+    /// with the engines dead or the tanks dry, or less petrol than a watch burns, which
+    /// powers only part of one. Nothing before she leaves Rome.
+    static func trouble(_ g: GameState) -> String? {
+        guard g.day > 0 else { return nil }
+        if Airship.goingDown(g) { return "Going down" }
+        let dead = Airship.enginesOut(g), dry = g.fuel <= 0
+        let adrift = g.atPort ? "" : ", adrift"
+        if dead { return dry ? "Engines dead, tanks dry" : "Engines dead\(adrift)" }
+        if dry { return "Tanks dry\(adrift)" }
+        return g.fuel < journey.pace(g.pace).fuel ? "Last of the petrol" : nil
+    }
+
     static func words(_ g: GameState) -> Words {
         let pace = journey.pace(g.pace), rations = journey.rations(g.rations)
         let n = g.living.count
@@ -102,6 +115,7 @@ enum AirshipSkin {
         // The engine's finale: the landing, then the town and who climbs down.
         let finale = Airship.finale(g).components(separatedBy: "\n\n")
         let dry = g.fuel <= 0 && g.day > 0
+        let dead = Airship.enginesOut(g)
         return Words(
             setOut: "Head north",
             halt: "Stop the engines & take stock",
@@ -125,7 +139,7 @@ enum AirshipSkin {
             distance: { formatNumber(Double($0)) },
             meters: ("Lift", "Engines"),
             clock: nil,
-            trouble: nil,
+            trouble: trouble(g).map { ("Airship", $0) },
             cash: "Cash",
             currency: "$",
             storeNames: [.clothes: "Fur suits"],
@@ -141,14 +155,16 @@ enum AirshipSkin {
             vesselHeading: "The \(g.ship)",
             suppliesNote: "Speed: \(pace.name) · Rations: \(rations.name)"
                 + (g.noCitrus > 6 ? " · [red]\(watches(g.noCitrus)) without coffee[/red]" : "")
-                + (dry ? " · [red]the tanks are dry[/red]" : ""),
+                + (dry ? " · [red]the tanks are dry[/red]" : "")
+                + (dead ? " · [red]the engines are dead[/red]" : ""),
             crewHeading: "Crew · health \(g.healthLabel.text)",
             leaderTag: "captain",
             clothesWarning: g.clothes < n ? "[red]Only \(g.clothes) of \(n) aboard have a fur suit.[/red]" : nil,
             lostHeading: "Lost on the flight",
             paceHeading: "Speed",
             paceNow: "The engines are set for [amber]\(pace.name)[/amber]."
-                + (dry ? " [red]With the tanks dry, it makes no difference.[/red]" : ""),
+                + (dead ? " [red]With the engines dead, it makes no difference.[/red]"
+                    : dry ? " [red]With the tanks dry, it makes no difference.[/red]" : ""),
             rationsHeading: "Rations",
             rationsNow: "The crew is on [amber]\(rations.name)[/amber]. With \(n) aboard, that's \(tenth(Double(n) * rations.amount)) kg a watch.",
             restPrompt: g.atPort ? "The ground crew holds her on the mast while your people sleep in beds that keep still. How long will you stay?"

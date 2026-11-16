@@ -252,6 +252,52 @@ final class AirshipSkinTests: XCTestCase {
         XCTAssertNil(skin.words(g).clothesWarning)
     }
 
+    /// D14, checked on the airship: the box gave no sign that she was adrift, going down, or
+    /// running on engines that had given out.
+    func testTheStatusBoxSaysWhenTheAirshipIsInTrouble() {
+        var g = nearing("oslo")
+        g.pace = .steady
+        func trouble() -> String? {
+            let t = skin.words(g).trouble
+            if let t { XCTAssertEqual(t.label, "Airship") }
+            return t?.value
+        }
+        XCTAssertNil(trouble())
+        g.fuel = 249
+        XCTAssertEqual(trouble(), "Last of the petrol", "less than a cruising watch burns")
+        g.fuel = 250
+        XCTAssertNil(trouble())
+        g.fuel = 0
+        XCTAssertEqual(trouble(), "Tanks dry, adrift")
+        g.sails = 0.4
+        XCTAssertTrue(Airship.enginesOut(g), "shows 0%: given out")
+        XCTAssertEqual(trouble(), "Engines dead, tanks dry")
+        g.fuel = 3000
+        XCTAssertEqual(trouble(), "Engines dead, adrift")
+        has(skin.words(g).suppliesNote, "[red]the engines are dead[/red]")
+        has(skin.words(g).paceNow, "[red]With the engines dead, it makes no difference.[/red]")
+        g.sails = 0.5
+        XCTAssertNil(trouble(), "shows 1%")
+        g.hull = 0.3
+        XCTAssertEqual(trouble(), "Going down")
+        g.hull = 50
+        // Moored, she is not adrift; and before Rome is left behind there is nothing to say.
+        var moored = at("oslo", port: true)
+        moored.fuel = 0
+        g = moored
+        XCTAssertEqual(trouble(), "Tanks dry")
+        g = state(month: 4)
+        g.fuel = 0
+        XCTAssertNil(trouble())
+
+        // Engines given out are drawn as dry tanks are: no propeller turning, drifting.
+        var dead = nearing("pulham")
+        dead.weather = air.fairWeather
+        dead.sails = 0
+        XCTAssertTrue(AirshipScene.drifting(frame(dead)))
+        has(skin.scene.label(frame(dead)), "drifting")
+    }
+
     func testTheStoresSellPetrolByTheHundredKilos() {
         let w = skin.words(nearing("oslo"))
         func label(_ key: ItemKey, at port: String) -> String {

@@ -110,10 +110,11 @@ enum AirshipScene {
         return g.currentStop.id
     }
 
-    /// With the tanks dry, once the flight is under way: a fresh voyage has bought nothing yet.
+    /// With the tanks dry or the engines given out, once the flight is under way: a fresh
+    /// voyage has bought nothing yet.
     static func drifting(_ f: SceneFrame) -> Bool {
         guard let g = f.state, moored(f) == nil, !down(f) else { return false }
-        return g.fuel <= 0 && g.day > 0
+        return (g.fuel <= 0 || Airship.enginesOut(g)) && g.day > 0
     }
 
     /// Forced down: the flight is over and her lift is gone.

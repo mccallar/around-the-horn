@@ -322,6 +322,42 @@ final class ResumeTests: XCTestCase {
         XCTAssertGreaterThan(d.game!.mile, 291)
     }
 
+    /// D14 on the airship: her lift gone over the Ekeberg mast, the question survives a quit;
+    /// the ground crew walks her in, the stores sell a bag of ballast, and the question,
+    /// asked again as she casts off, drops it.
+    func testAnAirshipGoingDownIsStillAskedAfterAResume() {
+        let j = Journeys.journey(Airship.id)
+        let c = controller(Airship.id)
+        var s = Skins.skin(Airship.id)!.debug.start(j.stops.firstIndex { $0.id == "oslo" }!, 4)
+        AirshipSkin.at(&s, "oslo")
+        s.hull = 0
+        s.timber = 0
+        s.fuel = 0
+        s.money = 50
+        c.loadForDebug(s)
+        c.startTravel()
+        c.tick()
+        guard case .choice(let ask) = c.screen, case .custom("sinking", _) = ask.kind else { return XCTFail("\(c.screen)") }
+        XCTAssertEqual(ask.options.map(\.enabled), [false, false, true])
+        let d = quitAndResume(Airship.id)
+        guard case .choice(let resumed) = d.screen else { return XCTFail("resumed: \(d.screen)") }
+        XCTAssertEqual(resumed, ask)
+        d.choose(resumed, option: 2)
+        guard case .portMenu = d.screen else { return XCTFail("walked in to the mast: \(d.screen)") }
+        XCTAssertTrue(d.run { $0.buy([.timber: 1]) })
+        d.startTravel()
+        d.tick()
+        guard case .choice(let again) = d.screen else { return XCTFail("asked again: \(d.screen)") }
+        XCTAssertEqual(again.options.map(\.enabled), [true, false, true])
+        d.choose(again, option: 0)
+        XCTAssertEqual(answerMessages(d).last, j.text.patched(20))
+        XCTAssertEqual(d.game!.hull, 20)
+        XCTAssertEqual(d.game!.mile, 2750)
+        if case .travel = d.screen {} else { d.startTravel() }
+        d.tick()
+        XCTAssertGreaterThan(d.game!.mile, 2750, "and she drifts on")
+    }
+
     func testNothingToMendWithAndNoMoneyEndsTheRun() {
         let c = controller(Rail.id)
         brokenDown(c, fittings: 0, money: 0)
