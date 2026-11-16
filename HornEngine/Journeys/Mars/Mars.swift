@@ -66,6 +66,7 @@ public final class Mars: Journey {
         rules.hullFloor = 1
         rules.hullSpan = 0
         rules.noFuelSpeed = 0.4
+        rules.burnsPartLoad = true  // the last of the propellant drives its share of the day
         rules.water = 2
         rules.hotWater = 2
         rules.deficiencyAfter = 30
@@ -89,7 +90,7 @@ public final class Mars: Journey {
         outOfWater: "[red]The water tanks are dry.[/red] The recycler can only give back what it is given.",
         lowWater: "About five days of water left in the tanks, by the recycler's count.",
         preventiveGone: "[amber]The last supplement pack is gone.[/amber] Bones will not notice for a month. Then they will.",
-        outOfFuel: "[red]The propellant tanks are dry.[/red] The drive coughs once and goes quiet. The ship coasts on the speed she has, which is not much.",
+        outOfFuel: "[red]The propellant tanks are dry.[/red] The drive coughs once and goes quiet, and so do the thrusters that keep her pointed. She coasts on along the arc at the speed she had, turning slowly, and the wings wear themselves out chasing the Sun.",
         lowFuel: "About five days of propellant left at this burn.",
         deficiencyCured: { "\($0)'s bones have stopped aching. The supplements are doing their work." },
         wellAgain: { "\($0) is back on the duty roster." },
@@ -173,8 +174,15 @@ public final class Mars: Journey {
 
     // MARK: - A turn under way
 
-    /// The launch window's geometry, and the capture before Phobos.
+    /// The launch window's geometry, and the capture before Phobos. A dark array coasts as
+    /// dry tanks do (the shared rule's `noFuelSpeed`, which `fuelBurn` keeps it from reaching);
+    /// with the tanks short, the share of the day they cannot give is noted for the tumble.
     override func adjustSpeed(_ e: GameEngine, _ reg: Region, _ sp: inout Double) {
+        let s = e.state
+        let burn = fuelBurn(e, pace(s.pace))
+        let dry = burn > 0 && s.fuel < burn ? 1 - max(0, s.fuel) / burn : 0
+        e.state.vars[MarsData.dryKey] = dry > 0 ? dry : nil
+        if Self.dark(s) { sp *= rules.noFuelSpeed }
         sp *= MarsData.window[e.state.startMonth] ?? 1
         if reg.id == "capture" && e.state.mile < MarsData.captureEnds {
             switch e.state.vars[MarsData.captureKey] {
@@ -190,10 +198,22 @@ public final class Mars: Journey {
         e.state.vars[MarsData.dockedKey] = Double(e.state.stopIndex)
     }
 
-    /// Far from the Sun the wings work harder for the same power.
+    /// A dark array runs no drive and burns nothing.
+    override func fuelBurn(_ e: GameEngine, _ pace: PaceInfo) -> Double {
+        Self.dark(e.state) ? 0 : pace.fuel
+    }
+
+    /// With the array dark the recycler stops, and the water lost doubles.
+    public override func waterNeed(_ s: GameState, _ temp: Temp) -> Double {
+        Self.dark(s) && !s.atPort ? MarsData.darkWater : super.waterNeed(s, temp)
+    }
+
+    /// Far from the Sun the wings work harder for the same power; with the tanks dry for
+    /// some or all of the day she tumbles, and they wear for that share of `tumbleWear`.
     override func propulsionWear(_ e: GameEngine) -> Double {
         let w = super.propulsionWear(e)
-        return e.state.region.has("far") ? w * 1.3 : w
+        let tumble = MarsData.tumbleWear * (e.state.vars[MarsData.dryKey] ?? 0)
+        return (e.state.region.has("far") ? w * 1.3 : w) + tumble
     }
 
     /// Pebbles and the Sun's weather hit the hull, harder at a hard burn; aerobraking
@@ -207,6 +227,8 @@ public final class Mars: Journey {
         if Self.aerobraking(e.state, reg) {
             hd += e.rnd(MarsData.aerobrakeWear.lowerBound, MarsData.aerobrakeWear.upperBound)
         }
+        // A hull worn to where it shows 0% has let go: all of it, so the shared wear ends it.
+        if Self.givenOut(e.state.hull - hd) { hd = max(hd, e.state.hull) }
         return hd
     }
 
@@ -232,6 +254,18 @@ public final class Mars: Journey {
     }
 
     override func tick(_ e: GameEngine, _ q: inout [Interrupt], _ mode: GameEngine.DayMode, _ reg: Region) {
+        // A day without thrust says so, unless the weather had something else to say.
+        let s = e.state
+        if mode == .sail && (s.note.isEmpty || s.note == s.weather.note) {
+            let dry = s.vars[MarsData.dryKey] ?? 0
+            if Self.dark(s) {
+                e.state.note = "The array is dark. She is coasting."
+            } else if dry >= 1 {
+                e.state.note = "The tanks are dry. She is coasting."
+            } else if dry > 0 {
+                e.state.note = "The drive sputters out partway through the day. She is coasting."
+            }
+        }
         if e.state.day >= MarsData.contractDays && e.state.vars[MarsData.lateKey] != 1 {
             e.state.vars[MarsData.lateKey] = 1
             q.append(.message("[amber]Day 170. The contract date has passed.[/amber] Nothing is forfeit; the bonus is gone, and Jezero will be glad of the cargo whenever it comes."))
@@ -261,13 +295,23 @@ public final class Mars: Journey {
 
     override func events(_ e: GameEngine, _ reg: Region) -> [JourneyEvent] { arcEvents(e, reg) }
 
-    override func arrive(_ e: GameEngine, _ stop: Stop) -> [Interrupt] { stationArrival(e, stop) ?? super.arrive(e, stop) }
+    /// A set piece that needs the drive, reached in the dark, waits for power (Mars+Trouble).
+    override func arrive(_ e: GameEngine, _ stop: Stop) -> [Interrupt] {
+        if Self.dark(e.state) && Self.needsTheDrive.contains(stop.id) {
+            return (stop.type == .port ? paid(e) : []) + hold(e, stop)
+        }
+        return stationArrival(e, stop) ?? super.arrive(e, stop)
+    }
 
     override func special(_ e: GameEngine, _ stop: Stop) -> [Interrupt] { setPiece(e, stop) }
 
     override func resolve(_ e: GameEngine, _ key: String, _ args: [String], _ option: Int) -> [Interrupt] {
-        answer(e, key, args, option)
+        key == "dark" ? answerDark(e, args, option) : answer(e, key, args, option)
     }
+
+    /// A hull at nothing ends the run; a dark array is asked about before every day; a set
+    /// piece that waited in the dark is met once there is power (Mars+Trouble).
+    override func stalled(_ e: GameEngine) -> [Interrupt]? { trouble(e) }
 
     // MARK: - Trade and score
 

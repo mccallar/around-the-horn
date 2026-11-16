@@ -30,11 +30,29 @@ enum MarsData {
     /// What the hull loses a day in the upper air while aerobraking.
     static let aerobrakeWear = 4.0...10.0
 
+    // Trouble (D14, Mars+Trouble)
+    /// Litres of water each person loses a day with the array dark and the recycler stopped
+    /// (`Rules.water` is 2).
+    static let darkWater = 4.0
+    /// Rewiring what is left of the wings: days in suits, the points of power it gives back,
+    /// the health it takes from each who go out, and each one's chance of coming back with a
+    /// decompression injury.
+    static let rigDays = 2
+    static let rigPower = 10.0
+    static let rigWear = 3...8
+    static let rigInjury = 0.15
+    /// Power & drive lost a day with the tanks dry: nothing for the thrusters that keep her
+    /// pointed, so she tumbles and the wings fight for the Sun.
+    static let tumbleWear = 1.0
+
     // vars keys
     static let captureKey = "mars.capture"   // 1 aerobrake, 2 full burn, 3 partial burn
     static let owedKey = "mars.owed"         // money wired by a grateful ship, paid at the next port
     static let lateKey = "mars.late"
     static let dockedKey = "mars.docked"     // the index of the last stop you went aboard at
+    static let coastKey = "mars.coast"       // the day a coast in the dark was chosen for
+    static let heldKey = "mars.held"         // the index of a set piece reached in the dark
+    static let dryKey = "mars.dry"           // the share of today's burn the tanks could not give
 
     /// "312.45 million km", from units of 10,000 km.
     static func km(_ units: Int) -> String {

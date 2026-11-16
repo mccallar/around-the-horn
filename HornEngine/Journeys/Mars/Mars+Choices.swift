@@ -41,9 +41,8 @@ extension Mars {
             var p = 0.3
             if e.state.sails < 50 { p += 0.2 }
             if e.chance(p) {
-                let d = e.ri(10, 20)
-                e.state.sails = max(0, e.state.sails - Double(d))
-                return [.message("Four more days of burning, then a turn and a braking burn that rattles the cups in the galley. Something in the drive rattles too, and keeps rattling. [green]+\(MarsData.km(gain)).[/green] [red](Power & drive −\(d)%)[/red]")]
+                let hit = knock(e, .power, e.ri(10, 20))
+                return [.message("Four more days of burning, then a turn and a braking burn that rattles the cups in the galley. Something in the drive rattles too, and keeps rattling. [green]+\(MarsData.km(gain)).[/green]\(hit)")]
             }
             return [.message("Four more days of burning, then a turn and a braking burn that rattles the cups in the galley. The drive takes it without complaint. [green]+\(MarsData.km(gain)).[/green]")]
 
@@ -74,7 +73,7 @@ extension Mars {
                 let idx = e.pick(c)!
                 if e.chance(0.75) {
                     hurt += 1
-                    e.state.crew[idx].hp -= 8
+                    Self.hurt(e, idx, 8)
                     e.sicken(idx, &q, e.state.temperature(in: e.state.region), nil, MarsData.radiation)
                 }
             }
@@ -144,9 +143,8 @@ extension Mars {
                     + e.passDays(1, .sea)
             }
             if e.chance(0.35) {
-                let d = e.ri(10, 20)
-                e.state.hull = max(0, e.state.hull - Double(d))
-                var q: [Interrupt] = [.message("Three days later the creak becomes a hiss, and the hiss becomes a frantic afternoon with the sealant gun. [red](Pressure hull −\(d)%)[/red]")]
+                let hit = knock(e, .hull, e.ri(10, 20))
+                var q: [Interrupt] = [.message("Three days later the creak becomes a hiss, and the hiss becomes a frantic afternoon with the sealant gun.\(hit)")]
                 e.checkSink(&q)
                 return q
             }

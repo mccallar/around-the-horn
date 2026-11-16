@@ -17,34 +17,35 @@ extension Mars {
         let nextPort = stops[(s.stopIndex + 1)...].first { $0.type == .port && $0.id != "cycler" }
         // A promise of money at the next station means something only while one lies ahead.
         let stationAhead = stops[(s.stopIndex + 1)...].contains { $0.type == .port }
+        // Trouble with the wings and the drive needs power to have trouble with, and the
+        // thruster grid needs the drive running.
+        let lit = !Self.dark(s)
+        let thrusting = full && lit && s.fuel > 0
 
         return [
             // The ship
             JourneyEvent(debris ? 7 : 4) { e, q in
-                let d = e.ri(5, 12)
-                e.state.hull = max(0, e.state.hull - Double(d))
-                q.append(.message("A pebble the size of a lentil goes in one side of the cargo bay and out the other. It does not stop to apologise. [red](Pressure hull −\(d)%)[/red]"))
+                let hit = self.knock(e, .hull, e.ri(5, 12))
+                q.append(.message("A pebble the size of a lentil goes in one side of the cargo bay and out the other. It does not stop to apologise.\(hit)"))
                 let c = Self.wellCrew(e)
                 if !c.isEmpty && e.chance(0.25) {
                     let idx = e.pick(c)!
-                    e.state.crew[idx].hp -= 6
+                    Self.hurt(e, idx, 6)
                     e.sicken(idx, &q, e.state.temperature(in: reg), nil, MarsData.decompression)
                 }
                 e.checkSink(&q)
             },
-            JourneyEvent(4) { e, q in
-                let d = e.ri(5, 10)
-                e.state.sails = max(0, e.state.sails - Double(d))
-                q.append(.message("A wing actuator sticks halfway through a turn, and a quarter of the array spends the day looking at nothing. [red](Power & drive −\(d)%)[/red]"))
+            JourneyEvent(4, when: lit) { e, q in
+                let hit = self.knock(e, .power, e.ri(5, 10))
+                q.append(.message("A wing actuator sticks halfway through a turn, and a quarter of the array spends the day looking at nothing.\(hit)"))
             },
-            JourneyEvent(4) { e, q in
-                let d = e.ri(4, 9)
-                e.state.sails = max(0, e.state.sails - Double(d))
-                q.append(.message("A coolant line splits behind a radiator panel. The fix takes an afternoon and a great deal of tape. [red](Power & drive −\(d)%)[/red]"))
+            JourneyEvent(4, when: lit) { e, q in
+                let hit = self.knock(e, .power, e.ri(4, 9))
+                q.append(.message("A coolant line splits behind a radiator panel. The fix takes an afternoon and a great deal of tape.\(hit)"))
                 let c = Self.wellCrew(e)
                 if !c.isEmpty && e.chance(0.35) {
                     let idx = e.pick(c)!
-                    e.state.crew[idx].hp -= 5
+                    Self.hurt(e, idx, 5)
                     e.sicken(idx, &q, e.state.temperature(in: reg), nil, MarsData.burn)
                 }
             },
@@ -69,10 +70,9 @@ extension Mars {
                 q.append(.message("A navigation update from Earth refuses to install, then installs twice, then insists the ship is in Belgium. A day goes by setting it right."))
                 q += e.passDays(1, .sea)
             },
-            JourneyEvent(full ? 6 : 0, when: full) { e, q in
-                let d = e.ri(8, 15)
-                e.state.sails = max(0, e.state.sails - Double(d))
-                q.append(.message("Running the drive this hard has worn a groove in the thruster grid. The drive's glow has a flicker in it now. [red](Power & drive −\(d)%)[/red]"))
+            JourneyEvent(thrusting ? 6 : 0, when: thrusting) { e, q in
+                let hit = self.knock(e, .power, e.ri(8, 15))
+                q.append(.message("Running the drive this hard has worn a groove in the thruster grid. The drive's glow has a flicker in it now.\(hit)"))
             },
 
             // Choices
@@ -84,7 +84,7 @@ extension Mars {
             JourneyEvent(3) { e, q in
                 q.append(e.ask("pod", prompt: "Radar picks up a cargo pod tumbling slowly along the arc, lost by somebody in an earlier window. Its beacon still works. Its label has faded.",
                                detail: "Matching its course would cost about \(MarsData.tonnes(30)) of propellant.",
-                               options: [.init("Match and take it aboard", enabled: e.state.fuel >= 30), .init("Leave it")]))
+                               options: [.init("Match and take it aboard", enabled: e.state.fuel >= 30 && !Self.dark(e.state)), .init("Leave it")]))
             },
             JourneyEvent(3, when: stationAhead) { e, q in
                 let wantsWater = e.chance(0.5)

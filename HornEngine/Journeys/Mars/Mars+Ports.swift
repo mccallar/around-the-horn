@@ -46,14 +46,17 @@ extension Mars {
     /// cycler then asks before it is a port.
     func stationArrival(_ e: GameEngine, _ stop: Stop) -> [Interrupt]? {
         guard stop.type == .port else { return nil }
-        if stop.id == "cycler" {
-            return paid(e) + [e.ask("cycler", [stop.id],
-                          prompt: "The cycler Perpetua is coming up on her endless loop between the planets. She will not slow down for you.",
-                          detail: "Matching orbits to dock costs \(MarsData.tonnes(MarsData.dockBurn)) of propellant. Her stores are open to anyone who does.\n[dim]You have \(MarsData.tonnes(e.state.fuel)).[/dim]",
-                          options: [.init("Match and dock (\(MarsData.tonnes(MarsData.dockBurn)))", enabled: e.state.fuel >= MarsData.dockBurn),
-                                    .init("Wave as she goes by")])]
-        }
+        if stop.id == "cycler" { return paid(e) + [cyclerOffer(e, stop)] }
         return paid(e) + e.portArrival(stop)
+    }
+
+    /// The cycler's one offer: match orbits and dock, or wave.
+    func cyclerOffer(_ e: GameEngine, _ stop: Stop) -> Interrupt {
+        e.ask("cycler", [stop.id],
+              prompt: "The cycler Perpetua is coming up on her endless loop between the planets. She will not slow down for you.",
+              detail: "Matching orbits to dock costs \(MarsData.tonnes(MarsData.dockBurn)) of propellant. Her stores are open to anyone who does.\n[dim]You have \(MarsData.tonnes(e.state.fuel)).[/dim]",
+              options: [.init("Match and dock (\(MarsData.tonnes(MarsData.dockBurn)))", enabled: e.state.fuel >= MarsData.dockBurn),
+                        .init("Wave as she goes by")])
     }
 
     /// Money a ship you helped has wired, collected at the next station you reach.
