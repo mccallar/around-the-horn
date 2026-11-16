@@ -76,6 +76,7 @@
 		8507B9626335D0733F75E858 /* TestJourneys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B84815BD850CCD28520377E /* TestJourneys.swift */; };
 		857722942DA1A18E9E64BEEF /* Mars+Trouble.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CAA93F080CF2043FFA558D9 /* Mars+Trouble.swift */; };
 		85A1CC3CDBEDA5BC33586B0B /* ResumeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6AFAF1AEC528687A069F091 /* ResumeTests.swift */; };
+		8600DEFECDB00EC3C2A4DD4F /* BalloonScreenshotUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3640D8989CBE3497720C8D69 /* BalloonScreenshotUITests.swift */; };
 		86570A81184F274E60797E88 /* VoyageScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78D4D01109F06BE35F45A3F /* VoyageScreens.swift */; };
 		87ED892C305EA05606F8FE9B /* MarkupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B656EEA583D97D6A03EE42FD /* MarkupTests.swift */; };
 		87F0DA05537FCFF0B3BB75A4 /* RailScreenshotUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 746C70F5F36AC967DD5E9C22 /* RailScreenshotUITests.swift */; };
@@ -90,6 +91,7 @@
 		92DBC0287E064A6096A4FE4D /* Mars.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51157A39DA824544D25246CF /* Mars.swift */; };
 		93CB0B6F54D0BA402B156D93 /* prototype-traces.json in Resources */ = {isa = PBXBuildFile; fileRef = 7B60571B9AA8419DCF959008 /* prototype-traces.json */; };
 		97E74D42385F1BC3E3FED5B8 /* Airship+Events.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54DABC9533B7FDC2B99A087C /* Airship+Events.swift */; };
+		9A6FB20D8345F2FF8CD3E4FC /* BalloonSkinTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C4ECD5723857A5B9C3025EE /* BalloonSkinTests.swift */; };
 		9CA9737D5D41C2573DA9DC47 /* GameController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A67AF0DC361810C5ED75471 /* GameController.swift */; };
 		9D296F1648014D5AD91473FB /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 96D694A616F343447C631102 /* PrivacyInfo.xcprivacy */; };
 		A28F39D86174143D740CCA23 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632D937A62370BF2FEC88811 /* Model.swift */; };
@@ -253,6 +255,7 @@
 		30041FBF2E158954803C5ED6 /* SkinContractTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkinContractTests.swift; sourceTree = "<group>"; };
 		3297DDCDE0CCC564386B7462 /* RailSkinTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RailSkinTests.swift; sourceTree = "<group>"; };
 		338B3382DF5DB3F0A539995D /* ChoiceList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChoiceList.swift; sourceTree = "<group>"; };
+		3640D8989CBE3497720C8D69 /* BalloonScreenshotUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalloonScreenshotUITests.swift; sourceTree = "<group>"; };
 		368CBB1228FD754F316AAACE /* AirshipSkin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirshipSkin.swift; sourceTree = "<group>"; };
 		3705B4E894BE9ADCD26E17A8 /* GameController+Debug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GameController+Debug.swift"; sourceTree = "<group>"; };
 		396F0F7A3170B9BD4EE739F9 /* Klondike+Towns.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Klondike+Towns.swift"; sourceTree = "<group>"; };
@@ -294,6 +297,7 @@
 		797CE7F576E9F694AA35ECB0 /* Mars+Events.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Mars+Events.swift"; sourceTree = "<group>"; };
 		7A807B556E06A4B497DA1B0B /* AirshipSkinTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirshipSkinTests.swift; sourceTree = "<group>"; };
 		7B60571B9AA8419DCF959008 /* prototype-traces.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "prototype-traces.json"; sourceTree = "<group>"; };
+		7C4ECD5723857A5B9C3025EE /* BalloonSkinTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalloonSkinTests.swift; sourceTree = "<group>"; };
 		7C802F0633CB47BCA69931C7 /* AirshipScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirshipScene.swift; sourceTree = "<group>"; };
 		7F27D7F015ED625BDF69DBC4 /* Audio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Audio.swift; sourceTree = "<group>"; };
 		7F4BCE9468DF346093B0A662 /* Horn1849Forage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Horn1849Forage.swift; sourceTree = "<group>"; };
@@ -402,6 +406,7 @@
 			children = (
 				7A807B556E06A4B497DA1B0B /* AirshipSkinTests.swift */,
 				F099379FFDDA51A0BAFA3352 /* AppInfoTests.swift */,
+				7C4ECD5723857A5B9C3025EE /* BalloonSkinTests.swift */,
 				711BBE96B8E230C92444CFFA /* ChartAndFishingTests.swift */,
 				6308324207F0B19AB2C51161 /* GameControllerTests.swift */,
 				0CC0DE5BB8FFF8FCF5AAC89C /* JourneyPickerTests.swift */,
@@ -560,6 +565,7 @@
 			isa = PBXGroup;
 			children = (
 				D44B9958CF117F65D96C1227 /* AirshipScreenshotUITests.swift */,
+				3640D8989CBE3497720C8D69 /* BalloonScreenshotUITests.swift */,
 				0F41F0439CB6BDE9D136E712 /* LaunchUITests.swift */,
 				746C70F5F36AC967DD5E9C22 /* RailScreenshotUITests.swift */,
 				2A5B3A3831A7A90C960BDFD0 /* ResumeUITests.swift */,
@@ -895,6 +901,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				48D1CFE2742A32C1FC482AE2 /* AirshipScreenshotUITests.swift in Sources */,
+				8600DEFECDB00EC3C2A4DD4F /* BalloonScreenshotUITests.swift in Sources */,
 				CFA59275DDFEF23A3004F4F7 /* LaunchUITests.swift in Sources */,
 				87F0DA05537FCFF0B3BB75A4 /* RailScreenshotUITests.swift in Sources */,
 				A6A0CD5D814E1017E1BCADA0 /* ResumeUITests.swift in Sources */,
@@ -909,6 +916,7 @@
 			files = (
 				BA8736C890A2831893403D4B /* AirshipSkinTests.swift in Sources */,
 				F1D702D9F2213EB9973B2A82 /* AppInfoTests.swift in Sources */,
+				9A6FB20D8345F2FF8CD3E4FC /* BalloonSkinTests.swift in Sources */,
 				71E118F1BA3180A2F7AF4028 /* ChartAndFishingTests.swift in Sources */,
 				27FAEDA776B23EEDF97FA2D0 /* GameControllerTests.swift in Sources */,
 				C00041AA7005DFF5A81404CA /* JourneyPickerTests.swift in Sources */,

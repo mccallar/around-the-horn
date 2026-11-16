@@ -7,7 +7,8 @@ extension GameController {
     /// places a real voyage takes minutes to reach. With `-HornDebugAtStop YES`, at the
     /// stop itself instead, under way, its arrival already told. With `-HornDebugHull <n>`,
     /// what holds the vessel together is down to `n`%: an ending by wreck a turn or two away.
-    func debugStart(at stopID: String, month: Int = 0, atStop: Bool = false, hull: Double? = nil) {
+    /// With `-HornDebugFuel <n>`, `n` of fuel aboard: the last of it, or none.
+    func debugStart(at stopID: String, month: Int = 0, atStop: Bool = false, hull: Double? = nil, fuel: Double? = nil) {
         guard let i = journey.stops.firstIndex(where: { $0.id == stopID }), i > 0 else { return }
         var s = skin.debug.start(i, month)
         if atStop {
@@ -15,6 +16,7 @@ extension GameController {
             s.stopIndex = i
         }
         if let hull { s.hull = hull }
+        if let fuel { s.fuel = fuel }
         loadForDebug(s)
     }
 }

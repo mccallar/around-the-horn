@@ -230,6 +230,112 @@ final class ResumeTests: XCTestCase {
         XCTAssertGreaterThan(c.game!.fuel, petrol, "the camp's petrol is taken on")
     }
 
+    // MARK: The Jet Stream
+
+    func testTheBalloonEndsAfterAResumeAtTheFinishLine() { endsAfterAResume(Balloon.id) }
+
+    func testAnOldBalloonSaveAtTheFinishLineStillArrives() { arrivesFromAnOldSaveAtTheEnd(Balloon.id) }
+
+    func testTheHimalayasQuestionIsStillAskedAfterAResume() {
+        let c = asksAfterAResume(Balloon.id, at: "him", custom("him"))
+        guard case .choice(let e) = c.screen else { return }
+        let propane = c.game!.fuel, mile = c.game!.mile
+        c.choose(e, option: 0)
+        XCTAssertEqual(c.game!.fuel, propane - 35, accuracy: 1e-9, "the climb over the range burns 35 gallons")
+        XCTAssertEqual(c.game!.mile, mile + 200, "and gains two hundred miles")
+    }
+
+    /// The edge of the Pacific, then the forecasters it leads to: both still asked, and
+    /// the track chosen is the ocean she flies over.
+    func testTheForkAndTheForecastersAreStillAskedAfterAResume() {
+        let c = asksAfterAResume(Balloon.id, at: "pacific", custom("fork"))
+        guard case .choice(let e) = c.screen else { return }
+        c.choose(e, option: 1)
+        guard case .choice(let offer) = c.screen, case .custom("forecast", _) = offer.kind else {
+            return XCTFail("then the forecasters: \(c.screen)")
+        }
+        let d = quitAndResume(Balloon.id)
+        guard case .choice(let still) = d.screen else { return XCTFail("still the forecasters, not \(d.screen)") }
+        XCTAssertEqual(still, offer)
+        let money = d.game!.money
+        d.choose(still, option: 0)
+        answerMessages(d)
+        guard case .seaMenu = d.screen else { return XCTFail("a menu, not the loop, after a resume: \(d.screen)") }
+        XCTAssertEqual(d.game!.money, money - 250)
+        XCTAssertEqual(Journeys.journey(Balloon.id).region(d.game!, at: 9000).id, "southtrack")
+        XCTAssertTrue(BalloonChart.onSouthTrack(d.game!))
+        XCTAssertNotNil(p.loadSave(Balloon.id))
+    }
+
+    func testTheDateLinesPartyIsStillOfferedAfterAResume() {
+        let c = asksAfterAResume(Balloon.id, at: "dateline", custom("dateline"))
+        guard case .choice(let e) = c.screen else { return }
+        let day = c.game!.day
+        c.choose(e, option: 0)
+        XCTAssertEqual(c.game!.day, day + 1, "the party takes a watch")
+    }
+
+    func testTheAzoresBoatIsStillOfferedAfterAResume() {
+        let c = asksAfterAResume(Balloon.id, at: "azores", custom("azores"))
+        guard case .choice(let e) = c.screen else { return }
+        XCTAssertEqual(e.options.count, 2)
+    }
+
+    func testSagasFieldIsStillOfferedAfterAResume() {
+        let c = asksAfterAResume(Balloon.id, at: "saga") {
+            if case .portArrival("saga") = $0.kind { true } else { false }
+        }
+        guard case .choice(let e) = c.screen else { return }
+        c.choose(e, option: 0)
+        answerMessages(c)
+        guard case .portMenu = c.screen else { return XCTFail("\(c.screen)") }
+        XCTAssertTrue(c.game!.atPort)
+        XCTAssertEqual(BalloonSkin.skin.words(c.game!).place, "Saga")
+    }
+
+    /// D14 on the balloon: her lift gone over the Luxor field with no ballast and no
+    /// propane to cut away, the question survives a quit; the ground team brings her in,
+    /// the store sells a sack, the ground team pays for the climb, and the question, asked
+    /// again as she climbs away, drops the sack.
+    func testABalloonGoingDownOverAFieldIsStillAskedAfterAResume() {
+        let j = Journeys.journey(Balloon.id)
+        let c = controller(Balloon.id)
+        var s = Skins.skin(Balloon.id)!.debug.start(j.stops.firstIndex { $0.id == "lux" }!, 0)
+        BalloonSkin.at(&s, "lux")
+        s.hull = 0
+        s.timber = 0
+        s.fuel = 0
+        s.money = 100
+        c.loadForDebug(s)
+        c.startTravel()
+        c.tick()
+        guard case .choice(let ask) = c.screen, case .custom("sinking", _) = ask.kind else { return XCTFail("\(c.screen)") }
+        XCTAssertEqual(ask.options.map(\.enabled), [false, false, true])
+        let d = quitAndResume(Balloon.id)
+        guard case .choice(let resumed) = d.screen else { return XCTFail("resumed: \(d.screen)") }
+        XCTAssertEqual(resumed, ask)
+        d.choose(resumed, option: 2)
+        guard case .portMenu = d.screen else { return XCTFail("down on the field: \(d.screen)") }
+        XCTAssertEqual(BalloonSkin.skin.words(d.game!).trouble?.value, "No lift")
+        XCTAssertNotNil(BalloonSkin.skin.words(d.game!).leaveRefusal, "no lift and a sack for sale: ballast first")
+        XCTAssertTrue(d.run { $0.buy([.timber: 1]) })
+        XCTAssertNil(BalloonSkin.skin.words(d.game!).leaveRefusal, "the ground team will pay for the climb")
+        d.leavePort()
+        guard case .travel = d.screen else { return XCTFail("\(d.screen)") }
+        d.tick()
+        var said = answerMessages(d)
+        guard case .choice(let again) = d.screen, case .custom("sinking", _) = again.kind else {
+            return XCTFail("asked again: \(d.screen) after \(said)")
+        }
+        XCTAssertTrue(again.options[0].enabled)
+        d.choose(again, option: 0)
+        said = answerMessages(d)
+        XCTAssertTrue(said.contains { $0.contains("You cut away a sack of ballast") }, "\(said)")
+        XCTAssertGreaterThan(d.game!.hull, 0)
+        XCTAssertEqual(d.game!.timber, 0)
+        XCTAssertFalse(d.game!.over)
+    }
+
     // MARK: The file
 
     /// A voyage with nothing waiting is written exactly as it always was, so any build

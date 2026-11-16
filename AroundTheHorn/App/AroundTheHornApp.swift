@@ -15,10 +15,12 @@ struct AroundTheHornApp: App {
         }
         #if DEBUG
         if let stop = UserDefaults.standard.string(forKey: "HornDebugStart") {
-            let hull = UserDefaults.standard.object(forKey: "HornDebugHull") == nil
-                ? nil : UserDefaults.standard.double(forKey: "HornDebugHull")
+            func number(_ key: String) -> Double? {
+                UserDefaults.standard.object(forKey: key) == nil ? nil : UserDefaults.standard.double(forKey: key)
+            }
             c.debugStart(at: stop, month: UserDefaults.standard.integer(forKey: "HornDebugMonth"),
-                         atStop: UserDefaults.standard.bool(forKey: "HornDebugAtStop"), hull: hull)
+                         atStop: UserDefaults.standard.bool(forKey: "HornDebugAtStop"), hull: number("HornDebugHull"),
+                         fuel: number("HornDebugFuel"))
         }
         #endif
         return c
