@@ -197,7 +197,10 @@ final class RailBreakdownTests: XCTestCase {
         guard let ask = choice(e.sailDay()) else { return XCTFail("no breakdown") }
         XCTAssertTrue(ask.prompt.hasPrefix("[red]The engine and the running gear have both given out.[/red]"), ask.prompt)
         XCTAssertEqual(ask.options.count, 4)
-        _ = e.resolve(ask, option: 0)
+        // The running gear first, as the condition box lists it, then the engine.
+        XCTAssertTrue(ask.options[0].label.hasPrefix("Mend the running gear"), ask.options[0].label)
+        XCTAssertTrue(ask.options[1].label.hasPrefix("Work on the engine"), ask.options[1].label)
+        _ = e.resolve(ask, option: 1)
         XCTAssertEqual(e.state.sails, 25)
         // Still standing on the running gear: asked again, for that alone.
         guard let again = choice(e.sailDay()) else { return XCTFail("still broken down") }
@@ -309,7 +312,7 @@ final class RailBreakdownTests: XCTestCase {
         let both = engine(inTheYard(hull: 0, fittings: 1, money: 13))
         guard let two = choice(both.sailDay()) else { return XCTFail("no breakdown") }
         XCTAssertEqual(two.options.count, 3)
-        XCTAssertFalse(two.options[1].enabled)
+        XCTAssertFalse(two.options[0].enabled, "no car spares aboard")
         _ = both.resolve(two, option: 2)
         XCTAssertTrue(both.buy([.timber: 1]))
         both.setSail()
