@@ -1,4 +1,8 @@
+#if os(WASI)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 // What can happen in a flying watch. One of these, by weight, on about one watch in seven;
 // under the fog the pressure ridges are checked first. Those that ask something are

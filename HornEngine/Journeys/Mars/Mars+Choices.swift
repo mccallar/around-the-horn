@@ -1,4 +1,8 @@
+#if os(WASI)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 // The two set pieces (turnover and the capture at Mars) and the answer to everything the
 // arc asks.

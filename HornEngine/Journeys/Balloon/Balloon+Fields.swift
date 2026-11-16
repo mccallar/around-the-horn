@@ -1,4 +1,8 @@
+#if os(WASI)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 // The six fields where a ground team waits with propane, helium and supplies. Propane is
 // cheapest at Luxor of every field after Marrakech; burner parts at Albuquerque; ballast at

@@ -1,4 +1,8 @@
+#if os(WASI)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 // The Jet Stream's tables: what the capsule carries, where the fields are, the air it flies
 // through and the weather there. Everything is in this namespace; nothing extends a shared
@@ -67,13 +71,15 @@ enum BalloonData {
     /// "0.7 gallons", "14.5 gallons", "1 gallon": propane to a tenth, never shown as none.
     static func gallons(_ g: Double) -> String {
         let tenths = max(1, jsRound(g * 10))
-        let n = tenths.truncatingRemainder(dividingBy: 10) == 0 ? String(Int(tenths / 10)) : String(format: "%.1f", tenths / 10)
+        let t = Int(tenths)
+        // Whole tenths, written without `String(format:)` so the web build can say it too.
+        let n = t % 10 == 0 ? String(t / 10) : "\(t / 10).\(t % 10)"
         return "\(n) \(tenths == 10 ? "gallon" : "gallons")"
     }
 
     /// "1600", the watch's GMT time.
     static func clock(_ s: GameState) -> String {
-        String(format: "%02d00", s.hour)
+        (s.hour < 10 ? "0" : "") + String(s.hour) + "00"
     }
 
     // MARK: - Stock

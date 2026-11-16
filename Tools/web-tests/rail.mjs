@@ -164,6 +164,11 @@ await test('the store, the menus and the contract clock', async () => {
   for (const [row, screen] of [['Check supplies', 'supplies'], ['Look at the map', 'chart'], ['Make repairs', 'repairs']]) {
     p.press(row);
     check(p.screen === screen, `${row} opens ${screen}`);
+    if (screen === 'repairs') {
+      const [first, second] = p.labels();
+      check(first.startsWith('Mend the running gear') && second.startsWith('Work on the engine'),
+        `the repairs in the condition box's order, running gear then engine (${first} / ${second})`);
+    }
     if (screen === 'supplies') {
       const w = wordsOn(p.look());
       check(w.includes(`The ${p.f.game.ship}`), 'the train by name');
@@ -176,8 +181,8 @@ await test('the store, the menus and the contract clock', async () => {
       check(p.look().blocks[0].text === 'Map of the road', 'the map');
     }
     if (screen === 'repairs') {
-      check(p.labels()[0].startsWith('Work on the engine — 1 set of boiler fittings (have 3)'), `the engine (${p.labels()[0]})`);
-      check(p.labels()[1].startsWith('Mend the running gear — 1 crate of car spares (have 3)'), 'the running gear');
+      check(p.labels()[0].startsWith('Mend the running gear — 1 crate of car spares (have 3)'), `the running gear (${p.labels()[0]})`);
+      check(p.labels()[1].startsWith('Work on the engine — 1 set of boiler fittings (have 3)'), 'the engine');
     }
     p.press(p.labels().at(-1));
     check(p.screen === 'seaMenu', `and back from ${screen}`);

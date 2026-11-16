@@ -274,7 +274,16 @@ a bar, clamped). They are left to be ruled on, not changed by this decision.
   specified with the rest (docs/journeys/klondike.md, "Sleds, oars, the outfit and the boat
   at nothing (D14)").
 
-## D15 — A flight saved before it left Rome comes back to the stores (2026-11-15)
+## D15 — Repairs are offered in the order the condition box lists them (2026-11-15)
+
+The repairs screen showed the hull above the sails (rail: the running gear above the
+engine; the airship: lift above the engines), then offered to mend the sails first and
+the hull second, as the prototype does. Ryan found it backwards. Every journey's repairs
+now come in the box's order, hull-role first, matching the shipyard and the status
+panel; rail's breakdown question lists the running gear before the engine for the same
+reason. Order only: no repair, cost or number changed.
+
+## D16 — A flight saved before it left Rome comes back to the stores (2026-11-15)
 
 Found in review of the airship skin: the first port's stores save as you leave them,
 as the prototype's do, and the app saves whenever it goes to the background,

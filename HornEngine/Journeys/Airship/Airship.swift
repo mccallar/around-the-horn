@@ -1,4 +1,8 @@
+#if os(WASI)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 // Over the Pole: 1926. Rome to Nome in a small semi-rigid airship, 9,600 km from mooring
 // mast to mooring mast as far as Spitsbergen, then over the North Pole and 4,300 km of ice

@@ -1262,7 +1262,7 @@ The app's skin (`AroundTheHorn/Journeys/Airship*.swift`, docs/design/journeys-ar
 - Leaving Rome with empty tanks is refused by the app (`Words.departRefusal`): “You can't cast
   off with empty tanks! The storekeeper shakes his head and points you back to the petrol.”
   A flight saved before she left (the stores save as you leave them) comes back to Rome's
-  stores, so she still leaves through both refusals and the departure sentence (D15).
+  stores, so she still leaves through both refusals and the departure sentence (D16).
 - The departure sentence reads “On DATE, the [i]SHIP[/i] slips the mast at Ciampino. …”: the
   date line ends in “a.m.” or “p.m.”, and a full stop after it doubled.
 - The role screen, its labels and the mast menu's trade row are in this journey's own words

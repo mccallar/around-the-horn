@@ -1,4 +1,8 @@
+#if os(WASI)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 // The set pieces (the Himalaya, the edge of the Pacific, the date line, the Azores) and the
 // answer to everything the flight asks.

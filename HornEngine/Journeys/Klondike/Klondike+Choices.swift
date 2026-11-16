@@ -1,4 +1,8 @@
+#if os(WASI)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 // The set pieces (the fork at Lynn Canal, the police at the summit, Miles Canyon, Five
 // Finger Rapids) and the answer to everything the trail asks.

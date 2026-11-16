@@ -1,4 +1,8 @@
+#if os(WASI)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 // The Long Transfer: 2087. Gateway Yard in high Earth orbit to Jezero Landing on Mars,
 // 480 million km along the transfer arc in a chartered second-hand freighter with five

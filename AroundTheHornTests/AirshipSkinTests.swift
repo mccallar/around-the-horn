@@ -534,7 +534,7 @@ final class AirshipSkinTests: XCTestCase {
         guard case .seaMenu = resumed.screen else { return XCTFail("\(resumed.screen)") }
 
         // 1849 and the Iron Road answer false and come back to the port menu, as they
-        // always have (decision D15).
+        // always have (decision D16).
         for other in [Horn1849Skin.skin, RailSkin.skin] {
             let g = GameState(journey: other.id, role: .merchant, ship: "Wren", captain: "Ada", crew: ["Bo", "Cy", "Di", "Ed"],
                               startYear: 1869, startMonth: 9)

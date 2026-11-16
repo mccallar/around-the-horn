@@ -1,4 +1,8 @@
+#if os(WASI)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 // To the Klondike's tables: the outfit, the stops, the three legs of country, the weather by
 // season, and the names. Everything is in this namespace; nothing extends a shared type.

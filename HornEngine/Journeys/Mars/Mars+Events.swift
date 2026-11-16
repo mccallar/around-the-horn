@@ -1,4 +1,8 @@
+#if os(WASI)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 // What can happen on a day along the arc: about one day in six, one of these by weight.
 // Those that ask something are answered in Mars+Choices.swift.

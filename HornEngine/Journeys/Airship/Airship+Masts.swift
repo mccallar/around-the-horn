@@ -1,4 +1,8 @@
+#if os(WASI)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 // The five mooring masts: where she can be fed, gassed, mended and gossiped about.
 

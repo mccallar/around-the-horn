@@ -149,7 +149,7 @@ struct Words {
     /// Whether a voyage saved at the first port before it left (the stores save as you
     /// leave them) comes back to those stores, so that it still leaves through the
     /// departure and both refusals. False: it comes back to the port menu, whose way out
-    /// sets off with neither, as 1849's prototype does (decision D15).
+    /// sets off with neither, as 1849's prototype does (decision D16).
     let resumesInFirstShop: Bool
     /// Why a port after the first won't let the vessel go yet: a balloon on the ground
     /// without the propane to climb away, which the field sells. Asked by the port menu's

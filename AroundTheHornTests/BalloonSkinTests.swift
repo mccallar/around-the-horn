@@ -523,7 +523,7 @@ final class BalloonSkinTests: XCTestCase {
     }
 
     /// The launch director won't let her go without food and the climb's 25 gallons; with
-    /// them she lifts off, and a flight saved in the hangar comes back to it (D15).
+    /// them she lifts off, and a flight saved in the hangar comes back to it (D16).
     func testMarrakechWontLetHerGoWithoutTheClimbsPropane() {
         XCTAssertNil(skin.words(state()).departRefusal, "the engine's own refusal names both")
         has(air.text.noProvisions, "at least 25 gallons of propane")

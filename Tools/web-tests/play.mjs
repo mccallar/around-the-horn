@@ -272,6 +272,11 @@ await test('every menu row leads somewhere and back', async () => {
   for (const [row, screen] of [['Check supplies', 'supplies'], ['Look at the chart', 'chart'], ['Make repairs', 'repairs']]) {
     p.press(row);
     check(p.screen === screen, `${row} opens ${screen}`);
+    if (screen === 'repairs') {
+      const [first, second] = p.labels();
+      check(first.startsWith('Patch the hull') && second.startsWith('Mend sails'),
+        `the repairs in the condition box's order, hull then sails (${first} / ${second})`);
+    }
     p.press(p.labels().at(-1));
     check(p.screen === 'seaMenu', `and comes back from ${screen}`);
   }

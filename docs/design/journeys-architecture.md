@@ -326,7 +326,7 @@ Iron Road look, read and play as they did.
     and rail answer `nil`. `GameController.depart` asks it first.
   - `Words.resumesInFirstShop`: a voyage saved at the first port before it left (the
     stores save as you leave them) comes back to those stores, so it still leaves through
-    `depart` and both refusals (decision D15). The airship answers true; 1849 and rail
+    `depart` and both refusals (decision D16). The airship answers true; 1849 and rail
     false, and come back to the port menu as before.
   - `Words.looseOne`: what one of a loose thing is called, "1 balloon". 1849 and rail
     answer `[:]` and still write "1 throws" and "1 casts".
@@ -403,7 +403,7 @@ Iron Road and Over the Pole look, read and play as they did.
     with the money for a step of propane, or no lift with a sack of ballast for sale (its
     engine left the asking to the app, As built 4 and D14). The launch from Marrakech is
     still the engine's own refusal through `depart`, which names both food and the 25
-    gallons, so `departRefusal` is `nil`; `resumesInFirstShop` is true (D15).
+    gallons, so `departRefusal` is `nil`; `resumesInFirstShop` is true (D16).
 - **One debug launch argument**, `-HornDebugFuel <n>` with `-HornDebugStart`: that much
   fuel aboard, so a walk can show dry tanks and a field's refusal. Debug builds only.
 - **The engine's text**: the three role labels in D11's shape ("A Zurich chocolate maker",

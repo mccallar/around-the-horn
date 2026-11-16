@@ -1,4 +1,8 @@
+#if os(WASI)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 // The towns: six on the way, two of them different for each pass. And Lake Bennett, where
 // the party builds a boat and waits for the ice.
