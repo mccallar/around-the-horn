@@ -11,10 +11,16 @@ enum BalloonData {
     static let launchBurn = 25.0
     /// Gallons a watch spent loitering low, before the temperature.
     static let loiterBurn = 10.0
-    /// Nautical miles a watch on the helium alone, with the tanks dry.
+    /// Nautical miles a watch on the helium alone, with the tanks dry or the burners dead.
     static let driftSpeed = 40.0
-    /// Lift lost every watch the tanks are dry, flying or loitering.
+    /// Lift lost every watch without heat for the cone (the tanks dry or the burners dead),
+    /// flying or loitering; a watch the last of the propane heats for part of loses the rest.
     static let emptyLift = 5.0
+    /// Lift at 0% with no ballast to cut away: a full propane cylinder goes over the side
+    /// instead, and this is the lift it buys back. What it costs is later: three or four
+    /// watches of propane (D14).
+    static let cylinder = 50.0
+    static let cylinderLift = 10.0
     /// Helium seeping through the cell, every watch flown.
     static let seep = 0.08
     static let strikeChance = 0.035
@@ -33,8 +39,10 @@ enum BalloonData {
     // Keys in `GameState.vars`.
     static let southKey = "balloon.south"
     static let forecastKey = "balloon.forecasters"
-    /// Propane aboard at the start of the watch being flown.
-    static let startFuelKey = "balloon.startFuel"
+    /// The share of the watch being flown that had no heat (none: the key is absent).
+    static let coldKey = "balloon.cold"
+    /// Set once the crew has been told the burners have given out; cleared once they burn.
+    static let burnersOutKey = "balloon.burnersOut"
     /// 1 after an ordinary relaunch, 2 after the ground team paid for it; said on the first watch.
     static let relaunchKey = "balloon.relaunch"
     static let toppedUpKey = "balloon.toppedUp"

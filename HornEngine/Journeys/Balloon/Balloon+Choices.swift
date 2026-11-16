@@ -14,7 +14,7 @@ extension Balloon {
             return [e.ask("him", prompt: "You are passing the Himalaya.",
                           detail: "The whole range stands up out of the haze to the north, a white wall two hundred miles long. Mission Control says the jet is running hard right over the summits — if you can stand the cold.",
                           options: [.init(high ? "Hold the jet over the range (35 gal)" : "Climb over the range into the jet (35 gal)",
-                                          enabled: e.state.fuel >= BalloonData.himalayaBurn),
+                                          enabled: e.state.fuel >= BalloonData.himalayaBurn && !Self.burnersOut(e.state)),
                                     .init("Stay south of the range")])]
         case "pacific":
             return [forkChoice(e)]
@@ -82,18 +82,16 @@ extension Balloon {
             }
             let living = e.state.crew.indices.filter { e.state.crew[$0].alive }
             for (i, idx) in living.enumerated() {
-                e.state.crew[idx].hp -= 3 + (i < e.state.clothes ? 0 : 10)
+                e.state.crew[idx].hp = max(0, e.state.crew[idx].hp - 3 - (i < e.state.clothes ? 0 : 10))
             }
             let over = e.state.pace == .full
                 ? "You burn hard to hold your height over the summits, and the jet takes you like a leaf in a gutter."
                 : "You burn hard and climb up over the summits into the jet, and it takes you like a leaf in a gutter."
             var t = over + " For an hour Everest stands just below the porthole, close enough to see the snow streaming off the summit. You've gained two hundred miles. The cold has gained on all of you. [red](Crew health falls.)[/red]"
             if e.chance(0.25) {
-                e.state.sails = max(0, e.state.sails - 10)
-                t += " Ice forms in a burner valve over the range. [red](Burners −10%)[/red]"
+                t += " Ice forms in a burner valve over the range." + knock(e, [(.burners, 10)])
             }
             var q: [Interrupt] = [.message(t)]
-            for idx in living where e.state.crew[idx].hp < 0 { e.state.crew[idx].hp = 0 }
             e.deaths(&q)
             return q
 
@@ -123,12 +121,14 @@ extension Balloon {
                 return [.message("You note the moment in the log and keep the watch schedule. Somebody eats the cake anyway, quietly, at three in the morning.")]
             }
             e.state.day += 1
-            e.state.fuel = max(0, e.state.fuel - BalloonData.partyBurn)
+            sink(e, burnWatch(e, BalloonData.partyBurn))
             e.state.food = max(0, e.state.food - 3)
             for i in e.state.crew.indices where e.state.crew[i].alive {
                 e.state.crew[i].hp = min(100, e.state.crew[i].hp + 8)
             }
-            return [.message("There is cake, cocoa, a paper hat for everyone and a crackly telephone call from home. Spirits climb higher than the balloon. [green](Crew health improves.)[/green]")]
+            var q: [Interrupt] = [.message("There is cake, cocoa, a paper hat for everyone and a crackly telephone call from home. Spirits climb higher than the balloon. [green](Crew health improves.)[/green]")]
+            checkLift(e, &q)
+            return q
 
         case "azores":
             if option == 1 { return [] }
@@ -175,8 +175,8 @@ extension Balloon {
                     q.append(.message("She has nothing you need. Her cook sends up a bag of oranges anyway, and the football scores."))
                 }
             } else {
-                e.state.sails = max(0, e.state.sails - 10)
-                q.append(.message("The line snags on her radio mast as she rolls. It parts before it can drag you down, but the jolt rattles every burner. [red](Burners −10%)[/red]"))
+                let note = knock(e, [(.burners, 10)])
+                q.append(.message("The line snags on her radio mast as she rolls. It parts before it can drag you down, but the jolt rattles every burner.\(note)"))
             }
             return q
 
@@ -191,30 +191,27 @@ extension Balloon {
         case "thunderheads":
             if option == 0 {
                 var q: [Interrupt] = []
-                let dry = e.state.fuel <= 0
+                let cold = burnWatch(e, burn(e.state, e.state.region))
                 e.state.day += 1
-                e.state.fuel -= min(e.state.fuel, burn(e.state, e.state.region))
                 e.consume(&q, .sail)
                 e.health(&q, .sail)
                 if e.state.over { return q }
-                if dry { e.state.hull -= BalloonData.emptyLift }
+                sink(e, cold)
                 if e.chance(0.1) {
-                    let d = e.ri(6, 12)
-                    e.state.hull -= Double(d)
-                    q.append(.message("You lose a watch detouring round the cells, and still catch the edge of one. [red](Lift −\(d)%)[/red]"))
+                    let note = knock(e, [(.lift, e.ri(6, 12))])
+                    q.append(.message("You lose a watch detouring round the cells, and still catch the edge of one.\(note)"))
                 } else {
                     q.append(.message("You lose a watch detouring round the cells, but come out the other side unharmed."))
                 }
-                e.checkSink(&q)
+                checkLift(e, &q)
                 return q
             }
             let cloudy = e.state.weather == BalloonData.cloud
             let risk = (cloudy ? 0.25 : 0.12) + (e.state.pace == .full ? 0.15 : 0)
             if e.chance(risk) {
-                let d = e.ri(18, 35)
-                e.state.hull -= Double(d)
-                var q: [Interrupt] = [.message("The gap closes. For ten minutes the balloon is flung up and down like a toy, and hail hammers on the capsule. [red](Lift −\(d)%)[/red]")]
-                e.checkSink(&q)
+                let note = knock(e, [(.lift, e.ri(18, 35))])
+                var q: [Interrupt] = [.message("The gap closes. For ten minutes the balloon is flung up and down like a toy, and hail hammers on the capsule.\(note)")]
+                checkLift(e, &q)
                 return q
             }
             return [.message("You hold your course with your heart in your mouth. Lightning walks the cloud walls on either side — and then you're through.")]
@@ -224,10 +221,9 @@ extension Balloon {
                 e.state.fuel = max(0, e.state.fuel - BalloonData.iceBurn)
                 return [.message("You burn hard and climb out of the cloud into clear, dry air. Within the hour the ice is sliding off the envelope in sheets and tumbling away below.")]
             }
-            let d = e.ri(5, 15)
-            e.state.hull -= Double(d)
-            var q: [Interrupt] = [.message("You ride it out. By the time the cloud thins, the balloon is carrying a ton of ice and sagging like a wet tent. [red](Lift −\(d)%)[/red]")]
-            e.checkSink(&q)
+            let note = knock(e, [(.lift, e.ri(5, 15))])
+            var q: [Interrupt] = [.message("You ride it out. By the time the cloud thins, the balloon is carrying a ton of ice and sagging like a wet tent.\(note)")]
+            checkLift(e, &q)
             return q
 
         case "camera":
@@ -239,10 +235,9 @@ extension Balloon {
                 e.state.money += Double(n)
                 return [.message("The pictures go out on the news around the world. Your sponsors are delighted, and wire you a bonus. [green](+$\(n))[/green]")]
             }
-            e.state.hull -= 8
-            e.state.sails = max(0, e.state.sails - 12)
-            var q: [Interrupt] = [.message("The plane cuts across in front of you, and its wash sets the whole balloon swinging. [red](Lift −8%, Burners −12%)[/red]")]
-            e.checkSink(&q)
+            let note = knock(e, [(.lift, 8), (.burners, 12)])
+            var q: [Interrupt] = [.message("The plane cuts across in front of you, and its wash sets the whole balloon swinging.\(note)")]
+            checkLift(e, &q)
             return q
 
         default:

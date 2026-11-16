@@ -10,8 +10,9 @@ import Foundation
 // storms, and which ballast wins back; the cold of the jet against the speed of it; stale
 // air in a sealed capsule; and the Pacific, five thousand miles with nowhere to land.
 // Tables are in BalloonData.swift; events in Balloon+Events.swift; the fields in
-// Balloon+Fields.swift; set pieces and answers in Balloon+Choices.swift. Spec and the bot's
-// numbers: docs/journeys/balloon.md.
+// Balloon+Fields.swift; set pieces and answers in Balloon+Choices.swift; lift, burners and
+// propane at nothing in Balloon+Trouble.swift. Spec and the bot's numbers:
+// docs/journeys/balloon.md.
 //
 // Stock roles: `hull` is lift, `sails` the burners; `timber` is ballast (a sack wins back
 // lift), `sailcloth` burner spares, `limes` CO2 scrubbers (against stale air), `clothes`
@@ -66,9 +67,10 @@ public final class Balloon: Journey {
 
         rules.tickHours = 4
         rules.startHour = 8
-        // A watch that starts with any propane is flown under power; one that starts dry
-        // drifts (`adjustSpeed`).
+        // A watch without heat drifts, and the last of the propane heats its share of one:
+        // `adjustSpeed` sets the pace, so the shared rule leaves it alone.
         rules.noFuelSpeed = 1
+        rules.wearWrecks = false  // lift at 0% goes down in `tick`, where ballast can still save her
         rules.water = 0.2
         rules.hotWater = 0.3
         rules.rainCatch = 2...6
@@ -164,8 +166,8 @@ public final class Balloon: Journey {
     static let aloftWithCrew = "Your co-pilot brings the balloon down at the first safe place, and the ground team flies everyone home. The attempt is over."
     static let aloftAlone = "With nobody at the burners, the balloon drifts on alone until it settles, far from anywhere. A search plane finds it two days later. The attempt is over."
     static let onTheGround = "The ground team packs up the balloon and flies everyone home. The attempt is over."
-    static let downOnLand = "With no lift left, you pick the emptiest ground in sight and come down hard in a cloud of dust and torn fabric. Everyone climbs out. The attempt is over."
-    static let downAtSea = "With no lift left, the capsule settles onto the swell and the envelope folds over it like a tent. A freighter answers your mayday and takes everyone aboard. The balloon is lost, and so is the attempt."
+    static let downOnLand = "With no lift left and nothing more to throw over the side, you pick the emptiest ground in sight and come down hard in a cloud of dust and torn fabric. Everyone climbs out. The attempt is over."
+    static let downAtSea = "With no lift left and nothing more to throw over the side, the capsule settles onto the swell and the envelope folds over it like a tent. A freighter answers your mayday and takes everyone aboard. The balloon is lost, and so is the attempt."
 
     /// The finale's opening lines, for the skin: the crossing, the landing, who climbs out.
     public static func finale(_ s: GameState) -> String {
@@ -241,19 +243,25 @@ public final class Balloon: Journey {
         pace(s.pace).fuel * BalloonData.burnFactor(s.temperature(in: reg))
     }
 
-    /// A watch that starts with dry tanks drifts on the helium alone. Otherwise the burn
-    /// follows the cold: the shared rule takes the altitude's gallons next, so the tank is
-    /// left holding what makes that come out right (and nothing, if the watch empties it).
+    /// A watch without heat, the tanks dry or the burners given out, drifts on the helium
+    /// alone; the last of the propane heats its share of the watch and she drifts the rest.
+    /// Otherwise the burn follows the cold: the shared rule takes the altitude's gallons next,
+    /// so the tank is left holding what makes that come out right (and nothing, if the watch
+    /// empties it). Burners that have given out burn nothing (`fuelBurn`).
     override func adjustSpeed(_ e: GameEngine, _ reg: Region, _ sp: inout Double) {
-        let start = e.state.fuel
-        e.state.vars[BalloonData.startFuelKey] = start
-        let base = pace(e.state.pace).fuel
-        if start <= 0 {
-            sp *= BalloonData.driftSpeed / pace(e.state.pace).speed
-            return
-        }
-        let b = burn(e.state, reg)
-        e.state.fuel = start >= b ? start - b + base : 0
+        let s = e.state
+        if !Self.burnersOut(s) { e.state.vars[BalloonData.burnersOutKey] = nil }
+        let b = burn(s, reg)
+        let heat = Self.heated(s, b)
+        e.state.vars[BalloonData.coldKey] = heat < 1 ? 1 - heat : nil
+        if heat < 1 { sp *= heat + (1 - heat) * BalloonData.driftSpeed / pace(s.pace).speed }
+        guard !Self.burnersOut(s) else { return }
+        e.state.fuel = s.fuel >= b ? s.fuel - b + pace(s.pace).fuel : 0
+    }
+
+    /// Burners that have given out burn nothing.
+    override func fuelBurn(_ e: GameEngine, _ pace: PaceInfo) -> Double {
+        Self.burnersOut(e.state) ? 0 : pace.fuel
     }
 
     /// Helium seeps every watch flown; the sun, rime, rough air and storms take more.
@@ -287,15 +295,18 @@ public final class Balloon: Journey {
         return s.living.contains { $0.hp > 0 } ? Self.aloftWithCrew : Self.aloftAlone
     }
 
-    /// Dry tanks cost lift every watch aloft; loitering burns its own, smaller share; the
-    /// first watch after a relaunch says what it cost.
+    /// A watch without heat costs lift, flying or loitering, and the share of one the last
+    /// of the propane could not heat costs its share; loitering burns its own, smaller share;
+    /// the first watch after a relaunch says what it cost. Lift gone, she is asked what goes
+    /// over the side (Balloon+Trouble), unless she is reaching a field or the finish, where
+    /// the arrival comes first.
     override func tick(_ e: GameEngine, _ q: inout [Interrupt], _ mode: GameEngine.DayMode, _ reg: Region) {
-        let dry: Bool
+        let cold: Double
         switch mode {
         case .port:
             return
         case .sail:
-            dry = (e.state.vars[BalloonData.startFuelKey] ?? 1) <= 0
+            cold = e.state.vars[BalloonData.coldKey] ?? 0
             if let r = e.state.vars[BalloonData.relaunchKey] {
                 e.state.vars[BalloonData.relaunchKey] = nil
                 let relaunched = "Relaunched. The climb back to cruising height burned \(Int(BalloonData.launchBurn)) gallons."
@@ -309,17 +320,17 @@ public final class Balloon: Journey {
                 }
             }
         case .sea:
-            let start = e.state.fuel
-            dry = start <= 0
-            if !dry {
-                e.state.fuel = max(0, start - BalloonData.loiterBurn * BalloonData.burnFactor(e.state.temperature(in: reg)))
-            }
+            cold = burnWatch(e, BalloonData.loiterBurn * BalloonData.burnFactor(e.state.temperature(in: reg)))
         }
-        if dry {
-            e.state.hull -= BalloonData.emptyLift
-            e.state.note = "The burners are cold. The balloon is sinking."
-            e.checkSink(&q)
+        if cold > 0 {
+            sink(e, cold)
+            e.state.note = Self.coldNote(e.state, cold)
         }
+        sayBurnersOut(e, &q)
+        guard Self.goingDown(e.state) else { return }
+        if mode == .sail, let ns = e.state.nextStop, ns.mile == e.state.mile, ns.type == .port || ns.type == .end { return }
+        // Asked once, however many watches of a rest are left to pass.
+        if !q.contains(where: Self.isSinking) { q += sinking(e) }
     }
 
     /// The climb away from the ground. A field's ground team will not strand you: short of
@@ -339,19 +350,27 @@ public final class Balloon: Journey {
 
     public override func mayDepart(_ s: GameState) -> Bool { s.fuel >= BalloonData.launchBurn }
 
-    /// What the app should say instead of relaunching, or nil: you are on the ground, short
-    /// of the climb's propane, and could buy a step of it here. With no money for it, the
-    /// ground team pays. Aloft (resuming between fields) it is always nil.
+    /// What the app should say instead of relaunching, or nil: you are on the ground with
+    /// no lift, no ballast aboard and the price of a sack here (with neither, she goes up to
+    /// be asked what goes over the side, and is grounded); or short of the climb's propane,
+    /// and could buy a step of it here. With no money for that, the ground team pays. Aloft
+    /// (resuming between fields) it is always nil.
     public static func relaunchRefusal(_ e: GameEngine) -> String? {
-        guard e.state.atPort, let port = e.currentPort, e.state.fuel < BalloonData.launchBurn else { return nil }
+        guard e.state.atPort, let port = e.currentPort else { return nil }
+        if goingDown(e.state) && e.state.timber < 1 && e.state.money >= port.price(.timber) {
+            return "The launch director won't let you go up with no lift in her. A sack of ballast from the store, or the riggers' helium, first."
+        }
+        guard e.state.fuel < BalloonData.launchBurn else { return nil }
         let step = Double(BalloonData.items.first { $0.key == .fuel }!.step)
         guard e.state.money >= step * port.price(.fuel) else { return nil }
         return "You need at least 25 gallons of propane to relaunch. The ground crew points at the fuel truck."
     }
 
     /// The region's thunderstorms, then the pack ice's roof, then one event on about one
-    /// watch in nine.
+    /// watch in nine. Nothing else happens to a balloon going down.
     override func dayEvents(_ e: GameEngine, _ q: inout [Interrupt], _ reg: Region) {
+        if Self.goingDown(e.state) { return }
+        defer { sayBurnersOut(e, &q) }
         let forecast = e.state.vars[BalloonData.forecastKey] == 1
         if reg.has("storms") && e.chance(forecast ? BalloonData.strikeChanceForecast : BalloonData.strikeChance) {
             strike(e, &q, reg)
@@ -392,7 +411,13 @@ public final class Balloon: Journey {
     override func special(_ e: GameEngine, _ stop: Stop) -> [Interrupt] { setPiece(e, stop) }
 
     override func resolve(_ e: GameEngine, _ key: String, _ args: [String], _ option: Int) -> [Interrupt] {
-        answer(e, key, args, option)
+        key == "sinking" ? answerSinking(e, args, option) : answer(e, key, args, option)
+    }
+
+    /// Going down, she is asked what goes over the side before another watch is flown
+    /// (Balloon+Trouble).
+    override func stalled(_ e: GameEngine) -> [Interrupt]? {
+        !e.state.atPort && Self.goingDown(e.state) ? sinking(e) : nil
     }
 
     // MARK: - Trade and score

@@ -47,6 +47,7 @@
 		54E22ECBF4E88BF7A4608CA0 /* AirshipScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C802F0633CB47BCA69931C7 /* AirshipScene.swift */; };
 		54F28ECDCAE78E4D847624EE /* LegacySaveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EFE7D352E191E20D2322B5D /* LegacySaveTests.swift */; };
 		570ED1A0299CA1D70CC7DA90 /* BalanceSimulationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 066E1756FBD97DB90F4CC624 /* BalanceSimulationTests.swift */; };
+		58F09BADA7536422B0161FD4 /* Balloon+Trouble.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DC4CD2FAA1AAD1D13F6D98C /* Balloon+Trouble.swift */; };
 		5B6D7AE3ED26A431939F6D13 /* Airship+Trouble.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8680208DD32657F232D32061 /* Airship+Trouble.swift */; };
 		5BE5B2EEB1577D6BDBFC6DA1 /* HornEngine.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 509B74C67184498F2681AA80 /* HornEngine.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		5C12F839C3F9D2C5328FC37D /* Rail+Depots.swift in Sources */ = {isa = PBXBuildFile; fileRef = C11589EC5172DE1C71B5748F /* Rail+Depots.swift */; };
@@ -292,6 +293,7 @@
 		895669FFCD02D59A23D0444B /* Horn1849Skin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Horn1849Skin.swift; sourceTree = "<group>"; };
 		8B5DB0322C897F9F163CD5FF /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		8B84815BD850CCD28520377E /* TestJourneys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestJourneys.swift; sourceTree = "<group>"; };
+		8DC4CD2FAA1AAD1D13F6D98C /* Balloon+Trouble.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Balloon+Trouble.swift"; sourceTree = "<group>"; };
 		8F46A30D261341B02D3FFAC1 /* GameEngine+Choices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GameEngine+Choices.swift"; sourceTree = "<group>"; };
 		90EC46C79B8380AEC8181D5A /* PrototypeParityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrototypeParityTests.swift; sourceTree = "<group>"; };
 		92B379A31EE0B81538B8E6BE /* HornEngineTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = HornEngineTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -652,6 +654,7 @@
 				C7BBEE9C984E82C11E2A8805 /* Balloon+Choices.swift */,
 				270A0ADEF8689846C48FA238 /* Balloon+Events.swift */,
 				F844F70FCAF56E479FEFEAF3 /* Balloon+Fields.swift */,
+				8DC4CD2FAA1AAD1D13F6D98C /* Balloon+Trouble.swift */,
 				C75ACC56221506F21CF03D24 /* BalloonData.swift */,
 			);
 			path = Balloon;
@@ -907,6 +910,7 @@
 				F1054CA224A77A86FF2984D9 /* Balloon+Choices.swift in Sources */,
 				FD588199CBD7935181554E17 /* Balloon+Events.swift in Sources */,
 				E1739C91F42EE16F44C49880 /* Balloon+Fields.swift in Sources */,
+				58F09BADA7536422B0161FD4 /* Balloon+Trouble.swift in Sources */,
 				A2C172461D23A7D268A69004 /* Balloon.swift in Sources */,
 				B82A3CF0792A5880E0AD517E /* BalloonData.swift in Sources */,
 				412A28E202A86BE6B8F7B9F9 /* GameData.swift in Sources */,

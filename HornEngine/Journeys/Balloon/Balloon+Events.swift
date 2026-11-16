@@ -21,15 +21,15 @@ extension Balloon {
         e.state.crew[idx].hp = max(1, e.state.crew[idx].hp - hp)
     }
 
-    /// The southern track's thunderstorm: a lift-tearing ride and a whole watch lost.
+    /// The southern track's thunderstorm: a lift-tearing ride and a whole watch lost, which
+    /// burns a watch of propane, or sinks as any watch without heat does.
     func strike(_ e: GameEngine, _ q: inout [Interrupt], _ reg: Region) {
-        let d = e.ri(15, 35)
-        e.state.hull -= Double(d)
+        let note = knock(e, [(.lift, e.ri(15, 35))])
         e.state.day += 1
-        e.state.fuel -= min(e.state.fuel, burn(e.state, reg))
+        sink(e, burnWatch(e, burn(e.state, reg)))
         e.state.weather = BalloonData.storm
-        q.append(.message("A thunderstorm boils up beneath you without warning. The updraft flings the balloon two miles up and the downdraft drops it three. It takes a whole watch to fight clear. [red](Lift −\(d)%)[/red]"))
-        e.checkSink(&q)
+        q.append(.message("A thunderstorm boils up beneath you without warning. The updraft flings the balloon two miles up and the downdraft drops it three. It takes a whole watch to fight clear.\(note)"))
+        checkLift(e, &q)
     }
 
     /// Somebody goes out on the iced roof.
@@ -53,6 +53,9 @@ extension Balloon {
         let rough = w.isRough
         let cold = temp == .cold || temp == .freezing
         let sea = reg.has("sea")
+        // Burner trouble needs burners: a flame to cough, a valve that is not dead already.
+        let lit = Self.lit(s)
+        let working = !Self.burnersOut(s)
 
         return [
             // 1–4: stores
@@ -87,15 +90,13 @@ extension Balloon {
             },
 
             // 5–10: the balloon
-            JourneyEvent(6, when: rough || w == BalloonData.jet) { e, q in
-                let d = e.ri(12, 28)
-                e.state.sails = max(0, e.state.sails - Double(d))
-                q.append(.message("Number two burner coughs, flares yellow and dies. It takes an hour of coaxing to bring it back. [red](Burners −\(d)%)[/red]"))
+            JourneyEvent(6, when: (rough || w == BalloonData.jet) && lit) { e, q in
+                let note = self.knock(e, [(.burners, e.ri(12, 28))])
+                q.append(.message("Number two burner coughs, flares yellow and dies. It takes an hour of coaxing to bring it back.\(note)"))
             },
             JourneyEvent(4, when: rough) { e, q in
-                e.state.sails = max(0, e.state.sails - 15)
-                e.state.hull -= 6
-                var t = "A load cable parts with a bang like a rifle shot, and the capsule lurches on the rest. [red](Burners −15%, Lift −6%)[/red]"
+                let note = self.knock(e, [(.burners, 15), (.lift, 6)])
+                var t = "A load cable parts with a bang like a rifle shot, and the capsule lurches on the rest.\(note)"
                 if e.chance(0.5) {
                     let well = e.state.crew.indices.filter { e.state.crew[$0].alive && e.state.crew[$0].ailment == nil }
                     if let idx = e.pick(well) {
@@ -105,13 +106,12 @@ extension Balloon {
                     }
                 }
                 q.append(.message(t))
-                e.checkSink(&q)
+                self.checkLift(e, &q)
             },
             JourneyEvent(4) { e, q in
-                let d = e.ri(8, 18)
-                e.state.hull -= Double(d)
-                q.append(.message("The gas cell is leaking. Somewhere up near the crown a seam has opened, and nobody can reach it. [red](Lift −\(d)%)[/red]"))
-                e.checkSink(&q)
+                let note = self.knock(e, [(.lift, e.ri(8, 18))])
+                q.append(.message("The gas cell is leaking. Somewhere up near the crown a seam has opened, and nobody can reach it.\(note)"))
+                self.checkLift(e, &q)
             },
             JourneyEvent(3, when: rough || w == BalloonData.snow) { e, q in
                 self.roofAccident(e, &q)
@@ -121,9 +121,9 @@ extension Balloon {
                 e.state.fuel -= Double(n)
                 q.append(.message("A valve on the tank rack outside has frozen open, and before you can close it, \(n) gallons have vented away."))
             },
-            JourneyEvent(2, when: w == BalloonData.storm) { e, q in
-                e.state.sails = max(0, e.state.sails - 18)
-                q.append(.message("Lightning cracks past close enough to taste. A burner valve is welded shut. [red](Burners −18%)[/red]"))
+            JourneyEvent(2, when: w == BalloonData.storm && working) { e, q in
+                let note = self.knock(e, [(.burners, 18)])
+                q.append(.message("Lightning cracks past close enough to taste. A burner valve is welded shut.\(note)"))
             },
 
             // 11–15: choices
@@ -149,7 +149,8 @@ extension Balloon {
             JourneyEvent(4, when: cold && (w == BalloonData.snow || w == BalloonData.cloud)) { e, q in
                 q.append(e.ask("ice",
                                prompt: "Ice is building on top of the envelope. You can't see it, but you can feel it: the balloon is getting heavy and slow to answer.",
-                               options: [.init("Climb above the cloud to melt it (40 gal)", enabled: e.state.fuel >= BalloonData.iceBurn),
+                               options: [.init("Climb above the cloud to melt it (40 gal)",
+                                               enabled: e.state.fuel >= BalloonData.iceBurn && !Self.burnersOut(e.state)),
                                          .init("Ride it out")]))
             },
             // A small camera plane can't climb to the jet.

@@ -72,16 +72,22 @@ final class BalloonTests: XCTestCase {
         XCTAssertEqual(e.state.fuel, 500 - 14 * 1.2, accuracy: 1e-9)
     }
 
-    func testTheLastOfThePropaneStillFliesAWatch() {
+    /// 5 gallons of the 13.3 a warm watch in the middle air burns: heat for 0.38 of the
+    /// watch, and the rest drifts and sinks (D14).
+    func testTheLastOfThePropaneHeatsItsShareOfAWatch() {
         var s = flying()
         s.fuel = 5
         s.forceFair = 1
         let e = engine(s)
         let q = e.sailDay()
+        let heat = 5 / (14 * 0.95)
         XCTAssertEqual(e.state.fuel, 0)
-        XCTAssertGreaterThan(e.state.mile - 1000, 150)
-        XCTAssertEqual(e.state.hull, 100 - BalloonData.seep, accuracy: 1e-9)
+        // 150 nm × (0.38 + 0.62 × 40/150) × the top of the jitter.
+        XCTAssertEqual(e.state.mile - 1000, Int(jsRound(150 * (heat + (1 - heat) * 40 / 150) * (0.85 + 0.3 * 0.999))))
+        XCTAssertEqual(e.state.mile - 1000, 94)
+        XCTAssertEqual(e.state.hull, 100 - BalloonData.seep - 5 * (1 - heat), accuracy: 1e-9)
         XCTAssertTrue(messages(q).contains(balloon.text.outOfFuel))
+        XCTAssertEqual(e.state.note, "The burners sputter out partway through the watch. The balloon is sinking.")
     }
 
     func testDryTanksDriftOnTheHeliumAndSink() {
@@ -95,8 +101,10 @@ final class BalloonTests: XCTestCase {
         XCTAssertEqual(e.state.hull, 100 - BalloonData.seep - 5, accuracy: 1e-9)
         XCTAssertFalse(e.state.note.isEmpty)
 
-        // Loitering dry sinks too, and at the bottom you come down.
+        // Loitering dry sinks too, and at the bottom, with nothing to cut away, you come down
+        // (with ballast aboard you are asked first: BalloonBreakdownTests).
         s.hull = 4
+        s.timber = 0
         let low = engine(s)
         let q = low.passDays(1, .sea)
         XCTAssertTrue(low.state.over)
