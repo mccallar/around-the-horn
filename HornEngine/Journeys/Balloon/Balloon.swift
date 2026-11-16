@@ -140,9 +140,10 @@ public final class Balloon: Journey {
         noTackle: "You have no fishing line left.",
         tooRough: "The air is far too rough to come down that low.",
         catchReport: { caught, limit, got in
-            var t = caught > 0 ? "You caught [amber]\(caught) lbs[/amber] of fish." : "You caught nothing."
-            if caught > limit { t += " The cool box holds \(limit) lbs before the rest goes bad." }
-            if got > 0 { t += " [green]+\(got) lbs of rations.[/green]" }
+            func lbs(_ n: Int) -> String { "\(n) \(n == 1 ? "lb" : "lbs")" }
+            var t = caught > 0 ? "You caught [amber]\(lbs(caught))[/amber] of fish." : "You caught nothing."
+            if caught > limit { t += " The cool box holds \(lbs(limit)) before the rest goes bad." }
+            if got > 0 { t += " [green]+\(lbs(got)) of rations.[/green]" }
             t += " [dim]The capsule is aired out. A watch has passed.[/dim]"
             return t
         },

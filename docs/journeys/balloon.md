@@ -300,35 +300,35 @@ Talk:
 3. A retired airline captain who has come out to watch: "Scrubbers. Everybody forgets the scrubbers. Five people in a sealed can make a great deal of bad air."
 
 ### Luxor
-Arrival: "You come down on the West Bank, on the dusty field where the little tourist balloons land every morning, with the temples on one side and the Nile on the other. Half the village walks out to watch you land."
+Arrival: "Below you is the dusty field on the West Bank where the little tourist balloons land every morning, with the temples on one side and the Nile on the other. Half the village is already walking out to watch."
 Talk:
 1. A tourist-balloon pilot: "We fly one hour every morning and call ourselves brave. Mind the haze over the Red Sea — it's thick as soup."
 2. Your ground-team driver, beating dust off his cap: "Propane's cheaper here than at any field ahead of you. Fill every tank you've got."
 3. A guide in a white robe: "People have watched the sky over this valley for four thousand years. You are the first I have seen arrive from Morocco."
 
 ### Jodhpur
-Arrival: "You land on a dry plain below the great fort, in a cloud of red dust. Half the city comes out to watch, and somebody brings tea."
+Arrival: "The field is a dry plain below the great fort, and the red dust is already blowing across it. Half the city is out to watch, and somebody has brought tea."
 Talk:
 1. A schoolteacher: "Beyond us, the Himalaya. Beyond them, China, and then the sea. There is a great deal of 'beyond' in your plans."
 2. Your ground-team chief: "Sand for ballast is the one thing the Thar has plenty of. Buy all you can lift."
 3. A mechanic from the airfield: "Your burners will ice up over the mountains. Carry spares, and somebody who can fit them wearing gloves."
 
 ### Saga
-Arrival: "You come down on the wide gravel bed of the Kase River, where the city holds its balloon fiesta every autumn. A crowd is already lining the bank, waving paper flags."
+Arrival: "Below you is the wide gravel bed of the Kase River, where the city holds its balloon fiesta every autumn. A crowd is already lining the bank, waving paper flags."
 Talk:
 1. A fiesta organiser: "From here the jet runs straight out over the ocean, faster than any ship. The next land is America. There is nothing in between."
 2. A balloon maker: "Last winter a team left here with half-full tanks. A fishing boat found them near Midway, sitting on their capsule. Fill your tanks."
 3. A doctor at the field: "The winter flu is everywhere this month. Wash your hands, and don't linger."
 
 ### Albuquerque
-Arrival: "You land on the great dusty field where the city holds its balloon fiesta. A dozen local pilots are waiting for you, and every one of them has advice."
+Arrival: "Below you is the great dusty field where the city holds its balloon fiesta. A dozen local pilots are waiting on it, and every one of them has advice."
 Talk:
 1. An old balloonist in a feed-store cap: "Three fellows from this town were the first to fly the Atlantic in a balloon, back in '78. You're carrying their luck. Don't waste it."
 2. A burner mechanic: "Best burner parts in the country, and the cheapest. Stock up. The Atlantic doesn't sell spares."
 3. A television reporter: "The whole country's watching. Can you say something about the Pacific? Anything. Thirty seconds."
 
 ### Kitty Hawk
-Arrival: "You come down on the little airstrip beside the Wright Brothers memorial, its granite pylon standing on top of its dune. The wind whips sand across the runway."
+Arrival: "Below you is the little airstrip beside the Wright Brothers memorial, its granite pylon standing on top of its dune. The wind is whipping sand across the runway."
 Talk:
 1. A park ranger: "The first airplane flew from the flat sand below that hill in 1903, for twelve seconds. You've been up for weeks. Mind the difference."
 2. Your ground-team chief: "From here it's the Atlantic and nothing else. No more fields, no more trucks. Whatever you'll need, buy it now."
@@ -1647,7 +1647,9 @@ card, setup, outfit, burial, status and chart copy (§2, §3, §12.1's labels, �
 §16, §19) belong to the skin: `AroundTheHorn/Journeys/BalloonSkin.swift` and the three files
 beside it (docs/design/journeys-architecture.md §2, "Balloon skin, as built"). The role
 labels are in D11's shape, as 1849's and the other journeys' are: "A Zurich chocolate
-maker", "A Bristol balloon builder", "An Alaska bush pilot" (§2's table; text only).
+maker", "A Bristol balloon builder", "An Alaska bush pilot" (§2's table; text only). The
+fields' arrivals (§6) describe the field below her, since "Land at the field" is asked
+after them, and the catch report says "1 lb" (text only).
 
 ### The numbers as shipped
 

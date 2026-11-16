@@ -106,7 +106,7 @@ final class BalloonSkinTests: XCTestCase {
         XCTAssertGreaterThan(air.role(.shipwright).patch, air.role(.merchant).patch)
         XCTAssertGreaterThan(air.role(.whaler).aim, air.role(.merchant).aim)
         XCTAssertEqual(Double(air.role(.whaler).catchLimit), 1.5 * Double(air.role(.merchant).catchLimit))
-        has(text, "can stow half as much again of what it catches")
+        has(text, "can stow half as much again of a catch")
         XCTAssertEqual(Role.shipwright.scoreMultiplier, 2)
         XCTAssertEqual(Role.whaler.scoreMultiplier, 3)
         has(text, "the builder's counts double, the bush pilot's triple")

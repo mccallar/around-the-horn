@@ -71,7 +71,7 @@ enum BalloonSkin {
             "Flying round the world is expensive, and not everyone who tried it was rich.",
             "[amber]Chocolate maker[/amber] — starts with $15,000.",
             "[amber]Balloon builder[/amber] — starts with $7,250. Gets far more out of every sack of ballast and every burner kit.",
-            "[amber]Bush pilot[/amber] — starts with $6,500. Deadly with a fishing line, and can stow half as much again of what it catches.",
+            "[amber]Bush pilot[/amber] — starts with $6,500. Deadly with a fishing line, and can stow half as much again of a catch.",
             "The poorer you start, the more your finish is worth: the builder's counts double, the bush pilot's triple.",
         ],
         namesHeading: "Balloon & crew",

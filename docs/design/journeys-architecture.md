@@ -407,7 +407,10 @@ Iron Road and Over the Pole look, read and play as they did.
 - **One debug launch argument**, `-HornDebugFuel <n>` with `-HornDebugStart`: that much
   fuel aboard, so a walk can show dry tanks and a field's refusal. Debug builds only.
 - **The engine's text**: the three role labels in D11's shape ("A Zurich chocolate maker",
-  "A Bristol balloon builder", "An Alaska bush pilot"). No number changed.
+  "A Bristol balloon builder", "An Alaska bush pilot"); the five fields' arrivals, which
+  told of a landing the question under them had not yet asked for ("You come down on the
+  West Bank ... Land at the field?"), now describe the field below her; and the catch
+  report writes "1 lb", not "1 lbs". No number changed.
 - **Night falls by the local sun.** The log keeps GMT, and local time along the route runs
   from GMT − 7 to GMT + 9, so the scene reads the longitude under her off the chart's
   route (`BalloonScene.longitude`) and darkens from about half past six in the evening to
