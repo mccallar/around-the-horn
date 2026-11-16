@@ -44,6 +44,7 @@ Three gates prove 1849 is unchanged and are never re-recorded: `PrototypeParityT
 | `weatherWeights(_:_:cursed:)` | the region's | seasons or the journey's state shift the odds (use `bump`) |
 | `crewFactor(_:)` | 1 / 0.85 / 0.65 / 0.45 for 4+ / 3 / 2 / 1 hands | the vehicle needs fewer or more |
 | `adjustSpeed(_:_:_:)` | nothing | grades, currents, head winds, a hired helper |
+| `stalled(_:)` | nil: the vehicle can move | it cannot (rail: broken down); what is shown instead of the turn, which then takes no time and draws nothing |
 | `structureDamage(_:_:)` | creep + rough weather × pace | the structure wears differently |
 | `tick(_:_:_:_:)` | nothing | a per-turn rule of its own, in every mode |
 | `dayEvents(_:_:_:)` | `eventChance` → one of `events` | several event tables |
@@ -71,7 +72,8 @@ Three gates prove 1849 is unchanged and are never re-recorded: `PrototypeParityT
 5. **Stock roles are fixed; names are the journey's.** `food`; `water`; `limes` = what
    wards off the slow sickness; `meds`; `clothes` = warmth, one per person; `sailcloth` =
    spare for what drives the vehicle (`state.sails`); `timber` = spare for what holds it
-   together (`state.hull`, zero ends the game); `tackle` = what the foraging game spends,
+   together (`state.hull`, zero ends the game unless the journey sets
+   `rules.wearWrecks = false`, when it breaks down instead: rail); `tackle` = what the foraging game spends,
    counted in throws; `fuel` = burned per turn by `PaceInfo.fuel`. A journey that doesn't
    carry one leaves it out of `items`. No water: `rules.water = 0; rules.hotWater = 0`.
 6. **Choices** are raised with `e.ask("key", args, prompt:, detail:, options:)` and
@@ -255,7 +257,9 @@ numbers and text are untouched, and so is everything 1849 shows.
   contract; 1849 answers `nil`), `Words.lots` (items the shop prices by the lot,
   "$2/100 gallons", where one alone costs pennies; 1849 answers `[]`) and
   `ForageField.oneWay` (all the quarry crosses the same way, wood on a current; 1849
-  answers `false`). Nothing else in the shared views changed.
+  answers `false`). Nothing else in the shared views changed. Later, `Words.trouble` (a
+  red row under those for a plight the meters don't say: "Train: Broken down", "Out of
+  wood"; 1849 answers `nil`), decision D14.
 - A turn need not be a day. Rail's is four hours, so the skin has one function, `span`,
   that turns a count of turns into "8 hours" or "7 days and 4 hours", and uses it for the
   rest menu, the contract row and the endings. The date with its hour is the engine's.
