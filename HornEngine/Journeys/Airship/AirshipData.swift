@@ -1,4 +1,8 @@
+#if os(WASI)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 // Over the Pole's tables: what the airship carries, where she moors, the country and the
 // ice she crosses and the weather there. Everything is in this namespace; nothing extends a

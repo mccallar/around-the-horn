@@ -507,9 +507,13 @@ public enum RepairJob { case mend, patch, yardHull, yardSails }
 public enum Journeys {
     /// Every journey, in the order the picker shows them. Adding one is this line and
     /// its folder.
-    public static let all: [Journey] = [Horn1849(), Rail(), Airship(), Balloon(), Klondike(), Mars()]
+    public static let all: [Journey] = [Horn1849(), Rail(), Airship()]
 
-    private static let byID: [String: Journey] = Dictionary(uniqueKeysWithValues: all.map { ($0.id, $0) })
+    /// Built and tested, but not offered yet: their skins are still being drawn. They can
+    /// be looked up by id (their own tests do) but are in no list a player sees.
+    static let unreleased: [Journey] = [Balloon(), Klondike(), Mars()]
+
+    private static let byID: [String: Journey] = Dictionary(uniqueKeysWithValues: (all + unreleased).map { ($0.id, $0) })
 
     /// An id no journey has (a save from a build with more journeys) falls back to 1849.
     /// Check `has` before trusting a save: its stop index is only good for its own journey.

@@ -1,4 +1,8 @@
+#if os(WASI)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 // The three set pieces (the Arctic Circle, the North Pole and Point Barrow) and the answer to
 // everything the flight asks.

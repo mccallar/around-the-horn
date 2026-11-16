@@ -1,4 +1,8 @@
+#if os(WASI)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 // The Jet Stream: 1999. Round the world by balloon, east from Marrakech on the winter jet
 // stream, 18,300 nautical miles until you cross the meridian of Marrakech again from the

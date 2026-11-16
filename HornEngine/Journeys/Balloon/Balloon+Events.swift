@@ -1,4 +1,8 @@
+#if os(WASI)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 // What can happen in a watch aloft: the southern track's thunderstorms, the North Pacific's
 // iced roof, and one of seventeen events, by weight, on about one watch in nine. Those that

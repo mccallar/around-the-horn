@@ -1,4 +1,8 @@
+#if os(WASI)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 // The Long Transfer's tables: what the freighter carries, where it stops, the stretches of
 // the transfer arc and the space weather in them. Everything is in this namespace; nothing

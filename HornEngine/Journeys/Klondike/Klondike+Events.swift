@@ -1,4 +1,8 @@
+#if os(WASI)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 // What can happen on a day of travel: first the country's own hazard (a snowslide on the
 // summits, a gravel bar on the river), else one event in nine. Those that ask something are

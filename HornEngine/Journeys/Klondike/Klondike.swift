@@ -1,4 +1,8 @@
+#if os(WASI)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 // To the Klondike: 1898. Seattle to Dawson City, 1,700 miles in three legs: a crowded
 // steamer up the Inside Passage, a mountain pass climbed a load at a time, and a boat you

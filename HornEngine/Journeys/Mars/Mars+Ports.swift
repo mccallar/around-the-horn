@@ -1,4 +1,8 @@
+#if os(WASI)
+import FoundationEssentials
+#else
 import Foundation
+#endif
 
 // The four places a freighter can tie up, and the cycler, which will not stop for you.
 
