@@ -111,8 +111,18 @@ final class RailSkinTests: XCTestCase {
         XCTAssertEqual(trouble(), "Broken down, no wood")
         g.hull = 30
         XCTAssertEqual(trouble(), "Out of wood")
-        g.fuel = 1
+        // Found by review: with less than a turn's wood the box said nothing, though the
+        // turn runs partly on fence posts. The pace decides how much a turn burns.
+        g.pace = .steady
+        g.fuel = 9
+        XCTAssertEqual(trouble(), "Last of the wood")
+        g.fuel = 10
         XCTAssertNil(trouble())
+        g.pace = .easy
+        g.fuel = 6
+        XCTAssertEqual(trouble(), "Last of the wood")
+        g.fuel = 7
+        XCTAssertNil(trouble(), "the easy pace burns 0.7 cords a turn")
         // The meters themselves never read below nought, a negative zero included.
         g.sails = -0.0
         XCTAssertEqual("\(Int(jsRounded(g.sails)))%", "0%")

@@ -106,11 +106,13 @@ export const card = {
 
 /**
  * The train's plight, for the status box: given out (the engine's rule, `Rail.brokenDown`:
- * a meter showing 0%), or no wood.
+ * a meter showing 0%), no wood, or less than the pace burns in a turn (`burn`), which runs
+ * partly on fence posts.
  */
-export function trouble(g) {
+export function trouble(g, burn) {
   const broken = jsRounded(g.sails) <= 0 || jsRounded(g.hull) <= 0, dry = g.fuel <= 0;
-  return broken ? (dry ? 'Broken down, no wood' : 'Broken down') : dry ? 'Out of wood' : null;
+  if (broken) return dry ? 'Broken down, no wood' : 'Broken down';
+  return dry ? 'Out of wood' : g.fuel < burn ? 'Last of the wood' : null;
 }
 
 /** What things are called on the road, worked out for the voyage in hand. */
@@ -149,7 +151,7 @@ export function words(J, v) {
     meters: ['Running gear', 'Engine'],
     // Late from the turn the engine calls it late, as the note and the score have it.
     clock: { label: 'Contract', value: left > 0 ? `${sp(left)} left` : left === 0 ? 'late' : `${sp(-left)} late` },
-    trouble: trouble(g) === null ? null : { label: 'Train', value: trouble(g) },
+    trouble: trouble(g, pace.fuel) === null ? null : { label: 'Train', value: trouble(g, pace.fuel) },
     cash: 'Cash',
     currency: '$',
     storeNames: { clothes: 'Blankets' },

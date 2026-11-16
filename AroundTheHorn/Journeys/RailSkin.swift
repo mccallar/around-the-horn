@@ -85,10 +85,12 @@ enum RailSkin {
         enterShop: "Enter the store",
         rankLegend: "Superintendent of the Line 7,000+ · Master Conductor 4,000+ · Brakeman 2,000+ · Section Hand")
 
-    /// The train's plight, for the status box: given out (the engine's own rule), or no wood.
+    /// The train's plight, for the status box: given out (the engine's own rule), no wood,
+    /// or less than the pace burns in a turn, which runs partly on fence posts.
     static func trouble(_ g: GameState) -> String? {
         let broken = Rail.brokenDown(g), dry = g.fuel <= 0
-        return broken ? (dry ? "Broken down, no wood" : "Broken down") : dry ? "Out of wood" : nil
+        if broken { return dry ? "Broken down, no wood" : "Broken down" }
+        return dry ? "Out of wood" : g.fuel < journey.pace(g.pace).fuel ? "Last of the wood" : nil
     }
 
     static func words(_ g: GameState) -> Words {
