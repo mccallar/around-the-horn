@@ -1190,6 +1190,8 @@ The app's skin (`AroundTheHorn/Journeys/Airship*.swift`, docs/design/journeys-ar
 
 - Leaving Rome with empty tanks is refused by the app (`Words.departRefusal`): “You can't cast
   off with empty tanks! The storekeeper shakes his head and points you back to the petrol.”
+  A flight saved before she left (the stores save as you leave them) comes back to Rome's
+  stores, so she still leaves through both refusals and the departure sentence (D15).
 - The departure sentence reads “On DATE, the [i]SHIP[/i] slips the mast at Ciampino. …”: the
   date line ends in “a.m.” or “p.m.”, and a full stop after it doubled.
 - The role screen, its labels and the mast menu's trade row are in this journey's own words
@@ -1197,8 +1199,17 @@ The app's skin (`AroundTheHorn/Journeys/Airship*.swift`, docs/design/journeys-ar
 - The weather turns red in the status panel on the thunderstorm only (the shell's rule: the
   hardest weather by `harsh`), not on icing fog; the scene rimes the airship white instead.
 - The rest menu reads “1 watch”, “3 watches”, “6 watches (1 day)”, “12 watches (2 days)”.
-- The sun: south of the Arctic it crosses the side of the sky away from the airship, and
-  nights are dark; in a `north` region the midnight sun circles low, at (126, 44) at midnight.
+- The sun crosses the side of the sky away from the airship, and nights are dark, except
+  where and when the sun does not set (north of the Circle, by latitude along the flight
+  and the date: Kings Bay from about April 17, Vadsø from about May 16, the Circle a month
+  round midsummer, Oslo and Nome never): there the midnight sun circles low, at (126, 44)
+  at midnight.
+- Places in sentences read “above the fog”, “over the North Sea”: the region names are
+  headings. One pilot balloon is “1 balloon”; the winds' tally writes “1,350 kg”.
+- Forced down, she is on the ice only where there is sea ice below (`pack`); over
+  Scandinavia she comes down in a field, in the engine's ending and in the picture.
+- At a mast she has reached and not moored to (the arrival's question, or flying on), the
+  picture is the mast and its town, the ground crew waiting at its foot.
 - The chart is §16's; its Mediterranean coast is crossed at about km 510, while the scene's
   sea (the region) runs to the Rhône stop at 650.
 - Forced down, the scene puts her on the surface; at the end she comes down over Nome's roofs.
