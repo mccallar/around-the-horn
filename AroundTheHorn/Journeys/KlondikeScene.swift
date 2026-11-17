@@ -261,12 +261,11 @@ enum KlondikeScene {
     }
 
     static func sea(_ s: Scene) {
-        let px = s.px, hz = s.hz, t = s.t
+        let px = s.px, hz = s.hz
         px.rect(0, hz, px.w, px.h - hz, s.c(s.p.water))
         let spd = s.f.moving ? 14 * s.f.weather.speed + 2 : 1.5
         waves(s, speed: spd, rough: s.p.rough + (s.region == "queenCharlotte" ? 1 : 0))
         if s.f.weather.sky == .still { floes(s, speed: spd) }
-        _ = t
     }
 
     /// 1849's wave dashes, eight rows of them.
@@ -334,6 +333,9 @@ enum KlondikeScene {
     {
         let px = s.px, by = base ?? s.hz
         let off = Double(s.mile) * (s.leg == .foot ? 1.5 : 0.1) + s.t * speed
+        // Snow sits on the trees from the first fall to break-up.
+        let snowOn = snowy && !(6...8).contains(s.g?.month ?? 2)
+        let frost = s.c(0xE8EEF2).opacity(0.8)
         var i = -every
         while i < 164 {
             let k = Int(PixelCanvas.mod(Double(i) + off, 997))
@@ -341,9 +343,7 @@ enum KlondikeScene {
             let h = Double(max(2, tall - 2 + seed % 5))
             let x = Double(i) - PixelCanvas.mod(off, Double(every))
             tree(px, x: x, base: by, height: h, color)
-            if snowy, KlondikeSkin.journey.temperature(s.g ?? KlondikeSkin.debug.start(5, 2), in: KlondikeSkin.journey.regions[0]) != .hot {
-                px.rect(x, by - h, 1, 1, s.c(0xE8EEF2).opacity(0.8))
-            }
+            if snowOn { px.rect(x, by - h, 1, 1, frost) }
             i += every
         }
     }
@@ -633,13 +633,18 @@ enum KlondikeScene {
         let px = s.px, hz = s.hz
         let lo = Int(max(0, 92 + d)), hi = Int(min(160, 175 + d))
         guard lo < hi else { return }
-        px.hills(lo..<hi, base: hz, s.far(0x46545C)) { x in max(0, 34 - abs(x - d - 132) * 0.9) }
-        px.hills(lo..<hi, base: hz, s.far(0xE8EEF2)) { x in max(0, 34 - abs(x - d - 132) * 0.9) - 18 < 0 ? 0 : 0 }
+        let rock = s.far(0x46545C), cap = s.far(0xE8EEF2)
         for i in lo..<hi {
-            let h = jsRounded(max(0, 34 - abs(Double(i) - d - 132) * 0.9))
-            if h > 18 { px.rect(Double(i), hz - h, 1, h - 18, s.far(0xE8EEF2)) }
+            let off: Double = abs(Double(i) - d - 132)
+            let h = jsRounded(max(0, 34 - off * 0.9))
+            guard h > 0 else { continue }
+            px.rect(Double(i), hz - h, 1, h, rock)
+            if h > 18 { px.rect(Double(i), hz - h, 1, h - 18, cap) }
         }
-        px.hills(lo..<hi, base: hz, s.c(0x2F4A35)) { x in 11 + 7 * sin((x - d) * 0.09) + 4 * sin((x - d) * 0.23) }
+        px.hills(lo..<hi, base: hz, s.c(0x2F4A35)) { x in
+            let u: Double = x - d
+            return 11 + 7 * sin(u * 0.09) + 4 * sin(u * 0.23)
+        }
         for i in 0..<7 {
             let bx = 104 + d + Double(i * 8), bh = Double(3 + (i * 5) % 4)
             s.rect(bx, hz - bh - 1, 5, bh + 1, s.c(0xE9DFC8))
@@ -778,7 +783,7 @@ enum KlondikeScene {
         let built = s.g.map(Klondike.hasBoat) ?? false
         let frames = built ? 3 : 4
         for k in 0..<frames {
-            let x = 2 + d + Double(k * 9) - (s.leg == .boat ? 0 : 0)
+            let x = 2 + d + Double(k * 9)
             frame(s, x, s.leg == .boat ? s.hz - 8 : s.hz + 8 + Double(k % 2) * 3)
         }
         if s.leg == .boat, let g = s.g, KlondikeSkin.iceOut(g) {
