@@ -1029,7 +1029,7 @@ final class MarsSkinTests: XCTestCase {
     func testThePickerOffersTheTransfer() {
         let c = controller()
         guard case .picker = c.screen else { return XCTFail("\(c.screen)") }
-        XCTAssertEqual(Array(c.journeys.map(\.id).prefix(5)), [Horn1849.id, Rail.id, Airship.id, Balloon.id, Mars.id])
+        XCTAssertEqual(c.journeys.map(\.id), [Horn1849.id, Rail.id, Airship.id, Balloon.id, Klondike.id, Mars.id])
         c.chooseJourney(mars.id)
         guard case .title = c.screen else { return XCTFail("\(c.screen)") }
         XCTAssertEqual(c.skin.id, mars.id)

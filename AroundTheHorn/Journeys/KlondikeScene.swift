@@ -253,7 +253,9 @@ enum KlondikeScene {
                 var x0 = PixelCanvas.mod(Double(k * 67) + 20 - ox * 3, 220)
                 if x0 < 0 { x0 += 220 }
                 x0 -= 30
-                px.hills(Int(max(0, x0))..<Int(min(160, x0 + 34)), base: hz, isle) { x in
+                let lo = Int(max(0, x0)), hi = Int(min(160, x0 + 34))
+                guard lo < hi else { continue }
+                px.hills(lo..<hi, base: hz, isle) { x in
                     max(0, 5 - abs(x - x0 - 17) * 0.3)
                 }
             }
@@ -350,7 +352,7 @@ enum KlondikeScene {
 
     /// A spruce: a narrow spire, wider toward its foot.
     static func tree(_ px: PixelCanvas, x: Double, base: Double, height h: Double, _ color: Color) {
-        let n = Int(h)
+        let n = max(0, Int(h))
         for r in 0..<n {
             let half = Double(r / 3)
             px.rect(x - half, base - h + Double(r), 1 + 2 * half, 1, color)
