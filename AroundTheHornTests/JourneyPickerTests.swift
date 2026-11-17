@@ -359,7 +359,8 @@ final class JourneyPickerTests: XCTestCase {
     /// voyages under way, and gone back to, each with its own file.
     func testEveryRealJourneyCanBeLeftAndResumed() throws {
         for j in Journeys.all {
-            let skin = try XCTUnwrap(Skins.skin(j.id))
+            // A journey with no skin yet fails here and the rest are still tried.
+            guard let skin = Skins.skin(j.id) else { XCTFail("no skin for \(j.id)"); continue }
             let c = GameController(persistence: p, journeys: Journeys.all + [other],
                                    skins: Skins.all + [TestJourneys.skin(other.id)], journey: j.id)
             c.tickInterval = .seconds(3600)

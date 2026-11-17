@@ -9,7 +9,10 @@ import HornEngine
 /// supplied is not blank and that its three drawings run for every weather and every stop.
 @MainActor
 final class SkinContractTests: XCTestCase {
-    let journeys = Journeys.all
+    /// Every journey that has a skin, in `Journeys.all`'s order. A journey without one fails
+    /// `testEveryJourneyHasASkinAndEverySkinAJourney` alone, so the contract below still
+    /// runs over every skin there is, before and after it in the list.
+    let journeys = Journeys.all.filter { Skins.skin($0.id) != nil }
 
     /// Every blank string reachable in `value`, by path. Closures are not strings: the
     /// tests call those themselves.
@@ -53,7 +56,7 @@ final class SkinContractTests: XCTestCase {
 
     func testEveryJourneyHasASkinAndEverySkinAJourney() {
         XCTAssertFalse(journeys.isEmpty)
-        for j in journeys { XCTAssertNotNil(Skins.skin(j.id), "no skin for \(j.id)") }
+        for j in Journeys.all { XCTAssertNotNil(Skins.skin(j.id), "no skin for \(j.id)") }
         for s in Skins.all { XCTAssertTrue(Journeys.has(s.id), "a skin for \(s.id), which is no journey") }
         XCTAssertEqual(Set(Skins.all.map(\.id)).count, Skins.all.count, "one skin each")
     }
