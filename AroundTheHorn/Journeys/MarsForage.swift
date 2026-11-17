@@ -29,7 +29,8 @@ enum MarsForage {
     static func backdrop(_ px: PixelCanvas, now: Double) {
         px.bands(top: 0x04060D, bottom: 0x0E1730, from: 0, each: 20, count: 10)
         for i in 0..<44 {
-            px.rect(Double((i * 53 + 11) % 160), Double((i * 37 + 3) % 168), 1, 1, Color.white.opacity(i % 3 == 0 ? 0.8 : 0.35))
+            let h = MarsScene.scatter(i + 100)
+            px.rect(Double(h % 160), Double((h / 160) % 168), 1, 1, Color.white.opacity(i % 3 == 0 ? 0.8 : 0.35))
         }
         let f = skin.field
         let each = (f.lanes.upperBound - f.lanes.lowerBound) / Double(f.bands)
@@ -116,20 +117,24 @@ enum MarsForage {
             px.rect(left + w - 4, top + 2, 2, 2, Color(hex: 0x2E6FB5))
             if Int((f.t * 2).rounded(.down)) % 2 == 0 { px.rect(left + w - 2, top - 1, 1, 1, Color(hex: 0xFF5A4A)) }
         default:
-            // A lump: rounded, its underside in shadow, a lit edge on top.
-            px.rect(left + 1, top, w - 2, h, c)
-            px.rect(left, top + 1, w, h - 2, c)
-            px.rect(left + 1, top + h - 2, w - 2, 2, dark)
-            px.rect(left + 2, top, w - 4, 1, bright)
+            // A lump with a ragged edge: each row set in by its own amount, the top lit, the
+            // underside in shadow, and on the bigger ones dark pits; the berg has a crack.
+            let ragged: [Double] = [2, 1, 0, 1, 0, 0, 1, 0, 2, 1, 0]
+            let seed = Int(w) % ragged.count
+            for r in 0..<Int(h) {
+                let inL = r == 0 || r == Int(h) - 1 ? 2 : ragged[(r + seed) % ragged.count]
+                let inR = r == 0 || r == Int(h) - 1 ? 1 : ragged[(r * 3 + seed + 4) % ragged.count]
+                let color = r == 0 ? bright : r >= Int(h) - 2 ? dark : c
+                px.rect(left + inL, top + Double(r), max(1, w - inL - inR), 1, color)
+            }
+            px.rect(left + w - 3, top + 1, 1, max(1, h - 3), dark)
             if w >= 13 {
                 px.rect(left + 3, top + 2, 2, 2, dark)
-                px.rect(left + w - 5, top + 1, 1, 3, dark)
+                px.rect(left + w / 2, top + h / 2, 2, 1, dark)
             }
             if w >= 20 {
-                // The berg: a notch out of its top and a crack down its face.
-                px.rect(left + 6, top, 3, 2, Color(hex: 0x04060D))
-                px.line(from: (left + 10, top + 2), to: (left + 13, top + h - 3), dark)
-                px.rect(left + w - 3, top + 3, 2, 1, bright)
+                px.line(from: (left + 9, top + 1), to: (left + 13, top + h - 3), dark)
+                px.rect(left + 4, top + 1, 4, 1, Color.white)
             }
         }
     }

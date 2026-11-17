@@ -173,13 +173,21 @@ enum MarsScene {
             return
         }
         let mile = g?.mile ?? 2000
+        if lost(f), let g, aerobraking(g) {
+            px.bands(top: 0x04060D, bottom: 0x0B1226, from: 0, each: 10, count: 8)
+            stars(px)
+            streak(px, t: t)
+            weather(px, f, ship: nil)
+            return
+        }
         let region = g?.region.id.rawValue ?? "departure"
         let stop = atStop(f)
         let station = dockedAt(f)
 
         px.bands(top: 0x04060D, bottom: 0x0B1226, from: 0, each: 10, count: 8)
         stars(px)
-        backdrop(px, mile: mile, region: region, stop: stop?.id, station: station, t: t)
+        let skimming = g.map(aerobraking) ?? false
+        backdrop(px, mile: mile, region: region, stop: stop?.id, station: station, t: t, skimming: skimming)
 
         if let station {
             dockedScene(px, station, t: t)
@@ -189,46 +197,50 @@ enum MarsScene {
         if f.moving && station == nil && !lost(f) { specks(px, t: t, fast: coasting(f) ? 0.4 : 1) }
 
         if lost(f) {
-            if let g, aerobraking(g) { streak(px, t: t) } else { wreck(px, f, t: t) }
+            wreck(px, f, t: t)
             weather(px, f, ship: nil)
             return
         }
         let centre = station != nil ? docked : flying
         let face = facing(f)
-        if let g, aerobraking(g), station == nil { plasma(px, t: t) }
+        if skimming && station == nil { plasma(px, t: t, trail: true) }
         freighter(px, f, at: centre, facing: face)
+        if skimming && station == nil { plasma(px, t: t, trail: false) }
         if stop?.id == "turnover" && face == .up { puffs(px, centre, t: t) }
         weather(px, f, ship: (centre, face))
     }
 
     // MARK: Sky
 
+    /// A number that looks random and is the same every time, for placing stars.
+    static func scatter(_ i: Int) -> Int { ((i &+ 1) &* 2_654_435_761 >> 7) & 0xFFFFF }
+
     /// The same stars every time, a few of them tinted.
     static func stars(_ px: PixelCanvas) {
         for i in 0..<48 {
-            let x = Double((i * 53 + 17) % 160), y = Double((i * 29 + 7) % 80)
+            let h = scatter(i)
+            let x = Double(h % 160), y = Double((h / 160) % 80)
             let tint: UInt32 = i % 7 == 0 ? 0xFFD9A0 : i % 5 == 0 ? 0xA8C8FF : 0xFFFFFF
             px.rect(x, y, 1, 1, Color(hex: tint).opacity(i % 3 == 0 ? 0.85 : 0.4))
         }
     }
 
-    /// A filled disc, a row at a time, darker on the side away from the Sun (lower left).
-    static func disc(_ px: PixelCanvas, _ cx: Double, _ cy: Double, _ r: Double, _ color: UInt32, shade: UInt32? = nil) {
+    /// A filled disc, a row at a time, centred on the pixel at (cx, cy) and the same on
+    /// both sides of it, darker on the side away from the Sun (lower left). `upper` stops
+    /// at the middle row: a dome.
+    static func disc(_ px: PixelCanvas, _ cx: Double, _ cy: Double, _ r: Double, _ color: UInt32, shade: UInt32? = nil,
+                     upper: Bool = false) {
         guard r > 0 else { return }
-        if r < 1.5 {
-            px.rect(cx.rounded(.down), cy.rounded(.down), r < 1 ? 1 : 2, r < 1 ? 1 : 2, Color(hex: color))
-            return
-        }
-        let ri = Int(r.rounded(.up))
-        for dy in -ri...ri {
+        let x = cx.rounded(.down), y0 = cy.rounded(.down)
+        if r < 1 { return px.rect(x, y0, 1, 1, Color(hex: color)) }
+        let ri = Int(r.rounded(.down))
+        for dy in -ri...(upper ? 0 : ri) {
             let y = Double(dy)
-            let half = (r * r - y * y).squareRoot()
-            guard half >= 0.5 else { continue }
-            let x0 = (cx - half).rounded(.down), wd = (2 * half).rounded()
-            px.rect(x0, (cy + y).rounded(.down), max(1, wd), 1, Color(hex: color))
+            let hw = (r * r - y * y).squareRoot().rounded()
+            px.rect(x - hw, y0 + y, 2 * hw + 1, 1, Color(hex: color))
             if let shade, r >= 3 {
-                let s = (half * (0.35 + 0.25 * max(0, y) / r)).rounded()
-                if s >= 1 { px.rect(x0, (cy + y).rounded(.down), s, 1, Color(hex: shade)) }
+                let s = (hw * (0.35 + 0.25 * max(0, y) / r)).rounded()
+                if s >= 1 { px.rect(x - hw, y0 + y, s, 1, Color(hex: shade)) }
             }
         }
     }
@@ -259,18 +271,20 @@ enum MarsScene {
     }
 
     /// Earth, its clouds and a continent, the Moon beside it.
-    static func earth(_ px: PixelCanvas, _ r: Double) {
+    static func earth(_ px: PixelCanvas, _ r: Double, moon: Bool = true) {
         let cx = 26 - r * 0.5, cy = 20 + r * 1.5
         disc(px, cx, cy, r + 1, 0x7FB6F0)
         disc(px, cx, cy, r, 0x2E6FB5, shade: 0x1B4778)
         if r >= 5 {
-            disc(px, cx + r * 0.2, cy - r * 0.25, r * 0.38, 0x5F8A4A)
+            disc(px, cx + r * 0.25, cy - r * 0.3, r * 0.26, 0x5F8A4A)
+            disc(px, cx + r * 0.05, cy - r * 0.05, r * 0.18, 0x5F8A4A)
             for k in 0..<3 {
                 let dk = Double(k)
                 px.rect((cx - r * 0.5 + dk * r * 0.3).rounded(.down), (cy - r * 0.55 + dk * r * 0.4).rounded(.down),
                         max(2, (r * 0.5).rounded()), 1, Color(hex: 0xEEF1F4).opacity(0.85))
             }
         }
+        guard moon else { return }
         let mr = max(1, r * 0.27)
         disc(px, cx + r + 6, cy - r / 3 - 2, mr, 0xB8B8B0, shade: 0x7F7F78)
     }
@@ -297,14 +311,24 @@ enum MarsScene {
         for (dx, dy, s) in [(-0.1, 0.1, 0.32), (0.3, -0.2, 0.18), (0.15, 0.45, 0.22)] {
             disc(px, cx + dx * r, cy + dy * r, max(1, r * s), 0x8A4129)
         }
-        disc(px, cx + r * 0.05, cy - r * 0.85, max(1, r * 0.22), 0xF4F1EA)
+        // The northern cap: the top rows of the disc, a little narrower.
+        let x = cx.rounded(.down), top = cy.rounded(.down) - r.rounded(.down)
+        for k in 0..<max(1, Int((r * 0.16).rounded())) {
+            let y = r.rounded(.down) - Double(k)
+            let hw = ((r * r - y * y).squareRoot() * 0.8).rounded()
+            px.rect(x - hw, top + Double(k), 2 * hw + 1, 1, Color(hex: 0xF4F1EA))
+        }
     }
 
     /// What is in the sky for this stretch of the arc, this stop or this station.
-    static func backdrop(_ px: PixelCanvas, mile: Int, region: String, stop: String?, station: String?, t: Double) {
+    static func backdrop(_ px: PixelCanvas, mile: Int, region: String, stop: String?, station: String?, t: Double,
+                         skimming: Bool = false) {
         let behind = region == "shadow" || stop == "shadow"
         if region == "deep" || behind { milkyWay(px) }
-        if region == "inner" { px.polygon([(146, 6), (146, 13), (0, 34), (0, 12)], Color(hex: 0xFFF2C8).opacity(0.07)) }
+        if region == "inner" {
+            px.polygon([(146, 7), (146, 11), (0, 44), (0, 4)], Color(hex: 0xFFF2C8).opacity(0.035))
+            px.polygon([(146, 8), (146, 10), (0, 32), (0, 16)], Color(hex: 0xFFF2C8).opacity(0.035))
+        }
         let rs = sunRadius(mile)
         if behind {
             sun(px, x: 18, y: 36, r: rs + 1, corona: true)
@@ -320,6 +344,7 @@ enum MarsScene {
             px.rect(27, 20, 1, 1, Color(hex: 0xD8D8D0))
         }
         if region == "stream1" || region == "stream2" { stream(px, second: region == "stream2", t: t) }
+        if skimming { return limbBelow(px, t: t) }
         let r = marsRadius(mile)
         if r > 0 && stop != "phobos" {
             let c = marsCentre(r)
@@ -458,12 +483,41 @@ enum MarsScene {
         }
     }
 
-    /// The glow of the air she is pushing through, round her front and trailing back.
-    static func plasma(_ px: PixelCanvas, t: Double) {
-        let c = flying
-        px.polygon([(c.x + 22, c.y - 9), (c.x + 30, c.y), (c.x + 22, c.y + 9), (c.x - 40, c.y + 3), (c.x - 40, c.y - 3)],
-                   Color(hex: 0xFF9A50).opacity(0.25 + 0.1 * sin(t * 11)))
-        px.polygon([(c.x + 25, c.y - 6), (c.x + 29, c.y), (c.x + 25, c.y + 6)], Color(hex: 0xFFE2B0).opacity(0.8))
+    /// The glow of the air she is pushing through: a bright bow round the end she leads
+    /// with, and streaks of hot air trailing back past her.
+    static func plasma(_ px: PixelCanvas, t: Double, trail: Bool) {
+        let c = flying, front = c.x + shipW / 2 + 2
+        if trail {
+            for k in 0..<5 {
+                let dy = Double(k - 2) * 4, len = 50 + Double((k * 13) % 20)
+                let flick = 0.25 + 0.15 * sin(t * 13 + Double(k))
+                px.rect(front - len, c.y + dy, len, 1, Color(hex: 0xFF9A50).opacity(flick))
+            }
+            return
+        }
+        for k in stride(from: -70.0, through: 70, by: 7) {
+            let a = k * .pi / 180
+            let x = front + 4 * cos(a), y = c.y + 13 * sin(a)
+            px.rect(x.rounded(.down), y.rounded(.down), 2, 2, Color(hex: abs(k) < 40 ? 0xFFF0D0 : 0xFFB070))
+        }
+    }
+
+    /// Mars filling the bottom of the view, its thin air a pale band along the edge, the
+    /// way it looks from the top of that air.
+    static func limbBelow(_ px: PixelCanvas, t: Double) {
+        let c = (x: 80.0, y: 250.0), r = 196.0
+        for y in stride(from: 52.0, to: 80, by: 1) {
+            let half = (r * r - (c.y - y) * (c.y - y)).squareRoot()
+            guard half > 0 else { continue }
+            let color: UInt32 = y < 55 ? 0xF0C8A0 : y < 58 ? 0xD98A5A : 0xB5562D
+            px.rect((c.x - half).rounded(.down), y, (2 * half).rounded(), 1, Color(hex: color))
+        }
+        // Dark country going by below, kept inside the planet's edge.
+        for (x, y, w) in [(20.0, 66.0, 18.0), (70, 72, 26), (118, 64, 14), (40, 77, 20)] {
+            let half = (r * r - (c.y - y) * (c.y - y)).squareRoot()
+            let a = max(c.x - half + 2, wrap(x - t * 3, 200) - 20), b = min(c.x + half - 2, a + w)
+            if b > a { px.rect(a.rounded(.down), y, (b - a).rounded(), 2, Color(hex: 0x8A4129)) }
+        }
     }
 
     // MARK: Stops
@@ -471,7 +525,7 @@ enum MarsScene {
     static func stopScene(_ px: PixelCanvas, _ id: String, _ f: SceneFrame, t: Double) {
         switch id {
         case "lunar":
-            earth(px, earthRadius(f.state?.mile ?? 38))
+            earth(px, earthRadius(f.state?.mile ?? 38), moon: false)
             disc(px, 134, 62, 26, 0xBDBDB4, shade: 0x84847C)
             for (dx, dy, r) in [(-8.0, -10.0, 4.0), (6, -2, 6), (-2, 9, 3), (12, 12, 2), (-14, 4, 2)] {
                 disc(px, 134 + dx, 62 + dy, r, 0x9A9A92)
@@ -484,7 +538,7 @@ enum MarsScene {
                 px.rect(x.rounded(.down), y, 1, 1, Color(hex: 0x6D9CC8).opacity(0.6))
             }
         case "cycler":
-            cycler(px, centre: (128, 17), scale: 0.45, t: t)
+            cycler(px, centre: (116, 15), scale: 0.45, t: t)
         case "midway":
             midway(px, at: (128, 6), scale: 0.4)
         case "shadow":
@@ -524,7 +578,8 @@ enum MarsScene {
         case "phobos":
             mars(px, 118, -70, 100)
             phobosYard(px, t: t)
-            px.rect(64, 39, 10, 2, arm)
+            px.rect(64, 39, 12, 2, arm)
+            px.rect(74, 39, 3, 24, Color(hex: 0x6B717A))
         default:
             break
         }
@@ -657,10 +712,9 @@ enum MarsScene {
         }
         // Domes.
         for (x, r) in [(112.0, 9.0), (131, 12.0), (148, 7.0)] {
-            disc(px, x, 58, r, 0xE4DDD0, shade: 0xB9B0A2)
-            px.rect(x - 1, 54, 2, 2, Color(hex: 0xF2D16B))
+            disc(px, x, 60, r, 0xE4DDD0, shade: 0xB9B0A2, upper: true)
+            px.rect(x - 1, 56, 2, 2, Color(hex: 0xF2D16B))
         }
-        px.rect(96, 56, 64, 4, Color(hex: 0xA65A32))
         // The pad, the lander on its legs, its ramp down, and three people in suits.
         px.rect(30, 62, 46, 3, Color(hex: 0x8C8378))
         let shell = Color(hex: 0xDCE1E6)
@@ -698,14 +752,14 @@ enum MarsScene {
         }
     }
 
-    /// Lost in the aerobrake: Mars's edge, and a short bright line across its sky.
+    /// Lost in the aerobrake: Mars's edge below, and a short bright line across the top of
+    /// its air.
     static func streak(_ px: PixelCanvas, t: Double) {
-        mars(px, 110, 120, 70)
-        limb(px, (110, 120), 70)
+        limbBelow(px, t: t)
         let x = 40 + wrap(t * 20, 90)
-        px.line(from: (x - 24, 46), to: (x, 54), Color(hex: 0xFFE2B0))
-        px.line(from: (x - 24, 47), to: (x, 55), Color(hex: 0xFF9A50).opacity(0.7))
-        px.rect(x.rounded(.down), 54, 2, 2, Color.white)
+        px.line(from: (x - 24, 44), to: (x, 52), Color(hex: 0xFFE2B0))
+        px.line(from: (x - 24, 45), to: (x, 53), Color(hex: 0xFF9A50).opacity(0.7))
+        px.rect(x.rounded(.down), 52, 2, 2, Color.white)
     }
 
     // MARK: Space weather

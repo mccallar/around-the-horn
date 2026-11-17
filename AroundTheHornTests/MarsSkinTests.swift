@@ -214,9 +214,9 @@ final class MarsSkinTests: XCTestCase {
         let rows = StatusPanel.stores(mars, g, w)
         XCTAssertEqual(rows.map(\.label), ["Rations", "Water", "Propellant"])
         XCTAssertEqual(rows.map(\.value), ["300 kg", "400 litres", "60 tonnes"])
-        XCTAssertEqual(w.meters.0, "Pressure hull")
+        XCTAssertEqual(w.meters.0, "Hull")
         XCTAssertEqual(w.meters.1, "Power & drive")
-        XCTAssertEqual(w.travelled, "Along the arc")
+        XCTAssertEqual(w.travelled, "Flown")
         XCTAssertEqual(w.leaderTag, "captain")
         XCTAssertNil(w.place, "under way, the stretch of the arc")
         for (tenths, reads) in [(5.0, "0.5 tonnes"), (10, "1 tonne"), (15, "1.5 tonnes"), (0, "0 tonnes")] {

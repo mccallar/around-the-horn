@@ -31,6 +31,7 @@
 		27FAEDA776B23EEDF97FA2D0 /* GameControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6308324207F0B19AB2C51161 /* GameControllerTests.swift */; };
 		2A6CB23257A89B5C55791DBD /* MarsData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 280D897DE9C88C1A14FA96A1 /* MarsData.swift */; };
 		2AAA4A67ACDAA3B8FC9AC69F /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85EEE5666B33F5B57B317B61 /* Persistence.swift */; };
+		30B0A9EDF29E0C60B83A3923 /* MarsScreenshotUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF7391E7E3604FF0B85272B3 /* MarsScreenshotUITests.swift */; };
 		3166AEDE2BE10C686F062A34 /* PressStart2P-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = BDBB3C16595D744809D8CF3B /* PressStart2P-Regular.ttf */; };
 		32F008A549271F1E85FAC2EB /* RNGTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 030AD9AFB938A4FEEA45CA09 /* RNGTests.swift */; };
 		36888AEFA781ED374977A53D /* HornEngine.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 509B74C67184498F2681AA80 /* HornEngine.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -368,6 +369,7 @@
 		F844F70FCAF56E479FEFEAF3 /* Balloon+Fields.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Balloon+Fields.swift"; sourceTree = "<group>"; };
 		FA09DBF841EE4DB044177DA3 /* GameEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameEngine.swift; sourceTree = "<group>"; };
 		FF2D081992F77ED1D9FA0BBC /* AroundTheHorn.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = AroundTheHorn.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FF7391E7E3604FF0B85272B3 /* MarsScreenshotUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarsScreenshotUITests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -578,6 +580,7 @@
 				D44B9958CF117F65D96C1227 /* AirshipScreenshotUITests.swift */,
 				3640D8989CBE3497720C8D69 /* BalloonScreenshotUITests.swift */,
 				0F41F0439CB6BDE9D136E712 /* LaunchUITests.swift */,
+				FF7391E7E3604FF0B85272B3 /* MarsScreenshotUITests.swift */,
 				746C70F5F36AC967DD5E9C22 /* RailScreenshotUITests.swift */,
 				2A5B3A3831A7A90C960BDFD0 /* ResumeUITests.swift */,
 				4B4F1F2713DA564D6DD82B2C /* ScreenshotUITests.swift */,
@@ -918,6 +921,7 @@
 				48D1CFE2742A32C1FC482AE2 /* AirshipScreenshotUITests.swift in Sources */,
 				8600DEFECDB00EC3C2A4DD4F /* BalloonScreenshotUITests.swift in Sources */,
 				CFA59275DDFEF23A3004F4F7 /* LaunchUITests.swift in Sources */,
+				30B0A9EDF29E0C60B83A3923 /* MarsScreenshotUITests.swift in Sources */,
 				87F0DA05537FCFF0B3BB75A4 /* RailScreenshotUITests.swift in Sources */,
 				A6A0CD5D814E1017E1BCADA0 /* ResumeUITests.swift in Sources */,
 				3DEF544B8261130989774BDD /* ScreenshotUITests.swift in Sources */,
