@@ -684,7 +684,10 @@ final class BalloonSkinTests: XCTestCase {
         d.leavePort()
         guard case .travel = d.screen else { return XCTFail("\(d.screen)") }
         d.tick()
-        guard case .message(let chief, _, _) = d.screen else { return XCTFail("\(d.screen)") }
+        // The day's own draw may come first (an illness, say): the chief's is among them.
+        var told: [String] = []
+        while case .message(let text, _, let next) = d.screen { told.append(text); next() }
+        let chief = told.first { $0.contains("On the sponsor's account") } ?? "\(told)"
         has(chief, "On the sponsor's account")
         has(chief, "(+15 gallons.)")
 
