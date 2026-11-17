@@ -131,6 +131,27 @@ final class MarsScreenshotUITests: ScreenshotWalk {
         shot("21-repairs")
     }
 
+    /// D19: a hauler who spends her purse below a step of propellant ($3.70) is cleared dry,
+    /// and told so, rather than sent back to the chandlery for good.
+    func testClearedDry() {
+        relaunch(["-HornTickSeconds", "30"])
+        tap("Take the charter")
+        tap("An ice hauler off the lunar tugs")
+        tap("Use these names")
+        tap("October 2087")
+        tap("Enter the chandlery")
+        for _ in 0..<18 { app.buttons["More Rations"].tap() }
+        for _ in 0..<16 { app.buttons["More Water"].tap() }
+        app.swipeUp()
+        for (item, n) in [("Supplement packs", 20), ("Medical kits", 8), ("Thermal suits", 10), ("Array panels", 8),
+                          ("Hull patches", 7), ("Tether cartridges", 1)] {
+            for _ in 0..<n { app.buttons["More \(item)"].tap() }
+        }
+        shot("14a-spent")
+        tap("Pay $621.75 and leave")
+        shot("14b-cleared-dry")
+    }
+
     /// The arc and its weather: six places in four months, and the gallery.
     func testTheArc() {
         for (stop, month, name) in [("hill", "9", "25-departure-october"), ("cycler", "7", "26-inner-arc-august"),
@@ -248,6 +269,13 @@ final class MarsScreenshotUITests: ScreenshotWalk {
         sleep(4)
         settle()
         shot("54-tumbling")
+        // Docked dry, she is not coasting yet: she will be once she undocks.
+        relaunch(["-HornDebugStart", "midway", "-HornDebugFuel", "0", "-HornTickSeconds", "1"])
+        tap("Continue the transfer")
+        roll(until: "Dock and go aboard")
+        tap("Dock and go aboard")
+        button(startingWith: "Change thrust").tap()
+        shot("55-docked-dry-thrust")
     }
 
     func testJezero() {
