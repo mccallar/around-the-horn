@@ -668,10 +668,10 @@ final class BalloonSkinTests: XCTestCase {
         c.tick()
         // The day's own draw may bring a message (an illness, say: a debug load's seed is
         // random); none of them is the relaunch, which the note tells.
-        var said: [String] = []
-        while case .message(let text, _, let next) = c.screen { said.append(text); next() }
-        XCTAssertFalse(said.contains { $0.contains("Relaunch") || $0.contains("climb back") },
-                       "a plain relaunch says so in the note: \(said)")
+        var day: [String] = []
+        while case .message(let text, _, let next) = c.screen { day.append(text); next() }
+        XCTAssertFalse(day.contains { $0.contains("Relaunch") || $0.contains("climb back") },
+                       "a plain relaunch says so in the note: \(day)")
         has(c.game!.note, "Relaunched. The climb back to cruising height burned 25 gallons.")
 
         // No money for a step of propane: the ground team pays, and says so.
