@@ -249,12 +249,18 @@ struct RepairsView: View {
             Heading(words.repairsHeading)
             ConditionBox(game: g, meters: words.meters)
             Para(words.repairsNote, size: 18, color: Theme.dim)
-            ChoiceList(choices: [
-                Choice(label: words.patch, enabled: c.read { $0.canPatchHull }) { c.patchHull() },
-                Choice(label: words.mend, enabled: c.read { $0.canMendSails }) { c.mendSails() },
-                Choice(label: "Done") { c.backToMenu() },
-            ])
+            ChoiceList(choices: Self.choices(c, words))
         }
+    }
+
+    /// In the order the condition box above lists its meters (D15): the hull's repair,
+    /// then the sails', then the way back.
+    static func choices(_ c: GameController, _ words: Words) -> [Choice] {
+        [
+            Choice(label: words.patch, enabled: c.read { $0.canPatchHull }) { c.patchHull() },
+            Choice(label: words.mend, enabled: c.read { $0.canMendSails }) { c.mendSails() },
+            Choice(label: "Done") { c.backToMenu() },
+        ]
     }
 }
 

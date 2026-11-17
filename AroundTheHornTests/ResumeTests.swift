@@ -352,7 +352,7 @@ final class ResumeTests: XCTestCase {
         guard case .portMenu = c.screen else { return XCTFail("aboard the Perpetua: \(c.screen)") }
         XCTAssertTrue(c.game!.atPort)
         XCTAssertEqual(c.game!.fuel, fuel - MarsData.dockBurn, accuracy: 1e-9)
-        XCTAssertEqual(MarsSkin.skin.words(c.game!).place, "Docked at Perpetua")
+        XCTAssertEqual(MarsSkin.skin.words(c.game!).place, "Aboard the Perpetua")
     }
 
     func testTurnoverIsStillAskedAfterAResume() {

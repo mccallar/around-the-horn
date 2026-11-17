@@ -18,7 +18,8 @@ extension Mars {
                  "A forecaster on her break: \"The Sun is building to a maximum next spring. Leave in August and it's calm, but the planets are badly placed and it's a long trip. Leave in December and it's a long trip through the storms. October is the window.\"",
                  "The quartermaster holds up a thermal suit. \"One each. The heat runs off the same power as the drive. When the panels go, the warmth goes with them, and faster than you would think.\"",
              ]),
-        Port(id: "cycler", journey: Mars.id, name: "the cycler Perpetua", shop: "The Perpetua's stores", mult: 1.1,
+        // A port's name heads its menu; sentences use the stop's, "the cycler Perpetua".
+        Port(id: "cycler", journey: Mars.id, name: "The cycler Perpetua", shop: "The Perpetua's stores", mult: 1.1,
              mods: [.food: 1.6, .water: 0.4],
              arrive: "The Perpetua comes up out of the dark exactly on time, as she has every twenty-six months for forty years: a turning wheel of habitat, a spine of tanks, and an ice shield like a dirty snowball. She never stops. You latch on and ride along for as long as you like.",
              talk: [

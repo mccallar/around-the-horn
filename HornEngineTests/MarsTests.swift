@@ -580,6 +580,43 @@ final class MarsTests: XCTestCase {
 
     // MARK: - Words
 
+    /// D19: Gateway sends a ship with no rations back to its chandlery while the purse runs
+    /// to a step of them (25 kg, $4.50); with less, she goes hungry, and the departure says
+    /// so, as it says when she goes with her tanks empty. Every other journey still refuses.
+    func testGatewayLetsAShipGoWithoutWhatSheCannotBuy() {
+        XCTAssertEqual(Mars.gatewayStep(.food), 4.5, accuracy: 1e-9)
+        XCTAssertEqual(Mars.gatewayStep(.fuel), 3.7, accuracy: 1e-9)
+        var s = GameState(journey: Mars.id, role: .whaler, ship: "Fair Copy", captain: "Adaeze",
+                          crew: ["Tomasz", "Priya", "Mateo", "Ingrid"], startYear: 2087, startMonth: 9)
+        s.fuel = 400
+        s.money = 4.5
+        XCTAssertNil(GameEngine(state: s).depart(), "the purse runs to 25 kg")
+        s.money = 4.49
+        let hungry = GameEngine(state: s)
+        let said = try? XCTUnwrap(hungry.depart())
+        XCTAssertTrue(said?.contains("There is not a ration aboard, and the galley stays shut until somebody sells you food.") == true, "\(said ?? "")")
+        XCTAssertFalse(said?.contains("betting pool") == true)
+        XCTAssertFalse(hungry.state.atPort)
+
+        s.food = 200
+        s.fuel = 0
+        let dry = GameEngine(state: s).depart() ?? ""
+        XCTAssertTrue(dry.contains("Her tanks are empty, so a tug nudges her clear of the yard"), dry)
+        XCTAssertFalse(dry.contains("ration"), dry)
+        s.fuel = 400
+        XCTAssertTrue((GameEngine(state: s).depart() ?? "").hasSuffix("Somebody has already started a betting pool."))
+
+        for j in Journeys.all where j.id != Mars.id {
+            let d = j.departures[0]
+            var g = GameState(journey: j.id, role: .merchant, ship: "Wren", captain: "Ada", crew: ["Bo", "Cy", "Di", "Ed"],
+                              startYear: d.year, startMonth: d.month)
+            g.fuel = 1000
+            g.money = 0
+            XCTAssertFalse(j.departsUnfed(g), j.id)
+            XCTAssertNil(GameEngine(state: g).depart(), "\(j.id): nobody leaves with no food")
+        }
+    }
+
     func testDistancesReadInMillionsOfKilometres() {
         XCTAssertEqual(MarsData.km(31_245), "312.45 million km")
         XCTAssertEqual(MarsData.km(38), "0.38 million km")

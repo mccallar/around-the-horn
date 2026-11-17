@@ -72,7 +72,7 @@ enum MarsSkin {
         differencesAction: "Weigh them up",
         differencesHeading: "How they weigh up",
         differences: [
-            "A charter costs money every day it runs, and only one of these three started with much of it.",
+            "Propellant, water and spares all come out of the purse, and only one of these three started with much in it.",
             "[amber]Charter captain[/amber] — starts with $1,500.",
             "[amber]Yard rigger[/amber] — starts with $850. Gets far more out of every array panel and hull patch.",
             "[amber]Ice hauler[/amber] — starts with $625. A dead eye with the grapple, and her melt tank takes 100 litres from an outing where the others manage 60.",
@@ -115,6 +115,14 @@ enum MarsSkin {
         return Mars.lastOfThePropellant(g) ? "Last of the propellant" : nil
     }
 
+    /// After the thrust setting, why it makes no way: under way she is coasting; docked,
+    /// she will be once she undocks.
+    static func coast(_ g: GameState, dark: Bool, dry: Bool) -> String {
+        guard dark || dry else { return "" }
+        let why = dark ? "The array is dark" : "The tanks are dry"
+        return g.atPort ? " [red]\(why): once she undocks, she will only coast.[/red]" : " [red]\(why): she is only coasting.[/red]"
+    }
+
     /// The contract row: days in hand, as the engine pays for them (one in hand at day
     /// 169), and late from the day its own message says the date has passed.
     static func contract(_ g: GameState) -> String {
@@ -149,7 +157,7 @@ enum MarsSkin {
             talk: "Talk to people",
             buy: "Buy supplies",
             yard: "Visit the yard crew",
-            place: docked ? "Docked at \(g.currentStop.short)" : nil,
+            place: !docked ? nil : g.currentStop.id == "cycler" ? "Aboard the Perpetua" : "Docked at \(g.currentStop.short)",
             statusNames: [:],
             travelled: "Flown",
             distanceUnit: "million km",
@@ -165,7 +173,9 @@ enum MarsSkin {
             fractional: [.limes],
             singular: true,
             lots: [],
-            departRefusal: g.fuel <= 0
+            // While the purse runs to a step of propellant: past that, holding her would
+            // hold her for good, and she leaves dry (D18, D19).
+            departRefusal: g.fuel <= 0 && Mars.gatewaySells(.fuel, g)
                 ? "Gateway's traffic office won't clear a ship to leave the yard with her tanks empty. The quartermaster points you back at the propellant."
                 : nil,
             resumesInFirstShop: true,
@@ -180,9 +190,7 @@ enum MarsSkin {
             clothesWarning: g.clothes < n ? "[red]Only \(g.clothes) of \(n) aboard have a thermal suit.[/red]" : nil,
             lostHeading: "Lost on the transfer",
             paceHeading: "Thrust",
-            paceNow: "The drive is set for [amber]\(pace.name)[/amber]."
-                + (dark ? " [red]The array is dark: she is only coasting.[/red]"
-                    : dry ? " [red]The tanks are dry: she is only coasting.[/red]" : ""),
+            paceNow: "The drive is set for [amber]\(pace.name)[/amber]." + coast(g, dark: dark, dry: dry),
             rationsHeading: "Rations",
             rationsNow: "The crew is on [amber]\(rations.name)[/amber]. With \(n) aboard, that's \(tenth(Double(n) * rations.amount)) kg a day.",
             restPrompt: g.atPort

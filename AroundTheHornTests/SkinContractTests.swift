@@ -454,6 +454,32 @@ final class SkinContractTests: XCTestCase {
         }
     }
 
+    // MARK: Repairs
+
+    /// D15: the repairs screen offers the hull's repair first and the sails' second, in the
+    /// order its condition box lists the meters (`Words.meters`, hull then sails). Each row
+    /// is told by what it waits for: the hull's by patches, the sails' by sailcloth.
+    func testRepairsComeInTheConditionBoxsOrder() throws {
+        let p = Persistence(directory: FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString),
+                            defaults: UserDefaults(suiteName: UUID().uuidString)!)
+        for j in journeys {
+            let skin = try XCTUnwrap(Skins.skin(j.id))
+            for (timber, sailcloth) in [(0, 2), (2, 0)] {
+                var g = skin.debug.start(1, j.departures[0].month)
+                g.hull = 50
+                g.sails = 50
+                g.timber = timber
+                g.sailcloth = sailcloth
+                let c = GameController(persistence: p, journeys: Journeys.all, skins: Skins.all)
+                c.loadForDebug(g)
+                let w = skin.words(g)
+                let rows = RepairsView.choices(c, w)
+                XCTAssertEqual(rows.map(\.label), [w.patch, w.mend, "Done"], j.id)
+                XCTAssertEqual(rows.map(\.enabled), [timber > 0, sailcloth > 0, true], "\(j.id): the hull's row first")
+            }
+        }
+    }
+
     // MARK: Debug starts
 
     func testDebugStartsAndTheGallery() throws {

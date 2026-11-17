@@ -112,7 +112,8 @@ public final class Mars: Journey {
         wrecked: { "The hull of the [i]\($0)[/i] lets go." },
         wreckedBody: "It goes quietly, the way these things do: a seam that had been patched once too often. The ship's last message reaches Gateway a few minutes later. It gives a position, a time and the names of everyone aboard, and it is very calm.",
         depart: { s in
-            "The [i]\(TextMarkup.escape(s.ship))[/i] backs away from Gateway Yard on \(s.dateText). Jezero is 480 million km along the arc, and the contract pays a bonus for every day under 170. Somebody has already started a betting pool."
+            "The [i]\(TextMarkup.escape(s.ship))[/i] backs away from Gateway Yard on \(s.dateText). Jezero is 480 million km along the arc, and the contract pays a bonus for every day under 170. "
+                + Mars.setOff(s)
         },
         noProvisions: "Nobody leaves Gateway without rations aboard. The yard's quartermaster points you back at the shop.",
         rested: { days, h in
@@ -196,6 +197,33 @@ public final class Mars: Journey {
             }
         }
     }
+
+    /// The departure's last word: the betting pool, or what she leaves without, which only a
+    /// purse with nothing left for it lets her do (D18, D19).
+    static func setOff(_ s: GameState) -> String {
+        var said: [String] = []
+        if s.fuel <= 0 {
+            said.append("Her tanks are empty, so a tug nudges her clear of the yard, and she will coast, turning slowly, until somebody sells her propellant.")
+        }
+        if s.food <= 0 {
+            said.append("There is not a ration aboard, and the galley stays shut until somebody sells you food.")
+        }
+        return said.isEmpty ? "Somebody has already started a betting pool." : said.joined(separator: " ")
+    }
+
+    /// What one step of `key` costs in Gateway's chandlery, as its bill adds it up.
+    public static func gatewayStep(_ key: ItemKey) -> Double {
+        let step = MarsData.items.first { $0.key == key }?.step ?? 0
+        return GameEngine.bill([key: step], at: stations[0])
+    }
+
+    /// Whether the purse still runs to one step of `key` at Gateway.
+    public static func gatewaySells(_ key: ItemKey, _ s: GameState) -> Bool { gatewayStep(key) <= s.money }
+
+    /// Gateway sends a ship with no rations back to the chandlery while the purse runs to
+    /// some; with nothing left to buy them with, holding her there would hold her for good,
+    /// so she goes hungry (D19).
+    public override func departsUnfed(_ s: GameState) -> Bool { !Self.gatewaySells(.food, s) }
 
     /// Docking somewhere is leaving it aboard: a shuttle from there can still catch you.
     override func leaving(_ e: GameEngine) {

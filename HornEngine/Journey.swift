@@ -406,6 +406,11 @@ public class Journey {
     /// `text.noProvisions`, so a journey that refuses for more says so there.
     public func mayDepart(_ s: GameState) -> Bool { true }
 
+    /// Whether the first port lets you go with no food aboard. Never, by default: the
+    /// engine's own refusal. A journey whose first stores have nothing left in the purse's
+    /// reach may let a hungry ship go rather than hold it there for good (decision D19).
+    public func departsUnfed(_ s: GameState) -> Bool { false }
+
     /// Leaving the ground: the first departure, or setting off from a port you went ashore
     /// at. Not called when travel resumes between ports.
     func leaving(_ e: GameEngine) {}

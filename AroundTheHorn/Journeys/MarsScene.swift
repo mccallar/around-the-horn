@@ -502,15 +502,34 @@ enum MarsScene {
         }
     }
 
+    /// The ground's circle in `limbBelow`, and how much deeper its air is.
+    static let limbCentre = (x: 80.0, y: 250.0), limbRadius = 196.0, airDepth = 4.0
+    static let air: UInt32 = 0xF0C8A0
+
+    /// The rows `limbBelow` fills, in order: the air's circle, a few pixels wider than the
+    /// ground's, then the ground over it, so the air shows as a pale band along the edge,
+    /// over the top and down the sides.
+    static func limbRows() -> [(y: Double, x: Double, w: Double, color: UInt32)] {
+        let c = limbCentre
+        var rows: [(y: Double, x: Double, w: Double, color: UInt32)] = []
+        for (r, ground) in [(limbRadius + airDepth, false), (limbRadius, true)] {
+            for y in stride(from: 40.0, to: 80, by: 1) {
+                let d = r * r - (c.y - y) * (c.y - y)
+                guard d > 0 else { continue }
+                let half = d.squareRoot()
+                let color: UInt32 = !ground ? air : y < 58 ? 0xD98A5A : 0xB5562D
+                rows.append((y, (c.x - half).rounded(.down), (2 * half).rounded(), color))
+            }
+        }
+        return rows
+    }
+
     /// Mars filling the bottom of the view, its thin air a pale band along the edge, the
     /// way it looks from the top of that air.
     static func limbBelow(_ px: PixelCanvas, t: Double) {
-        let c = (x: 80.0, y: 250.0), r = 196.0
-        for y in stride(from: 52.0, to: 80, by: 1) {
-            let half = (r * r - (c.y - y) * (c.y - y)).squareRoot()
-            guard half > 0 else { continue }
-            let color: UInt32 = y < 55 ? 0xF0C8A0 : y < 58 ? 0xD98A5A : 0xB5562D
-            px.rect((c.x - half).rounded(.down), y, (2 * half).rounded(), 1, Color(hex: color))
+        let c = limbCentre, r = limbRadius
+        for row in limbRows() where row.w > 0 {
+            px.rect(row.x, row.y, row.w, 1, Color(hex: row.color))
         }
         // Dark country going by below, kept inside the planet's edge.
         for (x, y, w) in [(20.0, 66.0, 18.0), (70, 72, 26), (118, 64, 14), (40, 77, 20)] {
@@ -757,9 +776,10 @@ enum MarsScene {
     static func streak(_ px: PixelCanvas, t: Double) {
         limbBelow(px, t: t)
         let x = 40 + wrap(t * 20, 90)
-        px.line(from: (x - 24, 44), to: (x, 52), Color(hex: 0xFFE2B0))
-        px.line(from: (x - 24, 45), to: (x, 53), Color(hex: 0xFF9A50).opacity(0.7))
-        px.rect(x.rounded(.down), 52, 2, 2, Color.white)
+        // Down through the air's top rows (51 to 54 over the middle of the ground).
+        px.line(from: (x - 24, 47), to: (x, 53), Color(hex: 0xFFE2B0))
+        px.line(from: (x - 24, 48), to: (x, 54), Color(hex: 0xFF9A50).opacity(0.7))
+        px.rect(x.rounded(.down), 53, 2, 2, Color.white)
     }
 
     // MARK: Space weather
@@ -866,7 +886,8 @@ enum MarsScene {
 
     /// For the plot's label: docked somewhere, or out on the arc.
     static func whereabouts(_ g: GameState) -> String {
-        if g.atPort, let port = j.port(g.currentStop.id) { return "docked at \(port.name)" }
+        // The stop's name, which reads in a sentence: "the cycler Perpetua".
+        if g.atPort, j.port(g.currentStop.id) != nil { return "docked at \(g.currentStop.name)" }
         if g.stopIndex == j.stops.count - 1 && g.mile >= g.currentStop.mile { return "at Jezero Landing" }
         return phrase(g.region)
     }

@@ -37,9 +37,10 @@ extension GameEngine {
     // MARK: - Departure
 
     /// Leaving the first port. Nil, and nobody leaves, if there's no food (the journey's
-    /// `text.noProvisions` says why); otherwise the setting-off message.
+    /// `text.noProvisions` says why) and the journey won't let a hungry ship go
+    /// (`Journey.departsUnfed`); otherwise the setting-off message.
     public func depart() -> String? {
-        if state.food <= 0 || !journey.mayDepart(state) { return nil }
+        if (state.food <= 0 && !journey.departsUnfed(state)) || !journey.mayDepart(state) { return nil }
         state.atPort = false
         journey.leaving(self)
         return journey.text.depart(state)

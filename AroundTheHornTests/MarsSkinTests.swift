@@ -237,9 +237,11 @@ final class MarsSkinTests: XCTestCase {
         g.limes = 1
         XCTAssertEqual(SuppliesView.rows(mars, g, w)[4].1, "1 pack")
 
-        // Docked, the box says where.
+        // Docked, the box says where; on the cycler, which is a ship, aboard her.
         let docked = at("midway", port: true)
         XCTAssertEqual(skin.words(docked).place, "Docked at Midway")
+        XCTAssertEqual(skin.words(at("cycler", port: true)).place, "Aboard the Perpetua")
+        XCTAssertEqual(skin.words(at("phobos", port: true)).place, "Docked at Phobos")
         XCTAssertNil(skin.words(at("turnover")).place)
 
         // Who is on it, and what the menu offers.
@@ -251,9 +253,10 @@ final class MarsSkinTests: XCTestCase {
         XCTAssertEqual(skin.words(g).bonus, "Bonus for being an ice hauler")
         XCTAssertEqual(w.forage, "Work the grapple")
         has(w.rationsNow, "With 5 aboard, that's 4 kg a day.")
-        // D15: the hull's repair above power's, in the box's order.
-        has(w.patch, "pressure hull")
-        has(w.mend, "array panel")
+        // The rows the repairs screen offers, hull first (D15: SkinContractTests holds
+        // the order).
+        XCTAssertEqual(w.patch, "Patch the pressure hull — 1 patch [dim](have 3)[/dim]")
+        XCTAssertEqual(w.mend, "Fit a spare array panel — 1 panel [dim](have 3)[/dim]")
     }
 
     func testTheContractRowCountsDaysInHandAsTheEnginePaysThem() {
@@ -299,6 +302,19 @@ final class MarsSkinTests: XCTestCase {
         g.sails = 0.4
         has(skin.words(g).suppliesNote, "[red]the array is dark[/red]")
         has(skin.words(g).paceNow, "[red]The array is dark: she is only coasting.[/red]")
+        // Docked she is going nowhere, so not coasting: she will be once she undocks.
+        var docked = at("midway", port: true)
+        docked.fuel = 0
+        has(skin.words(docked).paceNow, "[red]The tanks are dry: once she undocks, she will only coast.[/red]")
+        XCTAssertFalse(skin.words(docked).paceNow.contains("coasting"))
+        XCTAssertEqual(skin.words(docked).trouble?.value, "Tanks dry")
+        docked.fuel = 300
+        docked.sails = 0
+        has(skin.words(docked).paceNow, "[red]The array is dark: once she undocks, she will only coast.[/red]")
+        XCTAssertFalse(skin.words(docked).paceNow.contains("coasting"))
+        XCTAssertEqual(skin.words(docked).trouble?.value, "Array dark")
+        docked.sails = 64
+        XCTAssertEqual(skin.words(docked).paceNow, "The drive is set for [amber]Cruise[/amber].")
         g.clothes = 3
         XCTAssertEqual(skin.words(g).clothesWarning, "[red]Only 3 of 5 aboard have a thermal suit.[/red]")
         g.clothes = 5
@@ -542,6 +558,58 @@ final class MarsSkinTests: XCTestCase {
         XCTAssertEqual(skin.words(again.game!).setOut, "Burn for Mars")
     }
 
+    /// The review's case (D19): an ice hauler who spends her $625 down to $3.25 with no
+    /// propellant can't buy the chandlery's smallest step of it ($3.70), so holding her at
+    /// Gateway would hold her for good, through every way out of the chandlery and every
+    /// relaunch. The traffic office clears her, and the departure says she goes dry.
+    func testGatewayClearsAShipThatCanBuyNoPropellant() {
+        let c = controller()
+        newTransfer(c, role: .whaler)
+        XCTAssertEqual(c.game!.money, 625)
+        c.enterFirstShop()
+        guard case .shop = c.screen else { return XCTFail("\(c.screen)") }
+        let cart: [ItemKey: Int] = [.food: 450, .water: 800, .limes: 20, .meds: 8, .clothes: 10, .sailcloth: 8,
+                                    .timber: 7, .tackle: 1]
+        XCTAssertTrue(c.run { $0.buy(cart) })
+        XCTAssertEqual(c.game!.money, 3.25, accuracy: 1e-9)
+        XCTAssertEqual(c.game!.fuel, 0)
+        XCTAssertFalse(Mars.gatewaySells(.fuel, c.game!))
+        XCTAssertNil(skin.words(c.game!).departRefusal)
+        // Saved in the chandlery, relaunched: back to it, and out through the departure.
+        c.save()
+        let again = controller()
+        again.chooseJourney(mars.id)
+        again.continueSavedVoyage()
+        guard case .shop(let leave) = again.screen else { return XCTFail("back to the chandlery, not \(again.screen)") }
+        leave()
+        guard case .depart(let text) = again.screen else { return XCTFail("cleared, not \(again.screen)") }
+        has(text, "Her tanks are empty, so a tug nudges her clear of the yard, and she will coast, turning slowly, until somebody sells her propellant.")
+        XCTAssertFalse(again.game!.atPort)
+
+        // With $3.70 she could buy a step, and is sent back for it.
+        var g = state(month: 9)
+        g.money = 3.7
+        XCTAssertNotNil(skin.words(g).departRefusal)
+    }
+
+    /// The same for rations, which the engine refuses: with no rations and less than a
+    /// step of them (25 kg, $4.50) in the purse, she goes hungry and is told so.
+    func testGatewayLetsAShipGoHungryWhenThePurseRunsToNoRations() {
+        let c = controller()
+        newTransfer(c, role: .whaler)
+        c.enterFirstShop()
+        guard case .shop(let done) = c.screen else { return XCTFail("\(c.screen)") }
+        // Everything but rations at its cap is $650.50, past her $625.
+        let cart: [ItemKey: Int] = [.fuel: 100, .water: 800, .limes: 20, .meds: 8, .clothes: 10, .sailcloth: 8,
+                                    .timber: 6, .tackle: 8]
+        XCTAssertTrue(c.run { $0.buy(cart) })
+        XCTAssertLessThan(c.game!.money, Mars.gatewayStep(.food))
+        done()
+        guard case .depart(let text) = c.screen else { return XCTFail("cleared, not \(c.screen)") }
+        has(text, "There is not a ration aboard, and the galley stays shut until somebody sells you food.")
+        XCTAssertFalse(c.game!.atPort)
+    }
+
     // MARK: The picture
 
     func frame(_ g: GameState, moving: Bool = true) -> SceneFrame {
@@ -782,6 +850,44 @@ final class MarsSkinTests: XCTestCase {
         var crewless = flying(20_000)
         crewless.over = true
         XCTAssertFalse(MarsScene.lost(frame(crewless)))
+    }
+
+    /// Skimming Mars, its thin air is a pale band over the ground's edge: over the top of
+    /// it, and down its sides, where the air's circle is wider. The lost ship's bright line
+    /// ends in it. (The air was once drawn on rows the ground's circle never reached.)
+    func testMarsAirIsAPaleBandAlongTheLimb() throws {
+        let rows = MarsScene.limbRows()
+        let air = rows.filter { $0.color == MarsScene.air && $0.w > 0 }
+        let ground = rows.filter { $0.color != MarsScene.air && $0.w > 0 }
+        let top = try XCTUnwrap(ground.map(\.y).min())
+        XCTAssertGreaterThanOrEqual(air.filter { $0.y < top }.count, 3, "air over the top of the ground")
+        for g in ground {
+            let a = try XCTUnwrap(air.first { $0.y == g.y }, "air beside the ground at row \(g.y)")
+            XCTAssertLessThan(a.x, g.x, "row \(g.y): air shows down the side")
+        }
+        XCTAssertEqual(rows.lastIndex { $0.color == MarsScene.air }.map { $0 + 1 }, rows.firstIndex { $0.color != MarsScene.air },
+                       "the air first, the ground over it")
+        XCTAssertTrue(rows.allSatisfy { (0..<80).contains($0.y) })
+        // The streak's head, at row 53, is in the air over the middle of the ground.
+        XCTAssertTrue(air.contains { $0.y == 53 && $0.x <= 50 && $0.x + $0.w >= 110 })
+        XCTAssertGreaterThan(top, 53)
+    }
+
+    // MARK: Stations' names
+
+    /// A port's name heads the port menu, which neither reads markup nor capitalises, so
+    /// each is written as a heading; sentences use the stop's name.
+    func testEveryStationsNameIsAHeading() {
+        for port in mars.ports {
+            XCTAssertEqual(port.name.first?.isUppercase, true, port.name)
+            XCTAssertFalse(port.name.contains("["), port.name)
+        }
+        XCTAssertEqual(mars.port("cycler")?.name, "The cycler Perpetua")
+        XCTAssertEqual(mars.stop("cycler")?.name, "the cycler Perpetua")
+        XCTAssertEqual(MarsScene.whereabouts(at("cycler", port: true)), "docked at the cycler Perpetua")
+        XCTAssertEqual(MarsScene.whereabouts(at("midway", port: true)), "docked at Midway Depot")
+        // And the purses are told apart without a daily charge no rule makes.
+        XCTAssertFalse(card.differences.contains { $0.contains("every day") }, "\(card.differences)")
     }
 
     // MARK: The plot
