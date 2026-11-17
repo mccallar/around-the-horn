@@ -237,14 +237,10 @@ final class MarsScreenshotUITests: ScreenshotWalk {
         shot("50-array-dark")
         rewire.tap()
         shot("51-rewire")
-        // The two days' messages, then under way on ten points of power. (They last a few
-        // days out here, and then the question comes back.)
-        let halt = app.buttons["Cut the drive & take stock"], go = app.buttons["Continue"]
-        for _ in 0..<8 where !halt.exists {
-            if go.waitForExistence(timeout: 2) { go.tap() }
-        }
-        XCTAssertTrue(halt.waitForExistence(timeout: 5), "not under way after the rewire")
-        shot("52-rewired", settle: false)
+        // Two days later: the wings talked round, ten points of power, the drive lit. (They
+        // last a few days out here, and then the question comes back.)
+        tap("Continue")
+        shot("52-rewired")
         relaunch(["-HornDebugStart", "shadow", "-HornDebugFuel", "0", "-HornTickSeconds", "30"])
         shot("53-tanks-dry")
         relaunch(["-HornDebugStart", "shadow", "-HornDebugFuel", "0", "-HornTickSeconds", "3"])

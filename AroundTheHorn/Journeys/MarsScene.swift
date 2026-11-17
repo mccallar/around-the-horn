@@ -540,7 +540,7 @@ enum MarsScene {
         case "cycler":
             cycler(px, centre: (116, 15), scale: 0.45, t: t)
         case "midway":
-            midway(px, at: (128, 6), scale: 0.4)
+            midway(px, at: (112, 8), scale: 0.4)
         case "shadow":
             // Earth at the Sun's edge, about to go behind it.
             px.rect(23, 33, 1, 1, Color(hex: 0x9CC8F2))
