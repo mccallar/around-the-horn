@@ -288,7 +288,9 @@ tests) and `HornEngineTests/MarsBreakdownTests.swift` (18, D14); `JourneyContrac
 title card, setup and outfit copy, learn pages, burial wording, status labels, scene,
 chart and the grapple's drawing (§1's card, §15's canvas, §16, §19) belong to the skin,
 `AroundTheHorn/Journeys/Mars*.swift` (docs/design/journeys-architecture.md §2, "Mars skin,
-as built"; Gateway's refusal of empty tanks is D18). No shared engine code changed. The test bot `JourneyBot` gained
+as built"; Gateway's refusal of empty tanks is D18, and D19 lets her go without what the
+purse can't buy, through one shared hook, `Journey.departsUnfed`, false for every other
+journey). No other shared engine code changed. The test bot `JourneyBot` gained
 one knob, `stockFactorHere` (off by default), described below.
 
 ### The numbers as shipped

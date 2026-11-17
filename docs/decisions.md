@@ -333,3 +333,26 @@ a transfer saved in the chandlery comes back to it and leaves only through `depa
 Any propellant at all clears her. A ship that runs dry later, or leaves a station dry, still
 coasts as the engine says. No engine rule, number or sentence changed, and the bot (which
 always buys propellant) is unaffected.
+
+## D19 — Gateway holds a ship only for what her purse can still buy (2026-11-16)
+
+Found in review of the transfer's skin. D18 sent a ship with empty tanks back to Gateway's
+chandlery, and the engine sends back a ship with no rations, as every journey's first port
+does. The chandlery sells nothing back and its only ways out lead to the departure, so a
+captain who had spent the purse below the smallest step of what was missing (an ice
+hauler can spend $621.75 of her $625 without a tonne of propellant; five tonnes cost
+$3.70) went round the same refusal for good, and with `resumesInFirstShop` (D16) a
+relaunch came back to the same chandlery.
+
+Now each refusal holds only while the purse runs to one step of what it asks for, as
+the shop bills it (`Mars.gatewaySells`: five tonnes of propellant, $3.70; 25 kg of
+rations, $4.50). With less, the traffic office clears her: dry, she coasts; with no
+rations, the crew goes hungry; and the departure sentence says which, in place of the
+betting pool. Propellant is the skin's refusal (`Words.departRefusal`); rations are the
+engine's, so the engine has a new hook, `Journey.departsUnfed`, false by default (every
+other journey still refuses a ship with no food, whatever her purse, exactly as before)
+and answered by the transfer alone. No number, price or random draw changed, and the bot
+(which always buys both) is unaffected.
+
+The airship's petrol refusal at Rome has the same shape (step 100 kg, $1.50) and is left
+as it was.

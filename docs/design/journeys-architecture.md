@@ -471,9 +471,10 @@ Iron Road and Over the Pole look, read and play as they did.
 ### Mars skin, as built
 
 The Long Transfer (`mars`) is the fifth skin: `MarsSkin` (copy, words, debug starts),
-`MarsScene`, `MarsChart`, `MarsForage`, and its entry in `Skins.all`. The engine's rules,
-numbers and text are untouched, and the four journeys before it look, read and play as
-they did.
+`MarsScene`, `MarsChart`, `MarsForage`, and its entry in `Skins.all`. The engine's
+numbers are untouched; in review its departure sentence learned to say what she leaves
+without, the cycler's port name became a heading, and Gateway lets a ship go without what
+her purse can't buy (D19). The four journeys before it look, read and play as they did.
 
 - **One shell member, with a default**: `ForageField.bands`, the number of lanes the
   quarry keeps to (the grapple's ice drifts in the three filaments of a comet's stream,
@@ -485,14 +486,17 @@ they did.
   meter (power & drive here) down to `n`%, so a walk can show the array dark. Debug builds
   only.
 - **Gateway won't clear a ship with her tanks empty** (`Words.departRefusal`, decision
-  D18), and a transfer saved in the chandlery before she left comes back to it
-  (`resumesInFirstShop`, D16). `leaveRefusal` is `nil`: a dry ship may leave a station
-  and coast, which the engine allows.
+  D18) while the purse runs to a step of propellant, nor with no rations while it runs to
+  a step of those (the engine's `Journey.departsUnfed`); with less, she goes without and
+  the departure says so (D19). A transfer saved in the chandlery before she left comes
+  back to it (`resumesInFirstShop`, D16). `leaveRefusal` is `nil`: a dry ship may leave a
+  station and coast, which the engine allows.
 - **Units.** Distance is the engine's units of 10,000 km written as millions with two
   decimals ("312.45 of 480.00 million km", `MarsSkin.millions`, the engine's `MarsData.km`
   without its unit); a turn is a day; propellant is stored in tenths and counted in tenths
   of a tonne by `Stores`; tether cartridges are counted loose, "60 shots", "1 shot". The
-  status box names the station she is docked at (`Words.place`, "Docked at Midway"), and
+  status box names the station she is docked at (`Words.place`, "Docked at Midway";
+  on the cycler, "Aboard the Perpetua"), and
   its contract row counts days in hand as the engine pays them (one at day 169, "late" from
   the day its own message says so). Meters are "Hull" and "Power & drive": "Pressure hull ·
   Power & drive" wraps the status row on a phone.
@@ -500,8 +504,12 @@ they did.
   "Array dark, coasting" under way and "Array dark" docked; "Tanks dry, coasting" and
   "Tanks dry"; "Last of the propellant"; nothing before Gateway is left. The supplies note
   adds "the array is dark", "the tanks are dry" and, past half the month before bone loss,
-  the days without supplements. The thrust screen says she is only coasting, not that the
-  setting makes no difference: on a coast the shared rules still count it.
+  the days without supplements. The thrust screen says she is only coasting (docked, that
+  she will coast once she undocks), not that the setting makes no difference: on a coast
+  the shared rules still count it.
+- **Port names are headings.** The port menu heads itself with the port's name, which is
+  neither capitalised nor read for markup, so the cycler's is "The cycler Perpetua";
+  sentences (the arrival, the plot's label) use the stop's, "the cycler Perpetua".
 - **What the scene shows.** Black sky and fixed stars, the freighter in profile, nose to
   Mars on the right; past Turnover she flies tail first, braking (unless Turnover is waiting
   for power, `mars.held`), and at Turnover she stands on end with her thrusters puffing.
@@ -517,8 +525,9 @@ they did.
   drawn as itself (the Moon going by, the edge of Earth's reach, the cycler's wheel, Midway's
   three tanks, Earth at the Sun's edge, the way in at the approach, Phobos under Mars), each
   station docked and passing, and the cargo lander on the pad at Jezero. Aerobraking she
-  skims Mars's air with a bright bow and hot streaks; lost there, a short bright line crosses
-  it, as the engine's ending says; otherwise a hull that lets go is two pieces drifting
+  skims Mars's air (a pale band over the ground's edge, `MarsScene.limbRows`: the air's
+  circle 4 px wider, drawn first) with a bright bow and hot streaks; lost there, a short
+  bright line comes down into it, as the engine's ending says; otherwise a hull that lets go is two pieces drifting
   apart. Space weather by sky: a signal reaching her dish (good tracking), the solar wind
   streaming and her wings chattering, pebbles streaking by and striking her, static, a pale
   wash and hits on the picture (proton storm), a bright front going through (mass ejection).
@@ -538,10 +547,11 @@ they did.
   into it, six places in four months and the gallery, a station, the three set pieces, the
   plot and the grapple, the array dark and the rewire, dry tanks, Jezero, and the hull letting
   go.
-- `SkinContractTests` walks `Journeys.all` in order and stops at the first journey with no
-  skin (klondike comes before mars), so until every journey has one it never reaches the
-  later ones. Mars was checked with the list held to the journeys that have a skin, which
-  passes; the file itself is unchanged.
+- `SkinContractTests` runs its contract over every journey that has a skin; a journey
+  without one fails `testEveryJourneyHasASkinAndEverySkinAJourney` alone (and
+  `JourneyPickerTests` records it and goes on), so mars is held to the contract while
+  klondike still has no skin. The contract now also holds the repairs screen to D15's
+  order for every skin (`RepairsView.choices`).
 - The web version does not offer the transfer: its skin is not ported (D13).
 
 ## 3. Adding a journey
