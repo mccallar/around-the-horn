@@ -287,7 +287,8 @@ entry in `Journeys.all`. Tests: `HornEngineTests/MarsTests.swift` (30 rule tests
 tests) and `HornEngineTests/MarsBreakdownTests.swift` (18, D14); `JourneyContractTests` runs over it with no special case. The
 title card, setup and outfit copy, learn pages, burial wording, status labels, scene,
 chart and the grapple's drawing (§1's card, §15's canvas, §16, §19) belong to the skin,
-which is not built yet. No shared engine code changed. The test bot `JourneyBot` gained
+`AroundTheHorn/Journeys/Mars*.swift` (docs/design/journeys-architecture.md §2, "Mars skin,
+as built"; Gateway's refusal of empty tanks is D18). No shared engine code changed. The test bot `JourneyBot` gained
 one knob, `stockFactorHere` (off by default), described below.
 
 ### The numbers as shipped
@@ -542,7 +543,8 @@ The rules now (`Mars+Trouble.swift`):
 - **Crew health**: accidents leave a crew member at 1 health at least (`hurt`); what kills
   is the day that follows, as the shared rules count it.
 
-**What the skin must show** (none is built yet; the airship's is the model):
+**What the skin must show** (all built; docs/design/journeys-architecture.md §2, "Mars
+skin, as built"):
 
 - the red status row, `Words.trouble` = ("Ship", …): "Array dark, tanks dry"; "Array dark,
   coasting" under way and "Array dark" docked (`Mars.dark`); "Tanks dry, coasting" under

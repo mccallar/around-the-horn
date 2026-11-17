@@ -468,6 +468,82 @@ Iron Road and Over the Pole look, read and play as they did.
 - The web version does not offer the balloon: its skin is not ported (D13), and neither
   are the airship's shell members.
 
+### Mars skin, as built
+
+The Long Transfer (`mars`) is the fifth skin: `MarsSkin` (copy, words, debug starts),
+`MarsScene`, `MarsChart`, `MarsForage`, and its entry in `Skins.all`. The engine's rules,
+numbers and text are untouched, and the four journeys before it look, read and play as
+they did.
+
+- **One shell member, with a default**: `ForageField.bands`, the number of lanes the
+  quarry keeps to (the grapple's ice drifts in the three filaments of a comet's stream,
+  as docs/journeys/mars.md §15 has it). `FishingModel` puts each new quarry at the middle
+  of the lane its own draw falls in (`ForageField.lane`), so the random draws are the same;
+  every other skin keeps 0, quarry anywhere in its lanes, as before. The web shell does not
+  have it (the web offers neither journey that would use it).
+- **One debug launch argument**, `-HornDebugSails <n>` with `-HornDebugStart`: the second
+  meter (power & drive here) down to `n`%, so a walk can show the array dark. Debug builds
+  only.
+- **Gateway won't clear a ship with her tanks empty** (`Words.departRefusal`, decision
+  D18), and a transfer saved in the chandlery before she left comes back to it
+  (`resumesInFirstShop`, D16). `leaveRefusal` is `nil`: a dry ship may leave a station
+  and coast, which the engine allows.
+- **Units.** Distance is the engine's units of 10,000 km written as millions with two
+  decimals ("312.45 of 480.00 million km", `MarsSkin.millions`, the engine's `MarsData.km`
+  without its unit); a turn is a day; propellant is stored in tenths and counted in tenths
+  of a tonne by `Stores`; tether cartridges are counted loose, "60 shots", "1 shot". The
+  status box names the station she is docked at (`Words.place`, "Docked at Midway"), and
+  its contract row counts days in hand as the engine pays them (one at day 169, "late" from
+  the day its own message says so). Meters are "Hull" and "Power & drive": "Pressure hull ·
+  Power & drive" wraps the status row on a phone.
+- **The status box's trouble row** (docs/journeys/mars.md, D14): "Array dark, tanks dry";
+  "Array dark, coasting" under way and "Array dark" docked; "Tanks dry, coasting" and
+  "Tanks dry"; "Last of the propellant"; nothing before Gateway is left. The supplies note
+  adds "the array is dark", "the tanks are dry" and, past half the month before bone loss,
+  the days without supplements. The thrust screen says she is only coasting, not that the
+  setting makes no difference: on a coast the shared rules still count it.
+- **What the scene shows.** Black sky and fixed stars, the freighter in profile, nose to
+  Mars on the right; past Turnover she flies tail first, braking (unless Turnover is waiting
+  for power, `mars.held`), and at Turnover she stands on end with her thrusters puffing.
+  The drive's glow grows with the thrust and goes out on a coast; with the tanks dry she
+  tumbles round all four ways; her wing cells go dark one by one as power falls and all of
+  them at 0%; a hull under 60% dents, under 35% is patched and leaks. Each stretch of the arc
+  has its own sky: Earth filling the lower left and shrinking (a disc to 30 million km), the
+  double star of Earth and the Moon to 240 million km (where the engine's sight puts it),
+  the first ice stream's glitter, the zodiacal light, the Milky Way in deep space, the second
+  stream bluer, the Sun behind her in the shadow with Earth gone into its glare, Mars a red
+  point from 300 million km, a disc on the approach and most of the view in the capture. The
+  Sun's size follows her distance from it, read off the plot (`MarsChart.au`). Every stop is
+  drawn as itself (the Moon going by, the edge of Earth's reach, the cycler's wheel, Midway's
+  three tanks, Earth at the Sun's edge, the way in at the approach, Phobos under Mars), each
+  station docked and passing, and the cargo lander on the pad at Jezero. Aerobraking she
+  skims Mars's air with a bright bow and hot streaks; lost there, a short bright line crosses
+  it, as the engine's ending says; otherwise a hull that lets go is two pieces drifting
+  apart. Space weather by sky: a signal reaching her dish (good tracking), the solar wind
+  streaming and her wings chattering, pebbles streaking by and striking her, static, a pale
+  wash and hits on the picture (proton storm), a bright front going through (mass ejection).
+- **The plot** is §16's: the Sun in the middle, the two orbits dotted, the transfer as half
+  an ellipse with the Sun at a focus, its points spaced by the arc's length so the marker
+  moves evenly, the cycler's loop turned to pass through where she meets it, and an inset of
+  the Earth and the Moon, where Gateway, lunar distance and the edge of Earth's reach are too
+  close together to tell apart on the main plot.
+- `MarsSkinTests` holds every figure the card states to the tables (contract, purses, the
+  burns, the tanks, the temperatures of a cold cabin, the rewire, the window), sieves
+  everything the skin and the engine can say for a sailor's, a railroader's, an airship's
+  or a balloon's word, tells every weather, stretch, stop and station apart, checks the turn,
+  the wear, the glow, the tumble, the aerobrake and both losses, the plot, the grapple's
+  lanes, and plays whole transfers from the title card; `ResumeTests` resumes at the cycler,
+  Turnover, Midway, the capture and Jezero, and at Turnover reached dark, waiting for power.
+- `MarsScreenshotUITests` walks it: the setup, the chandlery and its refusal and the resume
+  into it, six places in four months and the gallery, a station, the three set pieces, the
+  plot and the grapple, the array dark and the rewire, dry tanks, Jezero, and the hull letting
+  go.
+- `SkinContractTests` walks `Journeys.all` in order and stops at the first journey with no
+  skin (klondike comes before mars), so until every journey has one it never reaches the
+  later ones. Mars was checked with the list held to the journeys that have a skin, which
+  passes; the file itself is unchanged.
+- The web version does not offer the transfer: its skin is not ported (D13).
+
 ## 3. Adding a journey
 
 1. Spec in `docs/journeys/<id>.md` (the brief's 20-section template, or compact).

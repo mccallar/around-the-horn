@@ -320,3 +320,16 @@ the launch and the finale already wrote the hour as "0800 GMT". The balloon's da
 now "January 8, 1999, 0800 GMT" in the box, the arrivals, the graves and the game-over
 footer, through a new engine hook, `Journey.hourText`, whose default ("8 a.m.") rail and
 the airship keep. 1849's date has no hour, so the three gates are untouched.
+
+## D18 — Gateway won't clear a ship with her tanks empty (2026-11-16)
+
+Found in building the transfer's skin: the engine lets a freighter leave Gateway Yard with
+no propellant at all, and she then coasts the whole way at four tenths of her speed,
+tumbling and wearing her array a point a day, which no player means to do and nothing on
+the outfitting screen warns of. As the airship's skin does for petrol, the transfer's skin
+answers `Words.departRefusal` while the tanks are empty ("Gateway's traffic office won't
+clear a ship to leave the yard with her tanks empty"), and `resumesInFirstShop` is true, so
+a transfer saved in the chandlery comes back to it and leaves only through `depart` (D16).
+Any propellant at all clears her. A ship that runs dry later, or leaves a station dry, still
+coasts as the engine says. No engine rule, number or sentence changed, and the bot (which
+always buys propellant) is unaffected.

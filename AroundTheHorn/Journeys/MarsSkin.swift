@@ -87,7 +87,7 @@ enum MarsSkin {
         crewLabel: "Crew member",
         monthHeading: "When will you launch?",
         monthIntro: "The 2087 window opens in August and closes in December. Gateway has a launch slot on the 7th of every month in it, and the yard wants an answer. When will you go?",
-        monthAdvice: "The yard boss looks up from her slate, which she almost never does. “August is calm, but the planets are badly placed and it's a long haul. December is just as long, and the Sun will throw storms at you all the way. October is the window: the shortest arc there is this time round. September or November if you have to.”",
+        monthAdvice: "The yard boss looks up from her slate, which she almost never does. “August is calm, but the planets are badly placed and it's a long haul. December is just as long, and the Sun will hurl storms at you all the way. October is the window: the shortest arc there is this time round. September or November if you have to.”",
         outfitHeading: "Fitting out",
         outfitIntro: { "You have [amber]$\(formatNumber($0.money))[/amber] to fit out the [i]\(Markup.escape($0.ship))[/i]. The chandlery at Gateway Yard has what you need:" },
         outfitBullets: [
