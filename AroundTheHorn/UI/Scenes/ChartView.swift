@@ -11,7 +11,7 @@ struct ChartView: View {
 
     var body: some View {
         let g = c.game!
-        let journey = c.journey, chart = c.skin.chart
+        let journey = c.journey, chart = c.skin.chart, words = c.skin.words(g)
         VStack(alignment: .leading, spacing: 0) {
             Heading(chart.title)
             TimelineView(.animation(minimumInterval: 0.25, paused: reduceMotion)) { tl in
@@ -29,9 +29,10 @@ struct ChartView: View {
                       spacing: 2) {
                 ForEach(Array(journey.stops.enumerated()), id: \.offset) { i, s in
                     let passed = i <= g.stopIndex, next = i == g.stopIndex + 1
-                    Text("\(passed ? "✓" : next ? "►" : "·") \(s.short)")
+                    let name = words.stopName(s)
+                    Text("\(passed ? "✓" : next ? "►" : "·") \(name)")
                         .foregroundStyle(passed ? Theme.amber : next ? Theme.ink : Theme.dim)
-                        .accessibilityLabel("\(s.short), \(passed ? "passed" : next ? "next" : "ahead")")
+                        .accessibilityLabel("\(name), \(passed ? "passed" : next ? "next" : "ahead")")
                 }
             }
             .bodyFont(18)

@@ -157,7 +157,9 @@ enum MarsSkin {
             talk: "Talk to people",
             buy: "Buy supplies",
             yard: "Visit the yard crew",
+            yardQuestion: nil,
             place: !docked ? nil : g.currentStop.id == "cycler" ? "Aboard the Perpetua" : "Docked at \(g.currentStop.short)",
+            stopName: { $0.short },
             statusNames: [:],
             travelled: "Flown",
             distanceUnit: "million km",
@@ -178,6 +180,7 @@ enum MarsSkin {
             departRefusal: g.fuel <= 0 && Mars.gatewaySells(.fuel, g)
                 ? "Gateway's traffic office won't clear a ship to leave the yard with her tanks empty. The quartermaster points you back at the propellant."
                 : nil,
+            departWarning: nil,
             resumesInFirstShop: true,
             leaveRefusal: nil,
             vesselHeading: "The \(g.ship)",

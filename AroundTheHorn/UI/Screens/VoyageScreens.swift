@@ -20,6 +20,21 @@ struct DepartView: View {
     }
 }
 
+/// A question of the shell's own (`Screen.ask`): the text and its answers.
+struct AskView: View {
+    @Environment(GameController.self) private var c
+    let text: String
+    let answers: [(label: String, then: () -> Void)]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            ScenePicture(game: c.game)
+            MessageBox(markup: text)
+            ChoiceList(choices: answers.enumerated().map { i, a in Choice(label: a.label, primary: i == 0, action: a.then) })
+        }
+    }
+}
+
 struct TravelView: View {
     @Environment(GameController.self) private var c
 
@@ -66,7 +81,7 @@ struct PortMenuView: View {
         VStack(alignment: .leading, spacing: 0) {
             ScenePicture(game: g)
             StatusPanel(game: g)
-            Heading(journey.port(g.currentStop.id)?.name ?? g.currentStop.name)
+            Heading(journey.port(g, at: g.currentStop.id)?.name ?? g.currentStop.name)
             ChoiceList(choices: [
                 Choice(label: words.leavePort, primary: true) { c.leavePort() },
                 Choice(label: words.supplies) { c.show(.supplies) },
@@ -77,7 +92,7 @@ struct PortMenuView: View {
                 Choice(label: words.trade) { c.trade() },
                 Choice(label: words.talk) { c.talk() },
                 Choice(label: words.buy) { c.buySupplies() },
-                Choice(label: words.yard) { c.show(.shipyard) },
+                Choice(label: words.yard) { c.openYard() },
             ] + c.wayOut)
         }
     }

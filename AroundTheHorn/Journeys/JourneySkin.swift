@@ -22,7 +22,8 @@ struct JourneySkin {
 
 /// Every skin. Adding a journey's skin is this line and its file.
 enum Skins {
-    static let all: [JourneySkin] = [Horn1849Skin.skin, RailSkin.skin, AirshipSkin.skin, BalloonSkin.skin, MarsSkin.skin]
+    static let all: [JourneySkin] = [Horn1849Skin.skin, RailSkin.skin, AirshipSkin.skin, BalloonSkin.skin, KlondikeSkin.skin,
+                                     MarsSkin.skin]
 
     static func skin(_ id: String) -> JourneySkin? { all.first { $0.id == id } }
 }
@@ -99,12 +100,19 @@ struct Words {
     let talk: String
     let buy: String
     let yard: String
+    /// What the yard row asks instead of opening the yard: Lake Bennett's boat, before
+    /// there is one to mend. Nil: the yard, as every other port has it.
+    let yardQuestion: ((GameEngine) -> Interrupt)?
 
     // The status panel.
     /// What the box writes after the date in place of the region's name: a balloon on the
     /// ground at a field is at that field, not over the next leg's country. Nil: the
     /// region, as 1849 writes it even in port.
     let place: String?
+    /// What the status box's "Next" row and the chart's legend call a stop: its `short`,
+    /// unless a fork has named it (the Klondike's landing is Dyea or Skagway once the
+    /// pass is chosen).
+    let stopName: (Stop) -> String
     /// Short names for its rows where the shop's is too long.
     let statusNames: [ItemKey: String]
     let travelled: String
@@ -146,6 +154,10 @@ struct Words {
     /// Why the first port won't let the vessel go yet, beyond the engine's own refusal
     /// (nothing to eat): an airship with empty tanks. Nil when nothing else stops it.
     let departRefusal: String?
+    /// A warning before the first port lets the vessel go, which the player may heed (back
+    /// to the stores) or not: less grub than the police at the summit will want. The two
+    /// answers are the skin's. Nil when there is nothing to warn of.
+    let departWarning: (text: String, back: String, go: String)?
     /// Whether a voyage saved at the first port before it left (the stores save as you
     /// leave them) comes back to those stores, so that it still leaves through the
     /// departure and both refusals. False: it comes back to the port menu, whose way out

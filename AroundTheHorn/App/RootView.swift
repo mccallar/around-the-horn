@@ -49,6 +49,7 @@ struct RootView: View {
         case .topTen(let hi, let back): TopTenView(table: c.persistence.topTen(c.journey), highlight: hi, back: back)
         case .shop(let done): ShopView(done: done)
         case .depart(let t): DepartView(text: t)
+        case .ask(let t, let answers): AskView(text: t, answers: answers)
         case .travel: TravelView()
         case .seaMenu: SeaMenuView()
         case .portMenu: PortMenuView()

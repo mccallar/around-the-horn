@@ -8,9 +8,10 @@ extension GameController {
     /// stop itself instead, under way, its arrival already told. With `-HornDebugHull <n>`,
     /// what holds the vessel together is down to `n`%: an ending by wreck a turn or two away.
     /// With `-HornDebugFuel <n>`, `n` of fuel aboard: the last of it, or none. With
-    /// `-HornDebugSails <n>`, what drives the vessel is down to `n`%: given out, at 0.
+    /// `-HornDebugSails <n>`, what drives the vessel is down to `n`%: given out, at 0. With
+    /// `-HornDebugFood <n>`, `n` of food aboard: short of what a stop will want to see.
     func debugStart(at stopID: String, month: Int = 0, atStop: Bool = false, hull: Double? = nil, fuel: Double? = nil,
-                    sails: Double? = nil) {
+                    sails: Double? = nil, food: Double? = nil) {
         guard let i = journey.stops.firstIndex(where: { $0.id == stopID }), i > 0 else { return }
         var s = skin.debug.start(i, month)
         if atStop {
@@ -20,6 +21,7 @@ extension GameController {
         if let hull { s.hull = hull }
         if let fuel { s.fuel = fuel }
         if let sails { s.sails = sails }
+        if let food { s.food = food }
         loadForDebug(s)
     }
 }

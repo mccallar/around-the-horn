@@ -20,7 +20,7 @@ struct AroundTheHornApp: App {
             }
             c.debugStart(at: stop, month: UserDefaults.standard.integer(forKey: "HornDebugMonth"),
                          atStop: UserDefaults.standard.bool(forKey: "HornDebugAtStop"), hull: number("HornDebugHull"),
-                         fuel: number("HornDebugFuel"), sails: number("HornDebugSails"))
+                         fuel: number("HornDebugFuel"), sails: number("HornDebugSails"), food: number("HornDebugFood"))
         }
         #endif
         return c

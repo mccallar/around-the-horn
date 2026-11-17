@@ -43,5 +43,12 @@ extension GameController {
 
     func endFishing(caught: Int) { act(run { $0.landCatch(caught) }, then: .seaMenu) }
 
+    /// The port menu's yard row: the yard, unless the skin has a question to ask there
+    /// instead (`Words.yardQuestion`).
+    func openYard() {
+        guard let g = game, let ask = skin.words(g).yardQuestion else { return show(.shipyard) }
+        act([run(ask)], then: .portMenu)
+    }
+
     func buySupplies() { show(.shop(done: { [weak self] in self?.backToMenu() })) }
 }

@@ -17,6 +17,8 @@ final class GameController {
         case role, roleDifferences, names, month, outfit
         case shop(done: () -> Void)
         case depart(String)
+        /// A question of the shell's own, not the engine's: a warning the player may heed.
+        case ask(String, [(label: String, then: () -> Void)])
         case travel, seaMenu, portMenu
         case message(String, label: String, then: () -> Void)
         case choice(ChoiceEvent)
@@ -37,6 +39,9 @@ final class GameController {
     /// Where to go once the interrupt queue is empty.
     enum After {
         case travel, seaMenu, portMenu, repairs, shipyard
+        /// Setting out from a port that held the party ashore (`Journey.holdInPort`): under
+        /// way if the answer let it go, otherwise back to the port menu.
+        case leaving
     }
 
     /// Every journey on offer, in the order the picker lists them: each one the engine
@@ -276,9 +281,15 @@ final class GameController {
         show(.shop(done: { [weak self] in self?.depart() }))
     }
 
-    func depart() {
+    /// `heeded`: the skin's warning (`Words.departWarning`) has been shown and waved off.
+    func depart(heeded: Bool = false) {
         if let g = game, let why = skin.words(g).departRefusal {
             return message(why) { [weak self] in self?.enterFirstShop() }
+        }
+        if !heeded, let g = game, let warn = skin.words(g).departWarning {
+            Feedback.play(.message)
+            return show(.ask(warn.text, [(warn.back, { [weak self] in self?.enterFirstShop() }),
+                                         (warn.go, { [weak self] in self?.depart(heeded: true) })]))
         }
         guard let text = run({ $0.depart() }) else {
             return message(journey.text.noProvisions) { [weak self] in self?.enterFirstShop() }
@@ -297,8 +308,11 @@ final class GameController {
         startTravel()
     }
 
+    /// Under way. A port that holds the party ashore (`Journey.holdInPort`, Lake Bennett
+    /// before a boat or the ice) says why instead, and the queue decides where it goes next.
     func startTravel() {
-        run { $0.setSail() }
+        let held = run { $0.setSail() }
+        if !held.isEmpty { return present(held, then: .leaving) }
         traveling = true
         show(.travel)
         travelTask?.cancel()
@@ -407,6 +421,7 @@ final class GameController {
         case .seaMenu, .portMenu: backToMenu()
         case .repairs: show(.repairs)
         case .shipyard: show(.shipyard)
+        case .leaving: if g.atPort { backToMenu() } else { startTravel() }
         }
     }
 

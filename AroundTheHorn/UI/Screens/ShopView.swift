@@ -12,7 +12,7 @@ struct ShopView: View {
         let g = c.game!
         let journey = c.journey, words = c.skin.words(g)
         let home = journey.stops.first.flatMap { journey.port($0.id) } ?? journey.ports[0]
-        let port = journey.port(g.currentStop.id) ?? home
+        let port = journey.port(g, at: g.currentStop.id) ?? home
         let bill = GameEngine.bill(cart, at: port)
         let over = bill > g.money
         let sign = words.currency

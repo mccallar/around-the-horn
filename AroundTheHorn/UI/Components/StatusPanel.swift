@@ -23,7 +23,7 @@ struct StatusPanel: View {
             ForEach(Self.stores(journey, game, words), id: \.label) { r in
                 Row(label: r.label) { Text(r.value) }
             }
-            Row(label: "Next: \(next?.short ?? "—")") {
+            Row(label: "Next: \(next.map(words.stopName) ?? "—")") {
                 Text(next.map { "\(words.distance($0.mile - game.mile)) \(words.distanceUnit)" } ?? "")
             }
             Row(label: words.travelled) {
