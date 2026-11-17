@@ -544,9 +544,10 @@ her purse can't buy (D19). The four journeys before it look, read and play as th
   lanes, and plays whole transfers from the title card; `ResumeTests` resumes at the cycler,
   Turnover, Midway, the capture and Jezero, and at Turnover reached dark, waiting for power.
 - `MarsScreenshotUITests` walks it: the setup, the chandlery and its refusal and the resume
-  into it, six places in four months and the gallery, a station, the three set pieces, the
-  plot and the grapple, the array dark and the rewire, dry tanks, Jezero, and the hull letting
-  go.
+  into it, a hauler cleared dry with too little left for propellant (D19), six places in
+  four months and the gallery, a station, the three set pieces, the plot and the grapple,
+  the array dark and the rewire, dry tanks under way and docked, Jezero, and the hull
+  letting go. Its reference set is the 25 in `docs/reference/shots-mars/`.
 - `SkinContractTests` runs its contract over every journey that has a skin; a journey
   without one fails `testEveryJourneyHasASkinAndEverySkinAJourney` alone (and
   `JourneyPickerTests` records it and goes on), so mars is held to the contract while
