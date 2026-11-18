@@ -471,6 +471,12 @@ struct Hooks: Encodable {
         let relaunchRefusal: String?
         let finale: String
         let shortfall: String
+        /// Whether the flight has taken the southern track, as the app's chart asks the
+        /// engine's regions (the region at 9,000 nm is the southern track's).
+        let southTrack: Bool
+        /// The region just short of the landfall on the way taken: the ocean the scene
+        /// draws the coast over.
+        let offLandfall: String
     }
 
     struct Klondike: Encodable {
@@ -539,7 +545,9 @@ struct Hooks: Encodable {
             ? Balloon(burnersOut: HornEngine.Balloon.burnersOut(s), goingDown: HornEngine.Balloon.goingDown(s),
                       lastOfThePropane: HornEngine.Balloon.lastOfThePropane(s),
                       relaunchRefusal: HornEngine.Balloon.relaunchRefusal(e), finale: HornEngine.Balloon.finale(s),
-                      shortfall: HornEngine.Balloon.shortfall(s))
+                      shortfall: HornEngine.Balloon.shortfall(s),
+                      southTrack: j.region(s, at: 9000).id.rawValue == "southtrack",
+                      offLandfall: j.stops.first { $0.id == "landfall" }.map { j.region(s, at: $0.mile - 1).id.rawValue } ?? "")
             : nil
         if s.journey == HornEngine.Klondike.id {
             typealias K = HornEngine.Klondike
