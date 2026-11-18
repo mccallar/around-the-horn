@@ -971,4 +971,32 @@ final class KlondikeTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(endings.count, 3, "\(endings)")
         XCTAssertTrue(endings.contains("The police have turned you back."), "\(endings)")
     }
+
+    /// D21: Seattle sends a party with no provisions back to the outfitter while the purse
+    /// runs to a step of them (250 lbs, $25); with less it goes hungry, and the departure
+    /// says so. A miner can spend that low on everything else.
+    func testSeattleLetsAPartyGoHungryOnlyWhenItCannotBuyAStep() throws {
+        XCTAssertEqual(Klondike.outfitterStep(.food), 25, accuracy: 1e-9)
+        var s = GameState(journey: Klondike.id, role: .whaler, ship: "Klondike Belle", captain: "Will",
+                          crew: ["Martha", "Gus", "Clara", "Ed"], startYear: 1898, startMonth: 2)
+        XCTAssertEqual(s.money, 720, accuracy: 1e-9)
+        let e = GameEngine(state: s)
+        XCTAssertTrue(e.buy([.limes: 40, .meds: 12, .clothes: 12, .sailcloth: 20, .timber: 10, .water: 500]))
+        XCTAssertEqual(e.state.money, 2, accuracy: 1e-9)
+        XCTAssertEqual(e.state.food, 0)
+        XCTAssertFalse(e.buy([.food: 250]), "the smallest step of grub is out of reach")
+        let said = try XCTUnwrap(e.depart(), "the miner is not held in Seattle for good")
+        XCTAssertTrue(said.hasSuffix(" " + Klondike.goingHungry), said)
+        XCTAssertFalse(e.state.atPort)
+
+        s.money = 25
+        XCTAssertFalse(klondike.departsUnfed(s))
+        XCTAssertNil(GameEngine(state: s).depart(), "the purse runs to 250 lbs")
+        s.money = 24.99
+        XCTAssertTrue(klondike.departsUnfed(s))
+        XCTAssertTrue((GameEngine(state: s).depart() ?? "").hasSuffix(Klondike.goingHungry))
+        s.food = 250
+        let fed = GameEngine(state: s).depart() ?? ""
+        XCTAssertTrue(fed.hasSuffix("a mountain pass and a river."), fed)
+    }
 }

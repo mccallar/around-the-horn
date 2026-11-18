@@ -372,3 +372,20 @@ goes out, the lake is water again and full of sails, as before.
 
 Fishing is unchanged: the spec allows it on the Lindeman and Log Cabin lakes on foot, and
 its one backdrop (§15) is a skiff on open water whatever the month.
+
+## D21 — Seattle holds a party only for grub its purse can still buy (2026-11-18)
+
+Found in review of the Klondike's skin, the same shape as D19. The engine sends a party
+with no provisions back to the Seattle outfitter, the outfitter buys nothing back, and
+`resumesInFirstShop` (D16) brings a relaunch back to the same stores. A miner starts with
+$720 and can spend all but $2 on everything else (lime juice, medicine, furs, rope,
+canvas and firewood at their limits), below the smallest step of provisions (250 lbs,
+$25), and then went round the same refusal for good.
+
+Now the refusal holds only while the purse runs to one step of provisions, as the
+outfitter bills it (`Klondike.outfitterSells`). With less, `Klondike.departsUnfed` lets
+the party go: the warning before Seattle still says how short it is, and the departure
+sentence ends by saying the outfit has no grub and the police at the summit will turn it
+back without its year's supply. Their check, which always offers "Turn back for home", is
+then an ending, not a loop. No number, price or random draw changed; the storekeeper and
+the boatbuilder can't spend that low without grub, and the bot always buys it.

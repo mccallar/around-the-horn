@@ -442,6 +442,37 @@ final class KlondikeSkinTests: XCTestCase {
         guard case .depart = d.screen else { return XCTFail("\(d.screen)") }
     }
 
+    /// D21: a miner can spend the purse below a step of grub (250 lbs, $25) with none
+    /// aboard. The stores then lead to the warning and a hungry departure, never round the
+    /// engine's refusal again, and the trek ends: at the police, or before them.
+    func testAMinerWithNoGrubAndNothingToBuyItWithStillLeavesSeattle() {
+        let c = controller()
+        newTrek(c, role: .whaler)
+        XCTAssertEqual(c.game!.money, 720, accuracy: 1e-9)
+        c.enterFirstShop()
+        guard case .shop(let done) = c.screen else { return XCTFail("\(c.screen)") }
+        XCTAssertTrue(c.run { $0.buy([.limes: 40, .meds: 12, .clothes: 12, .sailcloth: 20, .timber: 10, .water: 500]) })
+        XCTAssertLessThan(c.game!.money, Klondike.outfitterStep(.food))
+        XCTAssertEqual(c.game!.food, 0)
+        XCTAssertFalse(c.run { $0.buy([.food: 250]) }, "the smallest step of grub is out of reach")
+        done()
+        guard case .ask(let warning, let answers) = c.screen else { return XCTFail("the warning, not \(c.screen)") }
+        has(warning, "You have [amber]0 lbs[/amber] of provisions.")
+        answers[0].then()
+        guard case .shop(let again) = c.screen else { return XCTFail("back to the stores, not \(c.screen)") }
+        again()
+        guard case .ask(_, let leave) = c.screen else { return XCTFail("the warning again, not \(c.screen)") }
+        XCTAssertEqual(leave.map(\.label), ["Back to the shop", "Leave anyway"])
+        leave[1].then()
+        guard case .depart(let text) = c.screen else { return XCTFail("the departure, not \(c.screen)") }
+        has(text, Klondike.goingHungry)
+        XCTAssertFalse(c.game!.atPort)
+        c.run { $0.rng = SeededRNG(seed: 7) }
+        c.startTravel()
+        let end = playOut(c, white: false)
+        XCTAssertTrue(["finale", "gameover"].contains(end), end)
+    }
+
     /// D16: saved in the Seattle stores before it left, a trek comes back to them, and
     /// leaves only through the departure and its warning.
     func testASaveInTheSeattleStoresComesBackToThem() {

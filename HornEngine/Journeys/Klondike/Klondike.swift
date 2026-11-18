@@ -106,6 +106,7 @@ public final class Klondike: Journey {
         wreckedBody: "Her planks sprang one after another, and the river took her and everything in her. You stand on a gravel bar with the clothes on your back. The Klondike will have to wait for another year.",
         depart: { s in
             "Your steamer backs away from the Seattle waterfront on \(s.dateText), so crowded that people are sleeping on the freight. Behind you the city's hills sink into the rain. Ahead lie a thousand miles of coast, a mountain pass and a river."
+                + (s.food <= 0 ? " " + Klondike.goingHungry : "")
         },
         noProvisions: "You can't go north with no provisions! The outfitter laughs and points you back inside.",
         rested: { days, h in
@@ -450,6 +451,25 @@ public final class Klondike: Journey {
     }
 
     override func holdInPort(_ e: GameEngine) -> [Interrupt]? { bennettHold(e) }
+
+    // MARK: - Leaving Seattle with nothing left to buy grub with (D21)
+
+    /// What one step of `key` costs at the Seattle outfitter, as its bill adds it up.
+    public static func outfitterStep(_ key: ItemKey) -> Double {
+        let step = KlondikeData.items.first { $0.key == key }?.step ?? 0
+        return GameEngine.bill([key: step], at: towns[0])
+    }
+
+    /// Whether the purse still runs to one step of `key` in Seattle.
+    public static func outfitterSells(_ key: ItemKey, _ s: GameState) -> Bool { outfitterStep(key) <= s.money }
+
+    /// Seattle sends a party with no provisions back to the outfitter while the purse runs
+    /// to a step of them; with nothing left to buy them with, holding it there would hold it
+    /// for good, so it goes hungry, and the police at the summit will have their say (D21).
+    public override func departsUnfed(_ s: GameState) -> Bool { !Self.outfitterSells(.food, s) }
+
+    /// The departure's last sentence for a party that leaves with no provisions.
+    public static let goingHungry = "There isn't a pound of grub in your outfit, and too little in your purse to buy any, so you will go hungry until somebody sells you some. The police at the summit will turn back a party without its year's grub."
 
     // MARK: - Trade and score
 

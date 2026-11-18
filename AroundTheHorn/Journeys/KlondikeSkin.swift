@@ -182,8 +182,9 @@ enum KlondikeSkin {
             lots: [.water],
             departRefusal: nil,
             // Less grub than the police will want: a warning, which may be waved off. With
-            // none at all the engine's own refusal comes first.
-            departWarning: g.food > 0 && Klondike.shortOfGrubWarning(g) != nil
+            // none at all the engine's own refusal comes first, while the purse runs to a
+            // step of it; with less, the party may go hungry, warned (D21).
+            departWarning: (g.food > 0 || KlondikeSkin.journey.departsUnfed(g)) && Klondike.shortOfGrubWarning(g) != nil
                 ? (Klondike.shortOfGrubWarning(g)!, "Back to the shop", "Leave anyway") : nil,
             resumesInFirstShop: true,
             leaveRefusal: nil,

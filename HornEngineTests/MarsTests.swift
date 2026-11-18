@@ -582,7 +582,8 @@ final class MarsTests: XCTestCase {
 
     /// D19: Gateway sends a ship with no rations back to its chandlery while the purse runs
     /// to a step of them (25 kg, $4.50); with less, she goes hungry, and the departure says
-    /// so, as it says when she goes with her tanks empty. Every other journey still refuses.
+    /// so, as it says when she goes with her tanks empty. Every other journey but the
+    /// Klondike (D21) still refuses.
     func testGatewayLetsAShipGoWithoutWhatSheCannotBuy() {
         XCTAssertEqual(Mars.gatewayStep(.food), 4.5, accuracy: 1e-9)
         XCTAssertEqual(Mars.gatewayStep(.fuel), 3.7, accuracy: 1e-9)
@@ -606,7 +607,7 @@ final class MarsTests: XCTestCase {
         s.fuel = 400
         XCTAssertTrue((GameEngine(state: s).depart() ?? "").hasSuffix("Somebody has already started a betting pool."))
 
-        for j in Journeys.all where j.id != Mars.id {
+        for j in Journeys.all where j.id != Mars.id && j.id != Klondike.id {  // the Klondike: D21
             let d = j.departures[0]
             var g = GameState(journey: j.id, role: .merchant, ship: "Wren", captain: "Ada", crew: ["Bo", "Cy", "Di", "Ed"],
                               startYear: d.year, startMonth: d.month)
