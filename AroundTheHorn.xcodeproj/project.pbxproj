@@ -59,6 +59,7 @@
 		5BE5B2EEB1577D6BDBFC6DA1 /* HornEngine.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 509B74C67184498F2681AA80 /* HornEngine.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		5C12F839C3F9D2C5328FC37D /* Rail+Depots.swift in Sources */ = {isa = PBXBuildFile; fileRef = C11589EC5172DE1C71B5748F /* Rail+Depots.swift */; };
 		5D0CCE8887F7A48C5E1CF893 /* KlondikeForage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E62060A0087A4BCAB286A06 /* KlondikeForage.swift */; };
+		5D55E560BF56FDE04237F5C8 /* KlondikeScreenshotUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7956456B35E72B3C674F5DB6 /* KlondikeScreenshotUITests.swift */; };
 		64108882F3E72EFB40A02171 /* Horn1849.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F2549B7433A37309EAE108D /* Horn1849.swift */; };
 		699DE27EB99103642E593CE8 /* GameEngine+Actions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFB564D802B4628FB60D9483 /* GameEngine+Actions.swift */; };
 		6BA3FAE3F3280E81120CBC6A /* HornEngine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 509B74C67184498F2681AA80 /* HornEngine.framework */; };
@@ -309,6 +310,7 @@
 		7555C62CF312931CF4BEC721 /* AirshipData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirshipData.swift; sourceTree = "<group>"; };
 		76DD21EFECB1A9AE7B8FAF27 /* Rail+Events.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Rail+Events.swift"; sourceTree = "<group>"; };
 		771DF7A9C743BD52E884EC30 /* Feedback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Feedback.swift; sourceTree = "<group>"; };
+		7956456B35E72B3C674F5DB6 /* KlondikeScreenshotUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KlondikeScreenshotUITests.swift; sourceTree = "<group>"; };
 		797CE7F576E9F694AA35ECB0 /* Mars+Events.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Mars+Events.swift"; sourceTree = "<group>"; };
 		7A807B556E06A4B497DA1B0B /* AirshipSkinTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirshipSkinTests.swift; sourceTree = "<group>"; };
 		7B60571B9AA8419DCF959008 /* prototype-traces.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "prototype-traces.json"; sourceTree = "<group>"; };
@@ -590,6 +592,7 @@
 			children = (
 				D44B9958CF117F65D96C1227 /* AirshipScreenshotUITests.swift */,
 				3640D8989CBE3497720C8D69 /* BalloonScreenshotUITests.swift */,
+				7956456B35E72B3C674F5DB6 /* KlondikeScreenshotUITests.swift */,
 				0F41F0439CB6BDE9D136E712 /* LaunchUITests.swift */,
 				FF7391E7E3604FF0B85272B3 /* MarsScreenshotUITests.swift */,
 				746C70F5F36AC967DD5E9C22 /* RailScreenshotUITests.swift */,
@@ -935,6 +938,7 @@
 			files = (
 				48D1CFE2742A32C1FC482AE2 /* AirshipScreenshotUITests.swift in Sources */,
 				8600DEFECDB00EC3C2A4DD4F /* BalloonScreenshotUITests.swift in Sources */,
+				5D55E560BF56FDE04237F5C8 /* KlondikeScreenshotUITests.swift in Sources */,
 				CFA59275DDFEF23A3004F4F7 /* LaunchUITests.swift in Sources */,
 				30B0A9EDF29E0C60B83A3923 /* MarsScreenshotUITests.swift in Sources */,
 				87F0DA05537FCFF0B3BB75A4 /* RailScreenshotUITests.swift in Sources */,

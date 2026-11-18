@@ -20,11 +20,21 @@ struct AroundTheHornApp: App {
             }
             c.debugStart(at: stop, month: UserDefaults.standard.integer(forKey: "HornDebugMonth"),
                          atStop: UserDefaults.standard.bool(forKey: "HornDebugAtStop"), hull: number("HornDebugHull"),
-                         fuel: number("HornDebugFuel"), sails: number("HornDebugSails"), food: number("HornDebugFood"))
+                         fuel: number("HornDebugFuel"), sails: number("HornDebugSails"), food: number("HornDebugFood"),
+                         water: number("HornDebugWater"), vars: AroundTheHornApp.debugVars(UserDefaults.standard.string(forKey: "HornDebugVar")),
+                         mile: number("HornDebugMile").map { Int($0) })
         }
         #endif
         return c
     }()
+
+    #if DEBUG
+    /// `-HornDebugVar key=n` as a journey var.
+    static func debugVars(_ arg: String?) -> [String: Double] {
+        guard let parts = arg?.split(separator: "="), parts.count == 2, let n = Double(parts[1]) else { return [:] }
+        return [String(parts[0]): n]
+    }
+    #endif
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {
