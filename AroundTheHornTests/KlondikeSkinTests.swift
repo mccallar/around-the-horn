@@ -905,3 +905,116 @@ extension KlondikeSkinTests {
                        "A party hauling a loaded sled up a snowy mountain pass")
     }
 }
+
+// MARK: - The map, and fishing
+
+extension KlondikeSkinTests {
+    func testTheMapHasEveryStopOnTheWay() {
+        let chart = skin.chart
+        for (route, name) in [(KlondikeChart.chilkootRoute, "Chilkoot"), (KlondikeChart.whitePassRoute, "White Pass")] {
+            XCTAssertEqual(route.first?.mile, 0, name)
+            XCTAssertEqual(route.last?.mile, Double(klondike.totalMiles), name)
+            for (a, b) in zip(route, route.dropFirst()) { XCTAssertLessThan(a.mile, b.mile, "\(name): the way only goes on") }
+            // Every stop is a bend of the track, at the engine's own mile.
+            for stop in klondike.stops {
+                XCTAssertTrue(route.contains { $0.mile == Double(stop.mile) }, "\(name): \(stop.id) at \(stop.mile)")
+            }
+            // On the map, and the marker never jumps.
+            var last = ChartView.position(route, atMile: 0, chart)
+            for m in stride(from: 0.0, through: Double(klondike.totalMiles), by: 50) {
+                let q = ChartView.position(route, atMile: m, chart)
+                XCTAssertTrue((2...chart.w - 2).contains(q.x) && (2...chart.h - 2).contains(q.y), "\(name): \(m) is off the map")
+                XCTAssertLessThan(hypot(q.x - last.x, q.y - last.y), 4, "\(name): \(m)")
+                last = q
+            }
+        }
+        // The two passes part at the head of Lynn Canal and meet at Lake Bennett.
+        for (mile, same) in [(10_000.0, true), (11_100, true), (11_300, false), (11_365, false), (11_530, true), (15_000, true)] {
+            let a = ChartView.position(KlondikeChart.chilkootRoute, atMile: mile, chart)
+            let b = ChartView.position(KlondikeChart.whitePassRoute, atMile: mile, chart)
+            XCTAssertEqual(hypot(a.x - b.x, a.y - b.y) < 0.01, same, "\(mile)")
+        }
+        // Until a pass is chosen both are drawn; then only the one taken.
+        XCTAssertEqual(chart.others(going(10_600)).count, 1)
+        XCTAssertEqual(chart.others(going(11_280)).count, 0)
+        XCTAssertEqual(chart.route(going(11_280, white: true)).map(\.mile), KlondikeChart.whitePassRoute.map(\.mile))
+        // The inset shows the party on the trail, and not at sea or down the lakes.
+        XCTAssertNotNil(KlondikeChart.insetPosition(KlondikeChart.chilkootTrail, atMile: Double(KlondikeData.summitMile)))
+        XCTAssertNotNil(KlondikeChart.insetPosition(KlondikeChart.whitePassTrail, atMile: Double(KlondikeData.summitMile)))
+        XCTAssertNil(KlondikeChart.insetPosition(KlondikeChart.chilkootTrail, atMile: 5_000))
+        XCTAssertNil(KlondikeChart.insetPosition(KlondikeChart.chilkootTrail, atMile: 14_000))
+
+        let g = going(11_280)
+        XCTAssertEqual(chart.footer(g), "1,128.0 of 1,700.0 miles traveled. 572.0 to go. "
+                       + "The ringed stops are towns; the inset is the two passes, where a month's hauling is too short to show.")
+        XCTAssertEqual(chart.label(g), "Map of the route from Seattle to Dawson City. You are in the Taiya valley.")
+        has(chart.label(going(12_900)), "You are in Lake Laberge.")
+        has(chart.label(going(11_280, white: true)), "You are in the Skagway valley.")
+        // Three rings with their names, and the inset.
+        let over = PixelCanvas(w: chart.w, h: chart.h)
+        chart.overlay(over, g, 1)
+        XCTAssertGreaterThan(over.tally.marks, KlondikeChart.far.count * 4 + 3)
+    }
+
+    func testFishingIsCountedInPoundsOfProvisions() {
+        let w = skin.words(going(12_250))
+        let reward = FishingView.reward(klondike, w)
+        XCTAssertEqual(reward.item.key, .food)
+        XCTAssertEqual(reward.measure(klondike.role(.merchant).catchLimit), "150 lbs")
+        let forage = skin.forage
+        let grayling = klondike.quarry.first { $0.name == "grayling" }!
+        XCTAssertEqual(FishingView.pop(forage, reward)(grayling), "+3 lbs grayling")
+        XCTAssertEqual(forage.pop("1", grayling), "+1 lb grayling")
+        XCTAssertEqual(forage.heading, "Fishing")
+        XCTAssertEqual(forage.throwsLabel, "Casts")
+        XCTAssertEqual(forage.caughtLabel, "Caught")
+        XCTAssertEqual(forage.timeLabel, "Time")
+        has(forage.hint("150 lbs"), "up to 150 lbs")
+        has(forage.label(1), "with 1 fish swimming")
+        has(forage.label(3), "with 3 fish swimming")
+        XCTAssertEqual(klondike.forageReward, .food)
+        // The tally counts casts, as the supplies list does.
+        XCTAssertEqual(w.looseUnits[.tackle], "casts")
+        // Fish anywhere in the water, either way.
+        let f = forage.field
+        XCTAssertFalse(f.upward)
+        XCTAssertFalse(f.oneWay)
+        XCTAssertEqual(f.bands, 0)
+        for y in [f.lanes.lowerBound, 77.7, f.lanes.upperBound] { XCTAssertEqual(f.lane(y), y) }
+        // The engine's catch report, in pounds.
+        var report = going(12_250)
+        report.food = 100
+        let e = GameEngine(state: report)
+        let said = e.landCatch(35).compactMap { i -> String? in if case .message(let t) = i { return t }; return nil }
+        XCTAssertTrue(said.contains { $0.contains("35 lbs") }, "\(said)")
+        // The longest pop stays on the field.
+        let px = PixelCanvas(w: f.w, h: f.h)
+        for fish in klondike.quarry {
+            let pop = forage.pop(reward.count(fish.lb), fish)
+            XCTAssertLessThan(px.width(pop, size: 8), f.w, pop)
+        }
+        // Each fish is its own drawing.
+        var seen = Set<Int>()
+        for fish in klondike.quarry {
+            let c = PixelCanvas(w: f.w, h: f.h)
+            forage.quarry(c, FishingModel.Swimmer(kind: fish, x: 80, y0: 80, y: 80, vx: 30, t: 0, wf: 1, wa: 1))
+            seen.insert(c.tally.picture)
+        }
+        XCTAssertEqual(seen.count, klondike.quarry.count)
+        // Where there is water to fish, and where there is not.
+        func refusal(_ g: GameState) -> String? { klondike.forageRefusal(GameEngine(state: g)) }
+        XCTAssertEqual(refusal(going(5_200, white: false)), "The steamer won't stop so you can fish.")
+        XCTAssertEqual(refusal(going(11_400, white: false)), "There's nothing to fish in up here but snow.")
+        XCTAssertEqual(refusal(going(11_400, white: true)), "There's nothing to fish in up here but snow.")
+        for mile in [11_500, 12_250, 12_600, 12_900, 16_000] {
+            XCTAssertNil(refusal(going(mile, white: false)), "\(mile)")
+        }
+        XCTAssertNil(refusal(going(11_500, white: true)))
+        var windy = going(12_250, white: false)
+        windy.weather = KlondikeData.wind
+        XCTAssertEqual(refusal(windy), klondike.text.tooRough)
+        var none = going(12_250, white: false)
+        none.tackle = 0
+        XCTAssertEqual(refusal(none), klondike.text.noTackle)
+    }
+}
