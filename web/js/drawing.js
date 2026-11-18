@@ -12,7 +12,8 @@ export const SCENE_H = 80;
  * journey's fair weather and a sound vessel. `v` is the bridge's view, or null. `date`
  * (`[year, month from 0, day]`) and `hooks` are what the view says of the state, for a
  * skin whose scene asks what the app's asks of its GameState: the date, the journey's rule
- * for its trouble.
+ * for its trouble. `port` is the town the engine finds at the stop in hand for the way
+ * taken (`Journey.port(_:at:)`), which the Klondike's scene names.
  */
 export function sceneFrame(J, v, moving, t) {
   const g = v?.state ?? null;
@@ -28,6 +29,7 @@ export function sceneFrame(J, v, moving, t) {
     state: g,
     date: v?.date ?? null,
     hooks: v?.hooks ?? null,
+    port: v?.port ?? null,
   };
 }
 
