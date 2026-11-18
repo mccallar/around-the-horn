@@ -728,6 +728,9 @@ struct JourneyInfo: Encodable {
         let portTrades: Int
         let hullWarn: Double
         let sailsWarn: Double
+        /// Turns without `limes` before the deficiency sets in: the transfer's supplies
+        /// note warns from half of it, as the app's skin reads it off the rules.
+        let deficiencyAfter: Int
     }
 
     struct TextInfo: Encodable {
@@ -817,7 +820,7 @@ struct JourneyInfo: Encodable {
         let r = j.rules
         rules = RulesInfo(tickHours: r.tickHours, startHour: r.startHour, startDay: r.startDay,
                           restChoices: r.restChoices, rankCuts: r.rankCuts, portTrades: r.portTrades,
-                          hullWarn: r.hullWarn, sailsWarn: r.sailsWarn)
+                          hullWarn: r.hullWarn, sailsWarn: r.sailsWarn, deficiencyAfter: r.deficiencyAfter)
         let t = j.text
         text = TextInfo(noProvisions: t.noProvisions, defaultEpitaph: t.defaultEpitaph, goAshore: t.goAshore,
                         passBy: t.passBy, tradeAccept: t.tradeAccept, tradeDecline: t.tradeDecline, ranks: t.ranks)
