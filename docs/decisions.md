@@ -356,3 +356,19 @@ and answered by the transfer alone. No number, price or random draw changed, and
 
 The airship's petrol refusal at Rome has the same shape (step 100 kg, $1.50) and is left
 as it was.
+
+## D20 — A boat at Lake Bennett waits on the ice (2026-11-18)
+
+Found on the Klondike's screenshot walk. The spec (klondike.md §16) draws Bennett before
+the boat on the foot leg's snow and, once a boat exists, with "the boat scene and
+sprite": river-green water with waves. A party that builds or buys its boat in February
+or March then saw it afloat on open water while the engine, and the hold that keeps it
+in camp, said the lake was white from shore to shore until the end of May.
+
+Now, at Bennett with a boat and the ice still in (`KlondikeSkin.iceOut`), the boat leg's
+water is drawn as ice instead: white, a few grey cracks, no waves, the boat tied to the
+bank on it. The sprite, the leg, the words and every rule are the spec's; the day the ice
+goes out, the lake is water again and full of sails, as before.
+
+Fishing is unchanged: the spec allows it on the Lindeman and Log Cabin lakes on foot, and
+its one backdrop (§15) is a skiff on open water whatever the month.

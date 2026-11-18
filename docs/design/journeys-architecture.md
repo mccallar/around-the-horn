@@ -587,14 +587,48 @@ and play as they did: every new member's answer for them is the one that changes
   and no hour in the date; the red status row (`Words.trouble`, "Party") says "Sleds given
   out", "Oars & sail given out", "No firewood" or both, from the first day out (D14); the
   repairs list the outfit or the boat before the sleds or the oars (D15).
-- **One debug launch argument**, `-HornDebugFood <n>` with `-HornDebugStart`: `n` of food
-  aboard, short of what the summit will want.
+- **Four debug launch arguments**, each with `-HornDebugStart` and each doing nothing
+  without it (`GameController.debugStart`): `-HornDebugFood <n>`, `n` of food aboard, short
+  of what the summit will want; `-HornDebugWater <n>`, `n` of water (the Klondike's
+  firewood), none for the cold; `-HornDebugVar <key>=<n>`, one of the journey's `vars`,
+  so `klondike.route=2` starts past the fork on the White Pass; and `-HornDebugMile <n>`,
+  the start moved to mile `n` (stored units) between the stop before and the stop asked
+  for, so a stretch with no stop at its end (the Inside Passage, Queen Charlotte Sound,
+  the Fifty Mile River, Lake Laberge) can be started in. The Klondike's debug starts are
+  its `trailDays` on the coast and the trail and its `riverDates` on the river; with no
+  `-HornDebugMonth` the month is January, which is a month a party can leave in.
+- **The scene** (`KlondikeScene`) has three legs, chosen by `Klondike.legName`: the
+  steamer on the sea under the coast range, the party and its sled on the snow under the
+  mountains, and the boat on the lakes and the river between spruce banks. Every stop is
+  drawn as itself, near it in pixels by a day's travel on that leg (2,200 tenths a day by
+  steamer, 9 on foot, 300 by boat). Three were shortened after the walk: Lynn Canal's walls
+  rise out of the sea over the last day's steaming and Juneau is gone the day after it, so
+  neither stands over the other; Seattle's hills fall astern within the first day; and the
+  walls of Miles Canyon stand around the boat at the canyon and behind her within the day,
+  not over the upper lakes or Lake Laberge. A boat built at Bennett before break-up sits
+  on the ice, tied to the bank, until the ice goes out.
+- **The chart** (`KlondikeChart`) is the coast from Puget Sound to the head of Lynn Canal
+  and the river from Bennett to Dawson, with an inset of the two passes, which are four
+  pixels at the map's scale. **The forage** (`KlondikeForage`) is fishing from a skiff on
+  green water where the region is `fishable` (the lakes and the river), the catch smoked
+  and counted in pounds of provisions; on the coast and the trail there is nothing to
+  fish.
 - `KlondikeSkinTests` holds the skin's keys and dates to the engine's, Bennett's hold for a
   boat (from the way out and the yard row) and for the ice, a hold left on screen and
   resumed, the red row on every leg and none aboard the steamer or before Seattle, the
   given-out question and each of its answers (mend, buy a coil, make do, take stock) with
   no time passing while it asks, the repairs' order, the Seattle warning and refusal, and
   a save in the Seattle stores coming back to them.
+- `KlondikeScreenshotUITests` walks it: the setup and the learn pages, the Seattle shop,
+  its warning short of grub and the resume into it, a day out on the steamer and the
+  menu's screens; fourteen stretches, both passes, in play, and the gallery; Juneau,
+  Sheep Camp, White Pass City and Fort Selkirk with their stores and yards; the fork and
+  the purser, the packers, Dyea, the police with grub enough and short of it on both
+  passes, Lindeman, Log Cabin and Tagish; Bennett without a boat, the boat question, the
+  ice and the ice going out; Miles Canyon and Five Fingers; the map on the coast, both
+  passes and the river; fishing and nothing to fish; sleds and oars given out, no
+  firewood, both at once and worn repairs; Dawson and the top ten; and the three ways it
+  ends short of Dawson (turned back, the outfit ruined, the boat broken up).
 
 ## 3. Adding a journey
 

@@ -1609,6 +1609,24 @@ answers; `Klondike+Trouble.swift` sleds, oars, the outfit and the boat at 0%). T
 `HornEngineTests/KlondikeBreakdownTests.swift` (17, D14).
 `Journeys.all` lists it between the balloon and Mars.
 
+App skin: `AroundTheHorn/Journeys/` (`KlondikeSkin.swift` the card, the words and the debug
+starts; `KlondikeScene.swift` §16's scene; `KlondikeChart.swift` the map; `KlondikeForage.swift`
+§15's fishing), registered in `Skins.all`. Tests: `AroundTheHornTests/KlondikeSkinTests.swift`,
+the Klondike cases in `ResumeTests.swift`, and the screenshot walk
+`AroundTheHornUITests/KlondikeScreenshotUITests.swift`. The shell members it added and how
+it answers the others are in `docs/design/journeys-architecture.md` §2, "Klondike skin, as
+built".
+
+**The scene as built**, beyond §16: every stop is drawn as itself (the Seattle and Juneau
+waterfronts, Lynn Canal's walls going up into the cloud, Dyea's tide flats and Skagway's
+false fronts, Sheep Camp and White Pass City, the Golden Stairs and both summits with the
+police flag, Lindeman and Log Cabin, Bennett's tent city and boat frames, the Tagish post,
+Miles Canyon's walls and white water, the five towers of Five Fingers, Fort Selkirk and
+Dawson under its hill). A boat built at Bennett before the ice goes out sits on the ice,
+tied to the bank: §16's "boat scene" with the lake still white. Lynn Canal's walls rise
+over the last day's steaming and Juneau is gone the day after it; Miles Canyon's walls
+stand around the boat at the canyon and are behind her within the day.
+
 ### The numbers as shipped
 
 Everything in §2–§17 is as written, except the departures listed below. In short:
@@ -1833,7 +1851,7 @@ The rules now (`Klondike+Trouble.swift`):
   seasick steamer already left a crew member at 1 health at least; what kills is the day
   that follows, as the shared rules count it. Tested.
 
-**What the skin must show** (none is built yet; the airship's is the model):
+**What the skin shows** (built; `KlondikeSkinTests` holds each, and the walk shows them):
 
 - the red status row, `Words.trouble` = ("Party", …): "Sleds given out" on foot and "Oars &
   sail given out" afloat (`Klondike.givenOut`); "No firewood" (`Klondike.noFire`); both at
