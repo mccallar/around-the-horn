@@ -65,7 +65,7 @@ await test('a plain visit opens on the picker, and the journey chosen is remembe
   const d = p.look();
   check(d.banner === APP_NAME.toUpperCase(), `the picker's banner (${d.banner})`);
   check(d.blocks[0].text === 'Choose a journey', 'choose a journey');
-  check(p.labels().join('/') === 'Around the Horn/The Iron Road', `both journeys, in the engine's order (${p.labels()})`);
+  check(p.labels().slice(0, 2).join('/') === 'Around the Horn/The Iron Road', `both journeys first, in the engine's order (${p.labels()})`);
   check(d.choices[1].detail === p.f.journeys[1].subtitle, 'each with its subtitle');
   p.press('The Iron Road');
   check(p.screen === 'title' && p.f.journey.id === 'rail', 'the Iron Road\'s title card');
@@ -624,6 +624,15 @@ await test('given out in a yard: a spare aboard, or one from the store, gets her
 
 // MARK: - Two voyages at once
 
+/**
+ * The picker's first two rows, 1849's and the Iron Road's, when no journey after them has
+ * a voyage in progress (the picker lists every journey with a skin).
+ */
+const picked = (p) => {
+  const rows = p.labels();
+  return rows.slice(2).some((l) => l.includes('in progress')) ? rows.join('/') : rows.slice(0, 2).join('/');
+};
+
 await test('a voyage on each journey, in progress at once, each with its own save', async () => {
   const storage = new MemoryStorage();
   const p = await railPlayer({ engine: e1, storage, seeds: ['7', '8'], random: lcg(7), journey: null });
@@ -639,7 +648,7 @@ await test('a voyage on each journey, in progress at once, each with its own sav
   check(p.screen === 'title' && p.timers.running === 0, 'saved and on the title card');
   check(p.labels()[1] === 'Continue the voyage of the Sea Lark', `1849's title card offers it (${p.labels()[1]})`);
   p.press('Choose another journey');
-  check(p.labels().join('/') === 'Around the Horn · in progress/The Iron Road', `the picker marks it (${p.labels().join('/')})`);
+  check(picked(p) === 'Around the Horn · in progress/The Iron Road', `the picker marks it (${p.labels().join('/')})`);
   p.press('The Iron Road');
   check(!p.labels().some((l) => l.startsWith('Climb back aboard')), 'the Iron Road has nothing to climb back aboard');
   p.setUp({ names: { ship: 'Iron Duke' } });
@@ -655,7 +664,7 @@ await test('a voyage on each journey, in progress at once, each with its own sav
   check(sh?.journey === 'horn1849' && sh.ship === 'Sea Lark' && sh.day === horn.day, 'the voyage around the Horn, saved as it stood');
   check(sr?.journey === 'rail' && sr.ship === 'Iron Duke' && sr.day === rail.day, 'the train, saved as it stood');
   p.press('Choose another journey');
-  check(p.labels().join('/') === 'Around the Horn · in progress/The Iron Road · in progress', `both in progress (${p.labels().join('/')})`);
+  check(picked(p) === 'Around the Horn · in progress/The Iron Road · in progress', `both in progress (${p.labels().join('/')})`);
 
   // A new visit, another engine: each comes back as it was left.
   const q = await railPlayer({ engine: e2, storage, seeds: ['9'], random: lcg(9), journey: null });
@@ -676,7 +685,7 @@ await test('a voyage on each journey, in progress at once, each with its own sav
   check(storage.getItem('horn.topten-rail') === null, 'and the Iron Road\'s top ten is untouched');
   q.press(1);
   q.press('Choose another journey');
-  check(q.labels().join('/') === 'Around the Horn/The Iron Road · in progress', `one left in progress (${q.labels().join('/')})`);
+  check(picked(q) === 'Around the Horn/The Iron Road · in progress', `one left in progress (${q.labels().join('/')})`);
   noProblems(p);
   noProblems(q);
 });
