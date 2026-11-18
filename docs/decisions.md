@@ -180,7 +180,8 @@ the app's own flow, words and pictures: `web/js/flow.js` is GameController line 
 (the picker, the queue, the 0.7 s turn, the save that keeps what is waiting), and each
 journey's four skin files are its Swift skin's, function for function.
 `Tools/web-tests/skin.mjs` and `rail-skin.mjs` check every literal, colour, sprite row and
-map point against the Swift source. `?journey=<id>` and `horn.lastJourney` stand for the
+map point against the Swift source; Over the Pole's skin, ported the same way since, is held
+by `airship-skin.mjs`. `?journey=<id>` and `horn.lastJourney` stand for the
 app's `-journey` launch argument and the journey it remembers. What the web has that the app
 does not, or lacks: saves in `localStorage` (`horn.save-<id>`, `horn.topten-<id>`); Space
 throws at the nearest fish, as VoiceOver's double-tap does in the app; no haptics; text
