@@ -557,7 +557,12 @@ her purse can't buy (D19). The four journeys before it look, read and play as th
   `JourneyPickerTests` records it and goes on), so mars was held to the contract before
   klondike had a skin. The contract now also holds the repairs screen to D15's order for
   every skin (`RepairsView.choices`).
-- The web version does not offer the transfer: its skin is not ported (D13).
+- The web version offers the transfer: its four skin files are these, ported file for file
+  (D13), on the shell members the web shell already had. The bridge's `hooks.mars` answers
+  what the skin and the scene ask the engine (`dark`, `coasting`, `lastOfThePropellant`, and
+  what Gateway's purse still runs to, `gatewaySells`), and a journey's `rules` carry
+  `deficiencyAfter`, which the supplies note warns from half of. `Tools/web-tests/mars.mjs`
+  plays it and `mars-skin.mjs` holds it to the Swift.
 
 ### Klondike skin, as built
 
