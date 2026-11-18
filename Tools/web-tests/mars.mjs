@@ -199,7 +199,8 @@ await test('Gateway won\'t clear her with empty tanks, and a transfer saved in i
   b.press('Pay');
   check(b.screen === 'depart', `and out of the yard (${b.screen}: ${b.f.screen.text?.slice(0, 90)})`);
   const label = sceneLabel(b);
-  check(label.startsWith('The freighter docked at Gateway Yard') || label.startsWith('The freighter'), `the scene (${label})`);
+  check(label === 'The freighter in cislunar space, between the Earth and the Moon, her drive idle. Weather: quiet', `backing away from the yard (${label})`);
+  check(b.f.screen.text.includes('Somebody has already started a bett'), 'and the betting pool');
   b.press('Burn for Mars');
   check(b.screen === 'travel', 'under way');
   b.f.stopTravel();
@@ -219,12 +220,13 @@ await test('with too little in the purse for a step of propellant, Gateway clear
   check(p.f.game.money === 625, `an ice hauler's purse (${p.f.game.money})`);
   p.shop({ food: 18, water: 16, sailcloth: 8, timber: 8, meds: 8, clothes: 10, limes: 20 });
   check(p.f.game.money - p.f.bill < 3.7 && p.f.game.money - p.f.bill >= 0, `less than five tonnes' price left (${p.f.game.money - p.f.bill})`);
-  check(!p.f.v.hooks?.mars || true, 'the hooks');
   p.press('Pay');
   check(p.screen === 'depart', `cleared, dry (${p.screen}: ${p.f.screen.text?.slice(0, 120)})`);
-  check(p.f.game.fuel === 0, 'her tanks empty');
+  check(p.f.game.fuel === 0 && p.f.v.hooks.mars.gatewaySells.fuel === false && p.f.skin.words(p.f.v).departRefusal === null,
+    'her tanks empty, and the purse short of a step of propellant');
   const said = plain(p.f.screen.text ?? '');
-  check(/dry|propellant|tanks/i.test(said), `the departure says so (${said})`);
+  check(said.endsWith('Her tanks are empty, so a tug nudges her clear of the yard, and she will coast, turning slowly, until somebody sells her propellant.'),
+    `the departure says so, in place of the betting pool (${said})`);
   p.press('Burn for Mars');
   p.timers.fire();
   readOn(p);
@@ -316,7 +318,9 @@ await test('every other ending: the hull letting go, lost aerobraking, the capta
 
   const a = await shipAt((s) => Object.assign(s, { mile: 46500, stopIndex: stopIndex('approach'), hull: 2, timber: 0,
     vars: { ...s.vars, 'mars.capture': 1 } }));
-  check(sceneLabel(a).includes('skimming the top of the Martian air') || sceneLabel(a).startsWith('The freighter'), `aerobraking (${sceneLabel(a)})`);
+  check(sceneLabel(a) === 'The freighter close to Mars, her drive idle. Weather: quiet'
+    && a.f.skin.scene.label(sceneFrame(a.f.journey, a.f.v, true, 0)) === 'The freighter skimming the top of the Martian air, glowing. Weather: quiet',
+  `aerobraking (${sceneLabel(a)})`);
   a.press('Continue the transfer');
   burnUntil(a, (q) => q.screen === 'gameOver', 10);
   check(a.screen === 'gameOver' && wordsOn(a.look()).includes('She was a tired ship for a fire like that.'), `lost aerobraking (${wordsOn(a.look()).slice(0, 160)})`);
@@ -366,7 +370,7 @@ await test('the condition box, the repairs and the yard list the hull first (D15
   check(p.f.game.timber === 2 && p.f.game.hull > 30, `a patch mends the hull (${p.f.game.hull})`);
   const y = await shipAt((s) => { dockedAt('midway')(s); Object.assign(s, { hull: 40, sails: 40, money: 2000 }); });
   check(y.screen === 'portMenu' && y.labels().includes('Visit the yard crew'), `docked at Midway (${y.labels().join('/')})`);
-  check(y.look().blocks.some((b) => plain(b.markup ?? b.text ?? '').includes('Docked at Midway')) || statusRows(y).Weather, 'at Midway');
+  check(y.look().blocks.find((b) => b.type === 'status').region === 'Docked at Midway', 'docked at Midway, in the status box');
   y.say(y.words.yard);
   check(/^Reseal the pressure hull — \$[\d,]+\/New panels and a rebuilt thruster grid — \$[\d,]+\/Back to the station$/.test(y.labels().join('/')),
     `the yard crew (${y.labels().join('/')})`);
@@ -418,10 +422,10 @@ await test('the array dark with no panel: the rewire, a day\'s coast, or taking 
   c.timers.fire();
   const { mile } = c.f.game;
   c.press('Coast on in the dark for a day');
+  check(c.screen === 'travel' && c.f.game.mile === mile, 'back under way');
+  c.timers.fire();
+  check(c.f.game.mile > mile && c.f.game.note === 'The array is dark. She is coasting.', `a day's coast (${mile} to ${c.f.game.mile}: ${c.f.game.note})`);
   readOn(c);
-  if (c.screen === 'travel') c.timers.fire();
-  readOn(c);
-  check(c.f.game.mile > mile && choiceKey(c) !== 'dark' || c.f.game.mile > mile, `a day's coast (${mile} to ${c.f.game.mile})`);
   burnUntil(c, (q) => choiceKey(q) === 'dark', 5);
   check(choiceKey(c) === 'dark', 'and asked again the next day');
   noProblems(c);
@@ -433,6 +437,25 @@ await test('the array dark with no panel: the rewire, a day\'s coast, or taking 
   readOn(s);
   check(s.screen === 'seaMenu' && statusRows(s).Ship?.value === 'Array dark, coasting', `on the menu, still dark (${s.screen})`);
   noProblems(s);
+});
+
+await test('docked with the array dark: the box says so, and the yard crew rebuild it', async () => {
+  const p = await shipAt((s) => { dockedAt('midway')(s); Object.assign(s, { sails: 0, sailcloth: 0, money: 3000 }); });
+  check(p.screen === 'portMenu' && statusRows(p).Ship?.value === 'Array dark' && statusRows(p)[METERS].value === '72% · 0%',
+    `docked dark (${JSON.stringify(statusRows(p).Ship)})`);
+  check(p.f.skin.words(p.f.v).paceNow === 'The drive is set for [amber]Cruise[/amber]. [red]The array is dark: once she undocks, she will only coast.[/red]',
+    `the thrust screen (${p.f.skin.words(p.f.v).paceNow})`);
+  check(sceneLabel(p) === 'The freighter docked at Midway Depot, beside its three tanks, her array dark', `the scene (${sceneLabel(p)})`);
+  p.say(p.words.yard);
+  p.press('New panels and a rebuilt thruster grid');
+  readOn(p);
+  if (p.screen === 'shipyard') p.press('Back to the station');
+  check(p.f.game.sails > 50 && !statusRows(p).Ship, `rebuilt (${p.f.game.sails})`);
+  const c = await shipAt(dockedAt('cycler'));
+  check(c.look().blocks.find((b) => b.type === 'status').region === 'Aboard the Perpetua'
+    && sceneLabel(c) === 'The freighter docked alongside the cycler Perpetua, her wheel turning', `aboard the cycler (${sceneLabel(c)})`);
+  noProblems(p);
+  noProblems(c);
 });
 
 await test('reaching Turnover dark, it waits for power, without a day\'s coast on offer', async () => {
@@ -471,7 +494,8 @@ await test('the tanks dry: she coasts on to a station, and its propellant clears
   p.press('Continue the transfer');
   p.timers.fire();
   check(p.f.game.mile > mile && p.f.game.fuel === 0, `coasting on (${mile} to ${p.f.game.mile})`);
-  check(p.f.game.note === 'The tanks are dry. She is coasting.' || readOn(p).length >= 0, `the day's note (${p.f.game.note})`);
+  check(p.f.game.note === 'The tanks are dry. She is coasting.', `the day's note (${p.f.game.note})`);
+  readOn(p);
   const days = burnUntil(p, (q) => q.screen === 'portMenu' || q.screen === 'shop', 40);
   check((p.screen === 'portMenu' || p.screen === 'shop') && p.f.v.currentStop === 'midway' && days >= 1, `coasted in to Midway (${p.screen}, ${days} days)`);
   if (p.screen === 'shop') p.press(1);
