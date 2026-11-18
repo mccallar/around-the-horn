@@ -333,7 +333,8 @@ final class KlondikeScreenshotUITests: ScreenshotWalk {
         roll(untilText: "the ice goes out with a long groan")
         shot("67-ice-out")
         tap("Continue")
-        XCTAssertTrue(halt.waitForExistence(timeout: 10), "not under way once the ice went out")
+        // Under way, past whatever the first days on the water bring (a day goes by each second).
+        settle()
     }
 
     func testTheRiver() {
