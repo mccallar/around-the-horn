@@ -143,6 +143,23 @@ export function balloonProblems(d, where) {
   return out;
 }
 
+/**
+ * Words of the other journeys that must never reach the freighter: 1849's sea, the Iron
+ * Road's rails, the airship's petrol and masts, the balloon's propane, gallons and nautical
+ * miles, pounds and fishing, and the engine's own names for the stores and the meter the
+ * transfer calls power & drive. The freighter has a pressure hull and a chandlery of its own.
+ */
+export const MARS_FOREIGN = /\b(sails?|sailed|sailing|sailors?|harpoons?|voyage|chandler|shipyard|anchor|cords?|train|conductor|tender|roundhouse|petrol|mast|tackle|timber|sailcloth|limes|propane|gallons?|nautical|nm|miles?|lbs?|balloon|fish|fishing)\b/i;
+
+export function marsProblems(d, where) {
+  const out = [];
+  for (const { text } of texts(d)) {
+    const m = plain(text).match(MARS_FOREIGN);
+    if (m) out.push(`${where}: "${m[0]}" in ${JSON.stringify(text)}`);
+  }
+  return out;
+}
+
 export class Player {
   constructor({ flow, timers, log = false }) {
     this.f = flow;
@@ -355,14 +372,16 @@ export class Player {
  * What the careful player keeps aboard, in stored units, by journey: for 1849 the golden
  * voyages' bot's list; on the Iron Road a full tender and tank car, and the rest likewise;
  * over the Pole full tanks, full stores and three bags of ballast; on the jet stream every tank
- * full, and four sacks.
+ * full, and four sacks; on the transfer full tanks and lockers, ten supplement packs and two
+ * tether cartridges.
  */
 export const SAFE = {
   horn1849: { food: 1500, water: 600, limes: 10, clothes: 5, meds: 3, sailcloth: 3, timber: 3, tackle: 40 },
   rail: { fuel: 160, water: 1200, food: 300, clothes: 5, meds: 3, sailcloth: 3, timber: 3, tackle: 40 },
   airship: { fuel: 8000, water: 300, food: 300, limes: 10, clothes: 5, meds: 3, sailcloth: 3, timber: 3, tackle: 40 },
   balloon: { fuel: 1200, water: 200, food: 400, limes: 12, clothes: 5, meds: 3, sailcloth: 3, timber: 4, tackle: 40 },
+  mars: { fuel: 1000, water: 800, food: 450, limes: 10, clothes: 5, meds: 3, sailcloth: 3, timber: 3, tackle: 40 },
 };
 
 /** The month each journey's careful player leaves in. */
-export const MONTHS = { horn1849: 'January 1849', rail: 'October 1869', airship: 'May 1926', balloon: 'January 1999' };
+export const MONTHS = { horn1849: 'January 1849', rail: 'October 1869', airship: 'May 1926', balloon: 'January 1999', mars: 'October 2087' };
