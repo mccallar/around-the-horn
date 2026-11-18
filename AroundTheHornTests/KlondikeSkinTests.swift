@@ -1018,3 +1018,115 @@ extension KlondikeSkinTests {
         XCTAssertEqual(refusal(none), klondike.text.noTackle)
     }
 }
+
+// MARK: - The picker, and whole treks
+
+extension KlondikeSkinTests {
+    func testThePickerOffersTheTrek() {
+        let c = controller()
+        guard case .picker = c.screen else { return XCTFail("\(c.screen)") }
+        XCTAssertTrue(c.journeys.map(\.id).contains(klondike.id))
+        XCTAssertTrue(Skins.all.contains { $0.id == klondike.id }, "the skin is registered")
+        c.chooseJourney(klondike.id)
+        guard case .title = c.screen else { return XCTFail("\(c.screen)") }
+        XCTAssertEqual(c.skin.id, klondike.id)
+        XCTAssertEqual(c.journey.title, "To the Klondike")
+    }
+
+    /// Answers whatever the trek raises, first open option each time (the pass as asked),
+    /// until it ends, with a little care: grub, firewood and lime juice in every town it can
+    /// afford, the yard when the gear is worn, repairs under way when it is failing.
+    func playOut(_ c: GameController, white: Bool, maxSteps: Int = 40_000) -> String {
+        for _ in 0..<maxSteps {
+            switch c.screen {
+            case .travel:
+                let g = c.game!
+                if (g.sails < 35 && g.sailcloth >= 1) || (g.hull < 40 && g.timber >= 1) {
+                    c.heaveTo()
+                    if g.hull < 40 && g.timber >= 1 { c.patchHull() } else { c.mendSails() }
+                    continue
+                }
+                c.tick()
+            case .repairs, .shipyard: c.backToMenu()
+            case .message(_, _, let then): then()
+            case .ask(_, let answers): answers.last!.then()
+            case .depart: c.startTravel()
+            case .choice(let e):
+                if case .custom("fork", _) = e.kind {
+                    c.choose(e, option: white ? 1 : 0)
+                } else {
+                    c.choose(e, option: e.options.firstIndex(where: \.enabled)!)
+                }
+            case .burial(let id, let cause): c.bury(crewID: id, cause: cause, epitaph: "")
+            case .portMenu:
+                c.run { e in
+                    let n = e.state.living.count
+                    let need = Int(KlondikeData.yearOfGrub) * n + 600
+                    _ = e.buy([.food: max(0, min(e.room(for: .food), need - Int(e.state.food)))])
+                        || e.buy([.food: max(0, min(e.room(for: .food), 1000 - Int(e.state.food)))])
+                    _ = e.buy([.water: max(0, min(e.room(for: .water), 600 - Int(e.state.water)))])
+                        || e.buy([.water: max(0, min(e.room(for: .water), 300 - Int(e.state.water)))])
+                    _ = e.buy([.limes: max(0, min(e.room(for: .limes), 6 - Int(e.state.limes)))])
+                    _ = e.buy([.clothes: max(0, n - e.state.clothes)])
+                    if e.state.sailcloth < 3 { _ = e.buy([.sailcloth: 1]) }
+                    if e.state.timber < 3 { _ = e.buy([.timber: 1]) }
+                }
+                let g = c.game!
+                if g.hull < 70 && c.read({ $0.canRepairHullAtYard }) {
+                    c.repairHullAtYard()
+                    continue
+                }
+                if g.sails < 70 && c.read({ $0.canRecutSailsAtYard }) {
+                    c.recutSailsAtYard()
+                    continue
+                }
+                c.leavePort()
+            case .seaMenu: c.startTravel()
+            case .finale: return "finale"
+            case .gameOver: return "gameover"
+            default:
+                XCTFail("stuck on \(c.screen)")
+                return "stuck"
+            }
+        }
+        return "too long"
+    }
+
+    /// Whole treks from the title card, the way a player's taps would make them: the Seattle
+    /// stores, the steamer, either pass, the police, a boat at Bennett and the ice, the
+    /// canyon and the rapids, and whichever ending the dice bring. Seeded, so always the
+    /// same ones, and Dawson is among the endings on both passes.
+    func testAWholeTrekFromTheTitleCardReachesAnEnding() {
+        var endings: [(String, Bool)] = []
+        var arrivals: [String] = []
+        for round in 0..<6 {
+            let white = round % 2 == 1
+            let c = controller()
+            newTrek(c, role: round >= 4 ? .shipwright : .merchant, month: 2)
+            c.run { $0.rng = SeededRNG(seed: UInt64(round + 1)) }
+            XCTAssertTrue(klondike.vesselNames.contains(c.game!.ship))
+            c.enterFirstShop()
+            guard case .shop(let done) = c.screen else { return XCTFail("\(c.screen)") }
+            XCTAssertTrue(c.run { $0.buy([.food: 6500, .water: 1000, .limes: 12, .meds: 4, .clothes: 5,
+                                          .sailcloth: 6, .timber: 6, .tackle: 2]) })
+            done()
+            guard case .depart = c.screen else { return XCTFail("\(c.screen)") }
+            c.startTravel()
+            let end = playOut(c, white: white)
+            endings.append((end, white))
+            if c.game!.mile > KlondikeData.summitMile {
+                XCTAssertEqual(KlondikeSkin.onWhitePass(c.game!), white, "the pass taken")
+            }
+            if case .finale = c.screen {
+                arrivals.append(c.skin.words(c.game!).arrival)
+                XCTAssertTrue(Klondike.hasBoat(c.game!), "nobody reaches Dawson without a boat")
+            }
+            XCTAssertNil(p.loadSave(klondike.id), "no save after the trek ends")
+            XCTAssertFalse(c.traveling)
+        }
+        XCTAssertTrue(Set(endings.map(\.0)).isSubset(of: ["finale", "gameover"]), "\(endings)")
+        XCTAssertTrue(endings.contains { $0 == ("finale", false) }, "a trek can reach Dawson over the Chilkoot: \(endings)")
+        XCTAssertTrue(endings.contains { $0 == ("finale", true) }, "a trek can reach Dawson over the White Pass: \(endings)")
+        for a in arrivals { has(a, "noses into the mud below Dawson City") }
+    }
+}
