@@ -513,13 +513,14 @@ enum KlondikeScene {
             let d = s.dx(st.mile)
             return abs(d) < 230 ? d : nil
         }
-        if let d = near("seattle"), s.leg == .steamer { wharf(s, d, crowd: true) }
+        if let d = near("seattle"), d > -40, s.leg == .steamer { wharf(s, d, crowd: true) }
         if let d = near("juneau"), d > -30, s.leg == .steamer { wharf(s, d, crowd: false) }
         if let d = near("landing"), s.leg == .foot { s.white ? skagway(s, d) : dyea(s, d) }
         if let d = near("camp"), s.leg == .foot { s.white ? whitePassCity(s, d) : sheepCamp(s, d) }
         if let d = near("summit"), s.leg == .foot { s.white ? whitePassSummit(s, d) : chilkootSummit(s, d) }
         if let d = near("lakes"), s.leg == .foot { s.white ? logCabin(s, d) : lindeman(s, d) }
-        if let d = near("bennett") { bennett(s, d) }
+        // Not from the steamer: at the steamer's scale Bennett is a day past Lynn Canal.
+        if let d = near("bennett"), s.leg != .steamer { bennett(s, d) }
         if let d = near("tagish"), s.leg == .boat { tagish(s, d) }
         if let d = near("canyon"), s.leg == .boat { canyonWater(s, d) }
         if let d = near("fivefinger"), s.leg == .boat { fiveFingers(s, d) }
@@ -613,7 +614,7 @@ enum KlondikeScene {
         let px = s.px, hz = s.hz
         // Gone astern within the first day out.
         let lo = Int(max(0, 84 + d)), hi = Int(min(160, 160 + d))
-        guard lo < hi, d > -120 else { return }
+        guard lo < hi, d > -40 else { return }
         px.hills(lo..<hi, base: hz, s.far(0x3E5242)) { x in 10 + 6 * sin((x - d) * 0.08) + 3 * sin((x - d) * 0.2) }
         for i in 0..<9 {
             let bx = 92 + d + Double(i * 8), bh = Double(3 + (i * 5) % 4)

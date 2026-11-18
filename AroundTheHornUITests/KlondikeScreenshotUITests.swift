@@ -33,7 +33,8 @@ final class KlondikeScreenshotUITests: ScreenshotWalk {
         for _ in 0..<tries where !target.exists {
             if next.waitForExistence(timeout: 2) && !target.exists { next.tap() }
         }
-        XCTAssertTrue(target.waitForExistence(timeout: 10), "never reached \(label)")
+        if !target.waitForExistence(timeout: 10) { shot("stuck-before-\(label)") }
+        XCTAssertTrue(target.exists, "never reached \(label)")
     }
 
     /// Answers whatever comes up, passing what it passes, until words containing `text` are on screen.
@@ -42,7 +43,8 @@ final class KlondikeScreenshotUITests: ScreenshotWalk {
         for _ in 0..<tries where !target.exists {
             if onward.waitForExistence(timeout: 2) && !target.exists { onward.tap() }
         }
-        XCTAssertTrue(target.waitForExistence(timeout: 10), "never saw \(text)")
+        if !target.waitForExistence(timeout: 10) { shot("stuck-before-\(text)") }
+        XCTAssertTrue(target.exists, "never saw \(text)")
     }
 
     /// Answers until the party is under way with nothing on screen but the status.
@@ -303,8 +305,10 @@ final class KlondikeScreenshotUITests: ScreenshotWalk {
         XCTAssertTrue(wait.waitForExistence(timeout: 10), "the ice never asked")
         shot("66-ice-in")
         wait.tap()
-        roll(until: "Stop & take stock")
+        roll(untilText: "the ice goes out with a long groan")
         shot("67-ice-out")
+        tap("Continue")
+        XCTAssertTrue(halt.waitForExistence(timeout: 10), "not under way once the ice went out")
     }
 
     func testTheRiver() {

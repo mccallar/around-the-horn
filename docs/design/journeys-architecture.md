@@ -601,11 +601,12 @@ and play as they did: every new member's answer for them is the one that changes
   steamer on the sea under the coast range, the party and its sled on the snow under the
   mountains, and the boat on the lakes and the river between spruce banks. Every stop is
   drawn as itself, near it in pixels by a day's travel on that leg (2,200 tenths a day by
-  steamer, 9 on foot, 300 by boat). Three were shortened after the walk: Lynn Canal's walls
-  rise out of the sea over the last day's steaming and Juneau is gone the day after it, so
-  neither stands over the other; Seattle's hills fall astern within the first day; and the
-  walls of Miles Canyon stand around the boat at the canyon and behind her within the day,
-  not over the upper lakes or Lake Laberge. A boat built at Bennett before break-up sits
+  steamer, 9 on foot, 300 by boat). The walk found some that reached too far, now cut
+  back: Lynn Canal's walls rise out of the sea over the last day's steaming and Juneau is
+  gone the day after it, so neither stands over the other; Bennett's tents are seen only
+  from the trail and the river; Seattle and its wharf fall astern within the first day;
+  and the walls of Miles Canyon stand around the boat at the canyon and behind her within
+  the day, not over the upper lakes or Lake Laberge. A boat built at Bennett before break-up sits
   on the ice, tied to the bank, until the ice goes out.
 - **The chart** (`KlondikeChart`) is the coast from Puget Sound to the head of Lynn Canal
   and the river from Bennett to Dawson, with an inset of the two passes, which are four
