@@ -748,3 +748,160 @@ extension KlondikeSkinTests {
         }
     }
 }
+
+// MARK: - The picture
+
+extension KlondikeSkinTests {
+    func frame(_ g: GameState, moving: Bool = true) -> SceneFrame {
+        SceneFrame(t: 0, weather: g.weather, moving: moving, atPort: g.atPort, hull: g.hull, sails: g.sails,
+                   region: g.region, hour: g.hour, state: g)
+    }
+
+    func picture(_ f: SceneFrame, t: Double = 0.37) -> Int {
+        let px = PixelCanvas(w: SceneSkin.w, h: SceneSkin.h)
+        skin.scene.draw(px, f.at(t))
+        return px.tally.picture
+    }
+
+    func going(_ mile: Int, white: Bool) -> GameState {
+        var g = blank()
+        KlondikeSkin.go(&g, mile, white: white)
+        g.weather = klondike.fairWeather
+        return g
+    }
+
+    func testTheSpritesAreWhole() {
+        for (name, sprite, colors, width) in [("steamer", KlondikeScene.steamer, KlondikeScene.steamerColors, KlondikeScene.steamer[0].count),
+                                              ("party", KlondikeScene.party, KlondikeScene.partyColors, KlondikeScene.party[0].count),
+                                              ("boat", KlondikeScene.boat, KlondikeScene.boatColors, KlondikeScene.boat[0].count),
+                                              ("raft", KlondikeScene.raftBoat, KlondikeScene.boatColors, KlondikeScene.raftBoat[0].count)] {
+            XCTAssertGreaterThan(sprite.count, 4, name)
+            for row in sprite {
+                XCTAssertEqual(row.count, width, name)
+                for ch in row where ch != " " { XCTAssertNotNil(colors[ch], "no colour for \(ch) in the \(name)") }
+            }
+        }
+        XCTAssertNotEqual(KlondikeScene.boat, KlondikeScene.raftBoat, "a raft is not the boat")
+    }
+
+    /// On the steamer, on the trail and on the river, every weather is a sky of its own,
+    /// and the label says which.
+    func testEveryWeatherIsItsOwnPicture() {
+        var skies = Set<Sky>()
+        for mile in [5200, 11280, 14000] {
+            var seen: [Int: String] = [:]
+            for weather in klondike.weathers {
+                var g = going(mile, white: false)
+                g.weather = weather
+                let pic = picture(frame(g))
+                XCTAssertNil(seen[pic], "at \(mile): \(weather.name) looks just like \(seen[pic] ?? "")")
+                seen[pic] = weather.name
+                skies.insert(weather.sky)
+                has(skin.scene.label(frame(g)), KlondikeScene.phrase(weather.sky))
+            }
+            XCTAssertEqual(seen.count, klondike.weathers.count)
+        }
+        XCTAssertEqual(skies.count, klondike.weathers.count, "every weather has a sky of its own")
+    }
+
+    /// Every stretch of country, on both passes, is a picture of its own.
+    func testEveryStretchIsItsOwnPicture() {
+        var seen: [Int: String] = [:]
+        for (regions, white) in [(KlondikeData.regions, false), (KlondikeData.whitePassRegions, true)] {
+            for r in regions {
+                let g = going(min(r.to, klondike.totalMiles) - 5, white: white)
+                XCTAssertEqual(g.region.id, r.id)
+                let pic = picture(frame(g))
+                if let other = seen[pic] { XCTFail("\(r.name) looks just like \(other)") }
+                seen[pic] = r.name
+                XCTAssertEqual(pic, picture(frame(g)), "the same place twice is the same picture")
+            }
+        }
+        XCTAssertEqual(seen.count, KlondikeData.regions.count + KlondikeData.whitePassRegions.count)
+        // What the party travels by follows the leg.
+        has(skin.scene.label(frame(going(5200, white: false))), "A crowded steamer heading north")
+        has(skin.scene.label(frame(going(11280, white: false))), "Your party hauling sleds")
+        has(skin.scene.label(frame(going(14000, white: false))), "Your boat on the river")
+    }
+
+    /// Every stop, and each pass's own four, is drawn as itself: not like any other, and not
+    /// like the country halfway to the next.
+    func testEveryStopIsDrawnAsItself() {
+        var seen: [Int: String] = [:]
+        let stops = klondike.stops
+        for (i, stop) in stops.enumerated() {
+            for white in KlondikeData.variants[stop.id] == nil ? [false] : [false, true] {
+                let town = klondike.port(stop.id) != nil
+                var g = blank()
+                KlondikeSkin.at(&g, stop.id, port: town, white: white)
+                g.weather = klondike.fairWeather
+                if stop.id == "seattle" { g.day = 0 }
+                let name = "\(stop.id)\(white ? " (White Pass)" : "")"
+                let f = frame(g, moving: false)
+                let pic = picture(f)
+                if let other = seen[pic] { XCTFail("\(name) looks just like \(other)") }
+                seen[pic] = name
+                if town, let port = klondike.port(g, at: stop.id) {
+                    has(skin.scene.label(f), port.name)
+                }
+                if i + 1 < stops.count {
+                    let next = stops[i + 1]
+                    var by = g
+                    by.atPort = false
+                    by.mile = (stop.mile + next.mile) / 2
+                    XCTAssertNotEqual(pic, picture(frame(by, moving: false)), "\(name) is drawn as a stop")
+                }
+            }
+        }
+        XCTAssertEqual(seen.count, klondike.stops.count + KlondikeData.variants.count)
+        // The pass's own names, in the town and on the map.
+        XCTAssertEqual(klondike.port(at("landing", port: true), at: "landing")?.name, "Dyea")
+        XCTAssertEqual(klondike.port(at("landing", port: true, white: true), at: "landing")?.name, "Skagway")
+        has(skin.scene.label(frame(at("camp", port: true, white: true), moving: false)), "White Pass City")
+        has(skin.scene.label(frame(at("seattle", port: true), moving: false)), "The steamer tied up at Seattle")
+        has(skin.scene.label(frame(at("bennett", port: true), moving: false)), "Your party in camp at Lake Bennett")
+    }
+
+    /// Wear, a given-out meter, no fire, and each way the trek can end are drawn as
+    /// themselves, and said: every cell of the gallery is a picture of its own.
+    func testWearTroubleAndTheEndsAreDrawnAsThemselves() {
+        var seen: [Int: String] = [:]
+        for cell in skin.debug.gallery {
+            var g = SceneGallery.state(klondike, cell.set)
+            g.weather = klondike.fairWeather
+            let pic = picture(frame(g, moving: cell.moving))
+            if let other = seen[pic] { XCTFail("“\(cell.name)” looks just like “\(other)”") }
+            seen[pic] = cell.name
+        }
+        XCTAssertEqual(seen.count, skin.debug.gallery.count)
+
+        func said(_ name: String) -> String {
+            let cell = skin.debug.gallery.first { $0.name == name }!
+            return skin.scene.label(frame(SceneGallery.state(klondike, cell.set), moving: cell.moving))
+        }
+        has(said("Sleds given out"), "Your party beside sleds that have given out")
+        has(said("Oars given out, tied up"), "Your boat tied to the bank with no oars or sail")
+        has(said("The outfit ruined"), "Your outfit lies ruined in the snow")
+        has(said("Turned back at the summit"), "Your party turning back from the summit")
+        has(said("The boat broken up"), "The wreck of your boat going down the river")
+        // Worn is not given out: still hauling, still afloat.
+        has(said("Sleds 15%"), "Your party hauling sleds")
+        has(said("Sail 15%"), "Your boat on the river")
+        // A sled at 15% is drawn worn, at 64% whole.
+        var worn = going(11280, white: false)
+        let whole = picture(frame(worn))
+        worn.sails = 15
+        XCTAssertNotEqual(picture(frame(worn)), whole)
+        worn.sails = 0
+        XCTAssertNotEqual(picture(frame(worn, moving: false)), picture(frame(going(11280, white: false), moving: false)))
+        // A raft is not a boat.
+        var raft = going(13600, white: false)
+        let boat = picture(frame(raft))
+        raft.vars[KlondikeSkin.boatKey] = KlondikeSkin.raft
+        XCTAssertNotEqual(picture(frame(raft)), boat)
+        // The scene with no trek is the pass.
+        XCTAssertEqual(skin.scene.label(SceneFrame(t: 0, weather: klondike.fairWeather, moving: false, atPort: false,
+                                                   hull: 100, sails: 100, region: nil, hour: 0, state: nil)),
+                       "A party hauling a loaded sled up a snowy mountain pass")
+    }
+}
