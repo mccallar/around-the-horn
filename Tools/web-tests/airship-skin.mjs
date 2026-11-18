@@ -535,17 +535,31 @@ check(drawn === (6 + 8 * 2) * 9 * 2 * 4, `the airship drawn everywhere (${drawn}
   check(picture(kings) !== picture(oslo), 'the midnight sun is not the night');
 }
 
-// The gallery the app shows for screenshots: each one draws.
-for (const g of sk.debug.gallery) {
-  const s = fresh();
-  sk.debug.start(s, 5);
-  g.set(s);
-  const v = viewOf(s);
-  const px = new BufferCanvas(SCENE_W, SCENE_H);
-  sk.scene.draw(px, sceneFrame(J, v, g.moving, 1.5));
-  check(full(px) && !BAD.test(labelOf(v, g.moving, 1.5)), `the gallery's ${g.name}`);
+// The gallery the app shows for screenshots (SceneGallery.swift `state`: a fresh flight in
+// the first month she can leave, not moored, and then the cell's own changes): each one
+// draws, and shows what it is named for.
+{
+  const labels = {};
+  for (const g of sk.debug.gallery) {
+    const s = fresh('merchant', J.departures[0].month);
+    s.atPort = false;
+    g.set(s);
+    const v = viewOf(s);
+    const px = new BufferCanvas(SCENE_W, SCENE_H);
+    sk.scene.draw(px, sceneFrame(J, v, g.moving, 1.5));
+    labels[g.name] = labelOf(v, g.moving, 1.5);
+    check(full(px) && !BAD.test(labels[g.name]), `the gallery's ${g.name}`);
+  }
+  check(sk.debug.gallery.length === 24, 'the whole gallery');
+  for (const name of ['Rome', 'Pulham', 'Oslo', 'Vadsø', 'Kings Bay']) {
+    check(labels[name] === `Airship moored at the mast at ${J.ports.find((p) => labels[name]?.endsWith(p.name))?.name}`, `${name}: ${labels[name]}`);
+  }
+  check(labels.Drifting.startsWith('Airship drifting over the North Sea, engines stopped.'), `drifting: ${labels.Drifting}`);
+  check(labels['Midnight sun'].includes('in the midnight sun') && labels['France by night'].includes('over France by night'),
+    `the midnight sun, and night over France (${labels['Midnight sun']} | ${labels['France by night']})`);
+  check(labels.Nome === 'Airship coming down over the roofs of Nome, the town on the beach' && labels['North Pole'].startsWith('Airship over the North Pole'),
+    'the stops between');
 }
-check(sk.debug.gallery.length === 24, 'the whole gallery');
 
 // The chart.
 {
