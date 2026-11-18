@@ -210,6 +210,12 @@ export class Engine {
   escape(text) { return this.request({ op: 'escape', text }).result; }
   /** One name as the names screen keeps it: trimmed, the suggestion if blank, cut to `max`. */
   name(typed, suggested, max) { return this.request({ op: 'name', typed, suggested, max }).result; }
+  /** The Klondike's miles, kept in tenths: `{ result: "1,136.5", miles: "1,136.5 miles" }`. */
+  mileNumber(journey, units) { return this.request({ op: 'mileNumber', journey, units }); }
+  /** What a view's `hooks` would say about `state` (a GameState), without the voyage in hand. */
+  hooks(state) { return this.request({ op: 'hooks', state }).hooks; }
+  /** Journey.region at `mile` on the way `state` has taken (the voyage in hand's if none). */
+  region(mile, state) { return this.request({ op: 'region', mile, state }).result; }
 
   // The voyage in hand.
 
@@ -226,6 +232,7 @@ export class Engine {
 
   buy(cart) { return this.request({ op: 'buy', cart }); }
   depart() { return this.request({ op: 'depart' }); }
+  /** Under way; `interrupts` is a port's hold (Journey.holdInPort), empty when it lets you go. */
   setSail() { return this.request({ op: 'setSail' }); }
   sailDay() { return this.request({ op: 'sailDay' }); }
   rest(days) { return this.request({ op: 'rest', days }); }
@@ -244,6 +251,8 @@ export class Engine {
   finish() { return this.request({ op: 'finish' }); }
   setPace(pace) { return this.request({ op: 'setPace', pace }); }
   setRations(rations) { return this.request({ op: 'setRations', rations }); }
+  /** The Klondike's "See about a boat" at Lake Bennett (its skin's yard question). */
+  boatChoice() { return this.request({ op: 'boatChoice' }); }
 }
 
 /**

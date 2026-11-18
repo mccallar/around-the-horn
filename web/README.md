@@ -3,7 +3,8 @@
 The web version runs the game's own engine: the Swift rules in `HornEngine/`, compiled
 to WebAssembly (`horn.wasm`). There is no second copy of the rules in JavaScript. The page
 is plain HTML, CSS and JavaScript modules, with no build step and nothing to install.
-Both journeys play: Around the Horn, 1849, and The Iron Road, 1869.
+Two journeys play: Around the Horn, 1849, and The Iron Road, 1869. `horn.wasm` carries
+all six of the engine's journeys; the other four are offered once their skins are ported.
 
 ## Play
 
@@ -34,7 +35,7 @@ With Node 20 or later, from the repository's root:
 
     node Tools/web-tests/imports.mjs   # the WASI shim answers exactly what horn.wasm imports
     node Tools/web-tests/golden.mjs    # the 300 golden 1849 voyages hash as the Mac recorded them (~1 min)
-    node Tools/web-tests/parity.mjs    # horn.wasm and the Mac build give identical replies (~1 min)
+    node Tools/web-tests/parity.mjs    # horn.wasm and the Mac build give identical replies, all six journeys (~6 min)
     node Tools/web-tests/text.mjs      # names trimmed, "[" escaped and markup read as the app does (~3 s)
     node Tools/web-tests/play.mjs      # 1849's flow, played through its screens: wins, losses, saves
     node Tools/web-tests/skin.mjs      # 1849's skin is the app's, and every scene, chart and catch draws
@@ -43,9 +44,14 @@ With Node 20 or later, from the repository's root:
     node Tools/web-tests/ui.mjs        # the page on a small DOM of its own: keys, taps, fields, the picker, whole runs clicked, opened from disk
 
 `parity.mjs` builds the bridge for the Mac with `swift build` (Xcode's Swift); set
-`HORN_NATIVE` to an already built `HornWeb` to skip that, and `VOYAGES` to play more than
-20 voyages per background and journey. The engine's own tests are unchanged:
-`swift test --disable-sandbox`.
+`HORN_NATIVE` to an already built `HornWeb` to skip that, `VOYAGES` to play more than
+20 voyages per background and journey, and `TROUBLE` to put more than one voyage per
+background into each kind of trouble. Besides the bot's own voyages, it puts every journey
+into trouble under way through a save (a meter at 0% with and without spares, no fuel, the
+last of it, no food, all at once), sends it out with an empty purse or a full outfit, and
+plays on with saves every few turns, often with a question on screen; it reports, per
+journey, the saves taken in trouble and the trouble questions and holds asked and saved.
+The engine's own tests are unchanged: `swift test --disable-sandbox`.
 
 ## How it fits together
 
@@ -59,17 +65,28 @@ With Node 20 or later, from the repository's root:
 
   | Method | What it is |
   |---|---|
-  | `journeys()` | every journey's tables: items, stops, regions, ports and prices, weathers, ailments, roles, paces, rations, departures, names, the default top ten, the foraging quarry, the rules the screens show, a few sentences |
+  | `journeys()` | every journey's tables: items, stops, regions, ports and prices, weathers, ailments, roles, paces, rations, departures, names, the default top ten, the foraging quarry, the rules the screens show, a few sentences, and the stored units to a mile where a journey keeps them finer (`unitsPerMile`, the Klondike's tenths) |
   | `start({journey, role, ship, captain, crew, year, month, seed})` | `GameController.chooseDeparture`: a voyage at its first stop |
   | `save(pending)` / `load(save, seed)` | the save file exactly as the app writes it (the GameState's keys, `pending` beside them) |
   | `buy`, `depart`, `setSail`, `sailDay`, `rest`, `mendSails`, `patchHull`, `repairHullAtYard`, `recutSailsAtYard`, `tradeAtPort`, `talk`, `throwHarpoon`, `landCatch`, `beginArrival`, `resolve`, `commitBurial`, `finish`, `setPace`, `setRations` | `GameEngine`'s calls of the same names, as GameController makes them |
-  | `rank`, `topTen`, `bill`, `formatNumber`, `escape`, `name` | the engine's helpers the screens use |
+  | `rank`, `topTen`, `bill`, `formatNumber`, `escape`, `name` | the engine's helpers the screens use; `bill` is made at the voyage in hand's own port when it is that journey's, as the shop finds it (a Klondike town on the White Pass is not the one in the table) |
+  | `hooks(state)`, `region(mile, state)` | what a view's `hooks` would say about a state of the skin's own (a scene or a map drawn for a test or a debug start), and `Journey.region` at a mile on the way it has taken |
+  | `mileNumber(journey, units)`, `boatChoice()` | the Klondike's miles, kept in tenths, and its "See about a boat" question, which its skin asks from the yard's row at Lake Bennett |
 
   Every voyage call replies with `view`: `state` (the GameState) and what the screens
   read off it (the date as written, the region, health, the next stop, prices and room in
   the shop, what repairs cost and whether they can be done, why foraging is refused, the
-  generator's position). Calls that take time also reply with `interrupts`, in the order
-  the app shows them; `readInterrupt` reads one into `{type, …}`. Hand the interrupt
+  generator's position), the port whose prices apply (`port`, as the engine finds it for
+  the way taken), and `hooks`: what the skins ask the engine beyond the state, so a skin
+  never works out a rule of its own. `hooks.departsUnfed` and `mayDepart` are every
+  journey's (D19, D21); the rest are under the journey's id: the trouble each can be in
+  (D14: `rail.brokenDown`, `airship.enginesOut` and `goingDown`, `balloon.burnersOut`,
+  `goingDown`, `lastOfThePropane` and `relaunchRefusal`, `klondike.givenOut` and `noFire`,
+  `mars.dark`, `coasting` and `lastOfThePropellant`), the finales' words, and the
+  Klondike's boat, leg, meter names, progress, short-of-grub warning, burial line and stop
+  names on the way taken, and what Gateway's purse still runs to on Mars. Calls that take
+  time also reply with `interrupts`, in the order the app shows them (`setSail` with a
+  port's hold, `Journey.holdInPort`, empty when it lets you go); `readInterrupt` reads one into `{type, …}`. Hand the interrupt
   itself back to the engine (`resolve`, `save`), never the reading of it.
 - The game is plain ES modules in `js/`, after the app's Swift, file for file:
 
