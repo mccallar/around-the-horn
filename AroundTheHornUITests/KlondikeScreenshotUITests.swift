@@ -166,6 +166,31 @@ final class KlondikeScreenshotUITests: ScreenshotWalk {
         shot("21-repairs")
     }
 
+    /// D21: a miner who spends the purse below a step of grub ($25) with none aboard is
+    /// warned and goes hungry, rather than sent back to the outfitter for good.
+    func testLeavingHungry() {
+        relaunch(["-HornTickSeconds", "30"])
+        tap("Head for the Klondike")
+        tap("A hard-rock miner out of Leadville")
+        tap("Use these names")
+        tap("March 1898")
+        tap("Enter the shop")
+        for _ in 0..<5 { app.buttons["More Firewood"].tap() }
+        for _ in 0..<40 { app.buttons["More Lime juice"].tap() }
+        app.swipeUp()
+        for (item, n) in [("Medicine chest", 12), ("Furs & mackinaws", 12), ("Rope & rawhide", 20), ("Canvas & pitch", 10)] {
+            for _ in 0..<n { app.buttons["More \(item)"].tap() }
+        }
+        shot("14a-spent")
+        tap("Pay $718.00 and leave")
+        XCTAssertTrue(app.buttons["Leave anyway"].waitForExistence(timeout: 5))
+        shot("14b-no-grub")
+        tap("Leave anyway")
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "you will go hungry")).firstMatch
+            .waitForExistence(timeout: 5))
+        shot("14c-leaving-hungry")
+    }
+
     /// Every stretch of the way, in play: the coast by steamer, both passes on foot, the
     /// lakes and the river by boat.
     func testTheStretches() {
