@@ -109,7 +109,7 @@ export function sailorProblems(d, where) {
  * Road's rails. The airship has a captain and is a ship, the engine's Arctic has fishing
  * boats and dried fish, and Oslo's store is its "ship chandler".
  */
-export const AIRSHIP_FOREIGN = /\b(nm|sails?|sailed|sailing|sailors?|nautical|harpoons?|voyage|chandler|shipyard|anchor|cords?|train|conductor|tender|roundhouse|freight|miles?|lbs)\b/i;
+export const AIRSHIP_FOREIGN = /\b(nm|sails?|sailed|sailing|sailors?|nautical|harpoons?|voyage|chandler|shipyard|anchor|cords?|train|conductor|tender|roundhouse|miles?|lbs)\b/i;
 const AIRSHIP_OWN = ['ship chandler'];
 
 export function foreignProblems(d, where) {
