@@ -1130,3 +1130,53 @@ extension KlondikeSkinTests {
         for a in arrivals { has(a, "noses into the mud below Dawson City") }
     }
 }
+
+// MARK: - A stampeder's words, leg by leg
+
+extension KlondikeSkinTests {
+    func testTheWordsFollowTheLeg() {
+        let steamer = skin.words(going(5_200)), juneau = skin.words(at("juneau", port: true))
+        XCTAssertEqual(steamer.rest, "Rest in your bunk")
+        has(steamer.paceNow, "Aboard the steamer, the captain sets the pace.")
+        XCTAssertEqual(juneau.leavePort, "Back aboard and steam on")
+        XCTAssertEqual(juneau.place, "Juneau")
+
+        let trail = skin.words(going(11_280)), camp = skin.words(at("camp", port: true))
+        XCTAssertEqual(trail.rest, "Make camp and rest")
+        XCTAssertEqual(camp.leavePort, "Shoulder your packs and move on")
+        XCTAssertEqual(camp.yard, "Visit the outfitters' yard")
+        XCTAssertEqual(trail.vesselHeading, "Your outfit")
+        XCTAssertEqual(trail.meters.0, "Outfit")
+        XCTAssertEqual(trail.meters.1, "Sleds")
+        XCTAssertEqual(skin.words(at("camp", port: true, white: true)).place, "White Pass City")
+
+        let bennett = skin.words(at("bennett", port: true))
+        XCTAssertEqual(bennett.yard, "See about a boat")
+        XCTAssertNotNil(bennett.yardQuestion)
+        XCTAssertEqual(bennett.leavePort, "Push off and float on")
+
+        let river = skin.words(going(14_000)), selkirk = skin.words(at("selkirk", port: true))
+        XCTAssertEqual(selkirk.yard, "Visit the boatwrights")
+        XCTAssertNil(selkirk.yardQuestion)
+        XCTAssertEqual(river.vesselHeading, "The Puget Belle")
+        XCTAssertEqual(river.meters.0, "Boat")
+        XCTAssertEqual(river.meters.1, "Oars & sail")
+        has(river.mend, "Re-rig oars & sail")
+        has(river.patch, "Patch the hull")
+
+        // The rations in pounds a day for the party, as the engine counts them.
+        var g = going(11_280)
+        g.rations = .filling
+        has(skin.words(g).rationsNow, "With 5 in the party, that's 15 lbs a day.")
+        g.rations = .bare
+        has(skin.words(g).rationsNow, "that's 5 lbs a day.")
+        // Short of furs and of lime juice, said in red.
+        g.clothes = 3
+        XCTAssertEqual(skin.words(g).clothesWarning, "[red]Only 3 of 5 have furs.[/red]")
+        g.noCitrus = 21
+        has(skin.words(g).suppliesNote, "[red]21 days without lime juice[/red]")
+        g.role = .shipwright
+        has(skin.words(g).repairsNote, "As a boatbuilder, your repairs go much further.")
+        XCTAssertEqual(skin.words(g).bonus, "Bonus for being a boatbuilder")
+    }
+}
