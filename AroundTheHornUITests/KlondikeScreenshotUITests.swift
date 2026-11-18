@@ -293,14 +293,18 @@ final class KlondikeScreenshotUITests: ScreenshotWalk {
         tap("Continue")
         shot("64-boat-question")
         button(startingWith: "Buy a boat from the sawmill crew").tap()
+        // The haggling takes a day, and the day may bring news of its own.
+        roll(untilText: "The sawmill crew has a boat")
         shot("65-boat-bought")
         tap("Continue")
-        shot("66-bennett-with-boat")
-        tap("Push off and float on")
-        shot("67-ice-in")
-        tap("Wait in camp for the ice to go out")
-        roll(until: "Push off and float on")
-        shot("68-ice-out")
+        // Still pushing off: now the ice.
+        let wait = app.buttons["Wait in camp for the ice to go out"]
+        if !wait.waitForExistence(timeout: 5) { tap("Push off and float on") }
+        XCTAssertTrue(wait.waitForExistence(timeout: 10), "the ice never asked")
+        shot("66-ice-in")
+        wait.tap()
+        roll(until: "Stop & take stock")
+        shot("67-ice-out")
     }
 
     func testTheRiver() {

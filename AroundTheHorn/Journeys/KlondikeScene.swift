@@ -493,7 +493,8 @@ enum KlondikeScene {
             return abs(d) < 230 ? d : nil
         }
         if let d = near("seattle") { seattleHills(s, d) }
-        if let d = near("juneau") { juneauHills(s, d) }
+        // Juneau is ninety miles astern by the head of Lynn Canal: gone the day after.
+        if let d = near("juneau"), d > -30 { juneauHills(s, d) }
         if let d = near("lynn"), s.leg == .steamer { fjord(s, d) }
         if s.leg == .foot, s.region == "chilkootSummit", s.g?.over != true {
             let d = s.dx(11360)
@@ -513,7 +514,7 @@ enum KlondikeScene {
             return abs(d) < 230 ? d : nil
         }
         if let d = near("seattle"), s.leg == .steamer { wharf(s, d, crowd: true) }
-        if let d = near("juneau"), s.leg == .steamer { wharf(s, d, crowd: false) }
+        if let d = near("juneau"), d > -30, s.leg == .steamer { wharf(s, d, crowd: false) }
         if let d = near("landing"), s.leg == .foot { s.white ? skagway(s, d) : dyea(s, d) }
         if let d = near("camp"), s.leg == .foot { s.white ? whitePassCity(s, d) : sheepCamp(s, d) }
         if let d = near("summit"), s.leg == .foot { s.white ? whitePassSummit(s, d) : chilkootSummit(s, d) }
