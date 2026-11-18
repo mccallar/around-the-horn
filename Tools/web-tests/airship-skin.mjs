@@ -18,7 +18,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { repo } from './lib.mjs';
 import { portChecks, hexes } from './port.mjs';
-import { Player, engine, lcg, describe, texts, plain, wordProblems, markupProblems, FakeTimers } from './player.mjs';
+import { Player, engine, lcg, describe, wordProblems, markupProblems, foreignProblems, AIRSHIP_FOREIGN, FakeTimers } from './player.mjs';
 import { Flow, MemoryStorage } from '../../web/js/flow.js';
 import { BufferCanvas } from '../../web/js/pixels.js';
 import { sceneFrame, drawChart, SCENE_W, SCENE_H } from '../../web/js/drawing.js';
@@ -37,23 +37,7 @@ function check(ok, what) {
 const read = (p) => readFileSync(path.join(repo, p), 'utf8');
 const BAD = /undefined|NaN|\bnull\b|\[object/;
 
-/**
- * Words of the other journeys that must never reach the airship: 1849's sea and the Iron
- * Road's rails. The airship has a captain and is a ship, the engine's Arctic has fishing
- * boats and dried fish, and Oslo's store is its "ship chandler".
- */
-const FOREIGN = /\b(nm|sails?|sailed|sailing|sailors?|nautical|harpoons?|voyage|chandler|shipyard|anchor|cords?|train|conductor|tender|roundhouse|freight|miles?|lbs)\b/i;
-const OWN = ['ship chandler'];
-function foreignProblems(d, where) {
-  const out = [];
-  for (const { text } of texts(d)) {
-    let t = plain(text);
-    for (const o of OWN) t = t.split(o).join('');
-    const m = t.match(FOREIGN);
-    if (m) out.push(`${where}: "${m[0]}" in ${JSON.stringify(text)}`);
-  }
-  return out;
-}
+const FOREIGN = AIRSHIP_FOREIGN;
 
 // MARK: - The port
 
