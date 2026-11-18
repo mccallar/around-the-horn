@@ -573,8 +573,9 @@ and play as they did: every new member's answer for them is the one that changes
   - `Words.departWarning`: a warning before the first port lets the vessel go, which the
     player may heed (back to the stores) or wave off. The Klondike answers
     `Klondike.shortOfGrubWarning` (less than a year's grub a head for the police at the
-    summit) with "Back to the shop" / "Leave anyway", and `nil` with no grub at all, where
-    the engine's own refusal comes first; every other skin answers `nil`. It is shown on a
+    summit) with "Back to the shop" / "Leave anyway", and `nil` with no grub at all while
+    the purse runs to a step of it, where the engine's own refusal comes first; with less,
+    the party may leave hungry, warned (D21). Every other skin answers `nil`. It is shown on a
     new screen, `Screen.ask` (`AskView`): a question of the shell's own, not the engine's,
     so it is never saved; a voyage left there comes back to the stores (D16).
 - **The shell honours `Journey.holdInPort`**: `GameController.startTravel` shows what
@@ -618,18 +619,22 @@ and play as they did: every new member's answer for them is the one that changes
   boat (from the way out and the yard row) and for the ice, a hold left on screen and
   resumed, the red row on every leg and none aboard the steamer or before Seattle, the
   given-out question and each of its answers (mend, buy a coil, make do, take stock) with
-  no time passing while it asks, the repairs' order, the Seattle warning and refusal, and
-  a save in the Seattle stores coming back to them.
+  no time passing while it asks, the repairs' order, the Seattle warning and refusal, a
+  miner spent below a step of grub with none aboard leaving hungry and the trek ending
+  (D21), and a save in the Seattle stores coming back to them. Its vocabulary walk stands
+  in town at Bennett with no boat on both passes, so the yard's question is asked and
+  sieved for every role, and fails if it ever goes unasked.
 - `KlondikeScreenshotUITests` walks it: the setup and the learn pages, the Seattle shop,
-  its warning short of grub and the resume into it, a day out on the steamer and the
-  menu's screens; fourteen stretches, both passes, in play, and the gallery; Juneau,
+  its warning short of grub and the resume into it, a miner spent below a step of grub
+  and leaving hungry (D21), a day out on the steamer and the menu's screens; fourteen stretches, both passes, in play, and the gallery; Juneau,
   Sheep Camp, White Pass City and Fort Selkirk with their stores and yards; the fork and
   the purser, the packers, Dyea, the police with grub enough and short of it on both
   passes, Lindeman, Log Cabin and Tagish; Bennett without a boat, the boat question, the
   ice and the ice going out; Miles Canyon and Five Fingers; the map on the coast, both
   passes and the river; fishing and nothing to fish; sleds and oars given out, no
   firewood, both at once and worn repairs; Dawson and the top ten; and the three ways it
-  ends short of Dawson (turned back, the outfit ruined, the boat broken up).
+  ends short of Dawson (turned back, the outfit ruined, the boat broken up). Its reference
+  set is the 25 in `docs/reference/shots-klondike/`.
 
 ## 3. Adding a journey
 

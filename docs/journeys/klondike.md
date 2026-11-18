@@ -1777,6 +1777,11 @@ losses end at least three ways, the police among them.
     descriptions are unchanged). The role screen, the comparison page and the trade row in
     §2 and §12 are reworded to match, for the skin.
 22. **Sleds, oars, the outfit and the boat at 0%** (D14): see the next section.
+23. **Seattle holds a party with no grub only while its purse runs to a step of it** (D21):
+    a miner can spend all but $2 of $720 on everything else, below 250 lbs at $0.10. With
+    less than $25 and no grub, `Klondike.departsUnfed` lets the party go; the skin's warning
+    still says how short it is, and the departure ends by saying the outfit has no grub and
+    the police at the summit will turn it back. No number changed.
 
 ### Sleds, oars, the outfit and the boat at nothing (D14)
 
