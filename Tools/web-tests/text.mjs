@@ -1,12 +1,18 @@
 // The game's text as the app treats it, in horn.wasm and in the page: names and epitaphs
 // trimmed as Foundation trims them, a player's "[" escaped as Foundation finds it, and
-// markup read Character by Character, as the app's Markup.runs reads it. Every expected
-// answer here is the Mac's: Foundation's, and the app's Markup.runs run there.
+// markup read Character by Character, as the app's Markup.runs reads it, and amounts
+// counted as the app's Stores counts them: one of a loose item by its own name ("1
+// balloon"), a catch with its thousands grouped where the skin says so ("1,350 kg"), and
+// quarry kept to its field's lanes. Every expected answer here is the Mac's: Foundation's,
+// and the app's Markup.runs, Stores and ForageField run there (StoresTests, and the
+// airship's and Mars's skin tests).
 // parity.mjs holds horn.wasm to the Mac build of the bridge on every scalar.
 //
 //   node Tools/web-tests/text.mjs
 import { engine } from './player.mjs';
 import { escape, runs } from '../../web/js/markup.js';
+import * as Stores from '../../web/js/stores.js';
+import { FishingModel, lane, reward } from '../../web/js/fishing.js';
 
 let passed = 0;
 const failures = [];
@@ -123,6 +129,45 @@ e.buy({ food: 200 });
 const line = e.depart().result ?? '';
 check(line.startsWith('The [i]\u{600}[[red]Queen[/i] whistles off from the Omaha yard'),
   `the engine writes the name into its line as Foundation escapes it: "${show(line.slice(0, 40))}"`);
+
+// 4. Counting. Words for a stand-in journey, as the app's TestJourneys gives the shell one.
+const testWords = (o = {}) => ({ looseUnits: {}, looseOne: {}, fractional: [], singular: false, ...o });
+const balloons = { key: 'tackle', unit: 'boxes', one: 'box', per: 12 };
+const flying = testWords({ looseUnits: { tackle: 'balloons' }, looseOne: { tackle: 'balloon' } });
+for (const [n, reads] of [[0, '0 balloons'], [1, '1 balloon'], [2, '2 balloons'], [11, '11 balloons']]) {
+  const got = Stores.amount(balloons, { tackle: n }, flying);
+  check(got === reads, `${n} loose balloons read "${reads}" (got "${got}")`);
+}
+// An item not in looseOne reads the same at any count, as 1849's "1 throws" always has.
+const throws = testWords({ looseUnits: { tackle: 'throws' } });
+check(Stores.amount(balloons, { tackle: 1 }, throws) === '1 throws', 'one throw is still "1 throws"');
+const kit = { key: 'meds', unit: 'kits', one: 'kit', per: 1 };
+const single = Stores.counting(kit, testWords({ singular: true }));
+check(Stores.measure(1, kit, single, true) === '1 kit' && Stores.measure(1000, kit, single, true) === '1,000 kits',
+  'a singular journey\'s "1 kit" and "1,000 kits"');
+// A catch, with and without the thousands grouped.
+const air = { items: [{ key: 'food', unit: 'kg', one: 'kg', per: 1 }], forageReward: 'food' };
+const grouped = reward(air, testWords(), true), plainCatch = reward(air, testWords());
+check(grouped.measure(1350) === '1,350 kg' && grouped.measure(450) === '450 kg' && grouped.count(1350) === '1,350',
+  `a grouped catch reads "1,350 kg" (got "${grouped.measure(1350)}")`);
+check(plainCatch.measure(1050) === '1050 kg' && plainCatch.count(1050) === '1050',
+  `an ungrouped catch reads "1050 kg", as 1849's prototype wrote "Caught: 1050 lbs" (got "${plainCatch.measure(1050)}")`);
+// Lanes: a field in three bands keeps its quarry to the middle of each; one with none, anywhere.
+const stream = { w: 160, h: 200, origin: { x: 80, y: 180 }, upward: true, line: 172, lanes: [18, 150], speed: 150,
+  oneWay: true, bands: 3 };
+const lanesSeen = new Set();
+for (let k = 0; k < 200; k++) lanesSeen.add(lane(stream, 18 + (k / 199) * 132));
+check(same([...lanesSeen].sort((a, b) => a - b), [40, 84, 128]), `three lanes, at 40, 84 and 128 (got ${[...lanesSeen]})`);
+for (const field of [{ ...stream, bands: 0 }, { ...stream, bands: undefined }]) {
+  check([18, 77.7, 150].every((y) => lane(field, y) === y), `a field with no bands (${field.bands}) leaves y as it is`);
+}
+let draws = 0;
+const quarry = [{ lb: 5, chance: 1, width: 8, height: 6, speed: [20, 40] }];
+const m = new FishingModel({ field: stream, quarry, seconds: 30, padding: 1, random: () => (draws = (draws + 0.137) % 1),
+  useTackle: () => true, tackleLeft: () => 10 });
+for (let i = 0; i < 200; i++) m.step(0.05);
+check(m.fish.length > 0 && m.fish.every((f) => lanesSeen.has(f.y0)), `every chunk in a lane (${m.fish.map((f) => f.y0)})`);
+check(m.fish.every((f) => f.vx > 0), 'all going the same way');
 
 console.log(`text: ${passed} passed, ${failures.length} failed`);
 for (const f of failures.slice(0, 20)) console.log(`FAILED ${f}`);
