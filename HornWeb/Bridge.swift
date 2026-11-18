@@ -62,6 +62,10 @@ public final class Bridge {
         var typed: String?
         var suggested: String?
         var max: Int?
+        /// A state to read the journey's hooks or a region off, instead of the voyage's.
+        var state: GameState?
+        var mile: Int?
+        var units: Int?
     }
 
     /// A save as the app writes it: the voyage's own keys and, beside them, `pending`.
@@ -160,8 +164,9 @@ public final class Bridge {
         case "depart":
             return view(["result": AnyEncodable(try voyage().depart())])
         case "setSail":
-            try voyage().setSail()
-            return view()
+            // A port that holds the party ashore (`Journey.holdInPort`) says why instead:
+            // still in port, with what happens in its place. Empty when it lets you go.
+            return interrupts(try voyage().setSail())
         case "sailDay":
             return interrupts(try voyage().sailDay())
         case "rest":
@@ -212,11 +217,40 @@ public final class Bridge {
                                               into: table)
             return Reply(["table": AnyEncodable(t), "place": AnyEncodable(place)])
         case "bill":
+            // At the port as the shop finds it (ShopView): the voyage in hand's, when it is
+            // this journey's, since a port can depend on the way taken (the Klondike's towns
+            // on the White Pass); otherwise the journey's table.
             let j = try journey(r)
-            guard let port = j.port(try need(r.port, "port")) else { throw Failure(message: "no such port") }
+            let id = try need(r.port, "port")
+            let here = engine.flatMap { $0.state.journey == j.id ? j.port($0.state, at: id) : nil }
+            guard let port = here ?? j.port(id) else { throw Failure(message: "no such port") }
             var cart: [ItemKey: Int] = [:]
             for (k, n) in try need(r.cart, "cart") { if let key = ItemKey(rawValue: k) { cart[key] = n } }
             return Reply(["result": AnyEncodable(GameEngine.bill(cart, at: port))])
+        case "hooks":
+            // What the skins ask the engine about a voyage (`Hooks`), for a state of their
+            // own: a scene or a map drawn for a test or a debug start. The voyage in hand's
+            // are in every view.
+            let s = try need(r.state, "state")
+            guard Journeys.has(s.journey) else { throw Failure(message: "no journey \(s.journey)") }
+            return Reply(["hooks": AnyEncodable(Hooks(GameEngine(state: s, rng: CountedRNG(seed: 0))))])
+        case "region":
+            // `Journey.region(_:at:)`: the region at `mile` on the way this voyage has taken,
+            // for the state given or the voyage in hand.
+            let s = try r.state ?? voyage().state
+            guard Journeys.has(s.journey) else { throw Failure(message: "no journey \(s.journey)") }
+            return Reply(["result": AnyEncodable(RegionInfo(Journeys.journey(s.journey).region(s, at: try need(r.mile, "mile"))))])
+        case "boatChoice":
+            // The Klondike's "See about a boat", which its skin asks from the yard's row at
+            // Lake Bennett (`Words.yardQuestion`).
+            let e = try voyage()
+            guard e.state.journey == Klondike.id else { throw Failure(message: "no boat to see about") }
+            return interrupts([Klondike.boatChoice(e)])
+        case "mileNumber":
+            // The Klondike's miles, kept in tenths: "1,136.5" and "1,136.5 miles".
+            guard try need(r.journey, "journey") == Klondike.id else { throw Failure(message: "no tenths of a mile") }
+            let u = try need(r.units, "units")
+            return Reply(["result": AnyEncodable(Klondike.mileNumber(u)), "miles": AnyEncodable(Klondike.miles(u))])
         case "formatNumber":
             // An Int is 32 bits in WebAssembly: past that, `formatNumber` would trap. No
             // amount in the game comes near it.
@@ -356,6 +390,10 @@ struct View: Encodable {
     let inStrait: Bool
     let southernWinter: Bool
     let currentPort: String?
+    /// The port whose prices apply, as the engine finds it for this voyage: a port can
+    /// depend on the way taken (the Klondike's towns on the White Pass).
+    let port: JourneyInfo.PortInfo?
+    let hooks: Hooks
     let prices: [String: Double]
     let room: [String: Int]
     let canMendSails: Bool
@@ -388,6 +426,8 @@ struct View: Encodable {
         southernWinter = s.southernWinter
         let port = e.currentPort
         currentPort = port?.id
+        self.port = port.map { JourneyInfo.PortInfo($0, e.journey) }
+        hooks = Hooks(e)
         var prices: [String: Double] = [:]
         var room: [String: Int] = [:]
         for it in e.journey.items {
@@ -406,6 +446,121 @@ struct View: Encodable {
         let rng = e.rng as? CountedRNG
         draws = rng?.draws ?? 0
         self.rng = rng.map { String($0.base.state) } ?? ""
+    }
+}
+
+/// What the skins ask the engine about the voyage in hand, beyond the GameState: the
+/// journey's own rules for its trouble (D14), its departures (D19, D21) and its words, so
+/// the browser's skins read them instead of working them out. Each journey's are under its
+/// id; a journey with none has none.
+struct Hooks: Encodable {
+    struct Rail: Encodable {
+        let brokenDown: Bool
+    }
+
+    struct Airship: Encodable {
+        let enginesOut: Bool
+        let goingDown: Bool
+        let finale: String
+    }
+
+    struct Balloon: Encodable {
+        let burnersOut: Bool
+        let goingDown: Bool
+        let lastOfThePropane: Bool
+        let relaunchRefusal: String?
+        let finale: String
+        let shortfall: String
+    }
+
+    struct Klondike: Encodable {
+        struct Meters: Encodable {
+            let structure: String
+            let drive: String
+        }
+
+        struct Finale: Encodable {
+            let title: String
+            let body: String
+        }
+
+        struct StopName: Encodable {
+            let name: String
+            let short: String
+        }
+
+        let hasBoat: Bool
+        let givenOut: Bool
+        let noFire: Bool
+        /// "steamer", "foot" or "boat".
+        let leg: String
+        let meters: Meters
+        let progress: String
+        let shortOfGrubWarning: String?
+        let finale: Finale
+        /// The burial line where it happens, with `burialMark` where the name goes (the
+        /// skin puts the name in, already escaped, as the app's does).
+        let burial: String
+        /// Every stop's names on the way taken (`Klondike.name`, `shortName`), in order.
+        let stops: [StopName]
+    }
+
+    struct Mars: Encodable {
+        let dark: Bool
+        let coasting: Bool
+        let lastOfThePropellant: Bool
+        /// Whether the purse still runs to a step of each item at Gateway.
+        let gatewaySells: [String: Bool]
+    }
+
+    static let burialMark = "\u{1}NAME\u{1}"
+
+    /// `Journey.departsUnfed` and `mayDepart`: whether the first port lets you go hungry,
+    /// and whether it lets you go at all.
+    let departsUnfed: Bool
+    let mayDepart: Bool
+    let rail: Rail?
+    let airship: Airship?
+    let balloon: Balloon?
+    let klondike: Klondike?
+    let mars: Mars?
+
+    init(_ e: GameEngine) {
+        let s = e.state
+        let j = e.journey
+        departsUnfed = j.departsUnfed(s)
+        mayDepart = j.mayDepart(s)
+        rail = s.journey == HornEngine.Rail.id ? Rail(brokenDown: HornEngine.Rail.brokenDown(s)) : nil
+        airship = s.journey == HornEngine.Airship.id
+            ? Airship(enginesOut: HornEngine.Airship.enginesOut(s), goingDown: HornEngine.Airship.goingDown(s),
+                      finale: HornEngine.Airship.finale(s))
+            : nil
+        balloon = s.journey == HornEngine.Balloon.id
+            ? Balloon(burnersOut: HornEngine.Balloon.burnersOut(s), goingDown: HornEngine.Balloon.goingDown(s),
+                      lastOfThePropane: HornEngine.Balloon.lastOfThePropane(s),
+                      relaunchRefusal: HornEngine.Balloon.relaunchRefusal(e), finale: HornEngine.Balloon.finale(s),
+                      shortfall: HornEngine.Balloon.shortfall(s))
+            : nil
+        if s.journey == HornEngine.Klondike.id {
+            typealias K = HornEngine.Klondike
+            let m = K.meterNames(s)
+            let f = K.finale(s)
+            klondike = Klondike(hasBoat: K.hasBoat(s), givenOut: K.givenOut(s), noFire: K.noFire(s), leg: K.legName(s),
+                                meters: .init(structure: m.structure, drive: m.drive), progress: K.progress(s),
+                                shortOfGrubWarning: K.shortOfGrubWarning(s), finale: .init(title: f.title, body: f.body),
+                                burial: K.burialText(s, name: Self.burialMark),
+                                stops: j.stops.map { .init(name: K.name($0, s), short: K.shortName($0, s)) })
+        } else {
+            klondike = nil
+        }
+        if s.journey == HornEngine.Mars.id {
+            var sells: [String: Bool] = [:]
+            for it in j.items { sells[it.key.rawValue] = HornEngine.Mars.gatewaySells(it.key, s) }
+            mars = Mars(dark: HornEngine.Mars.dark(s), coasting: HornEngine.Mars.coasting(s),
+                        lastOfThePropellant: HornEngine.Mars.lastOfThePropellant(s), gatewaySells: sells)
+        } else {
+            mars = nil
+        }
     }
 }
 
@@ -493,6 +648,22 @@ struct JourneyInfo: Encodable {
         let arrive: String
         let talk: [String]
         let prices: [String: Double]
+
+        init(_ p: HornEngine.Port, _ j: Journey) {
+            var mods: [String: Double] = [:]
+            for it in j.items { if let m = p.mods[it.key] { mods[it.key.rawValue] = m } }
+            var prices: [String: Double] = [:]
+            for it in j.items { prices[it.key.rawValue] = p.price(it.key) }
+            id = p.id
+            name = p.name
+            shop = p.shop
+            mult = p.mult
+            self.mods = mods
+            fever = p.fever
+            arrive = p.arrive
+            talk = p.talk
+            self.prices = prices
+        }
     }
 
     struct RoleRow: Encodable {
@@ -586,6 +757,9 @@ struct JourneyInfo: Encodable {
     let totalMiles: Int
     let burnsFuel: Bool
     let tradeKeys: [ItemKey]
+    /// Stored units to the mile, where a journey keeps miles finer than whole ones (the
+    /// Klondike's tenths); absent where a unit is a mile.
+    let unitsPerMile: Int?
     let rules: RulesInfo
     let text: TextInfo
 
@@ -600,14 +774,7 @@ struct JourneyInfo: Encodable {
         }
         stops = j.stops.map { StopInfo(id: $0.id, name: $0.name, short: $0.short, type: $0.type, mile: $0.mile, note: $0.note) }
         regions = j.regions.map(RegionInfo.init)
-        ports = j.ports.map { p in
-            var mods: [String: Double] = [:]
-            for it in j.items { if let m = p.mods[it.key] { mods[it.key.rawValue] = m } }
-            var prices: [String: Double] = [:]
-            for it in j.items { prices[it.key.rawValue] = p.price(it.key) }
-            return PortInfo(id: p.id, name: p.name, shop: p.shop, mult: p.mult, mods: mods, fever: p.fever,
-                            arrive: p.arrive, talk: p.talk, prices: prices)
-        }
+        ports = j.ports.map { PortInfo($0, j) }
         weathers = j.weathers
         fairWeather = j.fairWeather
         deficiency = j.deficiency
@@ -638,6 +805,7 @@ struct JourneyInfo: Encodable {
         totalMiles = j.totalMiles
         burnsFuel = j.burnsFuel
         tradeKeys = j.tradeKeys
+        unitsPerMile = j.id == Klondike.id ? Klondike.unitsPerMile : nil
         let r = j.rules
         rules = RulesInfo(tickHours: r.tickHours, startHour: r.startHour, startDay: r.startDay,
                           restChoices: r.restChoices, rankCuts: r.rankCuts, portTrades: r.portTrades,
