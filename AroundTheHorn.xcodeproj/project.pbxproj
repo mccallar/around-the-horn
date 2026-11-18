@@ -79,6 +79,7 @@
 		7DA5ECED083824A1458BACF6 /* GoldenVoyageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26132E5082F8F671AED50D84 /* GoldenVoyageTests.swift */; };
 		7E94EBF4A679D14B70BA855E /* ChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E8E7F89E9868BA9D521DCD7 /* ChartView.swift */; };
 		7ECE44A5CCDF318BEBFE8B0F /* Feedback.swift in Sources */ = {isa = PBXBuildFile; fileRef = 771DF7A9C743BD52E884EC30 /* Feedback.swift */; };
+		810CB2071AB39A6B55CA8FE5 /* KlondikeSkinTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB43D74B5FD33FF848E8E4F4 /* KlondikeSkinTests.swift */; };
 		8507B9626335D0733F75E858 /* TestJourneys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B84815BD850CCD28520377E /* TestJourneys.swift */; };
 		857722942DA1A18E9E64BEEF /* Mars+Trouble.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CAA93F080CF2043FFA558D9 /* Mars+Trouble.swift */; };
 		85A1CC3CDBEDA5BC33586B0B /* ResumeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6AFAF1AEC528687A069F091 /* ResumeTests.swift */; };
@@ -371,6 +372,7 @@
 		E66CCC765DAB15D402E1E5A0 /* GameState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameState.swift; sourceTree = "<group>"; };
 		E6EC279D772A856004EC53F9 /* Score.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Score.swift; sourceTree = "<group>"; };
 		E9E1CCDC256F84383ED7FC1A /* AirshipForage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirshipForage.swift; sourceTree = "<group>"; };
+		EB43D74B5FD33FF848E8E4F4 /* KlondikeSkinTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KlondikeSkinTests.swift; sourceTree = "<group>"; };
 		ECB9C58551BE13CA61AEFC12 /* Klondike.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Klondike.swift; sourceTree = "<group>"; };
 		F099379FFDDA51A0BAFA3352 /* AppInfoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppInfoTests.swift; sourceTree = "<group>"; };
 		F657FF3127206CB698A0ADC6 /* Horn1849Chart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Horn1849Chart.swift; sourceTree = "<group>"; };
@@ -430,6 +432,7 @@
 				711BBE96B8E230C92444CFFA /* ChartAndFishingTests.swift */,
 				6308324207F0B19AB2C51161 /* GameControllerTests.swift */,
 				0CC0DE5BB8FFF8FCF5AAC89C /* JourneyPickerTests.swift */,
+				EB43D74B5FD33FF848E8E4F4 /* KlondikeSkinTests.swift */,
 				1EFE7D352E191E20D2322B5D /* LegacySaveTests.swift */,
 				B656EEA583D97D6A03EE42FD /* MarkupTests.swift */,
 				5E2EB97EDAC2DDD56BEDDE33 /* MarsSkinTests.swift */,
@@ -951,6 +954,7 @@
 				71E118F1BA3180A2F7AF4028 /* ChartAndFishingTests.swift in Sources */,
 				27FAEDA776B23EEDF97FA2D0 /* GameControllerTests.swift in Sources */,
 				C00041AA7005DFF5A81404CA /* JourneyPickerTests.swift in Sources */,
+				810CB2071AB39A6B55CA8FE5 /* KlondikeSkinTests.swift in Sources */,
 				54F28ECDCAE78E4D847624EE /* LegacySaveTests.swift in Sources */,
 				87ED892C305EA05606F8FE9B /* MarkupTests.swift in Sources */,
 				B1DB36C149731F691A6E12CB /* MarsSkinTests.swift in Sources */,
