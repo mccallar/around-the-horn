@@ -174,7 +174,8 @@ const SHOPPING = [['food', 1500], ['water', 600], ['limes', 10], ['clothes', 5],
  * `trace`, if given, receives every request and reply, for comparing two backends.
  */
 export class Bot {
-  constructor({ backend, journey, role, seed, wild, names, trace, saveEvery = 0 }) {
+  constructor({ backend, journey, role, seed, wild, names, trace, saveEvery = 0, pendingSave = 0.02, repairs = true,
+    maxTurns = 3000, atStart, trouble, troubleAt = 0, probe = false }) {
     this.b = backend;
     this.j = journey;
     this.role = role;
@@ -184,6 +185,21 @@ export class Bot {
     this.trace = trace;
     /** Every so many turns, save (with what's waiting) and load again, as leaving the app would. */
     this.saveEvery = saveEvery;
+    /** With saves on, the chance of leaving with each interrupt on screen. */
+    this.pendingSave = pendingSave;
+    /** Whether the bot mends what it can at the menu (off, a given-out meter is asked about). */
+    this.repairs = repairs;
+    this.maxTurns = maxTurns;
+    /**
+     * `atStart(save)` changes the voyage as it stands at its first stop, before the shop;
+     * `trouble(save)` changes it under way, at turn `troubleAt`: both through a save, as a
+     * debug start does, so the voyage goes on from a state play may not have reached.
+     */
+    this.atStart = atStart;
+    this.trouble = trouble;
+    this.troubleAt = troubleAt;
+    /** Ask about every save's own state too: its hooks, and its regions along the way. */
+    this.probe = probe;
     this.d = new SeededRNG((this.seed * 0x9E3779B97F4A7C15n + 7n) & MASK);
     this.h = new Fnv();
     this.ticks = 0;
@@ -224,17 +240,28 @@ export class Bot {
     await this.call({ op: 'start', journey: this.j.id, role: this.role, ...this.names,
       year: dep.year, month: dep.month, seed: this.seed.toString() });
     let ending = 'limit';
+    if (this.atStart) await this.saveAndLoad([], this.atStart);
     await this.shop();
     if (this.s.food <= 0) {
+      // Refused, unless the first port lets a ship with nothing left to buy food with go
+      // hungry (Journey.departsUnfed).
+      const unfed = this.v.hooks.departsUnfed;
       const r = await this.call({ op: 'depart' });
-      if (r.result !== undefined && r.result !== null) throw new Error('departed with no food');
-      this.mix('N|' + this.j.text.noProvisions);
-      await this.call({ op: 'buy', cart: { food: Math.min(this.v.room.food, 4) } });
+      if (r.result !== undefined && r.result !== null) {
+        if (!unfed) throw new Error('departed with no food');
+        this.mix('U|' + r.result);
+      } else {
+        this.mix('N|' + this.j.text.noProvisions);
+        await this.call({ op: 'buy', cart: { food: Math.min(this.v.room.food, 4) } });
+      }
     }
-    const dr = await this.call({ op: 'depart' });
-    this.mix('D|' + (dr.result ?? 'refused'));
+    if (this.s.atPort) {
+      const dr = await this.call({ op: 'depart' });
+      this.mix('D|' + (dr.result ?? 'refused'));
+    }
     if (!this.s.atPort) {
-      loop: for (let n = 0; n < 3000; n++) {
+      loop: for (let n = 0; n < this.maxTurns; n++) {
+        if (this.trouble && this.ticks === this.troubleAt && !this.s.over) await this.saveAndLoad([], this.trouble);
         this.mixState();
         let route = await this.seaTurn();
         if (route.over) { ending = route.over; break loop; }
@@ -257,9 +284,18 @@ export class Bot {
   }
 
   /** Leaves and comes back: the save and the queue go out as JSON and come back in. */
-  async saveAndLoad(pending) {
+  async saveAndLoad(pending, change) {
     const { save } = await this.call({ op: 'save', pending });
-    const r = await this.call({ op: 'load', save: JSON.parse(JSON.stringify(save)), seed: this.v.rng });
+    const copy = JSON.parse(JSON.stringify(save));
+    if (change) change(copy, this);
+    if (this.probe) {
+      await this.call({ op: 'hooks', state: copy });
+      const total = this.j.totalMiles;
+      for (const mile of [0, copy.mile, Math.floor(total / 3), Math.floor(total / 2), Math.floor((2 * total) / 3), total - 1]) {
+        await this.call({ op: 'region', state: copy, mile });
+      }
+    }
+    const r = await this.call({ op: 'load', save: copy, seed: this.v.rng });
     return r.pending;
   }
 
@@ -285,7 +321,7 @@ export class Bot {
         }
       }
     }
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < (this.repairs ? 6 : 0); i++) {
       const s = this.s;
       let op;
       if (this.v.canMendSails && (s.sails < 45 || d.chance(0.03 * wild))) op = 'mendSails';
@@ -299,11 +335,30 @@ export class Bot {
       const r = await this.process((await this.call({ op: 'rest', days: 3 })).interrupts);
       if (r.over) return r;
     }
-    await this.call({ op: 'setSail' });
-    return {};
+    // Under way already, so nothing can hold it (an empty queue).
+    return this.process((await this.call({ op: 'setSail' })).interrupts);
   }
 
+  /**
+   * A stay in port, then the way out. A port that holds the party ashore says why instead
+   * (Journey.holdInPort): the bot answers, and if it is still ashore, stays again, as the
+   * app goes back to the port menu.
+   */
   async portVisit() {
+    for (let round = 0; ; round++) {
+      const r = await this.stay();
+      if (r.over) return r;
+      const held = (await this.call({ op: 'setSail' })).interrupts;
+      if (!held.length) return {};
+      this.mix('L|' + held.length);
+      const q = await this.process(held);
+      if (q.over) return q;
+      if (!this.s.atPort) return {};
+      if (round >= 20) return { over: 'held' };
+    }
+  }
+
+  async stay() {
     const d = this.d;
     if (d.chance(0.6)) {
       const r = await this.process((await this.call({ op: 'rest', days: d.int(1, 3) })).interrupts);
@@ -326,8 +381,13 @@ export class Bot {
       const r = await this.process((await this.call({ op: 'recutSailsAtYard' })).interrupts);
       if (r.over) return r;
     }
+    // The Klondike's yard row at Lake Bennett asks about a boat (Words.yardQuestion).
+    const k = this.v.hooks.klondike;
+    if (k && !k.hasBoat && this.v.currentStop === 'bennett' && d.chance(0.5)) {
+      const r = await this.process((await this.call({ op: 'boatChoice' })).interrupts);
+      if (r.over) return r;
+    }
     await this.shop();
-    await this.call({ op: 'setSail' });
     return {};
   }
 
@@ -374,7 +434,7 @@ export class Bot {
       const [type] = Object.keys(i);
       const x = i[type];
       if (this.saveEvery && !this.s.over && type !== 'enterPort' && type !== 'finale' && type !== 'gameOver'
-          && this.d.chance(0.02)) {
+          && this.d.chance(this.pendingSave)) {
         // Leave with this on screen and the rest queued; come back to the same.
         q = await this.saveAndLoad([i, ...q]);
         continue;
