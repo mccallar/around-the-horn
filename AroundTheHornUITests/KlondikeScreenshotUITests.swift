@@ -54,12 +54,16 @@ final class KlondikeScreenshotUITests: ScreenshotWalk {
         XCTFail("never settled under way")
     }
 
-    /// From a debug start on the menu: under way, a day or two along, then the shot.
-    func underWay(_ name: String) {
+    /// From a debug start on the menu: under way, and the shot a day along, or at once for
+    /// a stretch too short to stay in for a day (with the start's weather).
+    func underWay(_ name: String, day: Bool = true) {
         tap("Continue on your journey")
-        sleep(3)
-        settle()
-        sleep(3)
+        guard day else {
+            sleep(1)
+            shot(name, settle: false)
+            return
+        }
+        sleep(5)
         settle()
         shot(name)
     }
@@ -136,8 +140,10 @@ final class KlondikeScreenshotUITests: ScreenshotWalk {
         shot("14-depart")
         tap("Steam north")
         XCTAssertTrue(halt.waitForExistence(timeout: 5))
-        shot("15-under-way")
+        // A day out of Seattle.
+        sleep(7)
         settle()
+        shot("15-under-way")
         halt.tap()
         shot("16-menu")
         tap("Check supplies & party")
@@ -161,24 +167,24 @@ final class KlondikeScreenshotUITests: ScreenshotWalk {
     /// Every stretch of the way, in play: the coast by steamer, both passes on foot, the
     /// lakes and the river by boat.
     func testTheStretches() {
-        for (stop, extra, name) in [
-            ("juneau", ["-HornDebugMile", "1500", "-HornDebugMonth", "1"], "25-inside-passage"),
-            ("juneau", ["-HornDebugMile", "3300"], "26-queen-charlotte"),
-            ("juneau", ["-HornDebugMile", "5200", "-HornDebugMonth", "3"], "27-bc-coast"),
-            ("juneau", ["-HornDebugMonth", "4"], "28-alaska-coast"),
-            ("camp", [], "29-taiya"),
-            ("camp", Self.whitePass, "30-skagway-valley"),
-            ("lakes", ["-HornDebugMonth", "1"], "31-chilkoot-summit"),
-            ("lakes", Self.whitePass, "32-white-pass-summit"),
-            ("bennett", [], "33-lindeman"),
-            ("bennett", Self.whitePass, "34-log-cabin"),
-            ("tagish", [], "35-upper-lakes"),
-            ("fivefinger", ["-HornDebugMile", "12600"], "36-fifty-mile"),
-            ("fivefinger", ["-HornDebugMile", "12900"], "37-laberge"),
-            ("selkirk", [], "38-yukon"),
+        for (stop, extra, day, name) in [
+            ("juneau", ["-HornDebugMile", "500", "-HornDebugMonth", "1"], true, "25-inside-passage"),
+            ("juneau", ["-HornDebugMile", "3300", "-HornDebugMonth", "2"], false, "26-queen-charlotte"),
+            ("juneau", ["-HornDebugMile", "4500", "-HornDebugMonth", "3"], true, "27-bc-coast"),
+            ("juneau", ["-HornDebugMile", "8000", "-HornDebugMonth", "4"], true, "28-alaska-coast"),
+            ("camp", ["-HornDebugMonth", "2"], true, "29-taiya"),
+            ("camp", ["-HornDebugMonth", "3"] + Self.whitePass, true, "30-skagway-valley"),
+            ("lakes", ["-HornDebugMonth", "1"], true, "31-chilkoot-summit"),
+            ("lakes", ["-HornDebugMonth", "2"] + Self.whitePass, true, "32-white-pass-summit"),
+            ("bennett", ["-HornDebugMonth", "2"], true, "33-lindeman"),
+            ("bennett", ["-HornDebugMonth", "3"] + Self.whitePass, true, "34-log-cabin"),
+            ("tagish", [], true, "35-upper-lakes"),
+            ("fivefinger", ["-HornDebugMile", "12550"], false, "36-fifty-mile"),
+            ("fivefinger", ["-HornDebugMile", "12850"], false, "37-laberge"),
+            ("selkirk", [], true, "38-yukon"),
         ] {
             relaunch(["-HornDebugStart", stop, "-HornTickSeconds", "4"] + extra)
-            underWay(name)
+            underWay(name, day: day)
         }
         relaunch(["-HornSceneGallery", "YES"])
         shot("39-gallery")

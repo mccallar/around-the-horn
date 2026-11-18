@@ -461,11 +461,18 @@ enum KlondikeScene {
 
     static func river(_ s: Scene) {
         let px = s.px, hz = s.hz
-        let water = PixelCanvas.mix(s.p.water, 0x2E5A4E, 0.5)
-        px.rect(0, hz, px.w, px.h - hz, water)
-        let spd = s.f.moving ? 10 * s.f.weather.speed + 3 : 3
-        waves(s, speed: spd, rough: s.p.rough)
-        if s.f.weather.sky == .still { floes(s, speed: spd) }
+        if let g = s.g, g.mile == KlondikeSkin.journey.stops[7].mile, !KlondikeSkin.iceOut(g) {
+            // A boat built at Bennett before break-up waits on the ice: white from shore to
+            // shore, with a few grey cracks.
+            s.rect(0, hz, px.w, px.h - hz, PixelCanvas.mix(0xE8F0F5, s.p.snow, 0.3))
+            for i in stride(from: 3, to: 160, by: 11) { s.rect(Double(i), hz + 3 + Double(i % 4) * 4, 5, 1, s.c(0xC9D8E2)) }
+        } else {
+            let water = PixelCanvas.mix(s.p.water, 0x2E5A4E, 0.5)
+            px.rect(0, hz, px.w, px.h - hz, water)
+            let spd = s.f.moving ? 10 * s.f.weather.speed + 3 : 3
+            waves(s, speed: spd, rough: s.p.rough)
+            if s.f.weather.sky == .still { floes(s, speed: spd) }
+        }
         // The near bank.
         let pulledIn = !s.f.moving || (s.g.map(Klondike.givenOut) ?? false)
         let top = pulledIn ? 74.0 : 78.0
@@ -603,8 +610,9 @@ enum KlondikeScene {
 
     static func seattleHills(_ s: Scene, _ d: Double) {
         let px = s.px, hz = s.hz
-        let lo = Int(max(0, 84 + d)), hi = Int(min(160, 230 + d))
-        guard lo < hi else { return }
+        // Gone astern within the first day out.
+        let lo = Int(max(0, 84 + d)), hi = Int(min(160, 160 + d))
+        guard lo < hi, d > -120 else { return }
         px.hills(lo..<hi, base: hz, s.far(0x3E5242)) { x in 10 + 6 * sin((x - d) * 0.08) + 3 * sin((x - d) * 0.2) }
         for i in 0..<9 {
             let bx = 92 + d + Double(i * 8), bh = Double(3 + (i * 5) % 4)
@@ -654,21 +662,26 @@ enum KlondikeScene {
         }
     }
 
-    // The head of Lynn Canal: mountains straight up into the cloud on either hand.
+    // The head of Lynn Canal: mountains straight up into the cloud on either hand. Coming
+    // up the canal the left-hand wall is a peak ahead, not a cliff over everything astern.
 
     static func fjord(_ s: Scene, _ d: Double) {
         let px = s.px, hz = s.hz
         let wall = s.far(0x3B4A52, -0.1), streak = s.far(0xE8EEF2)
+        // Rising out of the sea over the last day's steaming.
+        let rise = min(1, max(0, (60 - d) / 60))
+        guard rise > 0 else { return }
         for i in 0..<160 {
             let x = Double(i) - d
-            let left = 48 - x * 1.4, right = (x - 112) * 1.3
+            let left = (48 - abs(x) * 1.4) * rise, right = (x - 112) * 1.3 * rise
             let h = jsRounded(min(hz, max(0, max(left, right))))
             guard h > 0 else { continue }
             px.rect(Double(i), hz - h, 1, h, wall)
             if Int(x) % 9 < 2 { px.rect(Double(i), hz - h + 3, 1, max(0, h - 10), streak) }
         }
-        px.rect(0, 7, 160, 7, s.c(0xC9CED4).opacity(0.75))
-        px.rect(10, 5, 60, 2, s.c(0xC9CED4).opacity(0.6))
+        // The cloud the walls go up into.
+        px.rect(0, 7, 160, 7, s.c(0xC9CED4).opacity(0.75 * rise))
+        px.rect(10, 5, 60, 2, s.c(0xC9CED4).opacity(0.6 * rise))
     }
 
     // The landing: Dyea's tent flats, Skagway's false fronts.
@@ -812,11 +825,16 @@ enum KlondikeScene {
         }
     }
 
+    /// Where the slot runs, from the stop: ahead of the boat on the morning she reaches it
+    /// (not across the upper lakes), around her at it, and behind her within the day, before
+    /// Lake Laberge opens out.
+    static let canyonSpan = (from: 20.0, to: 90.0, ahead: 60.0)
+
     static func canyonWalls(_ s: Scene, _ d: Double) {
         let px = s.px
         let rock = s.c(0x2B2B30), lit = s.c(0x4A4A52)
-        let lo = Int(max(0, d - 40)), hi = Int(min(160, d + 220))
-        guard lo < hi else { return }
+        let lo = Int(max(0, d + canyonSpan.from)), hi = Int(min(160, d + canyonSpan.to))
+        guard lo < hi, d < canyonSpan.ahead else { return }
         for i in lo..<hi {
             let x = Double(i) - d
             let h = jsRounded(26 + 4 * sin(x * 0.3) + 2 * sin(x * 0.9))
@@ -833,8 +851,8 @@ enum KlondikeScene {
 
     static func canyonWater(_ s: Scene, _ d: Double) {
         let px = s.px
-        let lo = max(0, d - 40), hi = min(160, d + 220)
-        guard lo < hi else { return }
+        let lo = max(0, d + canyonSpan.from), hi = min(160, d + canyonSpan.to)
+        guard lo < hi, d < canyonSpan.ahead else { return }
         // White water the length of the slot, and the near wall's foot.
         let foam = s.c(0xEEF3F5)
         for k in 0..<22 {
