@@ -131,6 +131,7 @@ export function forage(J) {
     throwsLabel: 'Casts',
     caughtLabel: 'Hauled',
     timeLabel: 'Time',
+    grouped: false,
     hint: (limit) => `Tap the river to cast the grapnel. Each cast uses up line. The crew can cut and stack up to ${limit} at one stop.`,
     label: (n) => `The river from the bank, with ${n} pieces of driftwood going by`,
     actionHint: 'Double-tap to cast the grapnel at the nearest driftwood',

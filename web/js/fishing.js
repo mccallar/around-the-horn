@@ -7,6 +7,21 @@
 import { Theme, opacity } from './pixels.js';
 import * as Stores from './stores.js';
 
+/**
+ * Where quarry drawn at `y` in the field's `lanes` runs (ForageField.lane): `y` itself, or,
+ * when the field keeps its quarry to `bands` lanes (ice in the filaments of a comet's
+ * stream), the middle of the lane `y` falls in. A field that says nothing of `bands` has
+ * none, as the prototype's has.
+ */
+export function lane(field, y) {
+  const bands = field.bands ?? 0;
+  if (!(bands > 0)) return y;
+  const [lo, hi] = field.lanes;
+  const each = (hi - lo) / bands;
+  const k = Math.min(bands - 1, Math.max(0, Math.floor((y - lo) / Math.max(each, 1e-9))));
+  return lo + each * (k + 0.5);
+}
+
 export class FishingModel {
   /**
    * `useTackle` spends one throw and says whether there was one; `tackleLeft` counts what
@@ -56,7 +71,7 @@ export class FishingModel {
     const s = {
       kind,
       x: dir > 0 ? -kind.width : this.field.w + kind.width,
-      y0: this.rnd(this.field.lanes[0], this.field.lanes[1]),
+      y0: lane(this.field, this.rnd(this.field.lanes[0], this.field.lanes[1])),
       y: 0,
       vx: dir * this.rnd(kind.speed[0], kind.speed[1]),
       t: this.rnd(0, 6),
@@ -139,16 +154,18 @@ export class FishingModel {
  * model's amounts, a role's `catchLimit` and a quarry's `lb` (all stored units) are
  * turned into what the player reads.
  */
-export function reward(J, words) {
+export function reward(J, words, grouped = false) {
   const item = J.items.find((i) => i.key === J.forageReward);
   const how = Stores.counting(item, words);
   return {
     item,
     how,
-    /** With its unit: "12 lbs". */
-    measure: (stored) => Stores.measure(stored, item, how),
-    /** The bare number: "12". */
-    count: (stored) => Stores.count(stored, item, how),
+    /** Commas in the thousands (the forage skin's `grouped`). */
+    grouped,
+    /** With its unit: "12 lbs", "1.4 cords", "1,350 kg". */
+    measure: (stored) => Stores.measure(stored, item, how, grouped),
+    /** The bare number: "12", "1.4". */
+    count: (stored) => Stores.count(stored, item, how, grouped),
   };
 }
 

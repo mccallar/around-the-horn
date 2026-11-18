@@ -331,9 +331,15 @@ export class Flow {
     // A voyage standing on its last stop has arrived and not yet been told so.
     const ends = waiting.some((i) => kindOf(i) === 'arrival' || kindOf(i) === 'finale');
     if (this.v.nextStop == null && !ends) waiting.push({ arrival: { stopID: this.v.currentStop } });
+    // Saved in the first port's stores, or beside them, before it set out: back to them,
+    // if the skin says so, so that it can only leave through `depart`.
+    if (!waiting.length && Flow.notYetLeft(s) && this.skin.words(this.v).resumesInFirstShop) return this.enterFirstShop();
     if (!waiting.length) return this.backToMenu();
     this.present(waiting, s.atPort ? 'portMenu' : 'seaMenu');
   }
+
+  /** Still at the first port with no turn taken: `depart` has not let it go. */
+  static notYetLeft(s) { return s.atPort && s.stopIndex === 0 && s.day === 0; }
 
   chooseRole(r) {
     this.draftRole = r;
@@ -370,7 +376,18 @@ export class Flow {
     this.showShop(() => this.depart());
   }
 
-  depart() {
+  /** `heeded`: the skin's warning (`words.departWarning`) has been shown and waved off. */
+  depart(heeded = false) {
+    const why = this.v ? this.skin.words(this.v).departRefusal : null;
+    if (why != null) return this.message(why, () => this.enterFirstShop());
+    const warn = !heeded && this.v ? this.skin.words(this.v).departWarning : null;
+    if (warn) {
+      this.play('message');
+      return this.show({ name: 'ask', text: warn.text, answers: [
+        { label: warn.back, then: () => this.enterFirstShop() },
+        { label: warn.go, then: () => this.depart(true) },
+      ] });
+    }
     const text = this.run('depart').result;
     if (text == null) return this.message(this.journey.text.noProvisions, () => this.enterFirstShop());
     this.show({ name: 'depart', text });
@@ -378,8 +395,23 @@ export class Flow {
 
   // MARK: - Travel (spec §2: one turn every 0.7 s)
 
+  /**
+   * The port menu's way out: under way, unless the skin says why not yet
+   * (`words.leaveRefusal`), and then back to the port menu.
+   */
+  leavePort() {
+    const why = this.v ? this.skin.words(this.v).leaveRefusal : null;
+    if (why != null) return this.message(why, () => this.backToMenu());
+    this.startTravel();
+  }
+
+  /**
+   * Under way. A port that holds the party ashore (`Journey.holdInPort`, Lake Bennett
+   * before a boat or the ice) says why instead, and the queue decides where it goes next.
+   */
   startTravel() {
-    this.run('setSail');
+    const held = this.run('setSail').interrupts ?? [];
+    if (held.length) return this.present(held, 'leaving');
     this.traveling = true;
     this.show({ name: 'travel' });
     this.timer?.cancel();
@@ -485,6 +517,9 @@ export class Flow {
       case 'portMenu': return this.backToMenu();
       case 'repairs': return this.show({ name: 'repairs' });
       case 'shipyard': return this.show({ name: 'shipyard' });
+      // Setting out from a port that held the party ashore: under way if the answer let
+      // it go, otherwise back to the port menu.
+      case 'leaving': return g.atPort ? this.backToMenu() : this.startTravel();
       default: throw new Error(`nowhere to go after the queue: ${this.after}`);
     }
   }
@@ -541,15 +576,28 @@ export class Flow {
     this.show({ name: 'shop', done, cart: {} });
   }
 
+  /**
+   * The port menu's yard row: the yard, unless the skin has a question to ask there
+   * instead (`words.yardQuestion`, the engine call that asks it).
+   */
+  openYard() {
+    const ask = this.v ? this.skin.words(this.v).yardQuestion : null;
+    if (!ask) return this.show({ name: 'shipyard' });
+    this.act(this.run(ask).interrupts, 'portMenu');
+  }
+
   buySupplies() {
     this.showShop(() => this.backToMenu());
   }
 
-  /** The shop's port: the one you are at, or the first stop's. */
+  /**
+   * The shop's port: the one you are at, as the engine finds it for the way taken
+   * (`Journey.port(_:at:)`, the view's `port`), or the first stop's.
+   */
   get shopPort() {
     const J = this.journey;
     const home = (J.stops.length && J.ports.find((p) => p.id === J.stops[0].id)) || J.ports[0];
-    return J.ports.find((p) => p.id === this.v.currentStop) ?? home;
+    return this.v.port ?? home;
   }
 
   /** How many more of an item fit aboard, in the units the shop sells. */
@@ -598,7 +646,7 @@ export class Flow {
     const refusal = this.v.fishingRefusal;
     if (refusal != null) return this.message(refusal, () => this.backToMenu());
     const J = this.journey, forage = this.skin.forage;
-    const rw = reward(J, this.skin.words(this.v));
+    const rw = reward(J, this.skin.words(this.v), forage.grouped);
     const role = J.roles.find((r) => r.role === this.game.role);
     const model = new FishingModel({
       field: forage.field, quarry: J.quarry, seconds: J.forageSeconds, padding: role.aim, pop: popText(forage, rw),

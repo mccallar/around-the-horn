@@ -60,7 +60,10 @@ export function storeRows(J, g, words) {
   });
 }
 
-/** StatusPanel: date and region, weather, health, stores, next stop, distance, meters, note. */
+/**
+ * StatusPanel: date and region (or the skin's `place`), weather, health, stores, next stop
+ * (by the skin's `stopName`), distance, meters, note.
+ */
 export function status(c) {
   const J = c.journey, v = c.v, g = v.state, words = c.skin.words(v);
   const next = stopByID(J, v.nextStop);
@@ -68,13 +71,13 @@ export function status(c) {
     row('Weather', g.weather.name, isWorst(g.weather, J) ? 'red' : null),
     row('Health', v.healthLabel, v.healthColor),
     ...storeRows(J, g, words).map((r) => row(r.label, r.value)),
-    row(`Next: ${next?.short ?? '—'}`, next ? `${words.distance(next.mile - g.mile)} ${words.distanceUnit}` : ''),
+    row(`Next: ${next ? words.stopName(next) : '—'}`, next ? `${words.distance(next.mile - g.mile)} ${words.distanceUnit}` : ''),
     row(words.travelled, `${words.distance(g.mile)} of ${words.distance(J.totalMiles)} ${words.distanceUnit}`),
     row(`${words.meters[0]} · ${words.meters[1]}`, `${percent(g.hull)} · ${percent(g.sails)}`),
   ];
   if (words.clock) rows.push(row(words.clock.label, words.clock.value));
   if (words.trouble) rows.push(row(words.trouble.label, words.trouble.value, 'red'));
-  return { type: 'status', date: v.dateText, region: v.region.name, rows, note: g.note };
+  return { type: 'status', date: v.dateText, region: words.place ?? v.region.name, rows, note: g.note };
 }
 
 function conditionBox(g, meters) {
@@ -247,6 +250,12 @@ export function describe(c) {
       choices = [choice(words?.setOut ?? 'Continue', () => c.startTravel(), { primary: true })];
       break;
 
+    // AskView: a question of the shell's own (a warning the player may heed), not the engine's.
+    case 'ask':
+      blocks = [scene(), message(s.text)];
+      choices = s.answers.map((a, i) => choice(a.label, () => a.then(), { primary: i === 0 }));
+      break;
+
     case 'travel':
       blocks = [scene(true), ...(g ? [status(c)] : [])];
       choices = [choice(words?.halt ?? 'Continue', () => c.heaveTo(), { primary: true })];
@@ -272,9 +281,9 @@ export function describe(c) {
     case 'portMenu': {
       const pace = J.paces.find((p) => p.pace === g.pace), rations = J.rations.find((r) => r.rations === g.rations);
       const stop = stopByID(J, v.currentStop);
-      blocks = [scene(), status(c), heading(J.ports.find((p) => p.id === v.currentStop)?.name ?? stop.name)];
+      blocks = [scene(), status(c), heading(v.port?.name ?? stop.name)];
       choices = [
-        choice(words.leavePort, () => c.startTravel(), { primary: true }),
+        choice(words.leavePort, () => c.leavePort(), { primary: true }),
         choice(words.supplies, () => c.show({ name: 'supplies' })),
         choice(words.chart, () => c.show({ name: 'chart' })),
         choice(`${words.changePace} [dim](${pace.name})[/dim]`, () => c.show({ name: 'pace' })),
@@ -283,7 +292,7 @@ export function describe(c) {
         choice(words.trade, () => c.trade()),
         choice(words.talk, () => c.talk()),
         choice(words.buy, () => c.buySupplies()),
-        choice(words.yard, () => c.show({ name: 'shipyard' })),
+        choice(words.yard, () => c.openYard()),
         ...wayOut(c),
       ];
       break;
@@ -334,8 +343,9 @@ export function describe(c) {
         { type: 'chart', label: chart.label(v) },
         { type: 'legend', items: J.stops.map((st, i) => {
           const passed = i <= g.stopIndex, next = i === g.stopIndex + 1;
-          return { text: `${passed ? '✓' : next ? '►' : '·'} ${st.short}`, color: passed ? 'amber' : next ? null : 'dim',
-            label: `${st.short}, ${passed ? 'passed' : next ? 'next' : 'ahead'}` };
+          const name = words.stopName(st);
+          return { text: `${passed ? '✓' : next ? '►' : '·'} ${name}`, color: passed ? 'amber' : next ? null : 'dim',
+            label: `${name}, ${passed ? 'passed' : next ? 'next' : 'ahead'}` };
         }) },
         para(chart.footer(v), 18, 'dim'),
       ];
@@ -361,6 +371,8 @@ export function describe(c) {
 
     case 'repairs':
       blocks = [scene(), heading(words.repairsHeading), conditionBox(g, words.meters), para(words.repairsNote, 18, 'dim')];
+      // In the order the condition box above lists its meters (D15): the hull's repair,
+      // then the sails', then the way back.
       choices = [
         choice(words.patch, () => c.patchHull(), { enabled: v.canPatchHull }),
         choice(words.mend, () => c.mendSails(), { enabled: v.canMendSails }),
@@ -379,7 +391,7 @@ export function describe(c) {
 
     case 'fishing': {
       const forage = skin.forage, m = s.model;
-      const rw = reward(J, words);
+      const rw = reward(J, words, forage.grouped);
       const role = J.roles.find((r) => r.role === g.role);
       blocks = [
         heading(forage.heading),

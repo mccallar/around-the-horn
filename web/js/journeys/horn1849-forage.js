@@ -56,6 +56,8 @@ export const forage = {
   throwsLabel: 'Throws',
   caughtLabel: 'Caught',
   timeLabel: 'Time',
+  // The prototype wrote "Caught: 1050 lbs": no commas in the thousands.
+  grouped: false,
   hint: (limit) => `Tap the water to throw a harpoon. Each throw uses tackle. You can salt and keep up to ${limit}.`,
   label: (n) => `The sea below the boat, with ${n} fish swimming`,
   actionHint: 'Double-tap to throw a harpoon at the nearest fish',

@@ -5,11 +5,16 @@
 
 import { formatNumber, fixed2 } from './markup.js';
 
-/** How one item is counted: `{ loose, tenths, singular }`. */
+/**
+ * How one item is counted: `{ loose, looseOne, tenths, singular }`. `loose` is what one
+ * stored unit is called when the item is counted loose aboard, and `looseOne` exactly one
+ * of them, if that is not `loose` ("1 balloon").
+ */
 export function counting(it, words) {
   const loose = words.looseUnits[it.key] ?? null;
   return {
     loose,
+    looseOne: words.looseOne[it.key] ?? null,
     tenths: words.fractional.includes(it.key) || (it.per > 1 && loose === null),
     singular: words.singular,
   };
@@ -42,10 +47,14 @@ export function count(stored, it, how, grouped = false) {
   return grouped ? formatNumber(whole(stored, it)) : String(whole(stored, it));
 }
 
-/** `stored` with what it is counted in: "1,500 lbs", "9.5 crates", "60 throws". */
+/**
+ * `stored` with what it is counted in: "1,500 lbs", "9.5 crates", "1.4 cords", and what is
+ * loose aboard counted singly and written plain, "60 throws", "1 balloon".
+ */
 export function measure(stored, it, how, grouped = false) {
   const n = count(stored, it, how, grouped);
-  return `${n} ${how.loose ?? unit(it, n, how)}`;
+  const loose = n === '1' ? how.looseOne ?? how.loose : how.loose;
+  return `${n} ${loose ?? unit(it, n, how)}`;
 }
 
 /** With its unit, for the supplies list and the status box. */
