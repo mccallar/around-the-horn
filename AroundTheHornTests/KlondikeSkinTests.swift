@@ -462,3 +462,289 @@ final class KlondikeSkinTests: XCTestCase {
         guard case .ask = again.screen else { return XCTFail("the warning, not \(again.screen)") }
     }
 }
+
+// MARK: - Numbers the card states, and the stores
+
+extension KlondikeSkinTests {
+    /// Distances are tenths of a mile, written as the engine writes them.
+    func testDistancesAreTenthsOfAMile() {
+        XCTAssertEqual(KlondikeData.unitsPerMile, 10)
+        XCTAssertEqual(klondike.totalMiles, 17_000)
+        let w = skin.words(going(11280))
+        XCTAssertEqual(w.distanceUnit, "mi")
+        XCTAssertEqual(w.distance(11_365), "1,136.5")
+        XCTAssertEqual(w.distance(17_000), "1,700.0")
+        XCTAssertEqual(w.distance(7), "0.7")
+        XCTAssertEqual(w.distance(0), "0.0")
+        for stop in klondike.stops { XCTAssertEqual(w.distance(stop.mile), Klondike.mileNumber(stop.mile), stop.id) }
+        XCTAssertEqual(klondike.rules.restChoices.map(w.restChoice), ["1 day", "2 days", "3 days", "5 days"])
+        has(w.repairsNote, "Each repair takes a day.")
+        has(w.yardIntro, "Each job takes a day.")
+        XCTAssertEqual(skin.words(at("dawson")).gameOverLine.hasSuffix("1,700.0 miles from Seattle."), true)
+    }
+
+    func testTheCardsNumbersAreTheTables() {
+        let card = KlondikeSkin.card
+        let all = card.learnPages.flatMap(\.paragraphs) + card.differences + card.outfitBullets
+            + [card.tagline, card.monthIntro, card.monthAdvice]
+        let text = all.joined(separator: "\n")
+
+        // The way north.
+        XCTAssertEqual(klondike.totalMiles / KlondikeData.unitsPerMile, 1700)
+        has(card.tagline, "Seventeen hundred miles from Seattle")
+        has(text, "seventeen hundred miles north")
+        XCTAssertEqual((KlondikeData.bennettMile - KlondikeData.landingMile) / KlondikeData.unitsPerMile, 33)
+        has(text, "the thirty-three miles of trail")
+        let river = (klondike.totalMiles - KlondikeData.bennettMile) / KlondikeData.unitsPerMile
+        XCTAssertTrue((540..<550).contains(river), "\(river) miles")
+        has(text, "nearly five hundred and fifty miles of lakes, canyon and rapids")
+        XCTAssertEqual(GameState(journey: Klondike.id, role: .merchant, ship: "", captain: "", crew: ["", "", "", ""],
+                                 startYear: 1898, startMonth: 2).crew.count, 5)
+        has(text, "You lead a party of five.")
+        XCTAssertEqual(klondike.stop("lynn")!.type, .fork)
+        has(text, "At the head of Lynn Canal choose your pass")
+
+        // The police, the fire and the grub.
+        XCTAssertEqual(KlondikeData.yearOfGrub, 1095)
+        has(text, "a year's grub — 1,095 lbs a head")
+        has(text, "a year's grub: 1,095 lbs a head")
+        XCTAssertEqual(klondike.rules.parch, 12)
+        has(text, "A day without a fire costs every one of you 12 health.")
+        XCTAssertEqual(KlondikeData.temps["chilkootSummit"]![0], .freezing)
+        XCTAssertEqual(5 * KlondikeData.firewoodPerHead * KlondikeData.burn(.freezing), 40)
+        has(text, "five of you burn 40 lbs of it a day")
+        XCTAssertEqual(klondike.item(.food).desc.contains("1–3 lbs a day"), true)
+        XCTAssertEqual(klondike.rations(.bare).amount, 1)
+        XCTAssertEqual(klondike.rations(.filling).amount, 3)
+
+        // Given out, and mended.
+        XCTAssertEqual(KlondikeData.coilPrice, 24)
+        XCTAssertEqual(KlondikeData.coilPrice, 3 * klondike.item(.sailcloth).price)
+        has(text, "with a coil bought off the next party along for $24")
+        XCTAssertEqual(KlondikeData.makeDoDays, 2)
+        has(text, "or with two days' work making do")
+
+        // The ice and the crowd.
+        XCTAssertEqual(KlondikeData.breakupEarliest, KlondikeData.dayOfYear(month: 4, day: 24))
+        XCTAssertEqual(KlondikeData.breakupUsual, KlondikeData.dayOfYear(month: 4, day: 28))
+        has(text, "wait for the ice to go out, at the end of May")
+        XCTAssertEqual(KlondikeData.crowdBonusPerDay, 20)
+        XCTAssertEqual(KlondikeData.august1, KlondikeData.dayOfYear(month: 7, day: 1))
+        has(text, "Every day you get there before August 1 is worth 20 points.")
+
+        // Who you are.
+        for (role, money) in [(Role.merchant, "$1,700"), (.shipwright, "$1,000"), (.whaler, "$720")] {
+            let info = klondike.role(role)
+            XCTAssertEqual("$" + formatNumber(info.money), money)
+            let line = card.differences.first { $0.lowercased().contains(info.title) }
+            XCTAssertNotNil(line, "\(role)")
+            has(line ?? "", "starts with \(money).")
+        }
+        XCTAssertGreaterThan(klondike.role(.shipwright).mend, klondike.role(.merchant).mend)
+        XCTAssertGreaterThan(klondike.role(.shipwright).patch, klondike.role(.merchant).patch)
+        has(text, "Gets far more out of every bundle of canvas and coil of rope")
+        XCTAssertLessThan(Klondike.buildDays(.shipwright).proper, Klondike.buildDays(.merchant).proper)
+        XCTAssertLessThan(Klondike.buildDays(.shipwright).scow, Klondike.buildDays(.merchant).scow)
+        has(text, "builds a better boat in less time")
+        XCTAssertGreaterThan(KlondikeData.minerTrail, 1)
+        has(text, "moves an outfit over the pass faster than anyone")
+        XCTAssertEqual(Role.shipwright.scoreMultiplier, 2)
+        XCTAssertEqual(Role.whaler.scoreMultiplier, 3)
+        has(text, "the boatbuilder scores double, the miner triple")
+
+        // When to go: January to May of 1898.
+        XCTAssertEqual(klondike.departures.map(\.month), [0, 1, 2, 3, 4])
+        XCTAssertTrue(klondike.departures.allSatisfy { $0.year == 1898 })
+        XCTAssertEqual(KlondikeData.season(0), .winter)
+        XCTAssertEqual(KlondikeData.season(4), .spring)
+        has(card.monthAdvice, "Go in January and the pass will freeze you solid. Go in May")
+        XCTAssertEqual(klondike.item(.tackle).per, 20)
+        XCTAssertEqual(klondike.item(.tackle).desc.contains("Each box is 20 casts."), true)
+    }
+
+    func testTheRankLegendIsTheEnginesRanks() {
+        let cuts = klondike.rules.rankCuts
+        XCTAssertEqual(cuts, [7000, 4000, 2000])
+        let legend = cuts.map { "\(klondike.rank($0)) \(formatNumber(Double($0)))+" } + [klondike.rank(0)]
+        XCTAssertEqual(KlondikeSkin.card.rankLegend, legend.joined(separator: " · "))
+    }
+
+    /// The Seattle prices as the shop shows them, and amounts as the engine stores them.
+    func testTheStoresAndThePriceNote() {
+        let g0 = at("seattle", port: true)
+        let w = skin.words(g0)
+        func label(_ key: ItemKey, at port: String = "seattle") -> String {
+            ShopView.priceLabel(klondike.item(key), klondike.port(port)!.price(key), w.currency, lot: w.lots.contains(key))
+        }
+        XCTAssertEqual(label(.food), "$0.10/lb")
+        XCTAssertEqual(label(.water), "$2/100 lbs")
+        XCTAssertEqual(label(.limes), "$4/jug")
+        XCTAssertEqual(label(.sailcloth), "$8/coil")
+        XCTAssertEqual(label(.timber), "$10/bundle")
+        XCTAssertEqual(label(.tackle), "$3/box")
+        XCTAssertEqual(w.priceNote(40), "Prices here are 40% above Seattle, more or less.")
+        XCTAssertEqual(w.priceNote(-10), "Prices here are 10% below Seattle, more or less.")
+        // Bennett is dearer than Dyea, and Dyea than Seattle.
+        let mults = ["seattle", "juneau", "landing", "camp", "bennett", "selkirk"].map { klondike.port($0)!.mult }
+        XCTAssertEqual(mults, mults.sorted())
+
+        var g = going(11280)
+        g.tackle = 60
+        g.limes = 2.5
+        g.food = 6000
+        g.water = 1
+        XCTAssertEqual(Stores.have(klondike.item(.tackle), g, w), "3")
+        XCTAssertEqual(Stores.amount(klondike.item(.tackle), g, w), "60 casts")
+        g.tackle = 1
+        XCTAssertEqual(Stores.amount(klondike.item(.tackle), g, w), "1 cast")
+        XCTAssertEqual(Stores.amount(klondike.item(.limes), g, w), "2.5 jugs")
+        XCTAssertEqual(Stores.amount(klondike.item(.food), g, w), "6,000 lbs")
+        XCTAssertEqual(Stores.amount(klondike.item(.water), g, w), "1 lb")
+        XCTAssertEqual(StatusPanel.stores(klondike, g, w).map(\.label), ["Provisions", "Firewood"])
+    }
+
+    func testTradesAndTheDepartureReadRight() {
+        XCTAssertEqual(klondike.describe(.item(.meds), 3), "3 medicine kits")
+        has(klondike.describe(.item(.clothes), 1), "1 set")
+        has(klondike.describe(.item(.tackle), 40), "2 boxes")
+        has(klondike.describe(.item(.food), 250), "250 lbs")
+        var g = blank()
+        for day in 0..<4 {
+            g.day = day
+            let depart = klondike.text.depart(g)
+            XCTAssertFalse(depart.contains(".."), depart)
+            has(depart, g.dateText)
+        }
+        has(blank().dateText, "March 1, 1898")
+    }
+}
+
+// MARK: - The vocabulary sieve
+
+extension KlondikeSkinTests {
+    /// Every string reachable in `value`: the words as data, without the closures.
+    func strings(_ value: Any) -> [String] {
+        if let s = value as? String { return [s] }
+        return Mirror(reflecting: value).children.flatMap { strings($0.value) }
+    }
+
+    /// The states the walk below says everything in: under way, in town, given out with no
+    /// fire, short of lime juice and furs; on each pass; with and without a boat.
+    func states(_ i: Int) -> [GameState] {
+        var out: [GameState] = []
+        for white in [false, true] {
+            for (port, sails, water, citrus) in [(false, 64.0, 600.0, 0), (true, 50, 600, 30), (false, 0, 0, 40)] {
+                var g = skin.debug.start(i, 2)
+                KlondikeSkin.settle(&g, toward: i, white: white)
+                g.sails = sails
+                g.water = water
+                g.noCitrus = citrus
+                g.clothes = port ? 2 : 5
+                g.atPort = port && klondike.port(g, at: g.currentStop.id) != nil
+                out.append(g)
+            }
+        }
+        return out
+    }
+
+    /// Everything the skin can say, at every stop, for every role.
+    func everythingSaid() -> [String] {
+        let card = KlondikeSkin.card
+        var out = strings(card) + [card.resume("Belle"), card.outfitIntro(blank())]
+        let forage = skin.forage
+        out += [forage.heading, forage.throwsLabel, forage.caughtLabel, forage.timeLabel, forage.hint("150 lbs"),
+                forage.label(1), forage.label(3), forage.actionHint, forage.leave, skin.chart.title]
+        out += klondike.quarry.flatMap { [forage.pop("1", $0), forage.pop("35", $0)] }
+        for i in klondike.stops.indices.dropFirst() {
+            for role in Role.allCases {
+                for var g in states(i) {
+                    g.role = role
+                    let w = skin.words(g)
+                    out += strings(w) + klondike.rules.restChoices.map(w.restChoice)
+                    out += [w.distance(g.mile), w.yardHull(56), w.yardSails(72), w.priceNote(30), w.priceNote(-20),
+                            w.burial("Ida"), w.stopName(g.currentStop), skin.chart.label(g), skin.chart.footer(g)]
+                    if let ask = w.yardQuestion {
+                        let c = controller()
+                        c.loadForDebug(g)
+                        if case .choice(let e) = c.run({ ask($0) }) {
+                            out += [e.prompt, e.detail ?? ""] + e.options.map(\.label)
+                        }
+                    }
+                    for weather in klondike.weathers where role == .merchant {
+                        g.weather = weather
+                        for moving in [false, true] {
+                            out.append(skin.scene.label(ScenePicture.frame(klondike, g, moving: moving, t: 0)))
+                        }
+                    }
+                }
+            }
+        }
+        for cell in skin.debug.gallery {
+            let g = SceneGallery.state(klondike, cell.set)
+            out.append(skin.scene.label(ScenePicture.frame(klondike, g, moving: cell.moving, t: 0)))
+            out.append(cell.name)
+        }
+        out.append(skin.scene.label(ScenePicture.frame(klondike, nil, moving: false, t: 0)))
+        return out
+    }
+
+    /// Every sentence the trek's engine can write, read from its source: each string
+    /// literal, with the code inside its interpolations taken out.
+    func engineSaid() throws -> [String] {
+        let dir = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+            .appendingPathComponent("HornEngine/Journeys/Klondike")
+        let files = try fm.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil).filter { $0.pathExtension == "swift" }
+        XCTAssertGreaterThanOrEqual(files.count, 6, "the trek's engine is in \(dir.path)")
+        let literal = try NSRegularExpression(pattern: #""((?:[^"\\\n]|\\.)*)""#)
+        let code = try NSRegularExpression(pattern: #"\\\((?:[^()]|\((?:[^()]|\([^()]*\))*\))*\)"#)
+        var out: [String] = []
+        for file in files {
+            for line in try String(contentsOf: file, encoding: .utf8).split(separator: "\n").map(String.init)
+            where !line.trimmingCharacters(in: .whitespaces).hasPrefix("//") {
+                for m in literal.matches(in: line, range: NSRange(line.startIndex..., in: line)) {
+                    let s = String(line[Range(m.range(at: 1), in: line)!])
+                    out.append(code.stringByReplacingMatches(in: s, range: NSRange(s.startIndex..., in: s), withTemplate: ""))
+                }
+            }
+        }
+        out += klondike.items.flatMap { it in [1, 2].map { klondike.describe(.item(it.key), Double(it.per * $0)) } }
+        return out
+    }
+
+    /// Words from the other journeys' worlds: an 1849 ship at sea, a train, an airship, a
+    /// balloon, a freighter in space. A stampeder has a steamer, a boat with oars & sail,
+    /// firewood, lime juice and miles, so those stay.
+    static let elsewhere = try! NSRegularExpression(
+        pattern: #"\b(sails|sailing|sailors?|sailcloth|shipwrights?|anchor(s|ed)?|harpoons?|tackle|throws?|voyages?|"#
+            + #"nm|nautical|knots?|citrus|limes|whal(e|er|ers|ing)|galley|"#
+            + #"trains?|railroad|railway|locomotive|conductor|caboose|boxcars?|cords?|wagons?|oxen|"#
+            + #"petrol|gondola|hydrogen|propane|burners?|ballast|gallons?|helium|"#
+            + #"propellant|tonnes?|litres?|kilomet(re|er)s?|km|thrusters?|airlock|orbits?)\b"#,
+        options: [.caseInsensitive])
+
+    func testNothingOnTheTrailIsSaidInAnotherJourneysWords() throws {
+        let said = everythingSaid()
+        XCTAssertGreaterThan(Set(said).count, 150, "the walk found the words")
+        // The steamer anchors off Dyea, the White Pass has a wagon road at its foot, the lake
+        // fills with sails, and rapids throw spray; a count inside an interpolation is code.
+        let figures = ["anchor off Dyea", "wagon road", "full of sails", "throw spray", "s.sailcloth"]
+        let engine = try engineSaid().map { s in figures.reduce(s) { $0.replacingOccurrences(of: $1, with: "") } }
+        XCTAssertGreaterThan(Set(engine).count, 150, "the source was read")
+        for s in Set(said + engine) {
+            let m = Self.elsewhere.firstMatch(in: s, range: NSRange(s.startIndex..., in: s))
+            XCTAssertNil(m, "another journey's word in “\(s)”: \(m.map { (s as NSString).substring(with: $0.range) } ?? "")")
+        }
+        // The same sieve does catch a ship, a train, an airship, a balloon and a freighter.
+        for other in [Horn1849Skin.skin, RailSkin.skin, AirshipSkin.skin, BalloonSkin.skin, MarsSkin.skin] {
+            let words = strings(other.words(other.debug.start(3, other.id == Horn1849.id ? 0 : 9))).joined(separator: "\n")
+                + strings(other.card).joined(separator: "\n")
+            XCTAssertNotNil(Self.elsewhere.firstMatch(in: words, range: NSRange(words.startIndex..., in: words)), other.id)
+        }
+        // And nothing here is said in the shapes D11 retired.
+        let retired = ["You may:", "Find out the differences", "Be a ", "Many kinds of people", "Filling", "Meager",
+                       "Bare bones", "Attempt to trade"]
+        for s in Set(said + engine + klondike.roles.values.map(\.label) + Rations.allCases.map { klondike.rations($0).name }) {
+            for r in retired { XCTAssertFalse(s.contains(r), "“\(r)” in “\(s)”") }
+        }
+    }
+}
