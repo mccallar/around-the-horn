@@ -33,11 +33,11 @@ change that needed it, and run the tests below.
 
 With Node 20 or later, from the repository's root:
 
-    node Tools/web-tests/imports.mjs   # the WASI shim answers exactly what horn.wasm imports
+    node Tools/web-tests/imports.mjs   # the WASI shim answers exactly what horn.wasm imports; the shell's modules load, its engine calls exist, every skin answers the app's skin contract
     node Tools/web-tests/golden.mjs    # the 300 golden 1849 voyages hash as the Mac recorded them (~1 min)
     node Tools/web-tests/parity.mjs    # horn.wasm and the Mac build give identical replies, all six journeys (~6 min)
-    node Tools/web-tests/text.mjs      # names trimmed, "[" escaped and markup read as the app does (~3 s)
-    node Tools/web-tests/play.mjs      # 1849's flow, played through its screens: wins, losses, saves
+    node Tools/web-tests/text.mjs      # names trimmed, "[" escaped, markup read and amounts counted as the app does (~3 s)
+    node Tools/web-tests/play.mjs      # 1849's flow, played through its screens: wins, losses, saves, and what a skin may answer that 1849's does not
     node Tools/web-tests/skin.mjs      # 1849's skin is the app's, and every scene, chart and catch draws
     node Tools/web-tests/rail.mjs      # the Iron Road played: the picker, on time, late, forfeit, saves (~3 s)
     node Tools/web-tests/rail-skin.mjs # the Iron Road's skin is the app's; every scene, map and haul draws (~20 s)
@@ -113,6 +113,14 @@ The engine's own tests are unchanged: `swift test --disable-sandbox`.
   as in the app. `?journey=<id>` (`horn1849`, `rail`) opens on that journey's title card,
   as the app's `-journey <id>` does. A journey the engine has without a skin in
   `journeys/skins.js` is not offered.
+- A skin's words can stop or hold the voyage, as the app's do: a refusal to depart
+  (`departRefusal`) or a warning the player may heed or wave off (`departWarning`, the `ask`
+  screen) at the first port, a refusal to leave a later one (`leaveRefusal`), a port's own
+  hold on setting out (the engine's, in `setSail`'s `interrupts`), a question in place of
+  the yard (`yardQuestion`, the name of the engine call that asks it), and a voyage saved
+  in the first stores coming back to them (`resumesInFirstShop`, D16). The app's debug
+  launch arguments (`-HornDebugStart` and the rest) have no counterpart in the page; the
+  tests build their starts from a skin's `debug.start` and `Flow.loadForDebug`.
 - Keys: 1–9 press a numbered choice, Return a lone one; in the mini-game Space throws at
   the nearest fish or casts at the nearest driftwood (the app's VoiceOver throw). Leaving
   the page under way stops the voyage on its menu and saves it.
