@@ -1,11 +1,17 @@
 // The web game's flow (web/js/flow.js and web/js/screens.js), played in Node through what
 // the screens offer: whole seeded voyages to a win and to a loss, setting out with nothing
 // to eat, leaving mid-queue and coming back to it (D10), leaving the page while under way,
-// the shop, the names, the top ten. No browser: the drawing is skin.mjs's.
+// the shop, the names, the top ten. Then what the shell does with a skin's answers that
+// 1849's own never gives, on 1849's skin with those words changed (as the app's
+// TestJourneys stands in for a journey): a warning before departing and a refusal to, a
+// refusal to leave a port, a port's hold on setting out, the yard's question, a voyage
+// saved in the first stores coming back to them, the skin's place and stop names. No
+// browser: the drawing is skin.mjs's.
 //
 //   node Tools/web-tests/play.mjs
 import { Player, engine, lcg, describe, plain, wordProblems, SAFE } from './player.mjs';
 import { MemoryStorage, kindOf } from '../../web/js/flow.js';
+import * as horn1849 from '../../web/js/journeys/horn1849-skin.js';
 
 let passed = 0;
 const failures = [];
@@ -293,6 +299,190 @@ await test('every menu row leads somewhere and back', async () => {
   const legend = chart.blocks.find((b) => b.type === 'legend').items;
   check(legend[0].text === '✓ New York' && legend[1].text === '► Gulf Stream' && legend[2].text === '· Cape Verde', 'the chart\'s legend');
   check(p.problems.length === 0, `no word went wrong: ${p.problems.slice(0, 3).join(' | ')}`);
+});
+
+// MARK: - What a skin may answer that 1849's does not
+
+/** 1849's skin with words of the test's own over its own (`over(view)`), for the flow. */
+const testSkin = (over) => [{
+  id: 'horn1849',
+  skin: (J) => {
+    const base = horn1849.skin(J);
+    return { ...base, words: (v) => ({ ...base.words(v), ...over(v) }) };
+  },
+}];
+
+/** An engine whose `setSail` first answers with `holds`, one a call, as `Journey.holdInPort` does. */
+function holding(e, holds, sails = false) {
+  return new Proxy(e, {
+    get(t, k) {
+      if (k === 'setSail') {
+        return () => {
+          if (!holds.length) return t.setSail();
+          const r = sails ? t.setSail() : { ok: true, view: t.view(), interrupts: [] };
+          return { ...r, interrupts: [holds.shift()] };
+        };
+      }
+      const x = t[k];
+      return typeof x === 'function' ? x.bind(t) : x;
+    },
+  });
+}
+
+/** On the port menu at 1849's first port after New York, from a debug start. */
+function inPort(p) {
+  const f = p.f, J = f.journey;
+  f.engine.start({ journey: 'horn1849', role: 'merchant', ship: 'Resolute', captain: 'Ezra',
+    crew: ['Hannah', 'Silas', 'Mercy', 'Tobias'], year: 1849, month: 0, seed: '9' });
+  const s = f.engine.save([]);
+  const i = J.stops.findIndex((st, k) => k > 0 && J.ports.some((x) => x.id === st.id));
+  f.skin.debug.start(s, i);
+  Object.assign(s, { stopIndex: i, mile: J.stops[i].mile, atPort: true });
+  f.loadForDebug(s);
+  return J.stops[i];
+}
+
+await test('a skin\'s warning before departing may be heeded or waved off; its refusal sends you back to the stores', async () => {
+  const cues = [];
+  let refuse = true;
+  const skins = testSkin((v) => ({
+    departRefusal: refuse ? 'The harbour master wants to see your [amber]papers[/amber] first.' : null,
+    departWarning: v.state.limes < 10 ? { text: 'There is [red]hardly any citrus[/red] aboard.', back: 'Back to the chandler',
+      go: 'Sail without it' } : null,
+  }));
+  const p = await Player.make({ engine: e1, seeds: ['5'], skins, sound: (c) => cues.push(c) });
+  p.setUp();
+  p.shop({ food: 2 });
+  p.press('Pay');
+  check(p.screen === 'message' && plain(p.f.screen.text) === 'The harbour master wants to see your papers first.',
+    `the skin's refusal comes first (${p.screen})`);
+  check(p.f.game.food === 200 && p.f.game.day === 0, 'paid for, and still in port');
+  p.press('Continue');
+  check(p.screen === 'shop', `the refusal goes back to the stores (${p.screen})`);
+  refuse = false;
+  p.press('Leave the shop');
+  check(p.screen === 'ask', `then the warning (${p.screen})`);
+  const d = p.look();
+  check(d.blocks.map((b) => b.type).join('/') === 'scene/message' && plain(d.blocks[1].markup) === 'There is hardly any citrus aboard.',
+    'the warning: the scene and the words, in a message box');
+  check(p.labels().join('/') === 'Back to the chandler/Sail without it' && d.choices[0].primary && !d.choices[1].primary,
+    `its answers, the way back first (${p.labels().join('/')})`);
+  check(cues.at(-1) === 'message', `the warning sounds as a message does (${cues.at(-1)})`);
+  check(p.f.game.day === 0 && p.f.game.atPort, 'nothing has happened yet');
+  p.press('Back to the chandler');
+  check(p.screen === 'shop', `heeded: back to the stores (${p.screen})`);
+  p.press('Leave the shop');
+  check(p.screen === 'ask', 'asked again on the way out');
+  p.press('Sail without it');
+  check(p.screen === 'depart' && p.f.screen.text.length > 0, `waved off: the departure (${p.screen})`);
+  p.press('Set sail');
+  check(p.screen === 'travel' && !p.f.game.atPort, 'and away');
+  p.f.stopTravel();
+
+  // With what the warning wants aboard, no warning.
+  const q = await Player.make({ engine: e2, seeds: ['5'], skins });
+  q.setUp();
+  q.topUp({ food: 200, limes: 10 });
+  q.press('Pay');
+  check(q.screen === 'depart', `stocked: straight to the departure (${q.screen})`);
+  check(q.problems.length === 0 && p.problems.length === 0, `no word went wrong: ${p.problems.concat(q.problems).slice(0, 3).join(' | ')}`);
+});
+
+await test('a skin\'s refusal to leave a port keeps you there; a port\'s hold says why, then the queue decides', async () => {
+  let refuse = true;
+  const skins = testSkin(() => ({ leaveRefusal: refuse ? 'The pilot will not take you out in [red]this fog[/red].' : null }));
+  const storage = new MemoryStorage();
+  const holds = [{ message: { _0: 'The harbour is closed until the tide turns.' } }];
+  const p = await Player.make({ engine: holding(e1, holds), storage, seeds: ['9'], skins });
+  const stop = inPort(p);
+  check(p.screen === 'portMenu', `in port at ${stop.id} (${p.screen})`);
+  const day = p.f.game.day;
+  p.press(plain(p.words.leavePort));
+  check(p.screen === 'message' && plain(p.f.screen.text) === 'The pilot will not take you out in this fog.', 'the skin\'s refusal');
+  p.press('Continue');
+  check(p.screen === 'portMenu' && p.f.game.atPort && p.f.game.day === day, `still in port, no time gone (${p.screen})`);
+  refuse = false;
+  p.press(plain(p.words.leavePort));
+  check(p.screen === 'message' && p.f.screen.text === 'The harbour is closed until the tide turns.', `the port's hold (${p.screen})`);
+  check(!p.f.traveling, 'not under way');
+  const save = saveOf(storage);
+  check(save?.pending?.length === 1 && save.pending[0].message?._0 === 'The harbour is closed until the tide turns.',
+    'the hold is saved on screen (D10)');
+  p.press('Continue');
+  check(p.screen === 'portMenu' && p.f.game.atPort, `held: back to the port menu (${p.screen})`);
+  check((saveOf(storage)?.pending ?? []).length === 0, 'and nothing left waiting');
+  p.press(plain(p.words.leavePort));
+  check(p.screen === 'travel' && p.f.traveling && !p.f.game.atPort, `let go: under way (${p.screen})`);
+  p.f.stopTravel();
+
+  // A hold whose answer lets the party go: under way once it is dealt with.
+  const r = await Player.make({ engine: holding(e2, [{ message: { _0: 'The ice is going out.' } }], true), seeds: ['9'] });
+  inPort(r);
+  r.press(plain(r.words.leavePort));
+  check(r.screen === 'message' && r.f.after === 'leaving', `the hold, then where the queue goes (${r.f.after})`);
+  r.press('Continue');
+  check(r.screen === 'travel' && r.f.traveling, `under way after it (${r.screen})`);
+  r.f.stopTravel();
+});
+
+await test('the yard\'s row asks the skin\'s question where it has one, and opens the yard where it has none', async () => {
+  const plainP = await Player.make({ engine: e1, seeds: ['9'] });
+  inPort(plainP);
+  plainP.press(plain(plainP.words.yard));
+  check(plainP.screen === 'shipyard', `1849's yard row opens the yard (${plainP.screen})`);
+
+  // A stand-in question: the engine's own trade, asked from the yard's row.
+  const p = await Player.make({ engine: e2, seeds: ['9'], skins: testSkin(() => ({ yardQuestion: 'tradeAtPort' })) });
+  inPort(p);
+  p.press(plain(p.words.yard));
+  check(['message', 'choice'].includes(p.screen) && p.f.after === 'portMenu', `the question instead (${p.screen}, ${p.f.after})`);
+  for (let n = 0; n < 6 && p.screen !== 'portMenu'; n++) p.press(p.look().choices.findIndex((c) => c.enabled) + 1);
+  check(p.screen === 'portMenu', `and back to the port menu (${p.screen})`);
+});
+
+await test('a voyage saved in the first stores comes back to them if the skin says so, to the port menu if not (D16)', async () => {
+  for (const back of [true, false]) {
+    const storage = new MemoryStorage();
+    const skins = back ? testSkin(() => ({ resumesInFirstShop: true })) : undefined;
+    const a = await Player.make({ engine: e1, storage, seeds: ['5'], skins });
+    a.setUp();
+    a.shop({ food: 2 });
+    // The stores save as you leave them; the page is closed on the departure's words.
+    a.press('Pay');
+    check(a.screen === 'depart' && saveOf(storage)?.atPort && saveOf(storage)?.day === 0 && saveOf(storage)?.food === 200,
+      'saved in the stores, paid for, not yet away');
+    const b = await Player.make({ engine: e2, storage, seeds: ['6'], skins });
+    b.press('Continue the voyage');
+    check(b.screen === (back ? 'shop' : 'portMenu'), `${back ? 'the stores' : '1849\'s port menu'} (${b.screen})`);
+    if (back) {
+      b.press('Leave the shop');
+      check(b.screen === 'depart', `and out through the departure (${b.screen})`);
+    } else {
+      b.press(plain(b.words.leavePort));
+      check(b.screen === 'travel' && !b.f.game.atPort, `and the port menu's way out sets off with neither (${b.screen})`);
+      b.f.stopTravel();
+    }
+  }
+});
+
+await test('the status box and the chart take the skin\'s place and stop names', async () => {
+  const p = await Player.make({ engine: e1, seeds: ['9'], skins: testSkin(() => ({ place: 'At the pier', stopName: (st) => `${st.short}!` })) });
+  const stop = inPort(p);
+  const box = p.look().blocks.find((b) => b.type === 'status');
+  check(box.region === 'At the pier', `the place after the date (${box.region})`);
+  const next = p.f.journey.stops.find((st) => st.id === p.f.v.nextStop);
+  check(box.rows.some((r) => r.label === `Next: ${next.short}!`), `the next stop by the skin's name (${box.rows.map((r) => r.label)})`);
+  p.press(plain(p.words.chart));
+  const legend = p.look().blocks.find((b) => b.type === 'legend').items;
+  check(legend.every((x, i) => x.text.endsWith(`${p.f.journey.stops[i].short}!`) && x.label.startsWith(`${p.f.journey.stops[i].short}!, `)),
+    'every stop in the legend by the skin\'s name');
+  check(legend.find((x) => x.text === `✓ ${stop.short}!`), 'passed');
+
+  const q = await Player.make({ engine: e2, seeds: ['9'] });
+  inPort(q);
+  const own = q.look().blocks.find((b) => b.type === 'status');
+  check(own.region === q.f.v.region.name, `1849 writes the region even in port (${own.region})`);
+  check(q.look().blocks.find((b) => b.type === 'heading').text === q.f.v.port.name, 'the port menu is headed by the port the engine finds');
 });
 
 console.log(`play: ${passed} checks passed, ${failures.length} failed`);

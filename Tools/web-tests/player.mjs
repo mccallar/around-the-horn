@@ -117,14 +117,15 @@ export class Player {
   /**
    * `journey` opens on that journey's title card, as the app's UI tests launch with
    * `-journey <id>`; null opens as a plain launch does, on the picker or the journey last
-   * chosen.
+   * chosen. `skins` stands in for journeys/skins.js's (a test's own skin, as the app's
+   * TestJourneys stands in for a journey).
    */
   static async make({ engine: e, storage = new MemoryStorage(), seeds = ['1'], random = lcg(7), log,
-    journey = 'horn1849' } = {}) {
+    journey = 'horn1849', skins, sound } = {}) {
     const timers = new FakeTimers();
     let n = 0;
     const flow = new Flow({ engine: e ?? await engine(), storage, timers, random, seed: () => seeds[n++ % seeds.length],
-      journey });
+      journey, skins, sound });
     return new Player({ flow, timers, log });
   }
 
