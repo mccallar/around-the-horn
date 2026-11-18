@@ -8,6 +8,7 @@ import { FakeDocument, FakeWindow } from './dom.mjs';
 import { Player, FakeTimers, engine, lcg, plain } from './player.mjs';
 import { Flow, MemoryStorage } from '../../web/js/flow.js';
 import { UI } from '../../web/js/ui.js';
+import * as horn1849 from '../../web/js/journeys/horn1849-skin.js';
 
 let passed = 0;
 const failures = [];
@@ -24,7 +25,7 @@ console.error = (...a) => errors.push(a.map(String).join(' '));
  * A page: the flow, the UI and the elements it draws in. `journey` opens on its title card
  * (`?journey=<id>`); null, as a plain visit does.
  */
-async function page({ seed = '13', storage = new MemoryStorage(), journey = 'horn1849' } = {}) {
+async function page({ seed = '13', storage = new MemoryStorage(), journey = 'horn1849', skins } = {}) {
   const doc = new FakeDocument();
   const win = new FakeWindow();
   const app = doc.body.appendChild(doc.createElement('div'));
@@ -34,7 +35,7 @@ async function page({ seed = '13', storage = new MemoryStorage(), journey = 'hor
   const timers = new FakeTimers();
   const played = [];
   const flow = new Flow({ engine: await engine(), storage, timers, random: lcg(Number(seed)), seed: () => seed,
-    sound: (c) => played.push(c), journey });
+    sound: (c) => played.push(c), journey, skins });
   const clicks = [];
   const ui = new UI(flow, { root, banner, sound, synth: { play: (c) => clicks.push(c) }, doc, win });
   const settle = () => ui.render();
@@ -359,6 +360,55 @@ for (const [seed, role, want] of [['13', 'A Boston', 'finale'], ['11', 'A Nantuc
   check(words(served.screen) === 'The game could not start: its code did not load.', 'and it says so');
   check(readFileSync(new URL('../../web/js/main.js', import.meta.url), 'utf8').includes("if (location.protocol === 'file:') return;"),
     'main.js leaves the message alone where a browser runs it from disk');
+}
+
+// MARK: - What a skin may answer that 1849's does not, in the page
+
+{
+  // 1849's skin with a warning before departing and a place of its own.
+  const skins = [{
+    id: 'horn1849',
+    skin: (J) => {
+      const base = horn1849.skin(J);
+      return { ...base, words: (v) => ({ ...base.words(v), place: 'At the pier',
+        departWarning: v.state.limes < 10 ? { text: 'There is [red]hardly any citrus[/red] aboard.', back: 'Back to the chandler',
+          go: 'Sail without it' } : null }) };
+    },
+  }];
+  const p = await page({ skins });
+  const { root, flow, settle, buttons, label, click } = p;
+  click('Sail for California');
+  click('A Boston merchant');
+  click('Use these names');
+  click('January 1849');
+  click('Enter the shop');
+  const more = root.querySelectorAll('button[data-step]').find((b) => b.getAttribute('aria-label') === 'More Provisions');
+  for (let i = 0; i < 2; i++) {
+    more.click({ detail: 0 });
+    settle();
+  }
+  check(flow.screen.cart.food === 200, `provisions in the cart (${flow.screen.cart.food})`);
+  click('Pay');
+  check(flow.screen.name === 'ask', `the warning before departing (${flow.screen.name})`);
+  const box = root.querySelector('div.msg');
+  check(box && box.innerText === 'There is hardly any citrus aboard.' && box.querySelector('span.red')?.textContent === 'hardly any citrus',
+    `the warning in a message box, its markup in colour (${box?.innerText})`);
+  check(root.querySelector('canvas') != null, 'under the scene');
+  check(buttons().map(label).join('/') === 'Back to the chandler/Sail without it', `its two answers (${buttons().map(label).join('/')})`);
+  check(buttons()[0].className.includes('primary') && !buttons()[1].className.includes('primary'), 'the way back is the primary one');
+  check(p.played.at(-1) === 'message', `and it sounds as a message does (${p.played.at(-1)})`);
+  p.doc.dispatch('keydown', { key: '1', target: p.doc.body });
+  settle();
+  check(flow.screen.name === 'shop', `the 1 key heeds it: back to the stores (${flow.screen.name})`);
+  click('Leave the shop');
+  p.doc.dispatch('keydown', { key: '2', target: p.doc.body });
+  settle();
+  check(flow.screen.name === 'depart', `the 2 key waves it off: the departure (${flow.screen.name})`);
+  click('Set sail');
+  click('Heave to');
+  const status = root.querySelector('div.status');
+  check(status?.querySelector('span.dim')?.textContent === '· At the pier', `the skin's place after the date (${status?.querySelector('span.dim')?.textContent})`);
+  flow.stopTravel();
 }
 
 console.error = realError;
