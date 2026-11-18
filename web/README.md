@@ -3,9 +3,9 @@
 The web version runs the game's own engine: the Swift rules in `HornEngine/`, compiled
 to WebAssembly (`horn.wasm`). There is no second copy of the rules in JavaScript. The page
 is plain HTML, CSS and JavaScript modules, with no build step and nothing to install.
-Three journeys play: Around the Horn, 1849, The Iron Road, 1869, and Over the Pole, 1926.
-`horn.wasm` carries all six of the engine's journeys; the other three are offered once their
-skins are ported.
+Four journeys play: Around the Horn, 1849, The Iron Road, 1869, Over the Pole, 1926, and The
+Jet Stream, 1999. `horn.wasm` carries all six of the engine's journeys; the other two are
+offered once their skins are ported.
 
 ## Play
 
@@ -44,6 +44,8 @@ With Node 20 or later, from the repository's root:
     node Tools/web-tests/rail-skin.mjs # the Iron Road's skin is the app's; every scene, map and haul draws (~20 s)
     node Tools/web-tests/airship.mjs   # Over the Pole played: Rome's stores, landings, every ending, every trouble and its ways out, saves (~4 s)
     node Tools/web-tests/airship-skin.mjs # Over the Pole's skin is the app's; every scene, chart and wind draws (~15 s)
+    node Tools/web-tests/balloon.mjs   # the Jet Stream played: Marrakech's launch, both tracks to the finish, every ending, every trouble and its ways out, saves (~4 s)
+    node Tools/web-tests/balloon-skin.mjs # the Jet Stream's skin is the app's; every scene, chart and catch draws (~40 s)
     node Tools/web-tests/ui.mjs        # the page on a small DOM of its own: keys, taps, fields, the picker, whole runs clicked, opened from disk
 
 `parity.mjs` builds the bridge for the Mac with `swift build` (Xcode's Swift); set
@@ -85,9 +87,11 @@ The engine's own tests are unchanged: `swift test --disable-sandbox`.
   journey's (D19, D21); the rest are under the journey's id: the trouble each can be in
   (D14: `rail.brokenDown`, `airship.enginesOut` and `goingDown`, `balloon.burnersOut`,
   `goingDown`, `lastOfThePropane` and `relaunchRefusal`, `klondike.givenOut` and `noFire`,
-  `mars.dark`, `coasting` and `lastOfThePropellant`), the finales' words, and the
-  Klondike's boat, leg, meter names, progress, short-of-grub warning, burial line and stop
-  names on the way taken, and what Gateway's purse still runs to on Mars. Calls that take
+  `mars.dark`, `coasting` and `lastOfThePropellant`), the finales' words, the balloon's
+  track and the sea short of its landfall (`balloon.southTrack`, `offLandfall`, which the
+  app's chart and scene ask the engine's regions), and the Klondike's boat, leg, meter
+  names, progress, short-of-grub warning, burial line and stop names on the way taken, and
+  what Gateway's purse still runs to on Mars. Calls that take
   time also reply with `interrupts`, in the order the app shows them (`setSail` with a
   port's hold, `Journey.holdInPort`, empty when it lets you go); `readInterrupt` reads one into `{type, …}`. Hand the interrupt
   itself back to the engine (`resolve`, `save`), never the reading of it.
@@ -98,7 +102,7 @@ The engine's own tests are unchanged: `swift test --disable-sandbox`.
   | `flow.js` | `GameController` (and `+Menus`, `Persistence`): the screen in hand, the interrupt queue, the travel loop (one turn every 0.7 s), saving with what is still waiting (D10), the top ten |
   | `screens.js` | the SwiftUI screens, as descriptions with no DOM: blocks of words, and the numbered choices with what each does |
   | `ui.js` | `RootView`: draws the descriptions in the page, and turns taps and keys into the choices |
-  | `journeys/` | the skins: `horn1849-skin.js`, `-scene.js`, `-chart.js`, `-forage.js` are `Horn1849Skin.swift` and the three beside it; `rail-skin.js`, `-scene.js`, `-chart.js`, `-forage.js` are `RailSkin.swift` and its three; `airship-skin.js` and its three are `AirshipSkin.swift` and its; `skins.js` is `Skins.all` |
+  | `journeys/` | the skins: `horn1849-skin.js`, `-scene.js`, `-chart.js`, `-forage.js` are `Horn1849Skin.swift` and the three beside it; `rail-skin.js`, `-scene.js`, `-chart.js`, `-forage.js` are `RailSkin.swift` and its three; `airship-skin.js` and its three are `AirshipSkin.swift` and its, `balloon-skin.js` and its three `BalloonSkin.swift` and its; `skins.js` is `Skins.all` |
   | `pixels.js`, `drawing.js`, `fishing.js` | `PixelCanvas`, `ScenePicture` (its frame also carries the view's `date` and `hooks`, which the app's scenes read off the GameState) and `ChartView`, `FishingView` and its model |
   | `stores.js`, `markup.js`, `sound.js` | `Stores`, `Markup`, the square-wave `Synth` |
 
@@ -113,7 +117,7 @@ The engine's own tests are unchanged: `swift test --disable-sandbox`.
 - With more than one journey the page opens on the picker, which marks a journey with a voyage to
   go back to, or straight on the title card of the journey last chosen there. Each title
   card has a way back to the picker, and each menu a way to save and return to the title,
-  as in the app. `?journey=<id>` (`horn1849`, `rail`, `airship`) opens on that journey's title card,
+  as in the app. `?journey=<id>` (`horn1849`, `rail`, `airship`, `balloon`) opens on that journey's title card,
   as the app's `-journey <id>` does. A journey the engine has without a skin in
   `journeys/skins.js` is not offered.
 - A skin's words can stop or hold the voyage, as the app's do: a refusal to depart

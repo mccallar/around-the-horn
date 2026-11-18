@@ -465,8 +465,12 @@ Iron Road and Over the Pole look, read and play as they did.
   in three months and the gallery, a field and its refusal, the set pieces, the chart and
   the line, dry tanks, going down a sack at a time into the sea, and the finish line. Its
   reference set is the 25 in `docs/reference/shots-balloon/`.
-- The web version does not offer the balloon: its skin is not ported (D13), and neither
-  are the airship's shell members.
+- The web version offers the balloon: its four skin files are these, ported file for file
+  (D13), on the airship's shell members, which the web shell has. The bridge's
+  `hooks.balloon` answers what the chart and the scene ask the engine's regions: whether she
+  has taken the southern track (`southTrack`) and the sea short of the landfall
+  (`offLandfall`). `Tools/web-tests/balloon.mjs` plays it and `balloon-skin.mjs` holds it to
+  the Swift.
 
 ### Mars skin, as built
 
