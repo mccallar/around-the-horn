@@ -45,7 +45,7 @@ With Node 20 or later, from the repository's root:
     node Tools/web-tests/airship.mjs   # Over the Pole played: Rome's stores, landings, every ending, every trouble and its ways out, saves (~4 s)
     node Tools/web-tests/airship-skin.mjs # Over the Pole's skin is the app's; every scene, chart and wind draws (~15 s)
     node Tools/web-tests/balloon.mjs   # the Jet Stream played: Marrakech's launch, both tracks to the finish, every ending, every trouble and its ways out, saves (~4 s)
-    node Tools/web-tests/balloon-skin.mjs # the Jet Stream's skin is the app's; every scene, chart and catch draws (~40 s)
+    node Tools/web-tests/balloon-skin.mjs # the Jet Stream's skin is the app's; every scene, chart and catch draws (~25 s)
     node Tools/web-tests/ui.mjs        # the page on a small DOM of its own: keys, taps, fields, the picker, whole runs clicked, opened from disk
 
 `parity.mjs` builds the bridge for the Mac with `swift build` (Xcode's Swift); set
