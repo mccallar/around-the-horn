@@ -550,10 +550,51 @@ her purse can't buy (D19). The four journeys before it look, read and play as th
   letting go. Its reference set is the 25 in `docs/reference/shots-mars/`.
 - `SkinContractTests` runs its contract over every journey that has a skin; a journey
   without one fails `testEveryJourneyHasASkinAndEverySkinAJourney` alone (and
-  `JourneyPickerTests` records it and goes on), so mars is held to the contract while
-  klondike still has no skin. The contract now also holds the repairs screen to D15's
-  order for every skin (`RepairsView.choices`).
+  `JourneyPickerTests` records it and goes on), so mars was held to the contract before
+  klondike had a skin. The contract now also holds the repairs screen to D15's order for
+  every skin (`RepairsView.choices`).
 - The web version does not offer the transfer: its skin is not ported (D13).
+
+### Klondike skin, as built
+
+To the Klondike (`klondike`) is the sixth skin: `KlondikeSkin` (copy, words, debug starts),
+`KlondikeScene`, `KlondikeChart`, `KlondikeForage`, and its entry in `Skins.all`, between
+the balloon and Mars as `Journeys.all` orders them. The five journeys before it look, read
+and play as they did: every new member's answer for them is the one that changes nothing.
+
+- **Three new `Words` members**:
+  - `Words.yardQuestion`: what the port menu's yard row asks instead of opening the yard
+    (`GameController.openYard`). At Lake Bennett before there is a boat, the Klondike
+    answers `Klondike.boatChoice` ("See about a boat"); every other skin, and Bennett once
+    a boat is built, answers `nil`: the yard.
+  - `Words.stopName`: what the status box's "Next" row and the chart's legend call a stop.
+    The Klondike answers `Klondike.shortName` (the landing is "Dyea · Skagway" until the
+    pass is chosen, then the pass's own town); every other skin answers the stop's `short`.
+  - `Words.departWarning`: a warning before the first port lets the vessel go, which the
+    player may heed (back to the stores) or wave off. The Klondike answers
+    `Klondike.shortOfGrubWarning` (less than a year's grub a head for the police at the
+    summit) with "Back to the shop" / "Leave anyway", and `nil` with no grub at all, where
+    the engine's own refusal comes first; every other skin answers `nil`. It is shown on a
+    new screen, `Screen.ask` (`AskView`): a question of the shell's own, not the engine's,
+    so it is never saved; a voyage left there comes back to the stores (D16).
+- **The shell honours `Journey.holdInPort`**: `GameController.startTravel` shows what
+  `setSail()` returns instead of setting out, with `After.leaving` behind it: under way if
+  the answer let the party go (the ice went out), otherwise back to the port menu (no boat
+  yet, or "Not yet"). Left with the hold on screen, the voyage comes back to it with its
+  queue, then to a menu (D10).
+- **The Klondike's answers to the shell rules**: `departRefusal` and `leaveRefusal` are
+  `nil`; `resumesInFirstShop` is true (D16); turns are whole days, so there is no clock
+  and no hour in the date; the red status row (`Words.trouble`, "Party") says "Sleds given
+  out", "Oars & sail given out", "No firewood" or both, from the first day out (D14); the
+  repairs list the outfit or the boat before the sleds or the oars (D15).
+- **One debug launch argument**, `-HornDebugFood <n>` with `-HornDebugStart`: `n` of food
+  aboard, short of what the summit will want.
+- `KlondikeSkinTests` holds the skin's keys and dates to the engine's, Bennett's hold for a
+  boat (from the way out and the yard row) and for the ice, a hold left on screen and
+  resumed, the red row on every leg and none aboard the steamer or before Seattle, the
+  given-out question and each of its answers (mend, buy a coil, make do, take stock) with
+  no time passing while it asks, the repairs' order, the Seattle warning and refusal, and
+  a save in the Seattle stores coming back to them.
 
 ## 3. Adding a journey
 
