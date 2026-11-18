@@ -572,3 +572,117 @@ final class ResumeTests: XCTestCase {
         XCTAssertFalse(p.hasSave(Rail.id))
     }
 }
+
+// MARK: - To the Klondike
+
+extension ResumeTests {
+    func testTheTrekEndsAfterAResumeAtDawson() { endsAfterAResume(Klondike.id) }
+
+    func testAnOldTrekSaveAtDawsonStillArrives() { arrivesFromAnOldSaveAtTheEnd(Klondike.id) }
+
+    /// Every stop between Seattle and Dawson: quit on the warning that came with it, and
+    /// again on what the stop says or asks. Each comes back once, and is the stop's own: the
+    /// pass at Lynn Canal, the police at the summit, the canyon and the rapids, a town's
+    /// welcome, a landmark's note.
+    func testEveryStopOfTheTrekIsStillMetAfterAResume() {
+        let j = Journeys.journey(Klondike.id)
+        let asks = ["lynn": "fork", "summit": "police", "canyon": "canyon", "fivefinger": "fivefinger"]
+        for stop in j.stops.dropFirst().dropLast() {
+            let c = controller(Klondike.id)
+            let warning = arriveWarned(c, Klondike.id, at: stop.id)
+            let passed = c.game!
+            XCTAssertEqual(passed.currentStop.id, stop.id)
+
+            let again = quitAndResume(Klondike.id)
+            XCTAssertEqual(again.game, passed, stop.id)
+            onMessage(again, warning)
+            if case .message(_, _, let then) = again.screen { then() }
+            let isMark = asks[stop.id] == nil && j.port(stop.id) == nil
+            if !isMark { answerMessages(again) }
+            switch again.screen {
+            case .choice(let asked):
+                if let key = asks[stop.id] {
+                    XCTAssertTrue(custom(key)(asked), "\(stop.id): \(asked.kind)")
+                } else {
+                    guard case .portArrival(let id) = asked.kind else { XCTFail("\(stop.id): \(asked.kind)"); continue }
+                    XCTAssertEqual(id, stop.id)
+                }
+                let third = quitAndResume(Klondike.id)
+                guard case .choice(let still) = third.screen else { XCTFail("\(stop.id): \(third.screen)"); continue }
+                XCTAssertEqual(still, asked, stop.id)
+                third.choose(still, option: still.options.firstIndex(where: \.enabled)!)
+                answerMessages(third)
+                if case .choice(let next) = third.screen { XCTAssertNotEqual(next, still, "\(stop.id): asked once") }
+            case .message(let said, _, _):
+                XCTAssertTrue(isMark, "\(stop.id) asks, and said “\(said)”")
+                let third = quitAndResume(Klondike.id)
+                onMessage(third, said)
+                answerMessages(third)
+                if case .message(let next, _, _) = third.screen { XCTAssertNotEqual(next, said, "\(stop.id): said once") }
+            default:
+                XCTFail("\(stop.id): \(again.screen)")
+            }
+        }
+    }
+
+    /// D14 on the river: Miles Canyon reached with the oars given out waits. The question,
+    /// saying so, survives a quit; re-rigged, the canyon is met on the next day.
+    func testMilesCanyonReachedWithNoSweepWaitsAcrossAResume() {
+        let j = Journeys.journey(Klondike.id)
+        let i = j.stops.firstIndex { $0.id == "canyon" }!
+        var s = Skins.skin(Klondike.id)!.debug.start(i, 5)
+        s.stopIndex = i
+        s.mile = j.stops[i].mile
+        s.vars[KlondikeData.heldKey] = Double(i)
+        s.sails = 0
+        s.sailcloth = 1
+        let c = controller(Klondike.id)
+        c.loadForDebug(s)
+        c.startTravel()
+        c.tick()
+        guard case .choice(let ask) = c.screen, custom("givenout")(ask) else { return XCTFail("given out: \(c.screen)") }
+        XCTAssertTrue(ask.prompt.contains("Nobody takes a boat into Miles Canyon without a sweep."), ask.prompt)
+        XCTAssertEqual(KlondikeSkin.skin.words(c.game!).trouble?.value, "Oars & sail given out")
+
+        let again = quitAndResume(Klondike.id)
+        guard case .choice(let still) = again.screen else { return XCTFail("still the question, not \(again.screen)") }
+        XCTAssertEqual(still, ask)
+        again.choose(still, option: 0)
+        answerMessages(again)
+        XCTAssertGreaterThan(again.game!.sails, 0.5)
+        XCTAssertNil(KlondikeSkin.skin.words(again.game!).trouble)
+        if case .travel = again.screen {} else { again.startTravel() }
+        again.tick()
+        answerMessages(again)
+        guard case .choice(let canyon) = again.screen, custom("canyon")(canyon) else {
+            return XCTFail("the canyon, waiting: \(again.screen)")
+        }
+        XCTAssertNil(again.game!.vars[KlondikeData.heldKey])
+    }
+
+    /// Sleds given out with no rope, saved on the question: back on it, a coil bought off the
+    /// next party along at three times Seattle's price, and the party moves again.
+    func testGivenOutSledsAreStillAskedAfterAResume() {
+        var s = Skins.skin(Klondike.id)!.debug.start(4, 2)
+        s.sails = 0
+        s.sailcloth = 0
+        s.money = 100
+        let c = controller(Klondike.id)
+        c.loadForDebug(s)
+        c.startTravel()
+        c.tick()
+        guard case .choice(let ask) = c.screen, custom("givenout")(ask) else { return XCTFail("given out: \(c.screen)") }
+        XCTAssertEqual(ask.options.map(\.enabled), [false, true, true, true])
+        let mile = c.game!.mile
+
+        let again = quitAndResume(Klondike.id)
+        guard case .choice(let still) = again.screen else { return XCTFail("still the question, not \(again.screen)") }
+        XCTAssertEqual(still, ask)
+        XCTAssertEqual(again.game!.mile, mile, "nobody moved")
+        again.choose(still, option: 1)
+        answerMessages(again)
+        XCTAssertEqual(again.game!.money, 100 - KlondikeData.coilPrice, accuracy: 1e-9)
+        XCTAssertGreaterThan(again.game!.sails, 0.5)
+        XCTAssertNil(KlondikeSkin.skin.words(again.game!).trouble)
+    }
+}
