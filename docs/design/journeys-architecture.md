@@ -644,6 +644,15 @@ and play as they did: every new member's answer for them is the one that changes
   firewood, both at once and worn repairs; Dawson and the top ten; and the three ways it
   ends short of Dawson (turned back, the outfit ruined, the boat broken up). Its reference
   set is the 25 in `docs/reference/shots-klondike/`.
+- The web version offers the trek: its four skin files are these, ported file for file
+  (D13), on the shell members the web shell already had (`yardQuestion` names the engine
+  call that asks, `boatChoice`; `departWarning` is `{text, back, go}`; the hold comes back
+  in `setSail`'s `interrupts`). The bridge's `hooks.klondike` answers what the skin and the
+  scene ask the engine (the leg, the boat, given out, no fire, the meters' names, the
+  progress line, the warning, the finale, the burial line, every stop's names on the way
+  taken), `hooks.departsUnfed` is D21's, and the scene's frame carries the view's `port`,
+  the town the engine finds for the way taken. `Tools/web-tests/klondike.mjs` plays it and
+  `klondike-skin.mjs` holds it to the Swift.
 
 ## 3. Adding a journey
 
