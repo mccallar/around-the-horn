@@ -9,7 +9,10 @@ export const SCENE_H = 80;
 
 /**
  * What a skin's scene is asked to draw. With no voyage yet (the title card) it is the
- * journey's fair weather and a sound vessel. `v` is the bridge's view, or null.
+ * journey's fair weather and a sound vessel. `v` is the bridge's view, or null. `date`
+ * (`[year, month from 0, day]`) and `hooks` are what the view says of the state, for a
+ * skin whose scene asks what the app's asks of its GameState: the date, the journey's rule
+ * for its trouble.
  */
 export function sceneFrame(J, v, moving, t) {
   const g = v?.state ?? null;
@@ -23,6 +26,8 @@ export function sceneFrame(J, v, moving, t) {
     region: v?.region ?? null,
     hour: v?.hour ?? J.rules.startHour,
     state: g,
+    date: v?.date ?? null,
+    hooks: v?.hooks ?? null,
   };
 }
 
