@@ -675,6 +675,17 @@ extension KlondikeSkinTests {
                 out.append(g)
             }
         }
+        // In town at Lake Bennett with no boat yet, the one place the yard asks its question.
+        // `start` stands short of a stop, and past Bennett a boat exists, so the sweep above
+        // never stands here.
+        if klondike.stops[i].id == "bennett" {
+            for white in [false, true] {
+                var g = blank()
+                KlondikeSkin.at(&g, "bennett", port: true, white: white)
+                XCTAssertFalse(Klondike.hasBoat(g))
+                out.append(g)
+            }
+        }
         return out
     }
 
@@ -686,6 +697,7 @@ extension KlondikeSkinTests {
         out += [forage.heading, forage.throwsLabel, forage.caughtLabel, forage.timeLabel, forage.hint("150 lbs"),
                 forage.label(1), forage.label(3), forage.actionHint, forage.leave, skin.chart.title]
         out += klondike.quarry.flatMap { [forage.pop("1", $0), forage.pop("35", $0)] }
+        var asked = 0
         for i in klondike.stops.indices.dropFirst() {
             for role in Role.allCases {
                 for var g in states(i) {
@@ -694,11 +706,17 @@ extension KlondikeSkinTests {
                     out += strings(w) + klondike.rules.restChoices.map(w.restChoice)
                     out += [w.distance(g.mile), w.yardHull(56), w.yardSails(72), w.priceNote(30), w.priceNote(-20),
                             w.burial("Ida"), w.stopName(g.currentStop), skin.chart.label(g), skin.chart.footer(g)]
+                    if g.currentStop.id == "bennett" && g.atPort && !Klondike.hasBoat(g) {
+                        XCTAssertNotNil(w.yardQuestion, "Bennett's yard asks about a boat")
+                    }
                     if let ask = w.yardQuestion {
                         let c = controller()
                         c.loadForDebug(g)
                         if case .choice(let e) = c.run({ ask($0) }) {
+                            asked += 1
                             out += [e.prompt, e.detail ?? ""] + e.options.map(\.label)
+                        } else {
+                            XCTFail("the yard's question at \(g.currentStop.id) is not a question")
                         }
                     }
                     for weather in klondike.weathers where role == .merchant {
@@ -716,6 +734,7 @@ extension KlondikeSkinTests {
             out.append(cell.name)
         }
         out.append(skin.scene.label(ScenePicture.frame(klondike, nil, moving: false, t: 0)))
+        XCTAssertGreaterThanOrEqual(asked, 2 * Role.allCases.count, "the walk asks the yard's question on both passes, for every role")
         return out
     }
 
