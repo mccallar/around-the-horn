@@ -369,11 +369,38 @@ export class Player {
 }
 
 /**
+ * Words from the other journeys' worlds that must never reach the Klondike, as the app's
+ * `KlondikeSkinTests.elsewhere` sieves them: an 1849 ship at sea, a train, an airship, a
+ * balloon, a freighter in space. A stampeder has a steamer, a boat with oars & sail,
+ * firewood, lime juice, fish and miles, so those stay; and the steamer anchors off Dyea,
+ * the White Pass has a wagon road at its foot, the lake fills with sails and rapids throw
+ * spray (`KLONDIKE_FIGURES`, taken out before the sieve).
+ */
+export const KLONDIKE_FOREIGN = new RegExp('\\b(sails|sailing|sailors?|sailcloth|shipwrights?|anchor(s|ed)?|harpoons?|tackle|throws?|voyages?|'
+  + 'nm|nautical|knots?|citrus|limes|whal(e|er|ers|ing)|galley|'
+  + 'trains?|railroad|railway|locomotive|conductor|caboose|boxcars?|cords?|wagons?|oxen|'
+  + 'petrol|gondola|hydrogen|propane|burners?|ballast|gallons?|helium|'
+  + 'propellant|tonnes?|litres?|kilomet(re|er)s?|km|thrusters?|airlock|orbits?)\\b', 'i');
+export const KLONDIKE_FIGURES = ['anchor off Dyea', 'wagon road', 'full of sails', 'throw spray'];
+
+export function klondikeProblems(d, where) {
+  const out = [];
+  for (const { text } of texts(d)) {
+    let said = plain(text);
+    for (const f of KLONDIKE_FIGURES) said = said.split(f).join('');
+    const m = said.match(KLONDIKE_FOREIGN);
+    if (m) out.push(`${where}: "${m[0]}" in ${JSON.stringify(text)}`);
+  }
+  return out;
+}
+
+/**
  * What the careful player keeps aboard, in stored units, by journey: for 1849 the golden
  * voyages' bot's list; on the Iron Road a full tender and tank car, and the rest likewise;
  * over the Pole full tanks, full stores and three bags of ballast; on the jet stream every tank
  * full, and four sacks; on the transfer full tanks and lockers, ten supplement packs and two
- * tether cartridges.
+ * tether cartridges; on the trail a year's grub for five and two months' eating besides, a full
+ * load of firewood for the pass, and the canvas and rope to build a boat and mend on the river.
  */
 export const SAFE = {
   horn1849: { food: 1500, water: 600, limes: 10, clothes: 5, meds: 3, sailcloth: 3, timber: 3, tackle: 40 },
@@ -381,7 +408,8 @@ export const SAFE = {
   airship: { fuel: 8000, water: 300, food: 300, limes: 10, clothes: 5, meds: 3, sailcloth: 3, timber: 3, tackle: 40 },
   balloon: { fuel: 1200, water: 200, food: 400, limes: 12, clothes: 5, meds: 3, sailcloth: 3, timber: 4, tackle: 40 },
   mars: { fuel: 1000, water: 800, food: 450, limes: 10, clothes: 5, meds: 3, sailcloth: 3, timber: 3, tackle: 40 },
+  klondike: { food: 7500, water: 2000, limes: 10, clothes: 5, meds: 6, sailcloth: 4, timber: 5, tackle: 40 },
 };
 
 /** The month each journey's careful player leaves in. */
-export const MONTHS = { horn1849: 'January 1849', rail: 'October 1869', airship: 'May 1926', balloon: 'January 1999', mars: 'October 2087' };
+export const MONTHS = { horn1849: 'January 1849', rail: 'October 1869', airship: 'May 1926', balloon: 'January 1999', mars: 'October 2087', klondike: 'March 1898' };
