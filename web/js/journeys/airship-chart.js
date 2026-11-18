@@ -127,13 +127,25 @@ export const arcticCircle = 66.56;
 /** Swift's `x.rounded()`: halves away from zero. */
 const rounded = (x) => Math.sign(x) * Math.round(Math.abs(x));
 
+/**
+ * Swift's `stride(from:through:by:)` over Doubles (`to:`, short of the end, with
+ * `through` false): each value worked out from the start, not added up.
+ */
+function* stride(from, end, by, through = true) {
+  for (let i = 0; ; i++) {
+    const x = from + i * by;
+    if (by > 0 ? (through ? x > end : x >= end) : (through ? x < end : x <= end)) return;
+    yield x;
+  }
+}
+
 export function background(px) {
   px.rect(0, 0, px.w, px.h, hex(ocean));
   // Circles of latitude every ten degrees and meridians every thirty, dotted.
   const grid = hex(0x173B5C);
-  for (let lat = 80; lat >= 40; lat -= 10) circle(px, lat, 3, grid);
-  for (let lon = -180; lon < 180; lon += 30) {
-    for (let i = 0; 89 - i * 1.2 >= 37; i++) dot(px, project(lon, 89 - i * 1.2), grid);
+  for (const lat of stride(80, 40, -10)) circle(px, lat, 3, grid);
+  for (const lon of stride(-180, 180, 30, false)) {
+    for (const lat of stride(89, 37, -1.2)) dot(px, project(lon, lat), grid);
   }
   for (const shape of shapes) {
     px.polygon(shape.points.map(([lon, lat]) => project(lon, lat)), hex(shape.sea ? ocean : land));

@@ -19,13 +19,18 @@ export const horizon = 58;
 // MARK: Sky
 
 /**
- * By the kind of sky. The two winds share a sky, and so do the two fogs: a following wind
- * is the one that carries her (`speed` over 1), and icing fog is the fog that is hard on
- * the crew (`harsh`). `ground` is how much of its own colour the ground keeps under this
+ * A palette's defaults: `ground` is how much of its own colour the ground keeps under this
  * sky; `rough`, how hard she pitches: 1 in ordinary air.
  */
+export const paletteDefaults = { ground: 1.0, clouds: 0, cloud: 0xF4F7FA, sun: false, rough: 1.0 };
+
+/**
+ * By the kind of sky. The two winds share a sky, and so do the two fogs: a following wind
+ * is the one that carries her (`speed` over 1), and icing fog is the fog that is hard on
+ * the crew (`harsh`).
+ */
 export function palette(w) {
-  const P = (top, bot, o = {}) => ({ top, bot, ground: 1, clouds: 0, cloud: 0xF4F7FA, sun: false, rough: 1, ...o });
+  const P = (top, bot, o = {}) => ({ top, bot, ...paletteDefaults, ...o });
   switch (w.sky) {
     case 'clear': case 'still': case 'heat': case 'dust':
       return P(0x2D5F9A, 0x9FD0EE, { clouds: 1, sun: true });
@@ -95,6 +100,7 @@ export const daysBefore = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334
 
 const portOf = (J, id) => J.ports.find((p) => p.id === id) ?? null;
 const currentStop = (J, g) => J.stops[g.stopIndex];
+const lastStop = (J) => J.stops.at(-1);
 
 /**
  * Whether the sun stays up all night where she is on this date: when the sun's declination
@@ -454,11 +460,12 @@ export function mast(px, id, t, lines, tint) {
   px.rect(mastX + 1, mastTop - 3, 3, 2, steel);
   // The ground crew, on her handling lines.
   const rope = opacity(hex(0xD8C8A0), 0.8);
-  for (const [from, to] of [[[mooredX + 19, mooredY + 12], [108, hz - 2]], [[mooredX + 25, mooredY + 12], [119, hz - 2]]]) {
-    if (lines) px.line({ x: from[0], y: from[1] }, { x: to[0], y: to[1] }, rope);
-    const sway = jsRounded(Math.sin(t * 1.3 + to[0]));
-    px.rect(to[0] + sway, hz - 3, 1, 3, hex(0x2A2A30));
-    px.rect(to[0] + sway, hz - 4, 1, 1, hex(0xEFD6B0));
+  for (const [from, to] of [[{ x: mooredX + 19, y: mooredY + 12 }, { x: 108, y: hz - 2 }],
+    [{ x: mooredX + 25, y: mooredY + 12 }, { x: 119, y: hz - 2 }]]) {
+    if (lines) px.line(from, to, rope);
+    const sway = jsRounded(Math.sin(t * 1.3 + to.x));
+    px.rect(to.x + sway, hz - 3, 1, 3, hex(0x2A2A30));
+    px.rect(to.x + sway, hz - 4, 1, 1, hex(0xEFD6B0));
   }
 }
 
@@ -605,7 +612,7 @@ export function camp(px, region, t, tint) {
 export function position(J, f, s) {
   if (moored(J, f) !== null) return { x: mooredX, y: mooredY };
   if (down(f)) return { x: flyingX + 8, y: horizon - 10 };
-  if (landmark(J, f)?.id === J.stops[J.stops.length - 1]?.id) return { x: flyingX + 20, y: 30 };
+  if (landmark(J, f)?.id === lastStop(J)?.id) return { x: flyingX + 20, y: 30 };
   const drop = jsRounded((100 - Math.max(0, Math.min(100, f.hull))) / 10);
   const bob = jsRounded(Math.sin(f.t * (1.4 + s.rough * 0.7)) * (0.5 + s.rough * 0.5));
   return { x: flyingX, y: flyingY + drop + bob };

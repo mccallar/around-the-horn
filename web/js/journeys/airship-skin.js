@@ -86,8 +86,8 @@ export const card = {
     'An airship burns money by the tonne, and only one of these three has much of it.',
     '[amber]Financier[/amber] — starts with $1,200.',
     '[amber]Airship engineer[/amber] — starts with $580. Gets far more out of every bag of ballast and every box of engine spares.',
-    '[amber]Meteorologist[/amber] — starts with $470. Reads the winds aloft like a morning paper: a surer eye with a pilot balloon, and twice the petrol\'s worth of winds from every session.',
-    'The leaner the purse, the more a landing at Nome is worth: the engineer\'s counts double, the meteorologist\'s triple.',
+    "[amber]Meteorologist[/amber] — starts with $470. Reads the winds aloft like a morning paper: a surer eye with a pilot balloon, and twice the petrol's worth of winds from every session.",
+    "The leaner the purse, the more a landing at Nome is worth: the engineer's counts double, the meteorologist's triple.",
   ],
   namesHeading: 'Airship & crew',
   vesselPrompt: 'Name your airship:',
@@ -245,7 +245,7 @@ export function debugStart(J, s, stop, month = s.startMonth) {
 /** Standing at a stop, its arrival told: moored, if it has a mast and `port` says so. */
 export function at(J, s, stopId, port = false) {
   const i = J.stops.findIndex((st) => st.id === stopId);
-  if (i < 0) return;
+  if (!J.stops[i]) return;
   s.stopIndex = i;
   s.mile = J.stops[i].mile;
   s.day = Math.max(1, Math.trunc(s.mile / 190));

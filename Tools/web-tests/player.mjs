@@ -314,12 +314,14 @@ export class Player {
 
 /**
  * What the careful player keeps aboard, in stored units, by journey: for 1849 the golden
- * voyages' bot's list; on the Iron Road a full tender and tank car, and the rest likewise.
+ * voyages' bot's list; on the Iron Road a full tender and tank car, and the rest likewise;
+ * over the Pole full tanks, full stores and three bags of ballast.
  */
 export const SAFE = {
   horn1849: { food: 1500, water: 600, limes: 10, clothes: 5, meds: 3, sailcloth: 3, timber: 3, tackle: 40 },
   rail: { fuel: 160, water: 1200, food: 300, clothes: 5, meds: 3, sailcloth: 3, timber: 3, tackle: 40 },
+  airship: { fuel: 8000, water: 300, food: 300, limes: 10, clothes: 5, meds: 3, sailcloth: 3, timber: 3, tackle: 40 },
 };
 
 /** The month each journey's careful player leaves in. */
-export const MONTHS = { horn1849: 'January 1849', rail: 'October 1869' };
+export const MONTHS = { horn1849: 'January 1849', rail: 'October 1869', airship: 'May 1926' };

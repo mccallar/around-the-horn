@@ -70,8 +70,7 @@ export function wind(px, f) {
   const x = jsRounded(f.x), y = jsRounded(f.y);
   const w = f.kind.width, h = f.kind.height;
   const hw = Math.trunc(w / 2), hh = Math.trunc(h / 2);
-  const parsed = /^#[0-9A-Fa-f]{6}$/.test(f.kind.color) ? parseInt(f.kind.color.slice(1), 16) : null;
-  const color = parsed ?? 0xCFE8F5;
+  const color = colorOf(f.kind) ?? 0xCFE8F5;
   const c = hex(color);
   const left = x - hw, top = y - hh;
   const rows = h >= 5 ? 3 : 2;
@@ -117,4 +116,9 @@ export function forage(J) {
     quarry: wind,
     thrown: balloon,
   };
+}
+
+/** A quarry's `#RRGGBB` colour as a number, or null if it isn't one (Swift's `UInt32(_:radix:)`). */
+function colorOf(kind) {
+  return /^#[0-9A-Fa-f]{6}$/.test(kind.color) ? parseInt(kind.color.slice(1), 16) : null;
 }
