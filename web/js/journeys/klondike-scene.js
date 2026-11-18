@@ -45,7 +45,9 @@ function P(top, bot, water, snow, accent, more = {}) {
 
 export function palette(w) {
   switch (w.sky) {
-    case 'clear': return P(0x2F63A8, 0xBCDDF0, 0x23506E, 0xE9EFF4, 0xFFFFFF, { sun: 0xFFF1B8 });
+    case 'clear':
+    default:
+      return P(0x2F63A8, 0xBCDDF0, 0x23506E, 0xE9EFF4, 0xFFFFFF, { sun: 0xFFF1B8 });
     case 'breeze': return P(0x3A6CA6, 0xA9CFE6, 0x24557A, 0xDCE5EC, 0xCFE3F0, { sun: 0xFFE58A, clouds: 1 });
     case 'rain': return P(0x3F4A57, 0x7E8A97, 0x22384C, 0x8E9488, 0x93A5B6, { clouds: 3, cloud: 0x6B7584, haze: 0.3 });
     case 'fog': return P(0x8E979F, 0xC7CDD2, 0x5E6E7B, 0xC9CFD4, 0xB7C0C8, { haze: 0.65 });
@@ -55,7 +57,6 @@ export function palette(w) {
     case 'storm': return P(0x1B2028, 0x4A5360, 0x141F2B, 0xB5C0CB, 0xD8E0E8, { clouds: 3, cloud: 0x2C333D, rough: 3, haze: 0.7 });
     case 'still': return P(0x6C8FB0, 0xC9DDEA, 0x3D6378, 0xE0E8EE, 0xF2F7FA);
     case 'heat': return P(0xD98A3D, 0xF4D88C, 0x3C6A70, 0xD8D2B8, 0xA9CACC, { sun: 0xFFF4C2, haze: 0.15 });
-    default: return P(0x2F63A8, 0xBCDDF0, 0x23506E, 0xE9EFF4, 0xFFFFFF, { sun: 0xFFF1B8 });
   }
 }
 

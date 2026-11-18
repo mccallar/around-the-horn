@@ -89,26 +89,26 @@ export const card = {
     {
       heading: 'The rush',
       paragraphs: [
-        'In July 1897 a steamer tied up in Seattle with a ton of gold aboard, and by winter the whole country had the fever. The gold was on the Klondike River in Canada\'s Yukon, seventeen hundred miles north — up the coast by steamer, over the mountains on foot, and down the Yukon River by boat.',
-        'You lead a party of five. Buy a year\'s outfit, get it over the pass, build a boat, and bring everyone to Dawson City alive.',
+        "In July 1897 a steamer tied up in Seattle with a ton of gold aboard, and by winter the whole country had the fever. The gold was on the Klondike River in Canada's Yukon, seventeen hundred miles north — up the coast by steamer, over the mountains on foot, and down the Yukon River by boat.",
+        "You lead a party of five. Buy a year's outfit, get it over the pass, build a boat, and bring everyone to Dawson City alive.",
         'Time passes a day at a time. The steamer is quick; the thirty-three miles of trail are not, because everything you own goes up them a load at a time.',
       ],
     },
     {
       heading: 'The outfit',
       paragraphs: [
-        '[amber]Provisions[/amber]: the police at the summit turn back anyone without a year\'s grub — 1,095 lbs a head. Bring more than that; you\'ll eat on the way up.',
+        "[amber]Provisions[/amber]: the police at the summit turn back anyone without a year's grub — 1,095 lbs a head. Bring more than that; you'll eat on the way up.",
         '[amber]Firewood[/amber] keeps you alive on top of the pass, where nothing grows. Below the trees you can gather your own. A day without a fire costs every one of you 12 health.',
         '[amber]Lime juice[/amber] holds off scurvy. [amber]Furs[/amber] — one set each — hold off the cold.',
-        '[amber]Canvas & pitch[/amber] and [amber]rope & rawhide[/amber] patch your outfit on the trail and your boat on the river, and you\'ll need some to build the boat. [amber]Hooks & line[/amber] catch fish on the lakes and river.',
-        'Sleds worn down to 0% give out, and nobody moves until they are mended: with a coil of rope & rawhide, with a coil bought off the next party along for $24, or with two days\' work making do. An outfit that ever shows 0% is ruined, and the trek is over.',
+        "[amber]Canvas & pitch[/amber] and [amber]rope & rawhide[/amber] patch your outfit on the trail and your boat on the river, and you'll need some to build the boat. [amber]Hooks & line[/amber] catch fish on the lakes and river.",
+        "Sleds worn down to 0% give out, and nobody moves until they are mended: with a coil of rope & rawhide, with a coil bought off the next party along for $24, or with two days' work making do. An outfit that ever shows 0% is ruined, and the trek is over.",
       ],
     },
     {
       heading: 'Pass, lakes, river',
       paragraphs: [
         'At the head of Lynn Canal choose your pass: the steep [amber]Chilkoot[/amber] or the gentler, slower [amber]White Pass[/amber]. Either way, you carry everything up a load at a time.',
-        'At [amber]Lake Bennett[/amber] you build a boat and wait for the ice to go out, at the end of May. Then it\'s nearly five hundred and fifty miles of lakes, canyon and rapids to Dawson.',
+        "At [amber]Lake Bennett[/amber] you build a boat and wait for the ice to go out, at the end of May. Then it's nearly five hundred and fifty miles of lakes, canyon and rapids to Dawson.",
         'Oars & sail at 0% leave the boat tied to the bank until they are re-rigged, and nobody takes a boat into Miles Canyon or through Five Fingers without a sweep. A boat that shows 0% breaks up.',
         'Leave too early and the pass will freeze you; too late and the snow turns to slush and slides, and the crowd beats you to Dawson. Every day you get there before August 1 is worth 20 points. Hard driving gets you there sooner, if it gets you there at all.',
       ],
@@ -126,19 +126,19 @@ export const card = {
     'The poorer you start, the more your arrival is worth: the boatbuilder scores double, the miner triple.',
   ],
   namesHeading: 'Boat & party',
-  vesselPrompt: 'Name the boat you\'ll build at the lakes:',
-  vesselLabel: 'Boat\'s name',
+  vesselPrompt: "Name the boat you'll build at the lakes:",
+  vesselLabel: "Boat's name",
   leaderPrompt: 'Your name:',
   leaderLabel: 'Your name',
   crewPrompt: 'Your four partners:',
   crewLabel: 'Partner',
   monthHeading: 'When will you go?',
   monthIntro: 'The news reached Seattle last July. All winter the steamers have gone north crammed to the rails. When will you go?',
-  monthAdvice: 'An old sourdough taps his pipe on the stove: “Go in January and the pass will freeze you solid. Go in May and you\'ll wade through slush under the snowslides, and every creek in the Klondike will be staked twice over before you get there. March is the month. February, if your purse can stand a cold trail. Be at the lakes when the ice goes out.”',
+  monthAdvice: "An old sourdough taps his pipe on the stove: “Go in January and the pass will freeze you solid. Go in May and you'll wade through slush under the snowslides, and every creek in the Klondike will be staked twice over before you get there. March is the month. February, if your purse can stand a cold trail. Be at the lakes when the ice goes out.”",
   outfitHeading: 'Outfitting',
   outfitIntro: (v) => `You have [amber]$${formatNumber(v.state.money)}[/amber] to outfit your party. The outfitters on First Avenue will sell you anything, and they all tell you the same things:`,
   outfitBullets: [
-    '• [b]Provisions[/b] — the police won\'t let anyone over the summit without a year\'s grub: 1,095 lbs a head. Then you have to eat on the way.',
+    "• [b]Provisions[/b] — the police won't let anyone over the summit without a year's grub: 1,095 lbs a head. Then you have to eat on the way.",
     '• [b]Firewood[/b] — nothing grows on top of the pass, and in the cold up there five of you burn 40 lbs of it a day.',
     '• [b]Lime juice[/b] — beans and bacon all winter bring on scurvy.',
     '• [b]Furs & mackinaws[/b] — one set a head, or the summit will take fingers and toes.',
@@ -167,7 +167,7 @@ export function trouble(v) {
 }
 
 /** Where the bridge's burial line (`hooks.klondike.burial`) has the name (`Hooks.burialMark`). */
-export const burialMark = '\u0001NAME\u0001';
+export const burialMark = '\u{1}NAME\u{1}';
 
 /**
  * The burial line by where it happens, in the engine's words, with the name as the shell
