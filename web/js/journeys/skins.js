@@ -10,8 +10,9 @@ import * as rail from './rail-skin.js';
 import * as airship from './airship-skin.js';
 import * as balloon from './balloon-skin.js';
 import * as mars from './mars-skin.js';
+import * as klondike from './klondike-skin.js';
 
-export const all = [horn1849, rail, airship, balloon, mars];
+export const all = [horn1849, rail, airship, balloon, mars, klondike];
 
 /** The skins for the journeys the engine has, in the engine's order: `[{ journey, skin }]`. */
 export function offered(journeys, skins = all) {
