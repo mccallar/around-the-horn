@@ -50,7 +50,9 @@ portCheck(['AroundTheHorn/UI/Screens/SetupScreens.swift', 'AroundTheHorn/UI/Scre
 new Set([
   // Code, not words: an accessibility id, the font's file name, a format, SwiftUI's own.
   'title', '%.2f', 'VT323-Regular', 'PressStart2P-Regular',
-]), { allHaveWords: false });
+  // The shell's JavaScript is full of the DOM's own strings (classes, events, styles), so it
+  // is checked one way only: the app's words are all there.
+]), { allHaveWords: false, bothWays: false });
 
 for (const name of ['Scene', 'Chart', 'Forage']) {
   const sw = hexes(read(`AroundTheHorn/Journeys/Horn1849${name}.swift`));
