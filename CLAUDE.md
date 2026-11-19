@@ -15,6 +15,10 @@ make one.
   Press Start 2P) are SIL OFL and ship with `OFL.txt`.
 - `HornEngine` imports nothing UI. `PurityTests` reads the source to enforce it.
   All randomness goes through an injected `RandomSource`.
+- The engine also compiles for WASI (the web version, D12). An engine file imports
+  Foundation only as `#if os(WASI)` / `import FoundationEssentials` / `#else` /
+  `import Foundation` / `#endif`, imports nothing else, and never calls
+  `String(format:)`. `PurityTests` holds both.
 - Every sentence a player reads is original (spec §13). No names, text or art from any
   commercial game.
 - Never edit `AroundTheHorn/Info.plist` or the `.xcodeproj` by hand: edit `project.yml`
@@ -42,6 +46,25 @@ add a member to `JourneySkin` (no defaults, so every skin must answer) and let
 - UI tests always launch with `-journey <id>` (`LaunchUITests.horn`); a plain launch
   opens on the picker, or on the journey last chosen, once there are several.
 - What one journey can't show is tested with `AroundTheHornTests/TestJourneys.swift`.
+
+## The web version
+
+`web/` runs the same engine compiled to WebAssembly (`web/horn.wasm`, built from
+`HornEngine` and the bridge in `HornWeb`) under a JavaScript shell ported file for file
+from the app's (`flow.js` is `GameController`, `screens.js` the screens, `stores.js`
+`Stores`, and so on; its comments name the Swift each file ports). Each journey's skin is
+`web/js/journeys/<id>-skin.js`, `-scene.js`, `-chart.js` and `-forage.js`, listed in
+`skins.js`. See `web/README.md`.
+
+- **A change to a skin, a shared view or the controller is made on both sides**, word for
+  word, and the Node tests for it updated.
+- **After any change to `HornEngine/` or `HornWeb/`, rebuild `web/horn.wasm`** with
+  `Tools/build_web.sh` (it needs the Swift WebAssembly toolchain and SDK; the script says
+  where to get them) and commit it with the change, then run the Node tests. A build that
+  changes nothing the engine or the bridge compiles leaves the file's bytes as they were.
+- **The Node tests** (`Tools/web-tests/*.mjs`, Node 20+; `lib.mjs`, `player.mjs`,
+  `dom.mjs` and `port.mjs` are helpers, not tests) run nowhere but here: no CI runs them.
+  The loop is in the README. `parity.mjs` takes several minutes.
 
 ## Building and testing
 
