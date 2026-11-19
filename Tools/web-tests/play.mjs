@@ -29,7 +29,7 @@ async function test(name, f) {
 
 const e1 = await engine();
 const e2 = await engine();
-const saveOf = (storage) => JSON.parse(storage.getItem('horn.save-horn1849') ?? 'null');
+const saveOf = (storage, id = 'horn1849') => JSON.parse(storage.getItem(`horn.save-${id}`) ?? 'null');
 const screenWords = (f) => {
   const d = describe(f);
   return JSON.stringify(d.blocks.filter((b) => b.type !== 'scene')) + JSON.stringify(d.choices.map((c) => [c.label, c.enabled]));
@@ -88,6 +88,30 @@ await test('a crew with no water dies of thirst', async () => {
   p.press('Try again');
   check(p.screen === 'title', 'try again is the title card');
   check(!p.labels().some((l) => l.startsWith('Continue the voyage')), 'with nothing to continue');
+});
+
+await test('the engine ends a voyage as it queues the ending: the screens ahead of it leave no save to come back to', async () => {
+  // Seed 4's 1849 and seed 9's Iron Road, short of everything, each raise a message in
+  // the same turn as their game over and ahead of it. A save left then would bring back
+  // the turn before the end, to be played again.
+  for (const [journey, seed] of [['horn1849', 4], ['rail', 9]]) {
+    const storage = new MemoryStorage();
+    const p = await Player.make({ journey, engine: e1, storage, seeds: [String(seed)], random: lcg(seed) });
+    p.setUp();
+    p.shop({ food: 1 });
+    p.press(1);
+    const ahead = [];
+    const end = p.voyage({
+      targets: {}, fishOnce: false,
+      onScreen: (q) => {
+        if (['message', 'choice', 'burial'].includes(q.screen) && q.f.game?.over) ahead.push(saveOf(storage, journey));
+        return null;
+      },
+    });
+    check(end === 'gameOver', `${journey}: the voyage ends in a game over (${end})`);
+    check(ahead.length > 0 && ahead.every((x) => x === null),
+      `${journey}: a screen ahead of the game over, and no save behind it (${ahead.length}, ${ahead.filter((x) => x !== null).length} saved)`);
+  }
 });
 
 await test('no provisions, no voyage', async () => {

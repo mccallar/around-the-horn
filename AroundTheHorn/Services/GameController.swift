@@ -158,9 +158,16 @@ final class GameController {
 
     /// The voyage, and with it whatever is still waiting to be shown (`pending`): the
     /// engine has already moved on from what raised it, so the two only make sense
-    /// together.
+    /// together. An ended voyage is never saved, and its save goes at once: the engine
+    /// ends it as it queues the ending, while the messages ahead of that are still to be
+    /// shown, and a save left on disk then would bring back the turn before the end.
     func save() {
-        if let g = game, !g.over { persistence.save(g, pending: pending) }
+        guard let g = game else { return }
+        if g.over {
+            persistence.deleteSave(g.journey)
+        } else {
+            persistence.save(g, pending: pending)
+        }
     }
 
     /// What the last turn raised and the player has not yet dealt with, in order.

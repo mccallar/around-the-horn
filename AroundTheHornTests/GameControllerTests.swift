@@ -94,6 +94,60 @@ final class GameControllerTests: XCTestCase {
         XCTAssertFalse(endings.contains("too long"))
     }
 
+    /// The engine ends a voyage as it queues the ending, and what it raised ahead of the
+    /// ending is still shown first. The save is gone as soon as the first of those is up:
+    /// quitting on one must not bring back the turn before the end to be played again.
+    func testAnEndingClearsTheSaveBeforeTheMessagesAheadOfIt() {
+        setUpVoyage()
+        c.save()
+        XCTAssertNotNil(p.loadSave(Horn1849.id))
+        c.run { $0.state.over = true }
+        c.present([.message("The last line in the log."), .gameOver(title: "Lost", body: "Gone.")], then: .travel)
+        guard case .message(let t, _, let then) = c.screen else { return XCTFail("\(c.screen)") }
+        XCTAssertEqual(t, "The last line in the log.")
+        XCTAssertNil(p.loadSave(Horn1849.id), "no save behind the message ahead of the game over")
+        c.save()  // what going to the background does
+        XCTAssertNil(p.loadSave(Horn1849.id))
+        XCTAssertNil(GameController(persistence: p).savedVoyage, "a relaunch has nothing to continue")
+        then()
+        guard case .gameOver = c.screen else { return XCTFail("\(c.screen)") }
+    }
+
+    /// Whole voyages short of everything: some turn raises a message or a burial ahead of
+    /// its game over (seen at least once), and none leaves a save behind it.
+    func testNoScreenAheadOfAGameOverLeavesASave() {
+        var ahead = 0
+        for seed in 1...12 {
+            c.startNewGame()
+            c.chooseRole(.merchant)
+            c.setNames(ship: "", captain: "Ira", crew: ["", "", "", ""])
+            c.chooseDeparture(year: 1849, month: 0)
+            c.run { $0.rng = SeededRNG(seed: UInt64(seed)) }
+            c.enterFirstShop()
+            guard case .shop(let done) = c.screen else { return XCTFail("\(c.screen)") }
+            c.run { $0.buy([.food: 100]) }
+            done()
+            c.startTravel()
+            for _ in 0..<20_000 {
+                switch c.screen {
+                case .travel: c.tick(); continue
+                case .message(_, _, let then):
+                    if c.game!.over { ahead += 1; XCTAssertNil(p.loadSave(Horn1849.id), "seed \(seed)") }
+                    then(); continue
+                case .burial(let id, let cause):
+                    if c.game!.over { ahead += 1; XCTAssertNil(p.loadSave(Horn1849.id), "seed \(seed)") }
+                    c.bury(crewID: id, cause: cause, epitaph: ""); continue
+                case .choice(let e): c.choose(e, option: e.options.firstIndex(where: \.enabled)!); continue
+                case .portMenu, .seaMenu: c.startTravel(); continue
+                default: break
+                }
+                break
+            }
+            c.goToTitle()
+        }
+        XCTAssertGreaterThan(ahead, 0, "no voyage raised anything ahead of its ending")
+    }
+
     func testAFinaleEntersTheTopTen() {
         setUpVoyage()
         c.run { $0.state.mile = 13_990; $0.state.stopIndex = 10 }

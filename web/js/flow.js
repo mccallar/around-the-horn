@@ -237,10 +237,17 @@ export class Flow {
     return r;
   }
 
-  /** The voyage, and with it whatever is still waiting to be shown (D10). */
+  /**
+   * The voyage, and with it whatever is still waiting to be shown (D10). An ended voyage is
+   * never saved, and its save goes at once: the engine ends it as it queues the ending,
+   * while the messages ahead of that are still to be shown, and a save left behind then
+   * would bring back the turn before the end.
+   */
   save() {
     const g = this.game;
-    if (g && !g.over) this.persistence.save(this.journeyID, this.engine.save(this.pending));
+    if (!g) return;
+    if (g.over) this.persistence.deleteSave(g.journey);
+    else this.persistence.save(this.journeyID, this.engine.save(this.pending));
   }
 
   /** What the last turn raised and the player has not yet dealt with, in order. */
