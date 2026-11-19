@@ -249,8 +249,10 @@ final class AirshipScreenshotUITests: ScreenshotWalk {
     }
 
     /// The other ending: out of gas over the Barents Sea.
+    /// Nothing to drop (no ballast, no petrol to dump) and no mast below: down for good.
     func testForcedDown() {
-        relaunch(["-HornDebugStart", "bear", "-HornDebugHull", "0.2", "-HornTickSeconds", "2"])
+        let nothing = ["-HornDebugTimber", "0", "-HornDebugFuel", "0"]
+        relaunch(["-HornDebugStart", "bear", "-HornDebugHull", "0.2", "-HornTickSeconds", "2"] + nothing)
         shot("54-heavy")
         tap("Continue the flight")
         roll(until: "Try again")
@@ -260,7 +262,7 @@ final class AirshipScreenshotUITests: ScreenshotWalk {
         XCTAssertFalse(button(startingWith: "Continue the flight of").exists, "no save survives a forced landing")
 
         // Over Lapland, past the Circle, it is a field: Scandinavia is north, but land.
-        relaunch(["-HornDebugStart", "circle", "-HornDebugHull", "0.2", "-HornTickSeconds", "2"])
+        relaunch(["-HornDebugStart", "circle", "-HornDebugHull", "0.2", "-HornTickSeconds", "2"] + nothing)
         tap("Continue the flight")
         let over = app.buttons["Try again"]
         for _ in 0..<40 where !over.exists {

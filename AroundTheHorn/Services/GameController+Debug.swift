@@ -11,12 +11,14 @@ extension GameController {
     /// `-HornDebugSails <n>`, what drives the vessel is down to `n`%: given out, at 0. With
     /// `-HornDebugFood <n>`, `n` of food aboard: short of what a stop will want to see. With
     /// `-HornDebugWater <n>`, `n` of water aboard, whatever the skin calls it (the Klondike's firewood).
+    /// With `-HornDebugTimber <n>`, `n` of what mends the hull (the airship's ballast bags):
+    /// none, and a hull at 0% has nothing to answer it with.
     /// With `-HornDebugVar <key>=<n>`, one of the journey's own `vars` set to `n`: a way
     /// taken at a fork, say. With `-HornDebugMile <n>`, at mile `n` instead (in the journey's
     /// stored units), still bound for that stop: a stretch of the way with no stop at its end.
     func debugStart(at stopID: String, month: Int = 0, atStop: Bool = false, hull: Double? = nil, fuel: Double? = nil,
-                    sails: Double? = nil, food: Double? = nil, water: Double? = nil, vars: [String: Double] = [:],
-                    mile: Int? = nil) {
+                    sails: Double? = nil, food: Double? = nil, water: Double? = nil, timber: Double? = nil,
+                    vars: [String: Double] = [:], mile: Int? = nil) {
         guard let i = journey.stops.firstIndex(where: { $0.id == stopID }), i > 0 else { return }
         var s = skin.debug.start(i, month)
         if atStop {
@@ -28,6 +30,7 @@ extension GameController {
         if let sails { s.sails = sails }
         if let food { s.food = food }
         if let water { s.water = water }
+        if let timber { s.timber = Int(timber) }
         for (k, v) in vars { s.vars[k] = v }
         if let mile, !atStop, mile > journey.stops[i - 1].mile, mile < journey.stops[i].mile { s.mile = mile }
         loadForDebug(s)

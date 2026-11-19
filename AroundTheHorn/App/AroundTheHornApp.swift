@@ -21,7 +21,7 @@ struct AroundTheHornApp: App {
             c.debugStart(at: stop, month: UserDefaults.standard.integer(forKey: "HornDebugMonth"),
                          atStop: UserDefaults.standard.bool(forKey: "HornDebugAtStop"), hull: number("HornDebugHull"),
                          fuel: number("HornDebugFuel"), sails: number("HornDebugSails"), food: number("HornDebugFood"),
-                         water: number("HornDebugWater"), vars: AroundTheHornApp.debugVars(UserDefaults.standard.string(forKey: "HornDebugVar")),
+                         water: number("HornDebugWater"), timber: number("HornDebugTimber"), vars: AroundTheHornApp.debugVars(UserDefaults.standard.string(forKey: "HornDebugVar")),
                          mile: number("HornDebugMile").map { Int($0) })
         }
         #endif

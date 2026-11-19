@@ -84,7 +84,7 @@ test build along with it.
 | `-HornDebugAtStop YES` | With `-HornDebugStart`: at the stop itself, under way, its arrival already told. |
 | `-HornDebugMile <n>` | With `-HornDebugStart`: at that point of the route instead. |
 | `-HornDebugHull <n>`, `-HornDebugSails <n>` | With `-HornDebugStart`: the two condition meters down to `n`%. |
-| `-HornDebugFuel <n>`, `-HornDebugFood <n>`, `-HornDebugWater <n>` | With `-HornDebugStart`: that much aboard. |
+| `-HornDebugFuel <n>`, `-HornDebugFood <n>`, `-HornDebugWater <n>`, `-HornDebugTimber <n>` | With `-HornDebugStart`: that much aboard (timber: what mends the hull, whatever the skin calls it). |
 | `-HornDebugVar <key>=<n>` | With `-HornDebugStart`: one of the journey's own variables (a fork's way taken, say). |
 | `-HornTickSeconds 4` | Slows the travel clock (UI tests can't query a screen that redraws every 0.7 s). |
 | `-HornSceneGallery YES` | Every weather of the journey's scene side by side. |
