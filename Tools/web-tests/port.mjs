@@ -148,3 +148,21 @@ export function portChecks(check, swiftFiles, jsFiles, ignore = new Set(), { all
 
 /** Every 0x hex colour in a file, in order. */
 export const hexes = (src) => [...src.matchAll(/0x([0-9A-Fa-f]{6})\b/g)].map((m) => m[1].toUpperCase());
+
+/**
+ * `check` that a Swift file and its port use the same colours in the same order, so two
+ * colours swapped between drawings fail. A chart's route colour is a field of its skin,
+ * which the Swift writes first and the JavaScript last: it is compared on its own.
+ */
+export function sameColours(check, swiftFile, jsFile, label) {
+  const route = /routeColor:\s*(?:Color\(hex:\s*|hex\()0x([0-9A-Fa-f]{6})\b/g;
+  const sw = read(swiftFile), js = read(jsFile);
+  const routes = (src) => [...src.matchAll(route)].map((m) => m[1].toUpperCase());
+  const rest = (src) => hexes(src.replace(route, ''));
+  const a = rest(sw), b = rest(js);
+  let k = 0;
+  while (k < a.length && a[k] === b[k]) k++;
+  check(a.length === b.length && k === a.length,
+    `${label}: the colours are the app's, in its order (${a.length} and ${b.length}; from the ${k + 1}th: ${a.slice(k, k + 3)} | ${b.slice(k, k + 3)})`);
+  check(JSON.stringify(routes(sw)) === JSON.stringify(routes(js)), `${label}: the route's colour is the app's`);
+}

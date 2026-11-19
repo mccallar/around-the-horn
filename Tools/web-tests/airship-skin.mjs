@@ -17,7 +17,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { repo } from './lib.mjs';
-import { portChecks, hexes } from './port.mjs';
+import { portChecks, sameColours } from './port.mjs';
 import { Player, engine, lcg, describe, wordProblems, markupProblems, foreignProblems, AIRSHIP_FOREIGN, FakeTimers } from './player.mjs';
 import { Flow, MemoryStorage } from '../../web/js/flow.js';
 import { BufferCanvas } from '../../web/js/pixels.js';
@@ -46,11 +46,7 @@ const JS = (n) => `web/js/journeys/airship-${n.toLowerCase()}.js`;
 const NAMES = ['Scene', 'Chart', 'Forage', 'Skin'];
 portChecks(check, NAMES.map(SW), NAMES.map(JS), new Set(['Kittiwake', 'Leif', 'Rosa', 'Olav', 'Edith', 'Natale']));
 
-for (const name of NAMES) {
-  const sw = hexes(read(SW(name))).sort();
-  const js = hexes(read(JS(name))).sort();
-  check(JSON.stringify(sw) === JSON.stringify(js), `Airship${name}: the colours are the app's (${sw.length} and ${js.length})`);
-}
+for (const name of NAMES) sameColours(check, SW(name), JS(name), `Airship${name}`);
 
 /**
  * The numbers in a piece of either source. Comments and the Swift's type names hold no
@@ -106,7 +102,7 @@ const between = (s, a, b) => {
     ['static func airship', 'static func lights', 'export function airship', 'export function lights'],
     ['static func lights', '// MARK: VoiceOver', 'export function lights', '// MARK: VoiceOver']]) {
     const s = nums(between(sw, a, b)), j = nums(between(js, c, d));
-    const key = (x) => JSON.stringify([...x].sort((p, q) => p - q));
+    const key = (x) => JSON.stringify([...x]);
     check(key(s) === key(j), `${a}: the numbers are the app's (${s.length}: ${s.join(' ')} | ${j.length}: ${j.join(' ')})`);
   }
 }
@@ -129,7 +125,7 @@ const between = (s, a, b) => {
     ['static func circle', 'static func names', 'export function circle', 'export function names'],
     ['static func names', '\n}', 'export function names', 'export function chart'],
     ['static let skin', '// MARK: The top', 'export function chart(J)', '\n}\n']]) {
-    const key = (x) => JSON.stringify([...x].sort((p, q) => p - q));
+    const key = (x) => JSON.stringify([...x]);
     check(key(nums(between(sw, a, b))) === key(nums(between(js, c, d))), `${a}: the numbers are the app's`);
   }
   const fs = read(SW('Forage')), fj = read(JS('Forage'));
@@ -140,12 +136,12 @@ const between = (s, a, b) => {
   for (const [a, b, c, d] of [['static func backdrop', 'static func balloon', 'export function backdrop', 'export function balloon'],
     ['static func balloon', 'static func wind', 'export function balloon', 'export function wind'],
     ['static func wind', '\n}', 'export function wind', 'export function forage']]) {
-    const key = (x) => JSON.stringify([...x].sort((p, q) => p - q));
+    const key = (x) => JSON.stringify([...x]);
     // The JS reads a quarry's colour in `colorOf`, with its radix.
     check(key(nums(between(fs, a, b).replace('radix: 16', ''))) === key(nums(between(fj, c, d))), `${a}: the numbers are the app's`);
   }
   const ss = read(SW('Skin')), sj = read(JS('Skin'));
-  const key = (x) => JSON.stringify([...x].sort((p, q) => p - q));
+  const key = (x) => JSON.stringify([...x]);
   check(key(nums(between(ss, 'static let debug', 'static func at('))) === key([...nums(between(sj, 'export function debugStart', 'export function at(')),
     ...nums(between(sj, 'gallery: [', '],\n    },'))]), 'the debug start and the gallery');
   check(key(nums(between(ss, 'static func at(', '\n}'))) === key(nums(between(sj, 'export function at(', 'export function skin'))),

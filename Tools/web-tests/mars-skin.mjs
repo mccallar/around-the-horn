@@ -18,7 +18,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { repo } from './lib.mjs';
-import { portChecks, hexes } from './port.mjs';
+import { portChecks, sameColours } from './port.mjs';
 import { Player, engine, lcg, describe, wordProblems, markupProblems, marsProblems, MARS_FOREIGN, FakeTimers } from './player.mjs';
 import { Flow, MemoryStorage } from '../../web/js/flow.js';
 import { BufferCanvas } from '../../web/js/pixels.js';
@@ -47,11 +47,7 @@ const JS = (n) => `web/js/journeys/mars-${n.toLowerCase()}.js`;
 const NAMES = ['Scene', 'Chart', 'Forage', 'Skin'];
 portChecks(check, NAMES.map(SW), NAMES.map(JS), new Set(['Fair Copy', 'Noor', 'Tomasz', 'Priya', 'Kenji', 'Lucía']));
 
-for (const name of NAMES) {
-  const sw = hexes(read(SW(name))).sort();
-  const js = hexes(read(JS(name))).sort();
-  check(JSON.stringify(sw) === JSON.stringify(js), `Mars${name}: the colours are the app's (${sw.length} and ${js.length})`);
-}
+for (const name of NAMES) sameColours(check, SW(name), JS(name), `Mars${name}`);
 
 /**
  * The numbers in a piece of either source. Comments and the Swift's type names hold no
@@ -69,21 +65,26 @@ const between = (s, a, b) => {
   check(j >= 0, `the marker ${JSON.stringify(b)} follows ${a}`);
   return s.slice(i, j);
 };
-const key = (x) => JSON.stringify([...x].sort((p, q) => p - q));
-/** The numbers of `a`, less one of each of `less`, as a sorted key. */
-const without = (a, less) => {
+/**
+ * A section's numbers in order, so a transposed pair (`x + 1, y + 2` for `x + 2, y + 1`)
+ * fails; sorted only for the sections in UNORDERED, where the two write the same sums in another order.
+ */
+const UNORDERED = new Set(['static func freighter', 'static func inset(']);
+const key = (x, sorted = false) => JSON.stringify(sorted ? [...x].sort((p, q) => p - q) : [...x]);
+/** The numbers of `a`, less one of each of `less`, as a key. */
+const without = (a, less, sorted = false) => {
   const out = [...a];
   for (const n of less) {
     const i = out.indexOf(n);
     if (i >= 0) out.splice(i, 1);
   }
-  return key(out);
+  return key(out, sorted);
 };
 /** Each Swift piece against its JS piece: `[swFrom, swTo, jsFrom, jsTo, jsExtra, swExtra]`. */
 function sameNumbers(sw, js, pairs) {
   for (const [a, b, c, d, jsExtra = [], swExtra = []] of pairs) {
     const s = nums(between(sw, a, b)), j = nums(between(js, c, d));
-    check(without(s, swExtra) === without(j, jsExtra), `${a}: the numbers are the app's (${s.length}: ${s.join(' ')} | ${j.length}: ${j.join(' ')})`);
+    check(without(s, swExtra, UNORDERED.has(a)) === without(j, jsExtra, UNORDERED.has(a)), `${a}: the numbers are the app's (${s.length}: ${s.join(' ')} | ${j.length}: ${j.join(' ')})`);
   }
 }
 

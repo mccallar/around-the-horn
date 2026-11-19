@@ -13,7 +13,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { repo } from './lib.mjs';
-import { portChecks, hexes } from './port.mjs';
+import { portChecks, sameColours } from './port.mjs';
 import { engine, lcg, describe, wordProblems, markupProblems, FakeTimers } from './player.mjs';
 import { Flow, MemoryStorage } from '../../web/js/flow.js';
 import { BufferCanvas } from '../../web/js/pixels.js';
@@ -55,9 +55,7 @@ new Set([
 ]), { allHaveWords: false, bothWays: false });
 
 for (const name of ['Scene', 'Chart', 'Forage']) {
-  const sw = hexes(read(`AroundTheHorn/Journeys/Horn1849${name}.swift`));
-  const js = hexes(read(`web/js/journeys/horn1849-${name.toLowerCase()}.js`));
-  check(JSON.stringify(sw.sort()) === JSON.stringify(js.sort()), `Horn1849${name}: the colours are the app's`);
+  sameColours(check, `AroundTheHorn/Journeys/Horn1849${name}.swift`, `web/js/journeys/horn1849-${name.toLowerCase()}.js`, `Horn1849${name}`);
 }
 
 /** The ship's rows, as written in the Swift. */

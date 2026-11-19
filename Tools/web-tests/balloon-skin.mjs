@@ -18,7 +18,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { repo } from './lib.mjs';
-import { portChecks, hexes } from './port.mjs';
+import { portChecks, sameColours } from './port.mjs';
 import { Player, engine, lcg, describe, plain, wordProblems, markupProblems, balloonProblems, BALLOON_FOREIGN, FakeTimers } from './player.mjs';
 import { Flow, MemoryStorage } from '../../web/js/flow.js';
 import { BufferCanvas } from '../../web/js/pixels.js';
@@ -46,11 +46,7 @@ const JS = (n) => `web/js/journeys/balloon-${n.toLowerCase()}.js`;
 const NAMES = ['Scene', 'Chart', 'Forage', 'Skin'];
 portChecks(check, NAMES.map(SW), NAMES.map(JS), new Set(['Skylark', 'Greta', 'Hugo', 'Yuki', 'Conor', 'Rosa']));
 
-for (const name of NAMES) {
-  const sw = hexes(read(SW(name))).sort();
-  const js = hexes(read(JS(name))).sort();
-  check(JSON.stringify(sw) === JSON.stringify(js), `Balloon${name}: the colours are the app's (${sw.length} and ${js.length})`);
-}
+for (const name of NAMES) sameColours(check, SW(name), JS(name), `Balloon${name}`);
 
 /**
  * The numbers in a piece of either source. Comments and the Swift's type names hold no

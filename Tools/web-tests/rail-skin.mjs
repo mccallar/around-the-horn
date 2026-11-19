@@ -15,7 +15,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { repo } from './lib.mjs';
-import { portChecks, hexes } from './port.mjs';
+import { portChecks, sameColours } from './port.mjs';
 import { Player, engine, lcg, describe, wordProblems, markupProblems, sailorProblems, FakeTimers } from './player.mjs';
 import { Flow, MemoryStorage } from '../../web/js/flow.js';
 import { BufferCanvas } from '../../web/js/pixels.js';
@@ -43,9 +43,7 @@ portChecks(check, ['AroundTheHorn/Journeys/RailSkin.swift', 'AroundTheHorn/Journ
   'web/js/journeys/rail-scene.js'], new Set(['Prairie Queen', 'Amos', 'Hattie', 'Lars', 'Clara', 'Otto']));
 
 for (const name of ['Scene', 'Chart', 'Forage', 'Skin']) {
-  const sw = hexes(read(`AroundTheHorn/Journeys/Rail${name}.swift`)).sort();
-  const js = hexes(read(`web/js/journeys/rail-${name.toLowerCase()}.js`)).sort();
-  check(JSON.stringify(sw) === JSON.stringify(js), `Rail${name}: the colours are the app's (${sw.length} and ${js.length})`);
+  sameColours(check, `AroundTheHorn/Journeys/Rail${name}.swift`, `web/js/journeys/rail-${name.toLowerCase()}.js`, `Rail${name}`);
 }
 
 /** The train's sprites, row for row as written in the Swift. */
