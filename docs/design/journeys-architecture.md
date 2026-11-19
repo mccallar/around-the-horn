@@ -485,8 +485,8 @@ her purse can't buy (D19). The four journeys before it look, read and play as th
   quarry keeps to (the grapple's ice drifts in the three filaments of a comet's stream,
   as docs/journeys/mars.md §15 has it). `FishingModel` puts each new quarry at the middle
   of the lane its own draw falls in (`ForageField.lane`), so the random draws are the same;
-  every other skin keeps 0, quarry anywhere in its lanes, as before. The web shell does not
-  have it (the web offers neither journey that would use it).
+  every other skin keeps 0, quarry anywhere in its lanes, as before. The web shell honours
+  it too (`web/js/fishing.js`), since the web offers the transfer.
 - **One debug launch argument**, `-HornDebugSails <n>` with `-HornDebugStart`: the second
   meter (power & drive here) down to `n`%, so a walk can show the array dark. Debug builds
   only.
@@ -665,3 +665,15 @@ and play as they did: every new member's answer for them is the one that changes
 5. `xcodegen generate`; `swift test`; the app and UI suites; screenshots of the title,
    the first shop, travelling, a port, the chart and the mini-game.
 6. Append "As built" to the spec: what differs from it and the bot's numbers.
+7. The web port (D13), file for file from the Swift skin:
+   `web/js/journeys/<id>-skin.js`, `-scene.js`, `-chart.js` and `-forage.js`, and one entry
+   in `web/js/journeys/skins.js` (`imports.mjs` fails while the engine has a journey the
+   web has no skin for). Whatever the skin asks the engine beyond the view goes into the
+   bridge's hooks (`HornWeb/Bridge.swift`, `v.hooks.<id>`).
+8. Its Node tests: `Tools/web-tests/<id>.mjs` (the journey played through its screens)
+   and `<id>-skin.mjs` (every literal, colour and table against the Swift, through
+   `port.mjs`), with the journey's careful stores and foreign words in `player.mjs`;
+   `parity.mjs` plays every journey the engine has, and its count of journeys goes up by
+   one.
+9. Rebuild and commit `web/horn.wasm` (`Tools/build_web.sh`), list the journey and its
+   two tests in `web/README.md`, and add it to D13's paragraph in `docs/decisions.md`.

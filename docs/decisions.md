@@ -168,7 +168,8 @@ and does the same; a fix belongs to the engine's escape or the app's Markup. On 
 platforms nothing changes: the `#if` keeps `import Foundation`, and the three gates are
 untouched. `Tools/web-tests/golden.mjs` replays the 300 golden voyages
 through horn.wasm against the Mac's fixture, and `parity.mjs` compares every reply of
-seeded 1849 and rail voyages between horn.wasm and the bridge built for the Mac, and the
+seeded voyages (1849 and rail when this was written; all six journeys since each was
+ported, D13) between horn.wasm and the bridge built for the Mac, and the
 escape beside every scalar (the marks new in Unicode 17.0 aside, which Swift's tables know
 and macOS 15's Foundation does not). An Int is 32 bits in WebAssembly; no amount in the
 game comes near 2^31. The build leaves out the per-object LLVM module hash, which covered

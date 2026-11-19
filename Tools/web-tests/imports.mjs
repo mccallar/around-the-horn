@@ -74,6 +74,10 @@ function members(name) {
     vars: [...body.matchAll(/^ {4}var (\w+)\b/gm)].map((x) => x[1]) };
 }
 const tables = e.journeys();
+// Both ways: a journey the engine has with no web skin would be left off the web's picker
+// without a word.
+for (const J of tables) check(all.some((mod) => mod.id === J.id), `the web has a skin for the engine's journey ${J.id}`);
+check(tables.length === all.length, `as many skins as journeys (${all.length}, ${tables.length})`);
 for (const mod of all) {
   const J = tables.find((j) => j.id === mod.id);
   check(!!J, `the engine has a journey for the skin ${mod.id}`);

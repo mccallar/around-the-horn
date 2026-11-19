@@ -26,7 +26,9 @@ them. Then:
 
 It writes `web/horn.wasm` and prints its size (about 13 MB). The same source gives the same
 bytes from any checkout and any scratch directory, so a build after a change that does not
-reach the engine or the bridge leaves the file as it was. Commit the new file with the
+reach the engine or the bridge leaves the file as it was. (`HORN_WASM_OPT=1` also runs
+Binaryen's `wasm-opt` over it when that is on the PATH; its bytes then depend on its
+version, so the committed file is built without it.) Commit the new file with the
 change that needed it, and run the tests below.
 
 ## Test

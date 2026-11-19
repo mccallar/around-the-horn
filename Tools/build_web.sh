@@ -60,9 +60,11 @@ if [ -x "$OBJCOPY" ]; then
 else
     cp "$OUT" web/horn.wasm
 fi
-# wasm-opt (Binaryen) would shrink it further; it is not part of the toolchain, so it is
-# used only if it happens to be on the PATH.
-if command -v wasm-opt >/dev/null 2>&1; then
+# wasm-opt (Binaryen) would shrink it further, but it is not part of the toolchain and its
+# output depends on its version, so the committed file is built without it: the same source
+# then gives the same bytes from any checkout. It runs only when asked, with HORN_WASM_OPT=1
+# (and wasm-opt on the PATH), for a file that is not committed.
+if [ -n "${HORN_WASM_OPT:-}" ] && command -v wasm-opt >/dev/null 2>&1; then
     if wasm-opt -Oz --detect-features web/horn.wasm -o "$SCRATCH/opt.wasm"; then
         cp "$SCRATCH/opt.wasm" web/horn.wasm
     else
