@@ -395,7 +395,7 @@ export function describe(c) {
       const role = J.roles.find((r) => r.role === g.role);
       blocks = [
         heading(forage.heading),
-        { type: 'tally', items: [`${forage.throwsLabel}: ${g.tackle}`, `${forage.caughtLabel}: ${rw.measure(m.caught)}`,
+        { type: 'tally', items: [`${forage.throwsLabel}: ${formatNumber(g.tackle)}`, `${forage.caughtLabel}: ${rw.measure(m.caught)}`,
           `${forage.timeLabel}: ${Math.ceil(Math.max(0, m.time))}`] },
         { type: 'fishing', label: forage.label(m.fish.length), hint: forage.actionHint },
         para(forage.hint(rw.measure(role.catchLimit)), 18, 'dim'),

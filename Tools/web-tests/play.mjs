@@ -114,6 +114,26 @@ await test('the engine ends a voyage as it queues the ending: the screens ahead 
   }
 });
 
+await test('the fishing tally groups a thousand throws as the app does: "Throws: 1,000"', async () => {
+  const p = await Player.make({ engine: e1, seeds: ['13'], random: lcg(13) });
+  p.setUp();
+  p.shop({ food: 10, water: 10, tackle: 50 });
+  p.press('Pay');
+  p.press(1);
+  check(p.f.game.tackle === 1000, `a thousand throws aboard (${p.f.game.tackle})`);
+  let tally = null;
+  for (let i = 0; i < 40 && tally == null; i++) {
+    if (p.screen === 'travel') p.press(1);
+    else if (p.screen === 'seaMenu' && p.labels().includes('Go fishing') && p.look().choices.find((c) => plain(c.label) === 'Go fishing').enabled) {
+      p.press('Go fishing');
+      if (p.screen === 'fishing') tally = p.look().blocks.find((b) => b.type === 'tally');
+      else p.press(1);
+    } else if (p.screen === 'seaMenu') p.press(1);
+    else p.look().choices.find((c) => c.enabled).act();
+  }
+  check(tally != null && tally.items[0] === `${p.f.skin.forage.throwsLabel}: 1,000`, `the throws grouped (${tally?.items[0]})`);
+});
+
 await test('no provisions, no voyage', async () => {
   const p = await Player.make({ engine: e1, seeds: ['5'] });
   p.setUp();
