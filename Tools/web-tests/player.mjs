@@ -43,6 +43,8 @@ export function lcg(seed) {
 }
 
 const WRONG = /undefined|NaN|\[object|\bnull\b|Infinity/;
+/** Real companies' and brands' names, which no word on a screen may use. */
+const MARKS = /\b(Aspirin|Thermos|Primus|Vaseline|Band-Aid|Kleenex|Velcro|Jeep)\b/i;
 
 /** The tags a piece of markup leaves open, and any bracket that looks like a tag but isn't one. */
 export function markupProblems(s) {
@@ -80,6 +82,7 @@ export function wordProblems(d, where = '') {
   for (const { text, markup } of texts(d)) {
     if (typeof text !== 'string') { out.push(`${where}: not a string: ${text}`); continue; }
     if (WRONG.test(text)) out.push(`${where}: ${JSON.stringify(text)}`);
+    if (MARKS.test(text)) out.push(`${where}: a trademark in ${JSON.stringify(text)}`);
     if (markup) out.push(...markupProblems(text).map((p) => `${where}: ${p}`));
   }
   for (const c of d.choices) if (!plain(c.label).trim()) out.push(`${where}: a blank choice`);

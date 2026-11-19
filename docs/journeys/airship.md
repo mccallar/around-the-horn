@@ -167,7 +167,7 @@ Nine items. Prices are at Rome; port price = `base × port.mult × (port.mod[ite
 | `food` | food | Provisions | kg (kg) | 10 | 1 | $0.50 / kg | 300 | Pemmican, biscuit, chocolate, tinned soup. Each hand eats 0.1–0.3 kg a watch. |
 | `water` | water | Drinking water | litres (litre) | 20 | 1 | $0.05 / litre | 300 | About 0.6 litre per person per watch, in cans along the keel. |
 | `coffee` | deficiency preventive | Coffee & cocoa | tins (tin) | 1 | 1 | $4 | 20 | Kept hot in vacuum flasks, it keeps the watch awake. A tin lasts five people about ten watches. |
-| `meds` | medicine | Medicine | kits (kit) | 1 | 1 | $15 | 10 | Aspirin, iodine, bandages, burn ointment. One kit per illness halves its harm. |
+| `meds` | medicine | Medicine | kits (kit) | 1 | 1 | $15 | 10 | Headache powders, iodine, bandages, burn ointment. One kit per illness halves its harm. |
 | `furs` | warmth | Fur flying suits | suits (suit) | 1 | 1 | $18 | 8 | Reindeer-skin suits and fur boots. One per soul aboard, or the polar cold will kill them. |
 | `spares` | repair-propulsion | Engine spares | boxes (box) | 1 | 1 | $22 | 10 | Plugs, valves, magneto parts and a spare propeller blade, for repairs aloft. |
 | `ballast` | repair-structure | Water ballast | bags (bag) | 1 | 1 | $8 | 16 | A hundred kilos of water and alcohol, so it won't freeze. Drop a bag and she rises. |

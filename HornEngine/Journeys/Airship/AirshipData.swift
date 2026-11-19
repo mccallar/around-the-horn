@@ -61,7 +61,7 @@ enum AirshipData {
         Item(key: .limes, name: "Coffee & cocoa", unit: "tins", one: "tin", step: 1, per: 1, price: 4, max: 20,
              desc: "Kept hot in vacuum flasks, it keeps the watch awake. A tin lasts five people about ten watches."),
         Item(key: .meds, name: "Medicine", unit: "kits", one: "kit", step: 1, per: 1, price: 15, max: 10,
-             desc: "Aspirin, iodine, bandages, burn ointment. One kit per illness halves its harm."),
+             desc: "Headache powders, iodine, bandages, burn ointment. One kit per illness halves its harm."),
         Item(key: .clothes, name: "Fur flying suits", unit: "suits", one: "suit", step: 1, per: 1, price: 18, max: 8,
              desc: "Reindeer-skin suits and fur boots. One per soul aboard, or the polar cold will kill them."),
         Item(key: .sailcloth, name: "Engine spares", unit: "boxes", one: "box", step: 1, per: 1, price: 22, max: 10,

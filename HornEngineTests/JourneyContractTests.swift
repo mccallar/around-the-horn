@@ -73,6 +73,51 @@ final class JourneyContractTests: XCTestCase {
         }
     }
 
+    /// No real company's or brand's name reaches a player: a trademark that reads as a
+    /// common word in one country is still a mark in another. Every engine source is read,
+    /// and every item a shop sells.
+    func testNoTrademarkReachesAPlayer() throws {
+        let marks = ["Aspirin", "Thermos", "Primus", "Vaseline", "Band-Aid", "Kleenex", "Velcro", "Jeep"]
+        let engineDir = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+            .appendingPathComponent("HornEngine")
+        let files = (FileManager.default.enumerator(at: engineDir, includingPropertiesForKeys: nil)?
+            .compactMap { $0 as? URL } ?? []).filter { $0.pathExtension == "swift" }
+        XCTAssertGreaterThan(files.count, 20)
+        for file in files {
+            let text = try String(contentsOf: file, encoding: .utf8)
+            for m in marks where text.range(of: "\\b\(m)\\b", options: [.regularExpression, .caseInsensitive]) != nil {
+                XCTFail("\(file.lastPathComponent) names \(m)")
+            }
+        }
+        for j in Journeys.all {
+            for it in j.items {
+                for m in marks { XCTAssertFalse((it.name + " " + it.desc).localizedCaseInsensitiveContains(m), "\(j.id) \(it.key): \(m)") }
+            }
+        }
+    }
+
+    /// D11 retired 1849's role, ration and trade lines; no journey's design, and no design
+    /// note, may give them as the words a player reads. (SPEC.md is the original spec, and
+    /// decisions.md records the change from it.)
+    func testNoDesignDocUsesTheLinesD11Retired() throws {
+        let docs = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+            .appendingPathComponent("docs")
+        let retired = #"Many kinds of people|You may:|Find out the differences|\bBe an? [a-z]+ from\b|\bFilling\b|\bMeager\b|Bare bones|Attempt to trade"#
+        var read = 0
+        for folder in ["journeys", "design"] {
+            let dir = docs.appendingPathComponent(folder)
+            for file in try FileManager.default.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil)
+            where file.pathExtension == "md" {
+                read += 1
+                let text = try String(contentsOf: file, encoding: .utf8)
+                if let r = text.range(of: retired, options: .regularExpression) {
+                    XCTFail("\(folder)/\(file.lastPathComponent) uses D11's retired \"\(text[r])\"")
+                }
+            }
+        }
+        XCTAssertGreaterThanOrEqual(read, 7, "the design docs were not found")
+    }
+
     func testTablesAreComplete() {
         for j in Journeys.all {
             for r in Role.allCases {
