@@ -159,8 +159,9 @@ Also shared and journey-aware:
 - **A contract test** over `Journeys.all`: every journey has a skin, every skin's copy is
   non-empty, every skin's draws run without trapping for every weather and stop.
 
-**1849 must look and read exactly as it did.** The reference is the 38 screenshots taken
-before this work (`docs/reference/shots-1849/`).
+**1849 must look and read exactly as it did**, apart from the role, ration and trade lines
+D11 reworded. The reference is the 38 screenshots in `docs/reference/shots-1849/`, first
+taken before this work and retaken after D11 with the same walk.
 
 ### As built
 

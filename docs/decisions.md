@@ -147,7 +147,8 @@ Boston merchant", "A Mystic shipwright" and "A Nantucket whaler", the difference
 port row is "Seek a trade". Words only: no number, formula or random draw changed, so the
 prototype parity, balance and golden-voyage tests are untouched. The rail journey's
 matching lines were reworded the same day. The reference screenshots of the screens that
-show these lines are retaken with the next screenshot walk.
+show these lines are retaken with the next screenshot walk (both sets were retaken on
+2026-11-19).
 
 ## D12 — The web version runs the engine itself, compiled to WebAssembly (2026-11-14)
 
