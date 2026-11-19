@@ -525,6 +525,9 @@ struct Hooks: Encodable {
     /// and whether it lets you go at all.
     let departsUnfed: Bool
     let mayDepart: Bool
+    /// `Journey.firstPortSells`: whether the purse still runs to a step of each item in the
+    /// first port's stores.
+    let firstPortSells: [String: Bool]
     let rail: Rail?
     let airship: Airship?
     let balloon: Balloon?
@@ -536,6 +539,9 @@ struct Hooks: Encodable {
         let j = e.journey
         departsUnfed = j.departsUnfed(s)
         mayDepart = j.mayDepart(s)
+        var sells: [String: Bool] = [:]
+        for it in j.items { sells[it.key.rawValue] = j.firstPortSells(it.key, s) }
+        firstPortSells = sells
         rail = s.journey == HornEngine.Rail.id ? Rail(brokenDown: HornEngine.Rail.brokenDown(s)) : nil
         airship = s.journey == HornEngine.Airship.id
             ? Airship(enginesOut: HornEngine.Airship.enginesOut(s), goingDown: HornEngine.Airship.goingDown(s),

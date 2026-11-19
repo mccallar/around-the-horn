@@ -1263,6 +1263,9 @@ The app's skin (`AroundTheHorn/Journeys/Airship*.swift`, docs/design/journeys-ar
   off with empty tanks! The storekeeper shakes his head and points you back to the petrol.”
   A flight saved before she left (the stores save as you leave them) comes back to Rome's
   stores, so she still leaves through both refusals and the departure sentence (D16).
+  Both refusals hold only while the purse runs to a step of what is missing (100 kg of
+  petrol, $1.50; 10 kg of provisions, $5). With less she leaves dry, hungry or both, and
+  the departure sentence ends by saying so (D22).
 - The departure sentence reads “On DATE, the [i]SHIP[/i] slips the mast at Ciampino. …”: the
   date line ends in “a.m.” or “p.m.”, and a full stop after it doubled.
 - The role screen, its labels and the mast menu's trade row are in this journey's own words

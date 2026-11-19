@@ -116,6 +116,7 @@ public final class Rail: Journey {
         wreckedBody: "Something under the train finally let go. The engine is on her side in the ditch, the cars are stacked behind her like dropped cards, and everybody is alive to stand and look at it. The freight will go west on another train.",
         depart: { s in
             "The [i]\(TextMarkup.escape(s.ship))[/i] whistles off from the Omaha yard, \(s.dateText), with the freight due in Sacramento in twelve days and a consignee who will not wait past sixteen. Ahead: 1,776 miles of track so new the ties still smell of sap."
+                + (s.food <= 0 ? " " + Rail.goingHungry : "")
         },
         noProvisions: "You can't pull out with nothing to eat aboard! The outfitter points you back at the provisions.",
         rested: { turns, h in
@@ -316,6 +317,16 @@ public final class Rail: Journey {
         if e.state.temperature(in: reg) == .freezing { return "The river is iced from bank to bank." }
         return nil
     }
+
+    // MARK: - Leaving Omaha with nothing left to buy provisions with (D22)
+
+    /// Omaha sends a train with no provisions back to the outfitter while the purse runs to
+    /// a step of them; with nothing left to buy them with, holding her there would hold her
+    /// for good, so the crew goes hungry (D22).
+    public override func departsUnfed(_ s: GameState) -> Bool { !firstPortSells(.food, s) }
+
+    /// The departure's last sentence for a train that leaves Omaha with no provisions.
+    public static let goingHungry = "There isn't a pound of provisions aboard, and too little in the purse to buy any, so the crew will go hungry until somebody sells you some."
 
     // MARK: - Events, stops and answers (Rail+Events, Rail+Depots, Rail+Choices)
 

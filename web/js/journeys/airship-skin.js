@@ -8,7 +8,7 @@
 // function of the voyage takes the bridge's view `v`: `v.state` is the GameState, and the
 // rest is what the app reads off it (`v.dateText`, `v.healthLabel`, `v.region`, …), with
 // what it asks the engine (`Airship.goingDown`, `enginesOut`, `finale`) in
-// `v.hooks.airship`.
+// `v.hooks.airship`, and `Journey.firstPortSells` in `v.hooks.firstPortSells`.
 
 import { escape, formatNumber } from '../markup.js';
 import * as scene from './airship-scene.js';
@@ -178,7 +178,8 @@ export function words(J, v) {
     fractional: ['limes'],
     singular: true,
     lots: ['water', 'fuel'],
-    departRefusal: g.fuel <= 0
+    // Held only while the purse runs to a step of petrol: with less, she goes (D22).
+    departRefusal: g.fuel <= 0 && v.hooks.firstPortSells.fuel
       ? "You can't cast off with empty tanks! The storekeeper shakes his head and points you back to the petrol."
       : null,
     departWarning: null,

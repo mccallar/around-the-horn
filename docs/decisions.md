@@ -353,11 +353,12 @@ rations, the crew goes hungry; and the departure sentence says which, in place o
 betting pool. Propellant is the skin's refusal (`Words.departRefusal`); rations are the
 engine's, so the engine has a new hook, `Journey.departsUnfed`, false by default (every
 other journey still refuses a ship with no food, whatever her purse, exactly as before)
-and answered by the transfer alone. No number, price or random draw changed, and the bot
+and answered by the transfer alone. (The Klondike answers it too since D21, and rail, the
+airship and the balloon since D22: only 1849 keeps the refusal whatever the purse.) No number, price or random draw changed, and the bot
 (which always buys both) is unaffected.
 
-The airship's petrol refusal at Rome has the same shape (step 100 kg, $1.50) and is left
-as it was.
+The airship's petrol refusal at Rome has the same shape (step 100 kg, $1.50) and was left
+as it was here; D22 changes it.
 
 ## D20 — A boat at Lake Bennett waits on the ice (2026-11-18)
 
@@ -391,3 +392,27 @@ sentence ends by saying the outfit has no grub and the police at the summit will
 back without its year's supply. Their check, which always offers "Turn back for home", is
 then an ending, not a loop. No number, price or random draw changed; the storekeeper and
 the boatbuilder can't spend that low without grub, and the bot always buys it.
+
+## D22 — Rome, Marrakech and Omaha hold a crew only for what its purse can still buy (2026-11-19)
+
+Found in review of the whole project, the shape of D19 and D21 at the three first ports
+they left alone. Each sends a crew back to the first stores for something it lacks, the
+stores buy nothing back, and their only way out leads to the departure again: an engineer
+or a meteorologist could spend Rome's purse below a step of petrol (100 kg, $1.50) and of
+provisions (10 kg, $5) with neither aboard; either poorer balloonist could spend
+Marrakech's below a step of propane (50 gallons, $22.50) and of rations (10 lbs, $30); a
+river hand could spend Omaha's below a step of provisions (25 lbs, $3). Each then went
+round the same refusal for good, and with `resumesInFirstShop` (D16) a relaunch of the
+airship or the balloon came back to the same stores.
+
+Now every such refusal holds only while the purse runs to one step of what it asks for, as
+the first port's stores bill it (`Journey.firstPortSells`, which the transfer's and the
+Klondike's own checks already did by hand). With less, the crew goes: the airship's skin
+lets her leave dry (`Words.departRefusal`) and she flies as a free balloon, as she does when
+her tanks run dry aloft; the balloon's `mayDepart` lets her leave short of the climb, and
+the ground team puts in the 25 gallons on the sponsor's account, as every later field's
+already did; and all three answer `departsUnfed`, so the crew goes hungry. The departure
+sentence ends by saying what is missing, and the balloon's first watch then says only that
+the propane is gone (not that she relaunched). No number, price or random draw changed,
+and the bot (which always buys food and fuel) is unaffected. Only 1849 still refuses a
+ship with no food whatever her purse, as its prototype does.

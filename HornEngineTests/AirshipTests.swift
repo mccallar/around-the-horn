@@ -101,6 +101,39 @@ final class AirshipTests: XCTestCase {
         XCTAssertEqual(sp, 60 * 0.6 * 0.9, accuracy: 1e-9)
     }
 
+    /// D22: Rome holds a ship with no provisions, and the skin one with empty tanks, only
+    /// while the purse runs to a step of what is missing (10 kg for $5, 100 kg of petrol for
+    /// $1.50). An engineer can spend below both with neither aboard; she then leaves, and the
+    /// departure says why she is dry and hungry.
+    func testRomeLetsAShipGoDryAndHungryOnlyWhenThePurseCannotBuyAStep() throws {
+        XCTAssertEqual(airship.firstPortStep(.food), 5, accuracy: 1e-9)
+        XCTAssertEqual(airship.firstPortStep(.fuel), 1.5, accuracy: 1e-9)
+        var s = GameState(journey: Airship.id, role: .shipwright, ship: "Kestrel", captain: "Arne",
+                          crew: ["Ingrid", "Sigurd", "Solveig", "Olav"], startYear: 1926, startMonth: 4)
+        XCTAssertEqual(s.money, 580, accuracy: 1e-9)
+        let e = GameEngine(state: s)
+        XCTAssertTrue(e.buy([.sailcloth: 10, .meds: 10, .clothes: 8, .timber: 8, .water: 20]))
+        XCTAssertEqual(e.state.money, 1, accuracy: 1e-9)
+        XCTAssertFalse(e.buy([.food: 10]))
+        XCTAssertFalse(e.buy([.fuel: 100]))
+        XCTAssertFalse(airship.firstPortSells(.fuel, e.state))
+        let said = try XCTUnwrap(e.depart(), "the engineer is not held at Rome for good")
+        XCTAssertTrue(said.contains(" Her tanks are empty, so she leaves on the wind alone"), said)
+        XCTAssertTrue(said.hasSuffix("so the crew will go hungry until somebody sells you food."), said)
+        XCTAssertFalse(e.state.atPort)
+
+        s.money = 5
+        XCTAssertFalse(airship.departsUnfed(s))
+        XCTAssertNil(GameEngine(state: s).depart(), "the purse runs to 10 kg")
+        XCTAssertTrue(airship.firstPortSells(.fuel, s))
+        s.money = 4.99
+        XCTAssertTrue(airship.departsUnfed(s))
+        s.food = 10
+        s.fuel = 100
+        let fed = GameEngine(state: s).depart() ?? ""
+        XCTAssertTrue(fed.hasSuffix("most of them cold."), fed)
+    }
+
     // MARK: - Lift
 
     func testGasSeepsAndTheWeatherAndTheSunTakeMore() {

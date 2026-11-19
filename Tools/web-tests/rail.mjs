@@ -264,6 +264,26 @@ await test('driftwood is hauled where the line follows a river, and counted in c
 
 // MARK: - Whole runs
 
+await test('a purse too thin for a step of provisions, and none aboard: the train leaves hungry, and says so (D22)', async () => {
+  const p = await railPlayer({ engine: e1, seeds: ['7'], random: lcg(7) });
+  p.setUp({ role: p.f.journey.roles[2].label });
+  check(p.f.game.money === 350, `a river hand's purse (${p.f.game.money})`);
+  p.shop({ fuel: 99, water: 99, clothes: 99, meds: 99, sailcloth: 99, timber: 99, tackle: 99 });
+  const left = p.f.game.money - p.f.bill;
+  check(left >= 0 && left < 3, `less than a step of provisions ($3) left (${left})`);
+  p.press('Pay');
+  check(p.f.v.hooks.departsUnfed === true && p.f.game.food === 0, 'the engine lets the train go hungry');
+  check(p.screen === 'depart' && p.f.screen.text.endsWith("There isn't a pound of provisions aboard, and too little in the purse to buy any, so the crew will go hungry until somebody sells you some."),
+    `away from Omaha, hungry (${p.screen}: ${p.f.screen.text?.slice(-140)})`);
+  p.press(1);
+  for (let i = 0; i < 3000 && p.screen !== 'gameOver' && p.screen !== 'finale'; i++) {
+    if (p.screen === 'travel') p.timers.fire();
+    else p.look().choices.find((c) => c.enabled).act();
+  }
+  check(p.screen === 'gameOver' || p.screen === 'finale', `and it ends, never a loop (${p.screen})`);
+  noProblems(p);
+});
+
 await test('a careful contractor brings the freight in on time', async () => {
   const storage = new MemoryStorage();
   const p = await railPlayer({ engine: e1, storage, seeds: ['2'], random: lcg(2) });

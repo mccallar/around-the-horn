@@ -258,8 +258,10 @@ the field" (the port menu) or "Fly on without landing". Landing is a real decisi
     empty tank, so the propane-empty rules (§12.2, §12.5) apply from your first watch:
     drifting at 40 nm a watch and losing 5% lift a watch. It is a long shot, not a trap: a
     player with no money and no propane can always leave the field.
-  At Marrakech the launch is still refused with no food or under 25 gallons (§16.4): you
-  are at the shop with all your money, so the sponsor never pays there.
+  At Marrakech the launch is still refused with no food or under 25 gallons (§16.4), but
+  only while the purse runs to a step of what is missing (50 gallons, $22.50; 10 lbs of
+  rations, $30). A crew that has spent below that leaves on the sponsor's climb, hungry if
+  it has no rations, and the departure sentence says so (D22).
 - Time on the ground (rest, the riggers) is time not flying; but the ground is the only
   place the crew heals fast (+6 hp/watch) and the only place to buy anything, and on the
   ground scrubbers aren't needed (the stale-air counter resets — as it also does when you

@@ -41,6 +41,32 @@ final class RailTests: XCTestCase {
         return nil
     }
 
+    /// D22: Omaha holds a train with no provisions only while the purse runs to a step of
+    /// them (25 lbs, $3). A river hand can spend below it with none aboard; the train then
+    /// leaves, and the departure says the crew goes hungry.
+    func testOmahaLetsATrainGoHungryOnlyWhenThePurseCannotBuyAStep() throws {
+        XCTAssertEqual(rail.firstPortStep(.food), 3, accuracy: 1e-9)
+        var s = GameState(journey: Rail.id, role: .whaler, ship: "Juniper", captain: "Amos",
+                          crew: ["Clara", "Ned", "Ruth", "Gideon"], startYear: 1869, startMonth: 9)
+        XCTAssertEqual(s.money, 350, accuracy: 1e-9)
+        let e = GameEngine(state: s)
+        XCTAssertTrue(e.buy([.clothes: 10, .meds: 8, .sailcloth: 8, .timber: 8, .fuel: 9]))
+        XCTAssertLessThan(e.state.money, rail.firstPortStep(.food))
+        XCTAssertFalse(e.buy([.food: 25]))
+        let said = try XCTUnwrap(e.depart(), "the river hand is not held at Omaha for good")
+        XCTAssertTrue(said.hasSuffix(" " + Rail.goingHungry), said)
+        XCTAssertFalse(e.state.atPort)
+
+        s.money = 3
+        XCTAssertFalse(rail.departsUnfed(s))
+        XCTAssertNil(GameEngine(state: s).depart(), "the purse runs to 25 lbs")
+        s.money = 2.99
+        XCTAssertTrue(rail.departsUnfed(s))
+        s.food = 25
+        let fed = GameEngine(state: s).depart() ?? ""
+        XCTAssertTrue(fed.hasSuffix("smell of sap."), fed)
+    }
+
     // MARK: - Boiler water
 
     func testTheBoilerDrinksFromTheTankCarInADesert() {

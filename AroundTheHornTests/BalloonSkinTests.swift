@@ -603,6 +603,38 @@ final class BalloonSkinTests: XCTestCase {
         c.chooseDeparture(year: d.year, month: d.month)
     }
 
+    /// D22: a bush pilot can spend the purse below a step of propane ($22.50) and of rations
+    /// ($30) with neither aboard. The hangar then leads to the departure, never round the
+    /// launch director's refusal again: the ground team puts in the climb, the crew goes
+    /// hungry, and the flight ends.
+    func testABushPilotWithNothingLeftForPropaneOrRationsStillLeavesMarrakech() {
+        let c = controller()
+        newFlight(c, role: .whaler)
+        c.enterFirstShop()
+        guard case .shop(let done) = c.screen else { return XCTFail("\(c.screen)") }
+        // Everything but provisions and fuel, as much of each as the purse runs to.
+        c.run { e in
+            for it in e.journey.items where it.key != .food && it.key != .fuel {
+                var n = e.room(for: it.key)
+                while n > 0 && !e.buy([it.key: n]) { n -= 1 }
+            }
+        }
+        let g = c.game!
+        XCTAssertLessThan(g.money, air.firstPortStep(.fuel))
+        XCTAssertEqual(g.food, 0)
+        XCTAssertEqual(g.fuel, 0)
+        done()
+        guard case .depart(let text) = c.screen else { return XCTFail("the departure, not \(c.screen)") }
+        has(text, "“On the sponsor's account,” he says.")
+        has(text, "so the crew will go hungry until somebody sells you food.")
+        XCTAssertFalse(c.game!.atPort)
+        XCTAssertEqual(c.game!.fuel, 0, accuracy: 1e-9)
+        c.run { $0.rng = SeededRNG(seed: 7) }
+        c.startTravel()
+        let end = playOut(c)
+        XCTAssertTrue(["finale", "gameover"].contains(end), end)
+    }
+
     /// The launch director won't let her go without food and the climb's 25 gallons; with
     /// them she lifts off, and a flight saved in the hangar comes back to it (D16).
     func testMarrakechWontLetHerGoWithoutTheClimbsPropane() {

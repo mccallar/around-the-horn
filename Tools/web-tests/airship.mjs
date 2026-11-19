@@ -4,6 +4,7 @@
 // - the picker offers it; its title card, learn pages, setup and top ten are its own, in
 //   its own words (D11);
 // - Rome's stores refuse empty tanks, and a flight saved in them comes back to them (D16);
+//   a purse too thin for a step of petrol or provisions leaves dry and hungry (D22);
 // - whole seeded flights: landings at Nome through every stop, and every other ending:
 //   forced down on the ice, the sea and a field, grounded at a mast, the captain lost;
 // - every kind of trouble (D14) and each way out of it: engines dead (spares aloft, or
@@ -174,6 +175,26 @@ await test('Rome\'s stores refuse empty tanks, and a flight saved in them comes 
   b.f.stopTravel();
   noProblems(a);
   noProblems(b);
+});
+
+await test('a purse too thin for a step of petrol or provisions, and neither aboard: she leaves dry and hungry, and says so (D22)', async () => {
+  const p = await airPlayer({ engine: e1, seeds: ['7'], random: lcg(7) });
+  p.setUp({ role: J0.roles[1].label });
+  check(p.f.game.money === 580, `an engineer's purse (${p.f.game.money})`);
+  p.shop({ sailcloth: 10, meds: 10, clothes: 8, timber: 8, water: 1 });
+  check(p.f.game.money - p.f.bill === 1, `a dollar left, under a step of petrol ($1.50) or provisions ($5) (${p.f.game.money - p.f.bill})`);
+  p.press('Pay');
+  check(p.f.v.hooks.firstPortSells.fuel === false && p.f.v.hooks.departsUnfed === true, 'the purse runs to neither');
+  check(p.screen === 'depart' && p.f.screen.text.includes(' Her tanks are empty, so she leaves on the wind alone')
+    && p.f.screen.text.endsWith('so the crew will go hungry until somebody sells you food.'),
+  `away from Rome, dry and hungry (${p.screen}: ${p.f.screen.text?.slice(-160)})`);
+  p.press(1);
+  for (let i = 0; i < 3000 && p.screen !== 'gameOver' && p.screen !== 'finale'; i++) {
+    if (p.screen === 'travel') p.timers.fire();
+    else p.look().choices.find((c) => c.enabled).act();
+  }
+  check(p.screen === 'gameOver' || p.screen === 'finale', `and it ends, never a loop (${p.screen})`);
+  noProblems(p);
 });
 
 // MARK: - Whole flights

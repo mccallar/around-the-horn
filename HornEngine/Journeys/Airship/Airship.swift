@@ -117,6 +117,7 @@ public final class Airship: Journey {
         wreckedBody: forcedDownOnIce,
         depart: { s in
             "On \(s.dateText), the [i]\(TextMarkup.escape(s.ship))[/i] slips the mast at Ciampino. The ground crew lets go the lines, the engines take up their roar, and Rome shrinks to a smudge of domes and umbrella pines. Ahead lie nine thousand six hundred kilometres, most of them cold."
+                + Airship.setOff(s)
         },
         noProvisions: "You can't cast off with no provisions! The storekeeper shakes his head and points you back inside.",
         rested: { turns, h in
@@ -342,6 +343,26 @@ public final class Airship: Journey {
     /// (Airship+Trouble).
     override func stalled(_ e: GameEngine) -> [Interrupt]? {
         Self.goingDown(e.state) ? sinking(e) : nil
+    }
+
+    // MARK: - Leaving Rome with nothing left to buy petrol or provisions with (D22)
+
+    /// Rome sends a ship with no provisions back to the stores while the purse runs to a
+    /// step of them; with nothing left to buy them with, holding her there would hold her
+    /// for good, so the crew goes hungry (D22). Petrol is the skin's refusal, held the same.
+    public override func departsUnfed(_ s: GameState) -> Bool { !firstPortSells(.food, s) }
+
+    /// The departure's last sentences for a ship that leaves Rome short: dry tanks, then no
+    /// provisions. Empty for a ship with both.
+    public static func setOff(_ s: GameState) -> String {
+        var said: [String] = []
+        if s.fuel <= 0 {
+            said.append("Her tanks are empty, so she leaves on the wind alone, a free balloon going where it takes her, until somebody sells her petrol.")
+        }
+        if s.food <= 0 {
+            said.append("There is not a kilo of provisions aboard, and too little in the purse to buy any, so the crew will go hungry until somebody sells you food.")
+        }
+        return said.map { " " + $0 }.joined()
     }
 
     // MARK: - Trade and score

@@ -125,6 +125,7 @@ public final class Balloon: Journey {
         wreckedBody: downOnLand,
         depart: { s in
             "The [i]\(TextMarkup.escape(s.ship))[/i] lifts off from the launch field outside Marrakech at 0800 GMT on \(BalloonData.dateOnly(s)). The crowd shrinks to a scatter of dots, and the Atlas rises white to the south. Ahead lie eighteen thousand miles of sky."
+                + Balloon.setOff(s)
         },
         noProvisions: "The launch director won't let you go: you need food aboard and at least 25 gallons of propane to climb out.",
         rested: { turns, h in
@@ -324,9 +325,12 @@ public final class Balloon: Journey {
                     // First: it is how the watch began, before the wear's warnings.
                     q.insert(.message(Self.relaunchedCold(e.state)), at: 0)
                 } else if r == 2 {
-                    let n = BalloonData.gallons(e.state.vars[BalloonData.toppedUpKey] ?? 0)
-                    q.append(.message("The ground-team chief looks at your gauges, then at your wallet, and waves the fuel truck over. “On the sponsor's account,” he says. “Just enough to get you off the ground. After that you're drifting.” [dim](+\(n).)[/dim]"))
-                    q.append(.message(relaunched))
+                    // Leaving the first field, the departure has already said so (D22).
+                    if e.state.stopIndex > 0 {
+                        let n = BalloonData.gallons(e.state.vars[BalloonData.toppedUpKey] ?? 0)
+                        q.append(.message(Self.sponsorsClimb + " [dim](+\(n).)[/dim]"))
+                        q.append(.message(relaunched))
+                    }
                     q.append(.message(text.outOfFuel))
                 } else if e.state.note.isEmpty || e.state.note == e.state.weather.note {
                     e.state.note = relaunched
@@ -367,7 +371,30 @@ public final class Balloon: Journey {
         e.state.fuel -= burnt
     }
 
-    public override func mayDepart(_ s: GameState) -> Bool { s.fuel >= BalloonData.launchBurn }
+    /// Marrakech holds a balloon short of the climb's propane, or with no rations, only while
+    /// the purse runs to a step of what is missing. With less, the ground team puts in the
+    /// climb (`leaving`), as every later field's does, and the crew goes hungry (D22).
+    public override func mayDepart(_ s: GameState) -> Bool {
+        s.fuel >= BalloonData.launchBurn || !firstPortSells(.fuel, s)
+    }
+
+    public override func departsUnfed(_ s: GameState) -> Bool { !firstPortSells(.food, s) }
+
+    /// The ground team's word when it pays for the climb.
+    static let sponsorsClimb = "The ground-team chief looks at your gauges, then at your wallet, and waves the fuel truck over. “On the sponsor's account,” he says. “Just enough to get you off the ground. After that you're drifting.”"
+
+    /// The departure's last sentences for a balloon that leaves Marrakech short: the ground
+    /// team's climb, then no rations. Empty for a balloon with both.
+    public static func setOff(_ s: GameState) -> String {
+        var said: [String] = []
+        if s.vars[BalloonData.relaunchKey] == 2 {
+            said.append(sponsorsClimb)
+        }
+        if s.food <= 0 {
+            said.append("There is not a pound of rations aboard, and too little in the purse to buy any, so the crew will go hungry until somebody sells you food.")
+        }
+        return said.map { " " + $0 }.joined()
+    }
 
     /// What the app should say instead of relaunching, or nil: you are on the ground with
     /// no lift, no ballast aboard and the price of a sack here (with neither, she goes up to

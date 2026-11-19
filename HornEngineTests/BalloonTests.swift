@@ -141,6 +141,47 @@ final class BalloonTests: XCTestCase {
         XCTAssertNil(e.state.vars[BalloonData.relaunchKey])
     }
 
+    /// D22: Marrakech holds a balloon short of the climb's propane, or with no rations, only
+    /// while the purse runs to a step of what is missing (50 gallons for $22.50, 10 lbs for
+    /// $30). With less, the ground team puts in the climb, the crew goes hungry, and the
+    /// departure says both; the first watch says she is out of propane, not that she
+    /// relaunched.
+    func testMarrakechLetsABalloonGoOnTheSponsorsClimbOnlyWhenThePurseCannotBuyAStep() {
+        XCTAssertEqual(balloon.firstPortStep(.fuel), 22.5, accuracy: 1e-9)
+        XCTAssertEqual(balloon.firstPortStep(.food), 30, accuracy: 1e-9)
+        var s = GameState(journey: Balloon.id, role: .whaler, ship: "Skylark", captain: "Anna",
+                          crew: ["Bruno", "Claire", "Dieter", "Elena"], startYear: 1999, startMonth: 0)
+        XCTAssertEqual(s.fuel, 0)
+        XCTAssertEqual(s.food, 0)
+        s.money = 22.5
+        XCTAssertFalse(balloon.mayDepart(s))
+        XCTAssertTrue(balloon.departsUnfed(s))
+        XCTAssertNil(engine(s).depart(), "the purse runs to 50 gallons")
+        s.money = 30
+        s.fuel = 50
+        XCTAssertNil(engine(s).depart(), "the purse runs to 10 lbs")
+
+        s.fuel = 0
+        s.money = 22.49
+        XCTAssertTrue(balloon.mayDepart(s))
+        let e = engine(s)
+        let said = e.depart() ?? ""
+        XCTAssertTrue(said.contains("Ahead lie eighteen thousand miles of sky. The ground-team chief looks at your gauges"), said)
+        XCTAssertTrue(said.hasSuffix("so the crew will go hungry until somebody sells you food."), said)
+        XCTAssertFalse(e.state.atPort)
+        XCTAssertEqual(e.state.fuel, 0)
+        e.state.forceFair = 1
+        let first = messages(e.sailDay())
+        XCTAssertTrue(first.contains(balloon.text.outOfFuel), "\(first)")
+        XCTAssertFalse(first.contains { $0.contains("Relaunched") || $0.contains("ground-team chief") }, "\(first)")
+
+        s.money = 1000
+        s.fuel = 50
+        s.food = 10
+        let fed = engine(s).depart() ?? ""
+        XCTAssertTrue(fed.hasSuffix("eighteen thousand miles of sky."), fed)
+    }
+
     func testARelaunchBurnsTwentyFiveGallonsAndSaysSo() {
         var s = landed("lux")
         s.fuel = 100

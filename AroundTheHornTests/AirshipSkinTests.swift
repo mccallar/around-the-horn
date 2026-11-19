@@ -477,6 +477,37 @@ final class AirshipSkinTests: XCTestCase {
         has(text, "slips the mast at Ciampino.")
     }
 
+    /// D22: an engineer can spend the purse below a step of petrol ($1.50) and of
+    /// provisions ($5) with neither aboard. The stores then lead to the departure, never
+    /// round a refusal again, a relaunch comes back to stores that still let her go, and
+    /// the flight ends.
+    func testAnEngineerWithNothingLeftForPetrolOrProvisionsStillLeavesRome() {
+        let c = controller()
+        newFlight(c, role: .shipwright)
+        c.enterFirstShop()
+        guard case .shop = c.screen else { return XCTFail("\(c.screen)") }
+        XCTAssertTrue(c.run { $0.buy([.sailcloth: 10, .meds: 10, .clothes: 8, .timber: 8, .water: 20]) })
+        let g = c.game!
+        XCTAssertLessThan(g.money, air.firstPortStep(.fuel))
+        XCTAssertEqual(g.food, 0)
+        XCTAssertEqual(g.fuel, 0)
+        XCTAssertNil(skin.words(g).departRefusal)
+        c.save()
+        let again = controller()
+        again.chooseJourney(air.id)
+        again.continueSavedVoyage()
+        guard case .shop(let leave) = again.screen else { return XCTFail("back to the stores, not \(again.screen)") }
+        leave()
+        guard case .depart(let text) = again.screen else { return XCTFail("the departure, not \(again.screen)") }
+        has(text, "Her tanks are empty, so she leaves on the wind alone")
+        has(text, "so the crew will go hungry until somebody sells you food.")
+        XCTAssertFalse(again.game!.atPort)
+        again.run { $0.rng = SeededRNG(seed: 7) }
+        again.startTravel()
+        let end = playOut(again)
+        XCTAssertTrue(["finale", "gameover"].contains(end), end)
+    }
+
     /// The stores save as you leave them, and the app saves whenever it goes to the
     /// background. A flight saved at Rome before she left comes back to the stores, not
     /// to a mast menu whose "Cast off" would skip the refusals and the departure.

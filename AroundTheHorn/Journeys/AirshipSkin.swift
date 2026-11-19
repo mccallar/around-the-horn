@@ -151,7 +151,8 @@ enum AirshipSkin {
             fractional: [.limes],
             singular: true,
             lots: [.water, .fuel],
-            departRefusal: g.fuel <= 0
+            // Held only while the purse runs to a step of petrol: with less, she goes (D22).
+            departRefusal: g.fuel <= 0 && AirshipSkin.journey.firstPortSells(.fuel, g)
                 ? "You can't cast off with empty tanks! The storekeeper shakes his head and points you back to the petrol."
                 : nil,
             departWarning: nil,

@@ -581,6 +581,37 @@ final class RailSkinTests: XCTestCase {
         return c
     }
 
+    /// D22: a river hand can spend the purse below a step of provisions ($3) with none
+    /// aboard. The outfitter then leads to the departure, never round the engine's refusal
+    /// again, and the run ends.
+    func testARiverHandWithNothingLeftForProvisionsStillLeavesOmaha() {
+        let c = controller()
+        c.chooseJourney(rail.id)
+        c.startNewGame()
+        c.chooseRole(.whaler)
+        c.setNames(ship: "", captain: "Ira", crew: ["", "", "", ""])
+        c.chooseDeparture(year: 1869, month: 9)
+        c.enterFirstShop()
+        guard case .shop(let done) = c.screen else { return XCTFail("\(c.screen)") }
+        // Everything but provisions, as much of each as the purse runs to.
+        c.run { e in
+            for it in e.journey.items where it.key != .food {
+                var n = e.room(for: it.key)
+                while n > 0 && !e.buy([it.key: n]) { n -= 1 }
+            }
+        }
+        XCTAssertLessThan(c.game!.money, rail.firstPortStep(.food))
+        XCTAssertEqual(c.game!.food, 0)
+        done()
+        guard case .depart(let text) = c.screen else { return XCTFail("the departure, not \(c.screen)") }
+        has(text, Rail.goingHungry)
+        XCTAssertFalse(c.game!.atPort)
+        c.run { $0.rng = SeededRNG(seed: 7) }
+        c.startTravel()
+        let end = playOut(c)
+        XCTAssertTrue(["finale", "gameover"].contains(end), end)
+    }
+
     /// Answers whatever the road raises, first open option each time, until it ends.
     /// With `restock`, a little more care: wood, water, food and spares at every yard
     /// it can afford, the roundhouse when the train is worn, and a repair on the road

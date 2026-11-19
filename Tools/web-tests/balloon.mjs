@@ -207,6 +207,28 @@ await test('Marrakech won\'t launch her without propane for the climb, and a fli
   noProblems(b);
 });
 
+await test('a purse too thin for a step of propane or rations, and neither aboard: the ground team puts in the climb, and the crew goes hungry (D22)', async () => {
+  const p = await airPlayer({ engine: e1, seeds: ['7'], random: lcg(7) });
+  p.setUp({ role: J0.roles[2].label });
+  check(p.f.game.money === 6500, `a bush pilot's purse (${p.f.game.money})`);
+  p.shop({ water: 999, limes: 999, meds: 999, clothes: 999, timber: 999, sailcloth: 999, tackle: 999 });
+  const left = p.f.game.money - p.f.bill;
+  check(left >= 0 && left < 22.5, `less than a step of propane ($22.50) or rations ($30) left (${left})`);
+  p.press('Pay');
+  check(p.f.v.hooks.mayDepart === true && p.f.v.hooks.departsUnfed === true, 'the purse runs to neither');
+  check(p.screen === 'depart' && p.f.screen.text.includes('“On the sponsor\'s account,” he says.')
+    && p.f.screen.text.endsWith('so the crew will go hungry until somebody sells you food.'),
+  `up from Marrakech on the sponsor's climb, hungry (${p.screen}: ${p.f.screen.text?.slice(-160)})`);
+  check(p.f.game.fuel === 0, `the climb burned what the ground team put in (${p.f.game.fuel})`);
+  p.press(1);
+  for (let i = 0; i < 3000 && p.screen !== 'gameOver' && p.screen !== 'finale'; i++) {
+    if (p.screen === 'travel') p.timers.fire();
+    else p.look().choices.find((c) => c.enabled).act();
+  }
+  check(p.screen === 'gameOver' || p.screen === 'finale', `and it ends, never a loop (${p.screen})`);
+  noProblems(p);
+});
+
 // MARK: - Whole flights
 
 await test('careful flights cross the finish line, through every stop on the way, on both tracks', async () => {

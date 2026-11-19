@@ -607,14 +607,23 @@ final class MarsTests: XCTestCase {
         s.fuel = 400
         XCTAssertTrue((GameEngine(state: s).depart() ?? "").hasSuffix("Somebody has already started a betting pool."))
 
-        for j in Journeys.all where j.id != Mars.id && j.id != Klondike.id {  // the Klondike: D21
+        // 1849 keeps its prototype's refusal whatever the purse; every other first port
+        // lets a broke crew go hungry (D21 the Klondike, D22 rail, the airship, the balloon).
+        for j in Journeys.all {
             let d = j.departures[0]
             var g = GameState(journey: j.id, role: .merchant, ship: "Wren", captain: "Ada", crew: ["Bo", "Cy", "Di", "Ed"],
                               startYear: d.year, startMonth: d.month)
             g.fuel = 1000
             g.money = 0
-            XCTAssertFalse(j.departsUnfed(g), j.id)
-            XCTAssertNil(GameEngine(state: g).depart(), "\(j.id): nobody leaves with no food")
+            if j.id == Horn1849.id {
+                XCTAssertFalse(j.departsUnfed(g), j.id)
+                XCTAssertNil(GameEngine(state: g).depart(), "\(j.id): nobody leaves with no food")
+            } else {
+                XCTAssertTrue(j.departsUnfed(g), j.id)
+                XCTAssertNotNil(GameEngine(state: g).depart(), "\(j.id): a broke crew is not held for good")
+                g.money = j.firstPortStep(.food)
+                XCTAssertNil(GameEngine(state: g).depart(), "\(j.id): the purse runs to a step of food")
+            }
         }
     }
 
