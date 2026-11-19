@@ -52,6 +52,7 @@ With Node 20 or later, from the repository's root:
     node Tools/web-tests/klondike.mjs  # the Klondike played: Seattle's warning and refusal, the hungry departure, both passes to Dawson, Bennett's hold, every ending, every trouble and its ways out, saves (~4 s)
     node Tools/web-tests/klondike-skin.mjs # the Klondike's skin is the app's; every scene, map and catch draws (~12 s)
     node Tools/web-tests/ui.mjs        # the page on a small DOM of its own: keys, taps, fields, the picker, whole runs clicked, opened from disk
+    node Tools/web-tests/word-edges.mjs # every skin's words at the edge of each condition that picks them, against the same fixture as the app's WordEdgeTests
 
 `parity.mjs` builds the bridge for the Mac with `swift build` (Xcode's Swift); set
 `HORN_NATIVE` to an already built `HornWeb` to skip that, `VOYAGES` to play more than

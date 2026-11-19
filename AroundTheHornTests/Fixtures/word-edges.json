@@ -1,0 +1,285 @@
+{
+ "about": "The words a skin shows at the edge of each condition that picks them, read by AroundTheHornTests/WordEdgeTests.swift and Tools/web-tests/word-edges.mjs alike. Each journey starts from a fresh GameState (role merchant, its first departure, five aboard); each case sets fields of it, then reads one field of the skin's Words: `is` is its whole value (null for none), `has` and `lacks` are pieces it must and must not hold.",
+ "journeys": {
+  "horn1849": [
+   {
+    "set": {
+     "clothes": 5
+    },
+    "field": "clothesWarning",
+    "is": null
+   },
+   {
+    "set": {
+     "clothes": 4
+    },
+    "field": "clothesWarning",
+    "is": "[red]Only 4 of 5 have woolens.[/red]"
+   },
+   {
+    "set": {
+     "clothes": 0
+    },
+    "field": "clothesWarning",
+    "is": "[red]Only 0 of 5 have woolens.[/red]"
+   },
+   {
+    "set": {
+     "noCitrus": 20
+    },
+    "field": "suppliesNote",
+    "lacks": "without citrus"
+   },
+   {
+    "set": {
+     "noCitrus": 21
+    },
+    "field": "suppliesNote",
+    "has": " · [red]21 days without citrus[/red]"
+   }
+  ],
+  "rail": [
+   {
+    "set": {
+     "clothes": 5
+    },
+    "field": "clothesWarning",
+    "is": null
+   },
+   {
+    "set": {
+     "clothes": 4
+    },
+    "field": "clothesWarning",
+    "is": "[red]Only 4 of 5 have a blanket.[/red]"
+   },
+   {
+    "set": {
+     "clothes": 0
+    },
+    "field": "clothesWarning",
+    "is": "[red]Only 0 of 5 have a blanket.[/red]"
+   }
+  ],
+  "airship": [
+   {
+    "set": {
+     "clothes": 5
+    },
+    "field": "clothesWarning",
+    "is": null
+   },
+   {
+    "set": {
+     "clothes": 4
+    },
+    "field": "clothesWarning",
+    "is": "[red]Only 4 of 5 aboard have a fur suit.[/red]"
+   },
+   {
+    "set": {
+     "clothes": 0
+    },
+    "field": "clothesWarning",
+    "is": "[red]Only 0 of 5 aboard have a fur suit.[/red]"
+   },
+   {
+    "set": {
+     "noCitrus": 6
+    },
+    "field": "suppliesNote",
+    "lacks": "without coffee"
+   },
+   {
+    "set": {
+     "noCitrus": 7
+    },
+    "field": "suppliesNote",
+    "has": "without coffee[/red]"
+   },
+   {
+    "set": {
+     "fuel": 0,
+     "day": 0
+    },
+    "field": "suppliesNote",
+    "lacks": "the tanks are dry"
+   },
+   {
+    "set": {
+     "fuel": 0.5,
+     "day": 1
+    },
+    "field": "suppliesNote",
+    "lacks": "the tanks are dry"
+   },
+   {
+    "set": {
+     "fuel": 0,
+     "day": 1
+    },
+    "field": "suppliesNote",
+    "has": " · [red]the tanks are dry[/red]"
+   },
+   {
+    "set": {
+     "fuel": 0,
+     "money": 1.5
+    },
+    "field": "departRefusal",
+    "is": "You can't cast off with empty tanks! The storekeeper shakes his head and points you back to the petrol."
+   },
+   {
+    "set": {
+     "fuel": 0,
+     "money": 1.49
+    },
+    "field": "departRefusal",
+    "is": null
+   },
+   {
+    "set": {
+     "fuel": 100,
+     "money": 500
+    },
+    "field": "departRefusal",
+    "is": null
+   }
+  ],
+  "balloon": [
+   {
+    "set": {
+     "clothes": 5
+    },
+    "field": "clothesWarning",
+    "is": null
+   },
+   {
+    "set": {
+     "clothes": 4
+    },
+    "field": "clothesWarning",
+    "is": "[red]Only 4 of 5 aboard have a down suit.[/red]"
+   },
+   {
+    "set": {
+     "clothes": 0
+    },
+    "field": "clothesWarning",
+    "is": "[red]Only 0 of 5 aboard have a down suit.[/red]"
+   },
+   {
+    "set": {
+     "noCitrus": 12
+    },
+    "field": "suppliesNote",
+    "lacks": "without scrubbers"
+   },
+   {
+    "set": {
+     "noCitrus": 13
+    },
+    "field": "suppliesNote",
+    "has": "without scrubbers[/red]"
+   },
+   {
+    "set": {
+     "fuel": 0,
+     "day": 0
+    },
+    "field": "suppliesNote",
+    "lacks": "the tanks are dry"
+   },
+   {
+    "set": {
+     "fuel": 0.5,
+     "day": 1
+    },
+    "field": "suppliesNote",
+    "lacks": "the tanks are dry"
+   },
+   {
+    "set": {
+     "fuel": 0,
+     "day": 1
+    },
+    "field": "suppliesNote",
+    "has": " · [red]the tanks are dry[/red]"
+   }
+  ],
+  "mars": [
+   {
+    "set": {
+     "clothes": 5
+    },
+    "field": "clothesWarning",
+    "is": null
+   },
+   {
+    "set": {
+     "clothes": 4
+    },
+    "field": "clothesWarning",
+    "is": "[red]Only 4 of 5 aboard have a thermal suit.[/red]"
+   },
+   {
+    "set": {
+     "clothes": 0
+    },
+    "field": "clothesWarning",
+    "is": "[red]Only 0 of 5 aboard have a thermal suit.[/red]"
+   },
+   {
+    "set": {
+     "noCitrus": 15
+    },
+    "field": "suppliesNote",
+    "lacks": "without supplements"
+   },
+   {
+    "set": {
+     "noCitrus": 16
+    },
+    "field": "suppliesNote",
+    "has": "without supplements[/red]"
+   }
+  ],
+  "klondike": [
+   {
+    "set": {
+     "clothes": 5
+    },
+    "field": "clothesWarning",
+    "is": null
+   },
+   {
+    "set": {
+     "clothes": 4
+    },
+    "field": "clothesWarning",
+    "is": "[red]Only 4 of 5 have furs.[/red]"
+   },
+   {
+    "set": {
+     "clothes": 0
+    },
+    "field": "clothesWarning",
+    "is": "[red]Only 0 of 5 have furs.[/red]"
+   },
+   {
+    "set": {
+     "noCitrus": 20
+    },
+    "field": "suppliesNote",
+    "lacks": "without lime juice"
+   },
+   {
+    "set": {
+     "noCitrus": 21
+    },
+    "field": "suppliesNote",
+    "has": " · [red]21 days without lime juice[/red]"
+   }
+  ]
+ }
+}

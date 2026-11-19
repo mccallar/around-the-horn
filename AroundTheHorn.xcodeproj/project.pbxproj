@@ -23,6 +23,7 @@
 		1A379CE3F319A8631094FFDE /* GameState.swift in Sources */ = {isa = PBXBuildFile; fileRef = E66CCC765DAB15D402E1E5A0 /* GameState.swift */; };
 		1A37B15C6879FB6D85870F6A /* ScenePicture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 163849807C7C5D91D306EC75 /* ScenePicture.swift */; };
 		1CDC98768F49BC22BECDE3B5 /* RailSkinTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3297DDCDE0CCC564386B7462 /* RailSkinTests.swift */; };
+		1D5148C829C014A9956828FC /* word-edges.json in Resources */ = {isa = PBXBuildFile; fileRef = 8358DFBC4A56481875DA9607 /* word-edges.json */; };
 		1DE0008AE58F5320CCE67AB5 /* Rail+Events.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76DD21EFECB1A9AE7B8FAF27 /* Rail+Events.swift */; };
 		1E5F10CB543A419B52A9AC4E /* Markup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8658F512FD1FBFAEBFF786B6 /* Markup.swift */; };
 		21283D186304822B5942D1D1 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B5DB0322C897F9F163CD5FF /* Theme.swift */; };
@@ -44,6 +45,7 @@
 		3D0D3CB74B7340A3ED5B0717 /* JourneySmokeUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B48801A2534AAC2763BA0E14 /* JourneySmokeUITests.swift */; };
 		3DEF544B8261130989774BDD /* ScreenshotUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B4F1F2713DA564D6DD82B2C /* ScreenshotUITests.swift */; };
 		412A28E202A86BE6B8F7B9F9 /* GameData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4108B95E6294D296CE33783C /* GameData.swift */; };
+		41F151D0A1B5CB0FD0CE918F /* WordEdgeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 346CCD5F9644E05570B35802 /* WordEdgeTests.swift */; };
 		42A00B72C6A0E3290224E8B0 /* ChoiceList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 338B3382DF5DB3F0A539995D /* ChoiceList.swift */; };
 		457D26E80866FFA534E4D020 /* SkinContractTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30041FBF2E158954803C5ED6 /* SkinContractTests.swift */; };
 		4786C570374C5706BCD82268 /* BalloonBreakdownTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 565F02D176ED1C0648D6A86A /* BalloonBreakdownTests.swift */; };
@@ -269,6 +271,7 @@
 		30041FBF2E158954803C5ED6 /* SkinContractTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkinContractTests.swift; sourceTree = "<group>"; };
 		3297DDCDE0CCC564386B7462 /* RailSkinTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RailSkinTests.swift; sourceTree = "<group>"; };
 		338B3382DF5DB3F0A539995D /* ChoiceList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChoiceList.swift; sourceTree = "<group>"; };
+		346CCD5F9644E05570B35802 /* WordEdgeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordEdgeTests.swift; sourceTree = "<group>"; };
 		3640D8989CBE3497720C8D69 /* BalloonScreenshotUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalloonScreenshotUITests.swift; sourceTree = "<group>"; };
 		368CBB1228FD754F316AAACE /* AirshipSkin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirshipSkin.swift; sourceTree = "<group>"; };
 		3705B4E894BE9ADCD26E17A8 /* GameController+Debug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GameController+Debug.swift"; sourceTree = "<group>"; };
@@ -319,6 +322,7 @@
 		7C802F0633CB47BCA69931C7 /* AirshipScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirshipScene.swift; sourceTree = "<group>"; };
 		7F27D7F015ED625BDF69DBC4 /* Audio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Audio.swift; sourceTree = "<group>"; };
 		7F4BCE9468DF346093B0A662 /* Horn1849Forage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Horn1849Forage.swift; sourceTree = "<group>"; };
+		8358DFBC4A56481875DA9607 /* word-edges.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "word-edges.json"; sourceTree = "<group>"; };
 		85EEE5666B33F5B57B317B61 /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
 		85F2EE063C8E603923A4665B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		85F6CAB7F5FF70223DC5D7FA /* ShopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopView.swift; sourceTree = "<group>"; };
@@ -447,6 +451,8 @@
 				D3D5EC138C0C4B40C49F14A1 /* StoresTests.swift */,
 				272E9C7692171434AE6EB489 /* SynthTests.swift */,
 				8B84815BD850CCD28520377E /* TestJourneys.swift */,
+				346CCD5F9644E05570B35802 /* WordEdgeTests.swift */,
+				706E687E1AC33896C8725E4E /* Fixtures */,
 			);
 			path = AroundTheHornTests;
 			sourceTree = "<group>";
@@ -578,6 +584,14 @@
 				92B379A31EE0B81538B8E6BE /* HornEngineTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		706E687E1AC33896C8725E4E /* Fixtures */ = {
+			isa = PBXGroup;
+			children = (
+				8358DFBC4A56481875DA9607 /* word-edges.json */,
+			);
+			path = Fixtures;
 			sourceTree = "<group>";
 		};
 		92D6B99E5166A40BE903A4C3 /* Components */ = {
@@ -783,6 +797,7 @@
 			buildConfigurationList = EE47698AFC904A79C7CB4D4D /* Build configuration list for PBXNativeTarget "AroundTheHornTests" */;
 			buildPhases = (
 				6A16B24A7FEB623BA028BB36 /* Sources */,
+				AF6BE0CD3383AD7BBDF1497B /* Resources */,
 				CD759E29DB733ED496A3E9F2 /* Frameworks */,
 				5B75B4864B1A34685D012334 /* Embed Frameworks */,
 			);
@@ -932,6 +947,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AF6BE0CD3383AD7BBDF1497B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1D5148C829C014A9956828FC /* word-edges.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -973,6 +996,7 @@
 				F5F2A6A3B9B99EDB3509B063 /* StoresTests.swift in Sources */,
 				BB3B1340A172CD88BFC5EB27 /* SynthTests.swift in Sources */,
 				8507B9626335D0733F75E858 /* TestJourneys.swift in Sources */,
+				41F151D0A1B5CB0FD0CE918F /* WordEdgeTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
