@@ -1,7 +1,7 @@
 // 1849's tables, copied from the prototype's `ROLES`, `ITEMS`, `VAL`, `PORTS`, `STOPS`,
 // `REGIONS`, `MAGELLAN`, `WEATHER`, `PACE`, `RATIONS`, `AIL`, `DEATH_NAME`, `FIRST`,
 // `SHIPS` and `DEFAULT_TOP` (docs/reference/horn1849.html). The prototype is the
-// reference: change a number here only with Ryan's say-so (spec §0.5).
+// reference: change a number here only with the owner's say-so (spec §0.5).
 //
 // ORDER IS DATA. Weather weights are ordered lists, not dictionaries, because the
 // prototype's `wpick` walks an object in key order and a different order lands the same

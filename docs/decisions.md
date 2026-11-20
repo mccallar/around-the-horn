@@ -1,12 +1,12 @@
 # Decisions
 
 Where this repo departs from `SPEC.md`, and why. Balance numbers are never changed
-without Ryan (spec §0.5).
+without the owner (spec §0.5).
 
 ## D1 — The engine is a framework target, not a folder (2026-11-09)
 
 Spec §2 puts the engine in `AroundTheHorn/Engine/`. Here it is `HornEngine/`, its own
-framework target, following Slap Royale. "No SwiftUI/UIKit imports" is then enforced by
+framework target, following an earlier project's layout. "No SwiftUI/UIKit imports" is then enforced by
 the compiler and by `HornEngineTests/PurityTests`, not by a comment. The file names
 inside (`GameState.swift`, `GameData.swift`, `GameEngine.swift`, `Interrupt.swift`,
 `RNG.swift`, `Trade.swift`, `Score.swift`) are the spec's.
@@ -22,16 +22,16 @@ markup parsing).
 
 ## D3 — XcodeGen, generated project committed (2026-11-09)
 
-The spec's fallback path, and how every one of Ryan's apps is set up. `project.yml` is
+The spec's fallback path, and how the owner's other apps are set up. `project.yml` is
 the source of truth. `AroundTheHorn.xcodeproj` and `AroundTheHorn/Info.plist` are
-generated but committed, as in Slap Royale, because Xcode Cloud builds from the checkout
+generated but committed, as in an earlier project, because Xcode Cloud builds from the checkout
 and does not run XcodeGen. Regenerate and commit both whenever `project.yml` or the file
 list changes.
 
 ## D4 — Swift 5 language mode (2026-11-09)
 
-Spec §1 allows Swift 6 mode "if it compiles cleanly". Starting in 5.0, as Slap Royale
-does, so strict concurrency doesn't fight the `@MainActor` travel `Task`, AVAudioEngine
+Spec §1 allows Swift 6 mode "if it compiles cleanly". Starting in 5.0, as an earlier
+project does, so strict concurrency doesn't fight the `@MainActor` travel `Task`, AVAudioEngine
 render callbacks or `TimelineView` canvases. Revisit after M8.
 
 ## D5 — A literal "[" in markup is written "[[" (2026-11-09)
@@ -97,7 +97,7 @@ Results, three seed sets of 30 voyages per role:
 All pass with the tolerance. **The shipwright wins 93% every time, above the
 untolerated band.** Most likely this bot plays better than bot.js did, not that the
 balance moved: the engine matches the prototype exactly (D7). No balance number has been
-touched; whether to tighten the shipwright is Ryan's call (spec §0.5).
+touched; whether to tighten the shipwright is the owner's call (spec §0.5).
 
 Most whaler losses are thirst: the bot's water rule has no margin for the Doldrums.
 
@@ -108,8 +108,8 @@ both.)
 
 ## D9 — One engine, many journeys (2026-11-10)
 
-Ryan asked for variations on the game (rails, airships, balloons, another planet), planned
-and built without his input. The engine was split into shared rules and a `Journey` that
+The owner asked for variations on the game (rails, airships, balloons, another planet),
+planned and built without further input. The engine was split into shared rules and a `Journey` that
 supplies tables, numbers, text and hooks (docs/design/journeys-architecture.md); 1849
 became the first journey.
 
@@ -118,7 +118,7 @@ became the first journey.
   recorded BEFORE the split and never re-recorded.
 - The one change to `SensibleBot` is the name of the call that leaves port.
 - The save is version 2: it names its journey and stores weather and ailments whole. A
-  version-1 save (only ever on Ryan's own devices) is dropped, as any unreadable save is.
+  version-1 save (only ever on the owner's own devices) is dropped, as any unreadable save is.
 - Saves and top tens are per journey; the files from before are read as 1849's.
 - New journeys' balance is set by their own bots and bands
   (`HornEngineTests/<Name>Tests.swift`); none of it touches a 1849 number.
@@ -140,7 +140,7 @@ says or shows changes.
 ## D11 — 1849's role, ration and trade lines in its own words (2026-11-14)
 
 The role screen, the ration names and the trade row kept the prototype's wording, which
-sat close to an older game's. Ryan ruled to reword them: the role intro now reads "Every
+sat close to an older game's. The owner ruled to reword them: the role intro now reads "Every
 sort of person sailed for California in 1849. Choose who you will be:", the roles are "A
 Boston merchant", "A Mystic shipwright" and "A Nantucket whaler", the differences are
 "How do they compare?" / "How they compare", the rations are Full / Short / Scant, and the
@@ -282,7 +282,7 @@ a bar, clamped). They are left to be ruled on, not changed by this decision.
 
 The repairs screen showed the hull above the sails (rail: the running gear above the
 engine; the airship: lift above the engines), then offered to mend the sails first and
-the hull second, as the prototype does. Ryan found it backwards. Every journey's repairs
+the hull second, as the prototype does. The owner found it backwards. Every journey's repairs
 now come in the box's order, hull-role first, matching the shipyard and the status
 panel; rail's breakdown question lists the running gear before the engine for the same
 reason. Order only: no repair, cost or number changed.

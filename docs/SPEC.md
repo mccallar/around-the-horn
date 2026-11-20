@@ -1,10 +1,10 @@
 # Around the Horn: 1849 — Native iOS Build Spec
 
-> **For Claude Code.** This document specifies a native iOS game written in Swift/SwiftUI. A working web prototype, `horn1849.html`, is supplied alongside this file. **The prototype is the reference implementation**: when this spec and the prototype disagree on a number, a formula or a line of text, follow the prototype. Read both before writing code.
+> **For the implementer.** This document specifies a native iOS game written in Swift/SwiftUI. A working web prototype, `horn1849.html`, is supplied alongside this file. **The prototype is the reference implementation**: when this spec and the prototype disagree on a number, a formula or a line of text, follow the prototype. Read both before writing code.
 
 ---
 
-## 0. How to use this spec (instructions to Claude Code)
+## 0. How to use this spec (instructions to the implementer)
 
 1. Read this whole file, then read `horn1849.html` (the `<script>` block is the game logic, about 700 lines of JS).
 2. Work through the **Milestones** (§12) in order. Finish each milestone's acceptance checks before starting the next one. After each milestone, build with `xcodebuild` and run the tests.
@@ -13,7 +13,7 @@
 5. Ask the developer before changing game balance numbers. The values below were tuned by running the web version through a few hundred simulated voyages.
 
 ### Project setup
-Preferred: the developer creates the project in Xcode first (*File › New › Project › iOS › App*, product name `AroundTheHorn`, Interface **SwiftUI**, Language **Swift**, storage **None**, tests **enabled**), then runs Claude Code from the project folder.
+Preferred: the developer creates the project in Xcode first (*File › New › Project › iOS › App*, product name `AroundTheHorn`, Interface **SwiftUI**, Language **Swift**, storage **None**, tests **enabled**), then the implementer works from the project folder.
 
 Fallback, if no project exists: generate one with **XcodeGen** (`brew install xcodegen`) from a `project.yml` you write, then run `xcodegen generate`.
 

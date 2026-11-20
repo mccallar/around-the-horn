@@ -12,7 +12,7 @@ import XCTest
 /// whatever fits. A change to any rule, number, draw order or sentence of 1849 fails it.
 ///
 /// The fixture was recorded before the engine learned other journeys (docs/decisions.md D9).
-/// Re-record it only when 1849 itself is meant to change, which needs Ryan's say-so:
+/// Re-record it only when 1849 itself is meant to change, which needs the owner's say-so:
 ///   HORN_RECORD_GOLDEN=1 swift test --disable-sandbox --filter GoldenVoyageTests
 /// To see where a voyage diverges, write its full trace from the old and the new code and
 /// diff them:

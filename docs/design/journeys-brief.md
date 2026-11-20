@@ -1,6 +1,6 @@
 # Journeys — design brief
 
-Ryan's ask (2026-11-09): "Come up with variations on the game like rails, blimps, hot air
+The owner's ask (2026-11-09): "Come up with variations on the game like rails, blimps, hot air
 balloons — plan and build without my input. Do a futuristic trip to another planet, etc."
 
 The app becomes a **collection of journeys**. The title screen offers a choice of

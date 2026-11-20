@@ -4,7 +4,7 @@ options:
   deploymentTarget:
     iOS: "17.0"
 
-# THE VERSION LIVES HERE, ONCE, for every target (Slap Royale's lesson: three copies
+# THE VERSION LIVES HERE, ONCE, for every target (an earlier project's lesson: three copies
 # drifted and one IPA carried three different build numbers).
 #
 # CURRENT_PROJECT_VERSION governs MANUAL archives from Xcode's Organizer only. Xcode
@@ -125,7 +125,7 @@ targets:
 
 # ⚠️ Declaring ANY scheme turns off XcodeGen's per-target auto-generation: every scheme
 # still wanted must be spelled out here. No test action on the app scheme, deliberately —
-# a plain Run must never drag a test build along with it (Slap Royale's rule).
+# a plain Run must never drag a test build along with it (an earlier project's rule).
 schemes:
   AroundTheHorn:
     build:

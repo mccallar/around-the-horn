@@ -10,7 +10,7 @@ make one.
 
 - Work the milestones in `docs/SPEC.md` §12 in order. Each milestone's acceptance
   checks pass, and the suites are green, before the next starts.
-- **Never change a balance number without asking Ryan** (spec §0.5).
+- **Never change a balance number without asking the owner** (spec §0.5).
 - Apple frameworks only. No SPM packages, no third-party code. The two fonts (VT323,
   Press Start 2P) are SIL OFL and ship with `OFL.txt`.
 - `HornEngine` imports nothing UI. `PurityTests` reads the source to enforce it.

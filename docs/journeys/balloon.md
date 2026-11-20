@@ -1565,7 +1565,7 @@ so a journey that never meets it never draws.
     food leg by leg, so food rarely drops below 12 watches. If the real engine shows the
     pilot below 15%, either let non-chocolate-makers fish whenever they're over the sea in
     fishable weather and food < 24 watches, or raise the pilot's start money to $5,250 or
-    $5,500 (model: 44% and 47%). Balance changes are Ryan's call.
+    $5,500 (model: 44% and 47%). Balance changes are the owner's call.
 12. **Time of day (cosmetic, optional):** every line a player reads is now free of dawn,
     dusk, daylight and dark (§12.1). A later pass could choose variants, and a night sky
     (stars, the envelope lit by the burner), by local solar time = GMT hour + longitude ÷

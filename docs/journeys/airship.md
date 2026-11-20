@@ -906,7 +906,7 @@ July 50% / 8% — May is best, as the advice says. By route: above the fog 69% /
 a broken arm; meteorologist mostly forced down, thirst, pneumonia. The financier averages 1.9
 illnesses and 0.1 deaths a flight; the poorer roles 4.6–5.3 illnesses and 1–1.5 deaths. The
 Swift bot will not match this model exactly; the bands are the target, and any change to
-them is Ryan's call (spec §0.5).
+them is the owner's call (spec §0.5).
 
 ---
 

@@ -1,6 +1,6 @@
 #!/bin/sh
 # Builds and runs a suite against a booted simulator WITHOUT `xcodebuild test`, which
-# cannot allocate a pty inside the Claude Code sandbox — it fails with
+# cannot allocate a pty inside a sandboxed shell — it fails with
 #   "Failed to install or launch the test runner … Pseudo Terminal Setup Error … Operation not permitted"
 # after a clean build, which reads as a broken suite and is not one. Outside the sandbox,
 # plain `xcodebuild test -scheme <scheme> -destination '…'` works and is what CI runs.
