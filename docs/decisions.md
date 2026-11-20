@@ -303,7 +303,7 @@ taken), so she can only leave through `depart`. Nothing else about the save chan
 1849 and the Iron Road answer false and are exactly as they were: continued before they
 left, they come back to the port menu and can set out with no food and no departure
 sentence, as 1849's prototype does. That is left to be ruled on, not changed by this
-decision; answering true in their skins is the whole change.
+decision (nor by D22 or D23); answering true in their skins is the whole change.
 
 ## D17 — The balloon's relaunch needs burners, and its date keeps GMT (2026-11-16)
 
@@ -443,3 +443,11 @@ keep their code and stay green. The parity driver and the balance bot always buy
 provisions. The golden bot's random carts leave New York without them in 2 of its 300
 voyages, with $148 and $33 left, more than a step each, so the refusal it records still
 holds.
+
+This decision does not reach a voyage continued before it left New York. The stores save
+as you leave them, so a ship closed on the departure screen, or in the shop, comes back to
+New York's port menu (1849 answers `Words.resumesInFirstShop` false), and that menu's way
+out (`leavePort`, then `startTravel`) never calls `depart`: she sets out with no refusal
+and no departure sentence, so with no hungry line either, whatever her purse. That is
+D16's open item, still left to be ruled on; answering true in 1849's skin on both
+platforms would send her back through the stores and this decision's refusal.
