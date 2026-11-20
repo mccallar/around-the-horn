@@ -697,7 +697,8 @@ and play as they did: every new member's answer for them is the one that changes
    no food) must hold a crew only while `Journey.firstPortSells` says its purse still
    runs to a step of what it asks for, and `departsUnfed` must let a hungry crew go when
    it doesn't (D22, D23): the stores buy nothing back, so a crew held for something it
-   can't buy is held there for good. This bug shipped four times, 1849's own included. Test both sides of the step.
+   can't buy is held there for good. This bug shipped four times, 1849's own included.
+   Test both sides of the step.
 5. `xcodegen generate`; `swift test`; the app and UI suites; screenshots of the title,
    the first shop, travelling, a port, the chart and the mini-game. A new journey adds a
    row to the picker, so retake every set's `00-picker.png` too, each walk on a freshly

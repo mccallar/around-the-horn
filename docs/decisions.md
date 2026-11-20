@@ -6,10 +6,10 @@ without the owner (spec §0.5).
 ## D1 — The engine is a framework target, not a folder (2026-11-09)
 
 Spec §2 puts the engine in `AroundTheHorn/Engine/`. Here it is `HornEngine/`, its own
-framework target, following an earlier project's layout. "No SwiftUI/UIKit imports" is then enforced by
-the compiler and by `HornEngineTests/PurityTests`, not by a comment. The file names
-inside (`GameState.swift`, `GameData.swift`, `GameEngine.swift`, `Interrupt.swift`,
-`RNG.swift`, `Trade.swift`, `Score.swift`) are the spec's.
+framework target, following an earlier project's layout. "No SwiftUI/UIKit imports" is
+then enforced by the compiler and by `HornEngineTests/PurityTests`, not by a comment. The
+file names inside (`GameState.swift`, `GameData.swift`, `GameEngine.swift`,
+`Interrupt.swift`, `RNG.swift`, `Trade.swift`, `Score.swift`) are the spec's.
 
 Consequence: engine types the app uses must be `public`.
 
@@ -24,9 +24,9 @@ markup parsing).
 
 The spec's fallback path, and how the owner's other apps are set up. `project.yml` is
 the source of truth. `AroundTheHorn.xcodeproj` and `AroundTheHorn/Info.plist` are
-generated but committed, as in an earlier project, because Xcode Cloud builds from the checkout
-and does not run XcodeGen. Regenerate and commit both whenever `project.yml` or the file
-list changes.
+generated but committed, as in an earlier project, because Xcode Cloud builds from the
+checkout and does not run XcodeGen. Regenerate and commit both whenever `project.yml` or
+the file list changes.
 
 ## D4 — Swift 5 language mode (2026-11-09)
 
@@ -109,7 +109,7 @@ both.)
 ## D9 — One engine, many journeys (2026-11-10)
 
 The owner asked for variations on the game (rails, airships, balloons, another planet),
-planned and built without further input. The engine was split into shared rules and a
+planned and built without the owner's input. The engine was split into shared rules and a
 `Journey` that supplies tables, numbers, text and hooks
 (docs/design/journeys-architecture.md); 1849 became the first journey.
 
@@ -118,7 +118,8 @@ planned and built without further input. The engine was split into shared rules 
   recorded BEFORE the split and never re-recorded.
 - The one change to `SensibleBot` is the name of the call that leaves port.
 - The save is version 2: it names its journey and stores weather and ailments whole. A
-  version-1 save (only ever on the owner's own devices) is dropped, as any unreadable save is.
+  version-1 save (only ever on the owner's own devices) is dropped, as any unreadable
+  save is.
 - Saves and top tens are per journey; the files from before are read as 1849's.
 - New journeys' balance is set by their own bots and bands
   (`HornEngineTests/<Name>Tests.swift`); none of it touches a 1849 number.
@@ -140,12 +141,12 @@ says or shows changes.
 ## D11 — 1849's role, ration and trade lines in its own words (2026-11-14)
 
 The role screen, the ration names and the trade row kept the prototype's wording, which
-sat close to an older game's. The owner ruled to reword them: the role intro now reads "Every
-sort of person sailed for California in 1849. Choose who you will be:", the roles are "A
-Boston merchant", "A Mystic shipwright" and "A Nantucket whaler", the differences are
-"How do they compare?" / "How they compare", the rations are Full / Short / Scant, and the
-port row is "Seek a trade". Words only: no number, formula or random draw changed, so the
-prototype parity, balance and golden-voyage tests are untouched. The rail journey's
+sat close to an older game's. The owner ruled to reword them: the role intro now reads
+"Every sort of person sailed for California in 1849. Choose who you will be:", the roles
+are "A Boston merchant", "A Mystic shipwright" and "A Nantucket whaler", the differences
+are "How do they compare?" / "How they compare", the rations are Full / Short / Scant, and
+the port row is "Seek a trade". Words only: no number, formula or random draw changed, so
+the prototype parity, balance and golden-voyage tests are untouched. The rail journey's
 matching lines were reworded the same day. The reference screenshots of the screens that
 show these lines are retaken with the next screenshot walk (both sets were retaken on
 2026-11-19).
@@ -282,10 +283,10 @@ a bar, clamped). They are left to be ruled on, not changed by this decision.
 
 The repairs screen showed the hull above the sails (rail: the running gear above the
 engine; the airship: lift above the engines), then offered to mend the sails first and
-the hull second, as the prototype does. The owner found it backwards. Every journey's repairs
-now come in the box's order, hull-role first, matching the shipyard and the status
-panel; rail's breakdown question lists the running gear before the engine for the same
-reason. Order only: no repair, cost or number changed.
+the hull second, as the prototype does. The owner found it backwards. Every journey's
+repairs now come in the box's order, hull-role first, matching the shipyard and the
+status panel; rail's breakdown question lists the running gear before the engine for the
+same reason. Order only: no repair, cost or number changed.
 
 ## D16 — A flight saved before it left Rome comes back to the stores (2026-11-15)
 

@@ -283,15 +283,17 @@ Engine files: `HornEngine/Journeys/Mars/` (`Mars.swift` rules, sentences and hoo
 `MarsData.swift` tables, `Mars+Ports.swift` the four stations and the cycler's offer,
 `Mars+Events.swift` the 23 events, `Mars+Choices.swift` turnover, capture and every
 answer, `Mars+Trouble.swift` the array dark, the hull at 0% and the tanks dry, D14), one
-entry in `Journeys.all`. Tests: `HornEngineTests/MarsTests.swift` (30 rule tests, 4 balance
-tests) and `HornEngineTests/MarsBreakdownTests.swift` (18, D14); `JourneyContractTests` runs over it with no special case. The
-title card, setup and outfit copy, learn pages, burial wording, status labels, scene,
-chart and the grapple's drawing (§1's card, §15's canvas, §16, §19) belong to the skin,
+entry in `Journeys.all`. Tests: `HornEngineTests/MarsTests.swift` (30 rule tests, 4
+balance tests) and `HornEngineTests/MarsBreakdownTests.swift` (18, D14);
+`JourneyContractTests` runs over it with no special case. The title card, setup and
+outfit copy, learn pages, burial wording, status labels, scene, chart and the grapple's
+drawing (§1's card, §15's canvas, §16, §19) belong to the skin,
 `AroundTheHorn/Journeys/Mars*.swift` (docs/design/journeys-architecture.md §2, "Mars skin,
 as built"; Gateway's refusal of empty tanks is D18, and D19 lets her go without what the
 purse can't buy, through one shared hook, `Journey.departsUnfed`, which the Klondike
-(D21), rail, the airship and the balloon (D22) and 1849 (D23) answer too). No other shared engine code changed. The test bot `JourneyBot` gained
-one knob, `stockFactorHere` (off by default), described below.
+(D21), rail, the airship and the balloon (D22) and 1849 (D23) answer too). No other shared
+engine code changed. The test bot `JourneyBot` gained one knob, `stockFactorHere` (off by
+default), described below.
 
 ### The numbers as shipped
 
