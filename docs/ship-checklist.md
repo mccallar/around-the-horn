@@ -8,7 +8,7 @@ Node tests of the web version and the screenshot walks (see README).
 - [ ] **Sound.** The synth is tested for volume and shape but has never been *heard*:
       the click, the message blip, each journey's title tune, the arrival fanfare, the
       death dirge, the win tune, each journey's mini-game (the harpoon and the catch in
-      1849) and the catch. Mute toggle silences all of it; your own music keeps playing
+      1849). Mute toggle silences all of it; your own music keeps playing
       underneath.
 - [ ] **Haptics.** Light tap on every choice; success on arrival, the finale and a catch;
       warning on a death.
