@@ -287,6 +287,14 @@ for (const s of cardStrings) {
   check(!foreign(s), `the title card says no other journey's word: ${s.slice(0, 60)}`);
 }
 
+// Every ailment the trek names, as the crew list and a death line say it, passes the sieve,
+// and the sieve does catch 1849's name for the flux.
+for (const a of J.ailments) {
+  check(!foreign(a.rawValue) && !foreign(a.deathName), `the trek's ailment is in its own words: ${a.rawValue}`);
+}
+check(J.ailments.some((a) => a.rawValue === 'the flux'), 'the trek calls its fifth ailment the flux');
+check(foreign('You, Ada, have died of dysentery.'), "the sieve catches 1849's dysentery");
+
 const storm = J.weathers.find((w) => w.sky === 'storm');
 const troubles = new Set(), yardRows = new Set(), stopNames = new Set();
 const isTown = (st) => J.ports.some((p) => p.id === st.id);

@@ -621,18 +621,18 @@ Rations screen: `Rations are currently [amber]{name}[/amber]. With {n} in the pa
 | pneumonia | 4.5 | 6–10 | pneumonia |
 | typhoid fever | 5.5 | 7–12 | typhoid fever |
 | a fever | 3 | 4–7 | a fever |
-| dysentery | 4.5 | 5–9 | dysentery |
+| the flux | 4.5 | 5–9 | the flux |
 | frostbite | 2.5 | 5–9 | frostbite |
 | snow blindness | 1.0 | 2–4 | a fall on the ice |
 | a broken leg | 1.2 | 14–24 | an infected wound |
 | exhaustion | 1.5 | 3–5 | exhaustion |
 
 **Sickness pools** (1849's `sicken` structure):
-- **Fever port** (Dyea, Skagway): typhoid fever, a fever, dysentery.
-- **hot**: a fever, dysentery, exhaustion, typhoid fever, a broken leg. No region is
+- **Fever port** (Dyea, Skagway): typhoid fever, a fever, the flux.
+- **hot**: a fever, the flux, exhaustion, typhoid fever, a broken leg. No region is
   `hot`; this pool is kept for completeness.
 - **cold / freezing**: pneumonia, frostbite, snow blindness, a fever, a broken leg.
-- **otherwise** (cool, warm): a fever, dysentery, a broken leg, exhaustion, pneumonia.
+- **otherwise** (cool, warm): a fever, the flux, a broken leg, exhaustion, pneumonia.
 
 **Messages:**
 - `{name} has {ailment}.`
@@ -1782,6 +1782,13 @@ losses end at least three ways, the police among them.
     less than $25 and no grub, `Klondike.departsUnfed` lets the party go; the skin's warning
     still says how short it is, and the departure ends by saying the outfit has no grub and
     the police at the summit will turn it back. No number changed.
+24. **The flux** (§11; the owner's ruling, words only): the spec named the fifth ailment
+    after 1849's, and with the leader's death line ("You, {name}, have died of ___.") that
+    echoed the best-known line of an older trail game. It is "the flux", the period's own
+    name for it, in every table, pool and message; its damage, its days, the pools' order
+    and every random draw are as they were, so the bot's results are identical. 1849 keeps
+    the prototype's name. The vocabulary sieve (`KlondikeSkinTests.elsewhere`, the web's
+    `KLONDIKE_FOREIGN`) holds 1849's word out of the trek.
 
 ### Sleds, oars, the outfit and the boat at nothing (D14)
 

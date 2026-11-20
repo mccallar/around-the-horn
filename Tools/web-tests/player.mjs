@@ -373,14 +373,14 @@ export class Player {
 
 /**
  * Words from the other journeys' worlds that must never reach the Klondike, as the app's
- * `KlondikeSkinTests.elsewhere` sieves them: an 1849 ship at sea, a train, an airship, a
- * balloon, a freighter in space. A stampeder has a steamer, a boat with oars & sail,
+ * `KlondikeSkinTests.elsewhere` sieves them: an 1849 ship at sea (and her crew's dysentery,
+ * which the trek calls the flux), a train, an airship, a balloon, a freighter in space. A stampeder has a steamer, a boat with oars & sail,
  * firewood, lime juice, fish and miles, so those stay; and the steamer anchors off Dyea,
  * the White Pass has a wagon road at its foot, the lake fills with sails and rapids throw
  * spray (`KLONDIKE_FIGURES`, taken out before the sieve).
  */
 export const KLONDIKE_FOREIGN = new RegExp('\\b(sails|sailing|sailors?|sailcloth|shipwrights?|anchor(s|ed)?|harpoons?|tackle|throws?|voyages?|'
-  + 'nm|nautical|knots?|citrus|limes|whal(e|er|ers|ing)|galley|'
+  + 'nm|nautical|knots?|citrus|limes|whal(e|er|ers|ing)|galley|dysentery|'
   + 'trains?|railroad|railway|locomotive|conductor|caboose|boxcars?|cords?|wagons?|oxen|'
   + 'petrol|gondola|hydrogen|propane|burners?|ballast|gallons?|helium|'
   + 'propellant|tonnes?|litres?|kilomet(re|er)s?|km|thrusters?|airlock|orbits?)\\b', 'i');
