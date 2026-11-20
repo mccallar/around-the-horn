@@ -160,8 +160,11 @@ Also shared and journey-aware:
   non-empty, every skin's draws run without trapping for every weather and stop.
 
 **1849 must look and read exactly as it did**, apart from the role, ration and trade lines
-D11 reworded. The reference is the 38 screenshots in `docs/reference/shots-1849/`, first
-taken before this work and retaken after D11 with the same walk.
+D11 reworded and, with several journeys, the picker's rows (`c.wayBack`, `c.wayOut`: the
+title's "Choose another journey" and the menus' way back to the title). The reference is
+the 38 screenshots in `docs/reference/shots-1849/`, first taken before this work with 1849
+alone, and retaken after D11 with the same walk and six journeys, so they show those rows;
+the look with one journey and no extra rows is the set as first committed (`2f6614d`).
 
 ### As built
 
@@ -687,7 +690,9 @@ and play as they did: every new member's answer for them is the one that changes
    it doesn't (D22): the stores buy nothing back, so a crew held for something it can't
    buy is held there for good. This bug shipped three times. Test both sides of the step.
 5. `xcodegen generate`; `swift test`; the app and UI suites; screenshots of the title,
-   the first shop, travelling, a port, the chart and the mini-game.
+   the first shop, travelling, a port, the chart and the mini-game. A new journey adds a
+   row to the picker, so retake every set's `00-picker.png` too, each walk on a freshly
+   installed app (uninstall it first), so no journey is marked in progress.
 6. Append "As built" to the spec: what differs from it and the bot's numbers.
 7. The web port (D13), file for file from the Swift skin:
    `web/js/journeys/<id>-skin.js`, `-scene.js`, `-chart.js` and `-forage.js`, and one entry
