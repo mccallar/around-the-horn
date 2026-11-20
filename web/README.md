@@ -95,8 +95,10 @@ compared number by number (their scenes are, and so are their maps' routes and c
   the shop, what repairs cost and whether they can be done, why foraging is refused, the
   generator's position), the port whose prices apply (`port`, as the engine finds it for
   the way taken), and `hooks`: what the skins ask the engine beyond the state, so a skin
-  never works out a rule of its own. `hooks.departsUnfed` and `mayDepart` are every
-  journey's (D19, D21); the rest are under the journey's id: the trouble each can be in
+  never works out a rule of its own. `hooks.departsUnfed`, `mayDepart` and
+  `hooks.firstPortSells` (whether the purse still runs to a step of each item in the first
+  port's stores, which the airship's empty-tanks refusal reads) are every journey's (D19,
+  D21, D22); the rest are under the journey's id: the trouble each can be in
   (D14: `rail.brokenDown`, `airship.enginesOut` and `goingDown`, `balloon.burnersOut`,
   `goingDown`, `lastOfThePropane` and `relaunchRefusal`, `klondike.givenOut` and `noFire`,
   `mars.dark`, `coasting` and `lastOfThePropellant`), the finales' words, the balloon's

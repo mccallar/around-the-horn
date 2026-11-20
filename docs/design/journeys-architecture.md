@@ -301,6 +301,11 @@ numbers and text are untouched, and so is everything 1849 shows.
 - A walk across random country needs patience written down: `RailScreenshotUITests`
   has a list of the answers that cost least and a `roll(until:)` that gives them until
   the screen it wants turns up.
+- **Omaha holds a train only for what its purse can buy** (decision D22): with no
+  provisions aboard the engine's own refusal holds only while the purse runs to a step of
+  them (25 lbs, $3, `Journey.firstPortSells`); with less, `departsUnfed` lets the crew
+  leave hungry and the departure's last sentence says so (`Rail.goingHungry`). The skin
+  answers no `departRefusal` of its own.
 
 **What the next skin's author should copy.** The four files' layout; `RailSkin.span` if
 a turn is not a day; a `<Name>SkinTests` beside `RailSkinTests` (numbers held to the
@@ -324,8 +329,9 @@ Iron Road look, read and play as they did.
 - **Four new shell members**, each with an answer that leaves 1849 and rail as they were:
   - `Words.departRefusal`: why the first port won't let the vessel go beyond the engine's
     own refusal (nothing to eat). The airship answers "empty tanks" when there is no
-    petrol aboard, as its spec asked and its engine left to the app (As built 7); 1849
-    and rail answer `nil`. `GameController.depart` asks it first.
+    petrol aboard and the purse still runs to a step of it (`Journey.firstPortSells`,
+    D22), as its spec asked and its engine left to the app (As built 7); 1849 and rail
+    answer `nil`. `GameController.depart` asks it first.
   - `Words.resumesInFirstShop`: a voyage saved at the first port before it left (the
     stores save as you leave them) comes back to those stores, so it still leaves through
     `depart` and both refusals (decision D16). The airship answers true; 1849 and rail
@@ -381,6 +387,12 @@ Iron Road look, read and play as they did.
   petrol", from the engine's own `Airship.goingDown` and `Airship.enginesOut`; dead engines
   are drawn and labelled as dry tanks are, drifting. `ResumeTests` resumes a ship going
   down over the Oslo mast.
+- **Rome holds a ship only for what its purse can buy** (decision D22). With no petrol
+  aboard, `departRefusal` holds her only while the purse runs to a step of it (100 kg,
+  $1.50); with no provisions, the engine's own refusal holds only while it runs to a step
+  of those (10 kg, $5: `departsUnfed`). With less she leaves dry, flying as a free
+  balloon as she does when her tanks run dry aloft, or hungry, and the departure's last
+  sentences say what is missing (`Airship.setOff`).
 - `AirshipScreenshotUITests` walks it. Its patience leaves out the masts' "Fly on without
   stopping" and the Circle's "No time for speeches" while rolling toward them (they race
   the button it is waiting for), and its setup test is named to run first, so the title
@@ -408,6 +420,13 @@ Iron Road and Over the Pole look, read and play as they did.
     the helium alone, burning nothing, and the relaunch row says so. The launch from Marrakech is
     still the engine's own refusal through `depart`, which names both food and the 25
     gallons, so `departRefusal` is `nil`; `resumesInFirstShop` is true (D16).
+  - **Marrakech holds a balloon only for what its purse can buy** (decision D22): short of
+    the climb's 25 gallons, `mayDepart` refuses only while the purse runs to a step of
+    propane (50 gallons, $22.50), and with no rations the engine's own refusal holds only
+    while it runs to a step of those (10 lbs, $30: `departsUnfed`). With less the ground
+    team puts in the climb on the sponsor's account, as every later field does, or the
+    crew goes hungry; the departure says so, and the first watch says only that the
+    propane is gone.
 - **One debug launch argument**, `-HornDebugFuel <n>` with `-HornDebugStart`: that much
   fuel aboard, so a walk can show dry tanks and a field's refusal. Debug builds only.
 - **The engine's text**: the three role labels in D11's shape ("A Zurich chocolate maker",
@@ -662,6 +681,11 @@ and play as they did: every new member's answer for them is the one that changes
    `<Name>+Events.swift`; a data namespace enum; one entry in `Journeys.all`.
 3. `HornEngineTests/<Name>Tests.swift`: rules and balance.
 4. `AroundTheHorn/Journeys/<Name>Skin.swift` and one entry in the skin list.
+   A refusal at the first port (`Words.departRefusal`, `mayDepart`, the engine's own for
+   no food) must hold a crew only while `Journey.firstPortSells` says its purse still
+   runs to a step of what it asks for, and `departsUnfed` must let a hungry crew go when
+   it doesn't (D22): the stores buy nothing back, so a crew held for something it can't
+   buy is held there for good. This bug shipped three times. Test both sides of the step.
 5. `xcodegen generate`; `swift test`; the app and UI suites; screenshots of the title,
    the first shop, travelling, a port, the chart and the mini-game.
 6. Append "As built" to the spec: what differs from it and the bot's numbers.

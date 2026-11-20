@@ -5,7 +5,8 @@
 // question a skin asks) is one engine.js has; and every skin in journeys/skins.js answers
 // every member the app's JourneySkin, TitleCard, Words, SceneSkin, ChartSkin, ForageSkin,
 // ForageField and DebugSkin declare (AroundTheHorn/Journeys/JourneySkin.swift), and
-// nothing they don't, as SkinContractTests holds the app's skins to them.
+// nothing they don't, as SkinContractTests holds the app's skins to them; and the hooks
+// the bridge sends every journey are named in web/README.md.
 //
 //   node Tools/web-tests/imports.mjs
 import { readFileSync, readdirSync } from 'node:fs';
@@ -67,6 +68,7 @@ for (const m of calls) check(typeof e[m] === 'function', `the shell calls engine
 
 // Every skin answers the app's skin contract, member for member.
 const swift = readFileSync(path.join(repo, 'AroundTheHorn/Journeys/JourneySkin.swift'), 'utf8');
+const readme = readFileSync(path.join(repo, 'web/README.md'), 'utf8');
 /** A Swift struct's members that every skin must answer: its `let`s (a `var` has a default). */
 function members(name) {
   const body = swift.match(new RegExp(`\\nstruct ${name} \\{([\\s\\S]*?)\\n\\}`))?.[1] ?? '';
@@ -112,6 +114,11 @@ for (const mod of all) {
   check(words.yardQuestion === null || typeof e[words.yardQuestion] === 'function',
     `${mod.id}'s yard question is an engine call engine.js has (${words.yardQuestion})`);
   check(Object.values(words.looseOne ?? {}).every((x) => typeof x === 'string'), `${mod.id}'s looseOne names`);
+  // The hooks every journey has (not under a journey's id) are each named in the README,
+  // so a skin's author can find what the bridge answers (D19, D21, D22).
+  for (const k of Object.keys(v.hooks).filter((k) => !tables.some((j) => j.id === k))) {
+    check(new RegExp(`\`(hooks\\.)?${k}\``).test(readme), `web/README names the bridge's shared hook ${k}`);
+  }
   e.close();
 }
 

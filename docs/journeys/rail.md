@@ -92,6 +92,9 @@ Departures: June, August, **October (recommended)**, December 1869, February 187
   express wanting the main, a grass fire, a snowdrift, a tramp, a patent-medicine
   drummer, and so on), seven of them choices. No event harms an animal.
 - Score adds 40 points for every turn in hand on the twelve days.
+- Omaha won't let a train leave with no provisions while the purse runs to a step of them
+  (25 lbs, $3); with less, the crew leaves hungry and the departure says so (decision
+  D22), rather than being held for good by stores that buy nothing back.
 
 ## Breakdowns
 
