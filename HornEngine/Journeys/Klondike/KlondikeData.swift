@@ -339,17 +339,17 @@ enum KlondikeData {
     static let pneumonia = Ailment("pneumonia", damage: 4.5, days: 6...10)
     static let typhoid = Ailment("typhoid fever", damage: 5.5, days: 7...12)
     static let fever = Ailment("a fever", damage: 3, days: 4...7)
-    /// A camp's sickness of the bowels, by the period's own name (klondike.md, as built 24).
-    static let flux = Ailment("the flux", damage: 4.5, days: 5...9)
+    /// The influenza of the 1890s, by its period name (klondike.md, as built 24).
+    static let grippe = Ailment("the grippe", damage: 4.5, days: 5...9)
     static let frostbite = Ailment("frostbite", damage: 2.5, days: 5...9)
     static let snowBlindness = Ailment("snow blindness", damage: 1, days: 2...4, death: "a fall on the ice")
     static let brokenLeg = Ailment("a broken leg", damage: 1.2, days: 14...24, death: "an infected wound")
     static let exhaustion = Ailment("exhaustion", damage: 1.5, days: 3...5)
 
-    static let feverPortPool = [typhoid, fever, flux]
-    static let hotPool = [fever, flux, exhaustion, typhoid, brokenLeg]
+    static let feverPortPool = [typhoid, fever, grippe]
+    static let hotPool = [fever, grippe, exhaustion, typhoid, brokenLeg]
     static let coldPool = [pneumonia, frostbite, snowBlindness, fever, brokenLeg]
-    static let mildPool = [fever, flux, brokenLeg, exhaustion, pneumonia]
+    static let mildPool = [fever, grippe, brokenLeg, exhaustion, pneumonia]
 
     // MARK: - People, boats, the board
 

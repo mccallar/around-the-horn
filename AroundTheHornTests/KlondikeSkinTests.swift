@@ -762,12 +762,12 @@ extension KlondikeSkinTests {
     }
 
     /// Words from the other journeys' worlds: an 1849 ship at sea (and her crew's dysentery,
-    /// which the trek calls the flux), a train, an airship, a balloon, a freighter in space. A
+    /// which the trek never names, nor the flux), a train, an airship, a balloon, a freighter in space. A
     /// stampeder has a steamer, a boat with oars & sail, firewood, lime juice and miles, so
     /// those stay.
     static let elsewhere = try! NSRegularExpression(
         pattern: #"\b(sails|sailing|sailors?|sailcloth|shipwrights?|anchor(s|ed)?|harpoons?|tackle|throws?|voyages?|"#
-            + #"nm|nautical|knots?|citrus|limes|whal(e|er|ers|ing)|galley|dysentery|"#
+            + #"nm|nautical|knots?|citrus|limes|whal(e|er|ers|ing)|galley|dysentery|flux|"#
             + #"trains?|railroad|railway|locomotive|conductor|caboose|boxcars?|cords?|wagons?|oxen|"#
             + #"petrol|gondola|hydrogen|propane|burners?|ballast|gallons?|helium|"#
             + #"propellant|tonnes?|litres?|kilomet(re|er)s?|km|thrusters?|airlock|orbits?)\b"#,
@@ -791,10 +791,12 @@ extension KlondikeSkinTests {
                 + strings(other.card).joined(separator: "\n")
             XCTAssertNotNil(Self.elsewhere.firstMatch(in: words, range: NSRange(words.startIndex..., in: words)), other.id)
         }
-        // The trek's ailment is the flux, and the sieve catches 1849's name for it.
-        XCTAssertTrue(klondike.ailments.contains { $0.name == "the flux" })
-        let echo = klondike.text.leaderDied("Ada", "dysentery")
-        XCTAssertNotNil(Self.elsewhere.firstMatch(in: echo, range: NSRange(echo.startIndex..., in: echo)), echo)
+        // The trek's ailment is the grippe, and the sieve catches 1849's name for it and its old one.
+        XCTAssertTrue(klondike.ailments.contains { $0.name == "the grippe" })
+        for word in ["dysentery", "the flux"] {
+            let echo = klondike.text.leaderDied("Ada", word)
+            XCTAssertNotNil(Self.elsewhere.firstMatch(in: echo, range: NSRange(echo.startIndex..., in: echo)), echo)
+        }
         // And nothing here is said in the shapes D11 retired.
         let retired = ["You may:", "Find out the differences", "Be a ", "Many kinds of people", "Filling", "Meager",
                        "Bare bones", "Attempt to trade"]

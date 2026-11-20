@@ -288,11 +288,12 @@ for (const s of cardStrings) {
 }
 
 // Every ailment the trek names, as the crew list and a death line say it, passes the sieve,
-// and the sieve does catch 1849's name for the flux.
+// and the sieve does catch 1849's name for that sickness and its old name.
 for (const a of J.ailments) {
   check(!foreign(a.rawValue) && !foreign(a.deathName), `the trek's ailment is in its own words: ${a.rawValue}`);
 }
-check(J.ailments.some((a) => a.rawValue === 'the flux'), 'the trek calls its fifth ailment the flux');
+check(J.ailments.some((a) => a.rawValue === 'the grippe'), 'the trek calls its fifth ailment the grippe');
+check(foreign('You, Ada, have died of the flux.'), 'the sieve catches the flux');
 check(foreign('You, Ada, have died of dysentery.'), "the sieve catches 1849's dysentery");
 
 const storm = J.weathers.find((w) => w.sky === 'storm');
