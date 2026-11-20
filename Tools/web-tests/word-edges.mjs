@@ -18,7 +18,9 @@ const e = await engine();
 const tables = e.journeys();
 check(JSON.stringify(Object.keys(fixture.journeys).sort()) === JSON.stringify(tables.map((J) => J.id).sort()),
   'every journey has its edges');
-const KNOWN = ['clothes', 'noCitrus', 'day', 'fuel', 'money'];
+const KNOWN = ['clothes', 'noCitrus', 'day', 'fuel', 'money', 'hull', 'sails'];
+/** A field of the skin's words; `trouble` is the status box's red row, by its value. */
+const field = (words, name) => (name === 'trouble' ? words.trouble?.value : words[name]) ?? null;
 let cases = 0;
 for (const [id, list] of Object.entries(fixture.journeys)) {
   const J = tables.find((x) => x.id === id);
@@ -39,7 +41,7 @@ for (const [id, list] of Object.entries(fixture.journeys)) {
     const what = `${id} ${JSON.stringify(c.set)} ${c.field}`;
     const words = sk.words(v);
     check(c.field in words, `${what}: no such field`);
-    const got = words[c.field] ?? null;
+    const got = field(words, c.field);
     cases++;
     if ('is' in c) check(got === c.is, `${what}: ${JSON.stringify(got)}, not ${JSON.stringify(c.is)}`);
     if ('has' in c) check(got != null && got.includes(c.has), `${what}: ${JSON.stringify(got)} lacks ${JSON.stringify(c.has)}`);

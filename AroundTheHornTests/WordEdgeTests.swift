@@ -40,6 +40,8 @@ final class WordEdgeTests: XCTestCase {
         case "clothesWarning": return .some(w.clothesWarning)
         case "suppliesNote": return .some(w.suppliesNote)
         case "departRefusal": return .some(w.departRefusal)
+        // The status box's red row, by its value.
+        case "trouble": return .some(w.trouble?.value)
         default: return nil
         }
     }
@@ -63,6 +65,8 @@ final class WordEdgeTests: XCTestCase {
                     case "day": g.day = Int(v)
                     case "fuel": g.fuel = v
                     case "money": g.money = v
+                    case "hull": g.hull = v
+                    case "sails": g.sails = v
                     default: XCTFail("\(id): the fixture sets \(k), which this test does not know")
                     }
                 }

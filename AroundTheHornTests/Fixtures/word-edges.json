@@ -1,5 +1,5 @@
 {
- "about": "The words a skin shows at the edge of each condition that picks them, read by AroundTheHornTests/WordEdgeTests.swift and Tools/web-tests/word-edges.mjs alike. Each journey starts from a fresh GameState (role merchant, its first departure, five aboard); each case sets fields of it, then reads one field of the skin's Words: `is` is its whole value (null for none), `has` and `lacks` are pieces it must and must not hold.",
+ "about": "The words a skin shows at the edge of each condition that picks them, read by AroundTheHornTests/WordEdgeTests.swift and Tools/web-tests/word-edges.mjs alike. Each journey starts from a fresh GameState (role merchant, its first departure, five aboard); each case sets fields of it, then reads one field of the skin's Words (`trouble` is the status box's red row, its value): `is` is its whole value (null for none), `has` and `lacks` are pieces it must and must not hold.",
  "journeys": {
   "horn1849": [
    {
@@ -36,6 +36,15 @@
     },
     "field": "suppliesNote",
     "has": " · [red]21 days without citrus[/red]"
+   },
+   {
+    "set": {
+     "day": 1,
+     "fuel": 0,
+     "hull": 0
+    },
+    "field": "trouble",
+    "is": null
    }
   ],
   "rail": [
@@ -59,6 +68,57 @@
     },
     "field": "clothesWarning",
     "is": "[red]Only 0 of 5 have a blanket.[/red]"
+   },
+   {
+    "set": {
+     "day": 1,
+     "fuel": 10
+    },
+    "field": "trouble",
+    "is": null
+   },
+   {
+    "set": {
+     "day": 1,
+     "fuel": 9.99
+    },
+    "field": "trouble",
+    "is": "Last of the wood"
+   },
+   {
+    "set": {
+     "day": 1,
+     "fuel": 0
+    },
+    "field": "trouble",
+    "is": "Out of wood"
+   },
+   {
+    "set": {
+     "day": 1,
+     "fuel": 500,
+     "hull": 0.5
+    },
+    "field": "trouble",
+    "is": null
+   },
+   {
+    "set": {
+     "day": 1,
+     "fuel": 500,
+     "hull": 0.49
+    },
+    "field": "trouble",
+    "is": "Broken down"
+   },
+   {
+    "set": {
+     "day": 1,
+     "fuel": 0,
+     "sails": 0.49
+    },
+    "field": "trouble",
+    "is": "Broken down, no wood"
    }
   ],
   "airship": [
@@ -144,6 +204,65 @@
     },
     "field": "departRefusal",
     "is": null
+   },
+   {
+    "set": {
+     "day": 0,
+     "fuel": 0
+    },
+    "field": "trouble",
+    "is": null
+   },
+   {
+    "set": {
+     "day": 1,
+     "fuel": 250
+    },
+    "field": "trouble",
+    "is": null
+   },
+   {
+    "set": {
+     "day": 1,
+     "fuel": 249.99
+    },
+    "field": "trouble",
+    "is": "Last of the petrol"
+   },
+   {
+    "set": {
+     "day": 1,
+     "fuel": 0
+    },
+    "field": "trouble",
+    "is": "Tanks dry"
+   },
+   {
+    "set": {
+     "day": 1,
+     "fuel": 500,
+     "hull": 0.5
+    },
+    "field": "trouble",
+    "is": null
+   },
+   {
+    "set": {
+     "day": 1,
+     "fuel": 500,
+     "hull": 0.49
+    },
+    "field": "trouble",
+    "is": "Going down"
+   },
+   {
+    "set": {
+     "day": 1,
+     "fuel": 500,
+     "sails": 0.49
+    },
+    "field": "trouble",
+    "is": "Engines dead"
    }
   ],
   "balloon": [
@@ -205,6 +324,57 @@
     },
     "field": "suppliesNote",
     "has": " · [red]the tanks are dry[/red]"
+   },
+   {
+    "set": {
+     "day": 0,
+     "fuel": 0
+    },
+    "field": "trouble",
+    "is": null
+   },
+   {
+    "set": {
+     "day": 1,
+     "fuel": 0.01
+    },
+    "field": "trouble",
+    "is": "Last of the propane"
+   },
+   {
+    "set": {
+     "day": 1,
+     "fuel": 0
+    },
+    "field": "trouble",
+    "is": "Tanks dry"
+   },
+   {
+    "set": {
+     "day": 1,
+     "fuel": 500,
+     "hull": 0.5
+    },
+    "field": "trouble",
+    "is": null
+   },
+   {
+    "set": {
+     "day": 1,
+     "fuel": 500,
+     "hull": 0.49
+    },
+    "field": "trouble",
+    "is": "No lift"
+   },
+   {
+    "set": {
+     "day": 1,
+     "fuel": 500,
+     "sails": 0.49
+    },
+    "field": "trouble",
+    "is": "Burners dead"
    }
   ],
   "mars": [
@@ -242,6 +412,80 @@
     },
     "field": "suppliesNote",
     "has": "without supplements[/red]"
+   },
+   {
+    "set": {
+     "day": 0,
+     "fuel": 0
+    },
+    "field": "trouble",
+    "is": null
+   },
+   {
+    "set": {
+     "day": 1,
+     "fuel": 10
+    },
+    "field": "trouble",
+    "is": null
+   },
+   {
+    "set": {
+     "day": 1,
+     "fuel": 9.99
+    },
+    "field": "trouble",
+    "is": "Last of the propellant"
+   },
+   {
+    "set": {
+     "day": 1,
+     "fuel": 0
+    },
+    "field": "trouble",
+    "is": "Tanks dry"
+   },
+   {
+    "set": {
+     "day": 1,
+     "fuel": 500,
+     "sails": 0.5
+    },
+    "field": "trouble",
+    "is": null
+   },
+   {
+    "set": {
+     "day": 1,
+     "fuel": 500,
+     "sails": 0.49
+    },
+    "field": "trouble",
+    "is": "Array dark"
+   },
+   {
+    "set": {
+     "fuel": 0,
+     "money": 3.7
+    },
+    "field": "departRefusal",
+    "is": "Gateway's traffic office won't clear a ship to leave the yard with her tanks empty. The quartermaster points you back at the propellant."
+   },
+   {
+    "set": {
+     "fuel": 0,
+     "money": 3.69
+    },
+    "field": "departRefusal",
+    "is": null
+   },
+   {
+    "set": {
+     "fuel": 0.01,
+     "money": 500
+    },
+    "field": "departRefusal",
+    "is": null
    }
   ],
   "klondike": [
@@ -279,6 +523,15 @@
     },
     "field": "suppliesNote",
     "has": " · [red]21 days without lime juice[/red]"
+   },
+   {
+    "set": {
+     "day": 1,
+     "fuel": 0,
+     "sails": 0
+    },
+    "field": "trouble",
+    "is": null
    }
   ]
  }
