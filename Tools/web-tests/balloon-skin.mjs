@@ -62,8 +62,12 @@ const between = (s, a, b) => {
   check(i >= 0, `the marker ${a} is in the source`);
   return s.slice(i, s.indexOf(b, i + a.length));
 };
-const key = (x) => JSON.stringify([...x].sort((p, q) => p - q));
-/** The numbers of `a`, less one of each of `less`, as a sorted key. */
+/**
+ * A piece's numbers in order, so a transposed pair (`x + 1, y + 2` for `x + 2, y + 1`)
+ * fails: every piece of the balloon's writes its numbers in the app's order.
+ */
+const key = (x) => JSON.stringify([...x]);
+/** The numbers of `a`, less the first of each of `less`, as a key. */
 const without = (a, less) => {
   const out = [...a];
   for (const n of less) {
@@ -186,7 +190,9 @@ const without = (a, less) => {
   }
   const ss = read(SW('Skin')), sj = read(JS('Skin'));
   // Three of the app's cells set the southern track's flag to 1; the JS's `south` does.
-  check(without(nums(between(ss, 'static let debug', 'static func daytime')), [1, 1, 1]) === key([...nums(between(sj, 'export function debugStart', '/**\n * A watch that')),
+  const southFlag = /\$0\.vars\["balloon\.south"\] = 1;/g;
+  check((between(ss, 'static let debug', 'static func daytime').match(southFlag) ?? []).length === 3
+    && key(nums(between(ss, 'static let debug', 'static func daytime').replace(southFlag, ''))) === key([...nums(between(sj, 'export function debugStart', '/**\n * A watch that')),
     ...nums(between(sj, 'gallery: [', '],\n    },'))]) && /const south = \(s\) => \{ s\.vars = \{ \.\.\.s\.vars, 'balloon\.south': 1 \}; \};/.test(sj),
   'the debug start and the gallery');
   check(key(nums(between(ss, 'static func daytime', 'static func fly'))) === key(nums(between(sj, 'export function daytime', '/** Flying at'))),

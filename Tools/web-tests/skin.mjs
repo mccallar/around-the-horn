@@ -13,7 +13,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { repo } from './lib.mjs';
-import { portChecks, sameColours } from './port.mjs';
+import { portChecks, sameColours, sameNumbers } from './port.mjs';
 import { engine, lcg, describe, wordProblems, markupProblems, FakeTimers } from './player.mjs';
 import { Flow, MemoryStorage } from '../../web/js/flow.js';
 import { BufferCanvas } from '../../web/js/pixels.js';
@@ -65,6 +65,16 @@ for (const name of ['Scene', 'Chart', 'Forage']) {
   const scene = await import('../../web/js/journeys/horn1849-scene.js');
   check(rows.length === 18 && JSON.stringify(rows) === JSON.stringify(scene.ship), 'the ship is the app\'s, pixel for pixel');
 }
+
+/**
+ * The numbers each drawing is made of, function by function and in the app's order, so a
+ * transposed pair fails: the horizon and the skies, the sea and the ship, the town.
+ */
+sameNumbers(check, 'AroundTheHorn/Journeys/Horn1849Scene.swift', 'web/js/journeys/horn1849-scene.js', [
+  ['static let horizon', 'static let ship', 'export const horizon', 'export const ship'],
+  ['static func draw', 'static func town', 'export function draw', 'export function town'],
+  ['static func town', 'static func label', 'export function town', 'export function label'],
+]);
 
 /** The chart's numbers: the routes, the land and the islands. */
 {

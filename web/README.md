@@ -64,6 +64,12 @@ plays on with saves every few turns, often with a question on screen; it reports
 journey, the saves taken in trouble and the trouble questions and holds asked and saved.
 The engine's own tests are unchanged: `swift test --disable-sandbox`.
 
+The skin tests compare the numbers each drawing is made of with the Swift's, function by
+function and in order (`sameNumbers` in `port.mjs`, or the skin test's own copy), so a
+transposed coordinate fails; what one side writes and the other does not is set aside by
+name. One gap is known: the Iron Road's and 1849's map drawings and fishing fields are not
+compared number by number (their scenes are, and so are their maps' routes and coasts).
+
 ## How it fits together
 
 - `HornWeb/Bridge.swift` takes one JSON request and gives one JSON reply. Each request is

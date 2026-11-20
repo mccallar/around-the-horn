@@ -166,3 +166,52 @@ export function sameColours(check, swiftFile, jsFile, label) {
     `${label}: the colours are the app's, in its order (${a.length} and ${b.length}; from the ${k + 1}th: ${a.slice(k, k + 3)} | ${b.slice(k, k + 3)})`);
   check(JSON.stringify(routes(sw)) === JSON.stringify(routes(js)), `${label}: the route's colour is the app's`);
 }
+
+/**
+ * The numbers in a piece of either source, in order. Comments and the Swift's type names
+ * hold no data, nor do a closure's `$0`, a Swift tuple's `.0` or an index's `[0]`; a digit
+ * group's `_` is the same number either side, and a Swift colour written in fractions of
+ * 255 is the JS's `rgb` of the same three.
+ */
+export const numbers = (s) => [...s.replace(/\/\/[^\n]*/g, '').replace(/\/\*\*?[\s\S]*?\*\//g, '').replace(/UInt32|Int\b/g, '')
+  .replace(/ \/ 255/g, '').replace(/radix: 16/g, '').replace(/(?<=\d)_(?=\d)/g, '')
+  .replace(/\$\d/g, '').replace(/(?<=[A-Za-z_)\]])\.\d+\b/g, '').replace(/(?<=[A-Za-z_)\]])\[\d+\]/g, '')
+  .matchAll(/-?\d+(\.\d+)?/g)].map((m) => Number(m[0]));
+
+/**
+ * `check` that each Swift piece writes the same numbers as its JS piece, in the same order,
+ * so a transposed pair (`x + 1, y + 2` for `x + 2, y + 1`) fails. Each of `pairs` is
+ * `[swFrom, swTo, jsFrom, jsTo, jsExtra, swExtra]`: a piece runs from its first marker to
+ * the next. An extra is what one side writes and the other does not: a string or a pattern
+ * is cut from that side's text (once, and it must be there), a number drops the first of
+ * it from that side's numbers.
+ */
+export function sameNumbers(check, swiftFile, jsFile, pairs) {
+  const sw = read(swiftFile), js = read(jsFile);
+  const between = (s, a, b, file) => {
+    const i = s.indexOf(a), j = i < 0 ? -1 : s.indexOf(b, i + a.length);
+    check(i >= 0 && j >= 0, `${file}: the markers ${JSON.stringify(a)} and ${JSON.stringify(b)} are there, in order`);
+    return i >= 0 && j >= 0 ? s.slice(i, j) : '';
+  };
+  const less = (text, drop, file) => {
+    for (const x of drop.filter((x) => typeof x !== 'number')) {
+      const cut = text.replace(x, '');
+      check(cut !== text, `${file}: ${x} is there to set aside`);
+      text = cut;
+    }
+    const out = numbers(text);
+    for (const n of drop.filter((x) => typeof x === 'number')) {
+      const i = out.indexOf(n);
+      check(i >= 0, `${file}: a ${n} is there to set aside`);
+      if (i >= 0) out.splice(i, 1);
+    }
+    return out;
+  };
+  for (const [a, b, c, d, jsExtra = [], swExtra = []] of pairs) {
+    const s = less(between(sw, a, b, swiftFile), swExtra, swiftFile), j = less(between(js, c, d, jsFile), jsExtra, jsFile);
+    let k = 0;
+    while (k < s.length && s[k] === j[k]) k++;
+    check(s.length > 0 && s.length === j.length && k === s.length,
+      `${a}: the numbers are the app's, in order (${s.length} and ${j.length}; from the ${k + 1}th: ${s.slice(k, k + 4).join(' ')} | ${j.slice(k, k + 4).join(' ')})`);
+  }
+}

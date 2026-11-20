@@ -15,7 +15,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { repo } from './lib.mjs';
-import { portChecks, sameColours } from './port.mjs';
+import { portChecks, sameColours, sameNumbers } from './port.mjs';
 import { Player, engine, lcg, describe, wordProblems, markupProblems, sailorProblems, FakeTimers } from './player.mjs';
 import { Flow, MemoryStorage } from '../../web/js/flow.js';
 import { BufferCanvas } from '../../web/js/pixels.js';
@@ -61,6 +61,44 @@ for (const name of ['Scene', 'Chart', 'Forage', 'Skin']) {
   check(JSON.stringify(places) === JSON.stringify([railScene.engineX, railScene.tenderX, railScene.tankX, railScene.box1X,
     railScene.box2X, railScene.cabooseX]), 'where each car stands');
 }
+
+/**
+ * The numbers each drawing is made of, function by function and in the app's order, so a
+ * transposed pair fails. The JS keeps the palette's defaults in the function and the two
+ * scatters in one helper of its own; what either side writes that the other does not is
+ * named here.
+ */
+sameNumbers(check, 'AroundTheHorn/Journeys/RailScene.swift', 'web/js/journeys/rail-scene.js', [
+  ['struct Palette', '// MARK: The train', 'export function palette', '// MARK: The train'],
+  ['static func wrap', 'static func isNight', 'export function wrap', 'export function isNight'],
+  ['static func isNight', 'static let daleCreek', 'export function isNight', 'export function onTrestle'],
+  ['static func onTrestle', 'static func draw', 'export function onTrestle', 'export function draw'],
+  ['static func draw', '// MARK: Country', 'export function draw', '// MARK: Country'],
+  ['static func ground', 'static func far', 'export function ground', 'export function far'],
+  // Swift's snow loop runs over the ridge's own range, the JS's counts from 0.
+  ['static func far', 'static func middle', 'export function far', 'function scatterer', ['let i = 0']],
+  // The Swift's scatter in each function defaults its seed to 0; the JS's always passes one.
+  ['static func middle', 'static func near', 'function scatterer', 'export function near', [], ['seed: Double = 0']],
+  ['static func near', 'static func pine', 'export function near', 'export function pine', [], [/func scatter\(.*\n.*\n.*\n.*\n.*\n.*\n/]],
+  ['static func pine', 'static func oak', 'export function pine', 'export function oak'],
+  ['static func oak', 'static func bush', 'export function oak', 'export function bush'],
+  ['static func bush', 'static func roadbed', 'export function bush', 'export function roadbed'],
+  ['static func roadbed', 'static func poles', 'export function roadbed', 'export function poles'],
+  ['static func poles', 'static func yard', 'export function poles', 'export function yard'],
+  ['static func yard', 'static func gorge', 'export function yard', 'export function gorge'],
+  ['static func gorge', 'static let shedLength', 'export function gorge', 'export const shedLength'],
+  ['static let shedLength', 'static func shedBack', 'export const shedLength', 'export function shedBack'],
+  ['static func shedBack', 'static func shedFront', 'export function shedBack', 'export function shedFront'],
+  ['static func shedFront', '// MARK: Train', 'export function shedFront', '// MARK: Train'],
+  // The JS finds the wood's cap where Swift's `item(.fuel)` cannot miss.
+  ['static func train', 'static func wisp', 'export function train', 'export function wisp', ['?? 0']],
+  ['static func wisp', 'static func smoke', 'export function wisp', 'export function smoke'],
+  ['static func smoke', 'static func lights', 'export function smoke', 'export function lights'],
+  ['static func lights', 'static func wind', 'export function lights', 'export function wind'],
+  ['static func wind', 'static func shimmer', 'export function wind', 'export function shimmer'],
+  ['static func shimmer', '// MARK: VoiceOver', 'export function shimmer', '// MARK: VoiceOver'],
+  ['static func label', '\n}\n', 'export function label', '\n}\n'],
+]);
 
 /** The map's numbers: the road, the coast, the lake, the rivers, the peaks and the deserts. */
 {
