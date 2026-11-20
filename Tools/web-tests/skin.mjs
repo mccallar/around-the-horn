@@ -2,7 +2,8 @@
 // Journeys/Horn1849*.swift) and on its own:
 //
 // - the port: every sentence, colour, sprite and map point of the Swift skin is in the JS
-//   one, and every player-facing literal of the app's screens is in screens.js or flow.js;
+//   one, every player-facing literal of the app's screens is in screens.js, flow.js or
+//   ui.js, and every word those three say (ui.js's HTML cut out) is in the app's;
 // - the words: for every role, at every stop, at sea and in port, sick and well, no screen
 //   says "undefined", "NaN" or "null", and no markup is left open;
 // - the drawings: every scene in every weather at every stop, moving and still, at sea and
@@ -45,14 +46,19 @@ portCheck(['AroundTheHorn/Journeys/Horn1849Skin.swift', 'AroundTheHorn/Journeys/
 portCheck(['AroundTheHorn/UI/Screens/SetupScreens.swift', 'AroundTheHorn/UI/Screens/VoyageScreens.swift',
   'AroundTheHorn/UI/Screens/ShopView.swift', 'AroundTheHorn/UI/Components/StatusPanel.swift',
   'AroundTheHorn/UI/Scenes/ChartView.swift', 'AroundTheHorn/UI/Screens/FishingView.swift',
-  'AroundTheHorn/Services/GameController.swift', 'AroundTheHorn/App/RootView.swift', 'AroundTheHorn/App/AppInfo.swift'],
+  'AroundTheHorn/Services/GameController.swift', 'AroundTheHorn/App/RootView.swift', 'AroundTheHorn/App/AppInfo.swift',
+  'AroundTheHorn/UI/Theme.swift'],
 ['web/js/screens.js', 'web/js/flow.js', 'web/js/ui.js'],
 new Set([
   // Code, not words: an accessibility id, the font's file name, a format, SwiftUI's own.
   'title', '%.2f', 'VT323-Regular', 'PressStart2P-Regular',
-  // The shell's JavaScript is full of the DOM's own strings (classes, events, styles), so it
-  // is checked one way only: the app's words are all there.
-]), { allHaveWords: false, bothWays: false });
+  // The page's own: the storage keys, a console message, and what is left of the DOM's
+  // strings once ui.js's HTML is cut out (a media query, selectors, attribute and tag
+  // names, a key, the canvas's context). Anything else the shell's JS says must be the app's.
+  'horn.save-', 'horn.topten-', 'horn.muted', 'horn.lastJourney', 'save failed:',
+  '(prefers-reduced-motion: reduce)', 'input[data-field]', 'button[data-step]', '.qty', '.count', '.have',
+  'aria-label', 'aria-description', 'INPUT', 'BUTTON', 'Enter', '2d',
+]), { allHaveWords: false, markup: true });
 
 for (const name of ['Scene', 'Chart', 'Forage']) {
   sameColours(check, `AroundTheHorn/Journeys/Horn1849${name}.swift`, `web/js/journeys/horn1849-${name.toLowerCase()}.js`, `Horn1849${name}`);

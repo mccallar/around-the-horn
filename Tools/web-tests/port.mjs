@@ -109,13 +109,27 @@ const mayBeWords = (piece) => piece.trim().length >= 2 && /[A-Za-z]/.test(piece)
   && !/^[a-z][\w$]*$/.test(piece) && !/^\.{0,2}\/[\w./-]+$/.test(piece);
 
 /**
+ * The text of a JS literal that builds the page's HTML: its tags, its attributes and its
+ * CSS variables cut out, so what is left is what the player reads (or hears, from an
+ * `aria-label`'s value, which is kept as a piece of its own).
+ */
+const textOf = (whole) => [
+  ...whole.replace(/<\/?[a-z][a-z0-9]*(\s[^<>]*)?\/?>/gi, '…').replace(/<[a-z][a-z0-9]*(?=…|$)/gi, '…')
+    .replace(/\s*[a-z-]+="[^"]*"/gi, '…').replace(/^[^<>"]*">|"[^<>"]*$/g, '…').replace(/var\(--[a-z-]+\)/g, '…')
+    .split('…'),
+  ...[...whole.matchAll(/aria-(?:label|description)="([^"]*)"/g)].flatMap((m) => m[1].split('…')),
+];
+
+/**
  * `check(ok, what)` for every piece of every literal in `swiftFiles` that has a letter in
  * it: it must be in a literal of `jsFiles` (not in a comment). With `bothWays`, the other
  * way too: every piece of a JS literal that may be words must be in a Swift literal, so
- * the web can't say more than the app. `ignore` holds whole literals that are not a
- * player's words (debug names, keys). With `allHaveWords`, each Swift file must have some.
+ * the web can't say more than the app; with `markup`, a JS literal's HTML is cut out first
+ * (`textOf`). `ignore` holds whole literals, or pieces of the JS's, that are not a
+ * player's words (debug names, keys, the DOM's own strings). With `allHaveWords`, each
+ * Swift file must have some.
  */
-export function portChecks(check, swiftFiles, jsFiles, ignore = new Set(), { allHaveWords = true, bothWays = true } = {}) {
+export function portChecks(check, swiftFiles, jsFiles, ignore = new Set(), { allHaveWords = true, bothWays = true, markup = false } = {}) {
   const js = jsFiles.flatMap((f) => jsLiterals(read(f)).flat()).join('\u0000');
   const swiftPieces = [];
   for (const f of swiftFiles) {
@@ -138,7 +152,7 @@ export function portChecks(check, swiftFiles, jsFiles, ignore = new Set(), { all
     for (const pieces of jsLiterals(read(f), { errors: false })) {
       const whole = pieces.join('…');
       if (ignore.has(whole)) continue;
-      for (const piece of pieces) {
+      for (const piece of markup ? textOf(whole) : pieces) {
         if (!mayBeWords(piece) || ignore.has(piece)) continue;
         check(swift.includes(piece), `${path.basename(f)}: "${piece}" (of "${whole}") is not in the app's Swift`);
       }
