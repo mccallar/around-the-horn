@@ -31,8 +31,8 @@ list changes.
 ## D4 — Swift 5 language mode (2026-11-09)
 
 Spec §1 allows Swift 6 mode "if it compiles cleanly". Starting in 5.0, as an earlier
-project does, so strict concurrency doesn't fight the `@MainActor` travel `Task`, AVAudioEngine
-render callbacks or `TimelineView` canvases. Revisit after M8.
+project does, so strict concurrency doesn't fight the `@MainActor` travel `Task`,
+AVAudioEngine render callbacks or `TimelineView` canvases. Revisit after M8.
 
 ## D5 — A literal "[" in markup is written "[[" (2026-11-09)
 
@@ -109,9 +109,9 @@ both.)
 ## D9 — One engine, many journeys (2026-11-10)
 
 The owner asked for variations on the game (rails, airships, balloons, another planet),
-planned and built without further input. The engine was split into shared rules and a `Journey` that
-supplies tables, numbers, text and hooks (docs/design/journeys-architecture.md); 1849
-became the first journey.
+planned and built without further input. The engine was split into shared rules and a
+`Journey` that supplies tables, numbers, text and hooks
+(docs/design/journeys-architecture.md); 1849 became the first journey.
 
 - **1849 is unchanged, and three gates prove it**: the prototype parity fixture (D7), the
   balance simulation (D8), and `GoldenVoyageTests`, 300 seeded voyages hashed day by day,
