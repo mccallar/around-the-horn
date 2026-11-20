@@ -438,5 +438,8 @@ starvation rules take over, as they do for any ship that runs out at sea. This d
 the prototype only for a ship with no provisions and less than $10, which the prototype
 could never move past, and from the spec's "you can't leave New York with 0 food" (§6) in
 the same case. No number, price, sentence or random draw changed for any other ship, and
-the three gates (`PrototypeParityTests`, `BalanceSimulationTests`, `GoldenVoyageTests`),
-whose bots always buy provisions, keep their code and stay green.
+the three gates (`PrototypeParityTests`, `BalanceSimulationTests`, `GoldenVoyageTests`)
+keep their code and stay green. The parity driver and the balance bot always buy
+provisions. The golden bot's random carts leave New York without them in 2 of its 300
+voyages, with $148 and $33 left, more than a step each, so the refusal it records still
+holds.

@@ -214,8 +214,10 @@ struct JourneySkin {
   ruling; the prototype refuses her for good): with no provisions aboard the engine's own
   refusal holds only while the purse runs to a step of them (100 lbs, $10,
   `Journey.firstPortSells`); with less, `departsUnfed` lets her sail hungry and the
-  departure's last sentence says so (`Horn1849.goingHungry`). The three gates' bots
-  always buy provisions, so they are untouched.
+  departure's last sentence says so (`Horn1849.goingHungry`). The three gates keep their
+  code and stay green: the parity driver and the balance bot always buy provisions, and
+  the golden bot's random carts leave without them in 2 of 300 voyages, each with more
+  than $10 left, so the refusal it records still holds.
 
 **A new skin must supply** every member above for its `Journey.id`, add itself to
 `Skins.all`, and pass `SkinContractTests` unchanged: nothing a player reads is blank for a
