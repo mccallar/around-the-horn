@@ -149,6 +149,22 @@ await test('no provisions, no voyage', async () => {
   check(p.screen === 'depart' && p.f.game.food === 200, 'paid, and away');
 });
 
+await test('a purse too thin for a step of provisions, and none aboard: the ship sails hungry, and says so (D23)', async () => {
+  const p = await Player.make({ engine: e1, seeds: ['8'], random: lcg(8) });
+  p.setUp({ role: 'A Nantucket' });
+  check(p.f.game.money === 500, `a whaler's purse (${p.f.game.money})`);
+  p.shop({ sailcloth: 20, timber: 20 });
+  check(p.f.bill === 500, `the whole purse on sailcloth and timber (${p.f.bill})`);
+  p.press('Pay');
+  check(p.f.game.money === 0 && p.f.game.food === 0, 'nothing left, and nothing to eat');
+  check(p.f.v.hooks.departsUnfed === true, 'the engine lets her sail hungry');
+  check(p.screen === 'depart' && p.f.screen.text.endsWith("Ahead lie fourteen thousand miles of ocean. There isn't a biscuit in the bread room, and the purse won't stretch to a hundredweight of salt beef, so the crew puts to sea hungry and must live on whatever the sea or the next port gives them."),
+    `away from New York, hungry, not back to the chandler (${p.screen}: ${p.f.screen.text?.slice(-120)})`);
+  const end = p.voyage({ targets: {}, fishOnce: false });
+  check(end === 'gameOver' || end === 'finale', `and the voyage ends, never a loop (got ${end})`);
+  check(p.problems.length === 0, `no word went wrong: ${p.problems.slice(0, 3).join(' | ')}`);
+});
+
 await test('the shop counts, caps and refuses', async () => {
   const p = await Player.make({ engine: e1, seeds: ['6'] });
   p.setUp({ role: 'A Nantucket' });

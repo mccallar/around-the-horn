@@ -408,7 +408,8 @@ public class Journey {
 
     /// Whether the first port lets you go with no food aboard. Never, by default: the
     /// engine's own refusal. A journey whose first stores have nothing left in the purse's
-    /// reach may let a hungry ship go rather than hold it there for good (decision D19).
+    /// reach may let a hungry ship go rather than hold it there for good (decision D19);
+    /// every journey built here does (D19, D21, D22, D23).
     public func departsUnfed(_ s: GameState) -> Bool { false }
 
     /// What one step of `key` costs in the first port's stores, as their bill adds it up.
@@ -419,7 +420,7 @@ public class Journey {
 
     /// Whether the purse still runs to one step of `key` in the first port's stores. A
     /// first port that holds you for something only while this is true can never hold you
-    /// there for good (decisions D19, D21, D22).
+    /// there for good (decisions D19, D21, D22, D23).
     public func firstPortSells(_ key: ItemKey, _ s: GameState) -> Bool { firstPortStep(key) <= s.money }
 
     /// Leaving the ground: the first departure, or setting off from a port you went ashore

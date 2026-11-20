@@ -80,6 +80,7 @@ public final class Horn1849: Journey {
         wreckedBody: "Her seams opened faster than the pumps could keep up. She went down by the head, taking everything with her.",
         depart: { s in
             "The [i]\(TextMarkup.escape(s.ship))[/i] casts off from South Street on \(s.dateText). Behind you, New York shrinks to a smudge of chimney smoke. Ahead lie fourteen thousand miles of ocean."
+                + (s.food <= 0 ? " " + Horn1849.goingHungry : "")
         },
         noProvisions: "You can't put to sea with no provisions! The chandler shakes his head and points you back inside.",
         rested: { days, h in
@@ -202,6 +203,16 @@ public final class Horn1849: Journey {
         return [.shipFever, .dysentery, .fever, .brokenArm, .exhaustion]
     }
 
+    // MARK: - Leaving New York with nothing left to buy provisions with (D23)
+
+    /// New York sends a ship with no provisions back to the chandler while the purse runs to
+    /// a step of them; with nothing left to buy them with, holding her there would hold her
+    /// for good, so she sails hungry (D23). The prototype refuses her whatever the purse.
+    public override func departsUnfed(_ s: GameState) -> Bool { !firstPortSells(.food, s) }
+
+    /// The departure's last sentence for a ship that leaves New York with no provisions.
+    public static let goingHungry = "There isn't a biscuit in the bread room, and the purse won't stretch to a hundredweight of salt beef, so the crew puts to sea hungry and must live on whatever the sea or the next port gives them."
+
     // MARK: - Arrivals and choices
 
     override func arrive(_ e: GameEngine, _ stop: Stop) -> [Interrupt] { e.horn1849Arrive(stop) }
@@ -222,8 +233,8 @@ public final class Horn1849: Journey {
 // MARK: - Names the app and the tests know this journey's lines by
 
 extension GameEngine {
-    /// Leaving New York. Nil and the ship stays if there's no food; otherwise the
-    /// casting-off message.
+    /// Leaving New York. Nil and the ship stays if there's no food and the purse still runs
+    /// to a step of it (D23); otherwise the casting-off message.
     public func departNewYork() -> String? { depart() }
 
     public static let noProvisionsRefusal = Horn1849.strings.noProvisions

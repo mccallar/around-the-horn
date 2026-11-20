@@ -160,7 +160,8 @@ Also shared and journey-aware:
   non-empty, every skin's draws run without trapping for every weather and stop.
 
 **1849 must look and read exactly as it did**, apart from the role, ration and trade lines
-D11 reworded and, with several journeys, the picker's rows (`c.wayBack`, `c.wayOut`: the
+D11 reworded, the departure of a ship whose purse can't buy a step of provisions (D23,
+below) and, with several journeys, the picker's rows (`c.wayBack`, `c.wayOut`: the
 title's "Choose another journey" and the menus' way back to the title). The reference is
 the 38 screenshots in `docs/reference/shots-1849/`, first taken before this work with 1849
 alone, and retaken after D11 with the same walk and six journeys, so they show those rows;
@@ -209,6 +210,12 @@ struct JourneySkin {
 - 1849's skin is four files and a line: `Horn1849Skin` (copy and words), `Horn1849Scene`,
   `Horn1849Chart`, `Horn1849Forage`, and its entry in `Skins.all`. They are the old view
   code moved, not rewritten.
+- **New York holds a ship only for what her purse can buy** (decision D23, the owner's
+  ruling; the prototype refuses her for good): with no provisions aboard the engine's own
+  refusal holds only while the purse runs to a step of them (100 lbs, $10,
+  `Journey.firstPortSells`); with less, `departsUnfed` lets her sail hungry and the
+  departure's last sentence says so (`Horn1849.goingHungry`). The three gates' bots
+  always buy provisions, so they are untouched.
 
 **A new skin must supply** every member above for its `Journey.id`, add itself to
 `Skins.all`, and pass `SkinContractTests` unchanged: nothing a player reads is blank for a
@@ -687,8 +694,8 @@ and play as they did: every new member's answer for them is the one that changes
    A refusal at the first port (`Words.departRefusal`, `mayDepart`, the engine's own for
    no food) must hold a crew only while `Journey.firstPortSells` says its purse still
    runs to a step of what it asks for, and `departsUnfed` must let a hungry crew go when
-   it doesn't (D22): the stores buy nothing back, so a crew held for something it can't
-   buy is held there for good. This bug shipped three times. Test both sides of the step.
+   it doesn't (D22, D23): the stores buy nothing back, so a crew held for something it
+   can't buy is held there for good. This bug shipped four times, 1849's own included. Test both sides of the step.
 5. `xcodegen generate`; `swift test`; the app and UI suites; screenshots of the title,
    the first shop, travelling, a port, the chart and the mini-game. A new journey adds a
    row to the picker, so retake every set's `00-picker.png` too, each walk on a freshly

@@ -355,9 +355,10 @@ rations, the crew goes hungry; and the departure sentence says which, in place o
 betting pool. Propellant is the skin's refusal (`Words.departRefusal`); rations are the
 engine's, so the engine has a new hook, `Journey.departsUnfed`, false by default (every
 other journey still refuses a ship with no food, whatever her purse, exactly as before)
-and answered by the transfer alone. (The Klondike answers it too since D21, and rail, the
-airship and the balloon since D22: only 1849 keeps the refusal whatever the purse.) No number, price or random draw changed, and the bot
-(which always buys both) is unaffected.
+and answered by the transfer alone. (The Klondike answers it too since D21, rail, the
+airship and the balloon since D22, and 1849 since D23: no journey now keeps the refusal
+whatever the purse.) No number, price or random draw changed, and the bot (which always
+buys both) is unaffected.
 
 The airship's petrol refusal at Rome has the same shape (step 100 kg, $1.50) and was left
 as it was here; D22 changes it.
@@ -416,5 +417,26 @@ the ground team puts in the 25 gallons on the sponsor's account, as every later 
 already did; and all three answer `departsUnfed`, so the crew goes hungry. The departure
 sentence ends by saying what is missing, and the balloon's first watch then says only that
 the propane is gone (not that she relaunched). No number, price or random draw changed,
-and the bot (which always buys food and fuel) is unaffected. Only 1849 still refuses a
-ship with no food whatever her purse, as its prototype does.
+and the bot (which always buys food and fuel) is unaffected. 1849 was left refusing a ship
+with no food whatever her purse, as its prototype does, until D23.
+
+## D23 — New York holds a ship only for provisions her purse can still buy (2026-11-19)
+
+The owner's ruling, on the shape of D19, D21 and D22 at 1849's own first port. A whaler
+starts with $500 and can spend all of it at New York on sailcloth and timber (twenty bolts
+at $14 and twenty bundles at $11), with no provisions aboard and less than the smallest
+step of them (100 lbs, $10). The engine then refused her departure for good: the chandler
+buys nothing back and the shop's only way out leads to the same refusal, so the shop went
+round in a loop on both platforms. The prototype does the same, and 1849 was left as the
+prototype until now.
+
+Now 1849 answers `Journey.departsUnfed` as the others do: the refusal holds only while the
+purse runs to one step of provisions, as New York's chandler bills it
+(`Journey.firstPortSells`). With less, she sails hungry, and the departure sentence ends
+with a line of its own saying so (`Horn1849.goingHungry`); from there the engine's
+starvation rules take over, as they do for any ship that runs out at sea. This departs from
+the prototype only for a ship with no provisions and less than $10, which the prototype
+could never move past, and from the spec's "you can't leave New York with 0 food" (§6) in
+the same case. No number, price, sentence or random draw changed for any other ship, and
+the three gates (`PrototypeParityTests`, `BalanceSimulationTests`, `GoldenVoyageTests`),
+whose bots always buy provisions, keep their code and stay green.

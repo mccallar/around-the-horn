@@ -290,7 +290,7 @@ chart and the grapple's drawing (§1's card, §15's canvas, §16, §19) belong t
 `AroundTheHorn/Journeys/Mars*.swift` (docs/design/journeys-architecture.md §2, "Mars skin,
 as built"; Gateway's refusal of empty tanks is D18, and D19 lets her go without what the
 purse can't buy, through one shared hook, `Journey.departsUnfed`, which the Klondike
-(D21) and rail, the airship and the balloon (D22) answer too; only 1849 keeps it false). No other shared engine code changed. The test bot `JourneyBot` gained
+(D21), rail, the airship and the balloon (D22) and 1849 (D23) answer too). No other shared engine code changed. The test bot `JourneyBot` gained
 one knob, `stockFactorHere` (off by default), described below.
 
 ### The numbers as shipped

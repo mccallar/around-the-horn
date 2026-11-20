@@ -451,6 +451,38 @@ final class EngineTests: XCTestCase {
         XCTAssertEqual(GameData.port(.cv).price(.limes), 4 * 1.3 * 0.55, accuracy: 1e-12)
     }
 
+    /// D23: New York holds a ship with no provisions only while the purse runs to a step of
+    /// them (100 lbs, $10). A whaler can spend all $500 on sailcloth and timber; she then
+    /// sails hungry instead of going round the chandler's refusal for good, and the
+    /// departure says so.
+    func testNewYorkLetsAShipSailHungryOnlyWhenThePurseCannotBuyAStep() throws {
+        let horn = Journeys.journey(Horn1849.id)
+        XCTAssertEqual(horn.firstPortStep(.food), 10, accuracy: 1e-9)
+        var s = GameState(journey: Horn1849.id, role: .whaler, ship: "Petrel", captain: "Amos",
+                          crew: ["Clara", "Ned", "Ruth", "Gideon"], startYear: 1849, startMonth: 0)
+        XCTAssertEqual(s.money, 500, accuracy: 1e-9)
+        XCTAssertEqual(s.food, 0)
+        let e = GameEngine(state: s)
+        XCTAssertTrue(e.buy([.sailcloth: 20, .timber: 20]))
+        XCTAssertEqual(e.state.money, 0, accuracy: 1e-9)
+        XCTAssertFalse(e.buy([.food: 100]))
+        let said = try XCTUnwrap(e.departNewYork(), "the whaler is not held at New York for good")
+        XCTAssertTrue(said.hasSuffix("fourteen thousand miles of ocean. " + Horn1849.goingHungry), said)
+        XCTAssertFalse(e.state.atPort)
+
+        s.money = 10
+        XCTAssertFalse(horn.departsUnfed(s))
+        XCTAssertNil(GameEngine(state: s).departNewYork(), "the purse runs to 100 lbs")
+        s.money = 9.99
+        XCTAssertTrue(horn.departsUnfed(s))
+        let hungry = GameEngine(state: s).departNewYork() ?? ""
+        XCTAssertTrue(hungry.hasSuffix(" " + Horn1849.goingHungry), hungry)
+        s.food = 100
+        let fed = GameEngine(state: s).departNewYork() ?? ""
+        XCTAssertTrue(fed.hasSuffix("Ahead lie fourteen thousand miles of ocean."), fed)
+        XCTAssertFalse(fed.contains(Horn1849.goingHungry), fed)
+    }
+
     func testAWhalerSaltsUpTo300Pounds() {
         var s = GameState.fixture(role: .whaler)
         s.food = 500

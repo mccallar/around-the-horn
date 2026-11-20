@@ -58,6 +58,28 @@ final class GameControllerTests: XCTestCase {
         guard case .shop = c.screen else { return XCTFail("back to the shop") }
     }
 
+    /// D23: a whaler who spends her whole purse on sailcloth and timber, below a step of
+    /// provisions, is not sent back to the chandler: the shop leads to the departure, which
+    /// says the crew sails hungry, and the voyage goes on to an ending.
+    func testAWhalerWithNothingLeftForProvisionsStillSails() {
+        c.startNewGame()
+        c.chooseRole(.whaler)
+        c.setNames(ship: "", captain: "Ira", crew: ["", "", "", ""])
+        c.chooseDeparture(year: 1849, month: 0)
+        c.enterFirstShop()
+        guard case .shop(let done) = c.screen else { return XCTFail("\(c.screen)") }
+        XCTAssertTrue(c.run { $0.buy([.sailcloth: 20, .timber: 20]) })
+        XCTAssertEqual(c.game!.money, 0, accuracy: 1e-9)
+        XCTAssertEqual(c.game!.food, 0)
+        done()
+        guard case .depart(let text) = c.screen else { return XCTFail("the departure, not the shop again: \(c.screen)") }
+        XCTAssertTrue(text.hasSuffix(" " + Horn1849.goingHungry), text)
+        XCTAssertFalse(c.game!.atPort)
+        c.startTravel()
+        let end = playOut()
+        XCTAssertTrue(["finale", "gameover"].contains(end), end)
+    }
+
     /// Plays to an ending, taking the first enabled option everywhere.
     func playOut(maxSteps: Int = 20_000) -> String {
         for _ in 0..<maxSteps {

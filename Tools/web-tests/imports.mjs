@@ -115,7 +115,7 @@ for (const mod of all) {
     `${mod.id}'s yard question is an engine call engine.js has (${words.yardQuestion})`);
   check(Object.values(words.looseOne ?? {}).every((x) => typeof x === 'string'), `${mod.id}'s looseOne names`);
   // The hooks every journey has (not under a journey's id) are each named in the README,
-  // so a skin's author can find what the bridge answers (D19, D21, D22).
+  // so a skin's author can find what the bridge answers (D19, D21, D22, D23).
   for (const k of Object.keys(v.hooks).filter((k) => !tables.some((j) => j.id === k))) {
     check(new RegExp(`\`(hooks\\.)?${k}\``).test(readme), `web/README names the bridge's shared hook ${k}`);
   }
