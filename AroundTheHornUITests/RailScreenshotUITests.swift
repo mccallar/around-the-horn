@@ -108,18 +108,30 @@ final class RailScreenshotUITests: ScreenshotWalk {
 
     /// The country and the weather: three places in three seasons, and the gallery.
     func testTheCountry() {
-        for (stop, month, name) in [("promontory", "7", "25-salt-desert-august"), ("capehorn", "1", "26-sierra-february"),
-                                    ("rawlins", "5", "27-laramie-plains-june"), ("sink", "9", "28-humboldt-october")] {
+        for (stop, month, name, arrival) in [
+            ("promontory", "7", "25-salt-desert-august", "Promontory Summit, where the two roads met"),
+            ("capehorn", "1", "26-sierra-february", "The track rounds a ledge"),
+            ("rawlins", "5", "27-laramie-plains-june", "Rawlins Springs, and the last sweet water"),
+            ("sink", "9", "28-humboldt-october", "The Humboldt gives up here"),
+        ] {
             relaunch(["-HornDebugStart", stop, "-HornDebugMonth", month, "-HornTickSeconds", "4"])
             tap("Continue down the line")
             // The first turn reaches the stop and says so; the shot is of the country after it,
-            // with the weather that turn rolled.
-            let halt = app.buttons["Stop the train & take stock"]
-            for _ in 0..<12 where !(halt.exists && halt.isHittable) {
-                let next = app.buttons.matching(NSPredicate(format: "label IN %@", Self.patience)).firstMatch
-                if next.waitForExistence(timeout: 6) { next.tap() }
+            // back on the travel screen, with the weather that turn rolled. A question or a
+            // message on screen stays until it is answered, so whatever the turn asks first is
+            // answered only once it is known not to be the stop's own words.
+            let note = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", arrival)).firstMatch
+            let next = app.buttons.matching(NSPredicate(format: "label IN %@", Self.patience)).firstMatch
+            for _ in 0..<30 where !note.exists {
+                if next.exists, !note.exists { next.tap() } else { _ = next.waitForExistence(timeout: 2) }
             }
-            XCTAssertTrue(halt.waitForExistence(timeout: 5))
+            XCTAssertTrue(note.exists, "the first turn never reached \(stop)")
+            tap("Continue")
+            let halt = app.buttons["Stop the train & take stock"]
+            for _ in 0..<10 where !(halt.exists && halt.isHittable) {
+                if next.exists { next.tap() } else { _ = halt.waitForExistence(timeout: 1) }
+            }
+            XCTAssertTrue(halt.exists && halt.isHittable, "the travel screen never came back after \(stop)")
             shot(name)
         }
         relaunch(["-HornSceneGallery", "YES"])
